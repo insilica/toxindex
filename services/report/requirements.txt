@@ -1,0 +1,4 @@
+flask
+psycopg
+boto3
+reportlab

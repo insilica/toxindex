@@ -1,0 +1,11 @@
+Flask==2.2.2
+python-dotenv==0.21.0
+stripe==4.2.0
+flask-login
+Flask-WTF==1.1.1
+sendgrid==6.10.0
+gunicorn==21.2.0
+psycopg
+
+# UPLOAD SERVICE ==========================================================
+boto3
