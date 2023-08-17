@@ -1,0 +1,156 @@
+<style>
+    .content-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+        background-color: #f2f2f2;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    .report-count {
+        font-size: 16px;
+        font-weight: bold;
+        color: #333;
+    }
+    .new-report {
+        font-size: 14px;
+        cursor: pointer;
+        color: #007BFF;
+    }
+    .new-report:hover {
+        text-decoration: underline;
+    }
+    .report-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+    }
+    .report-table tr {
+        border-bottom: 1px solid #e0e0e0;
+    }
+    .report-table tr td {
+        padding: 10px;
+    }
+    .report-name {
+        font-weight: bold;
+    }
+    .report-time {
+        color: #888;
+        font-size: 12px;
+    }
+    .action-btn {
+        padding: 5px 10px;
+        margin-right: 5px;
+        border: none;
+        color: white;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    .action-btn.download {
+        background-color: #4CAF50;
+    }
+    .action-btn.download:hover {
+        background-color: #45a049;
+    }
+    .action-btn.send {
+        background-color: #007BFF;
+    }
+    .action-btn.send:hover {
+        background-color: #0056b3;
+    }
+</style>
+
+<div class="content" style="max-width:800px">
+    <div class="content-header">
+        <div class="report-count">12 Reports</div>
+        <div class="new-report">New Report</div>
+    </div>
+    <table class="report-table">
+        {% for report in reports %}
+            <tr>
+                <td><input type="checkbox"></td>
+                <td>
+                    <span class="report-name">{{ report.name }}</span>
+                    <br>
+                    <span class="report-time">Created: {{ report.time }}</span>
+                </td>
+                <td>
+                    <button class="action-btn download">Download</button>
+                    <button class="action-btn send">Send</button>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+</div>
+
+<div id="new-report-dialog" style="display:none; position:fixed; left:0; top:0; width:100%; height:100%; background-color:rgba(0,0,0,0.5);">
+    <div style="position:absolute; left:50%; top:50%; transform:translate(-50%, -50%); background-color:#fff; padding:20px;">
+        <label for="report-name">Report Name:</label>
+        <input type="text" id="report-name">
+        <br>
+        <label for="inchi">InChI:</label>
+        <input type="text" id="inchi">
+        <br>
+        <button id="submit-report">Submit</button>
+        <button id="cancel-report">Cancel</button>
+    </div>
+</div>
+
+<script>
+
+    var reports = {{ reports | tojson }};
+
+    // download the report when user clicks download button
+    document.querySelectorAll('.action-btn.download').forEach(function(button, index) {
+        button.addEventListener('click', function() {
+            var pdfPath = reports[index].path;
+            var currentPath = window.location.pathname;
+            var downloadReportUrl = currentPath + '/download_report/' + pdfPath;
+        
+            fetch("/p/test/report/download_report/report.pdf ") // By default, this will be a GET request
+            .then(response => response.blob())
+            .then(blob => {
+                var url = window.URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = 'report.pdf';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+            });
+        });
+    });
+
+    document.querySelector('.new-report').addEventListener('click', function() {
+        document.getElementById('new-report-dialog').style.display = 'block';
+    });
+    
+    document.getElementById('submit-report').addEventListener('click', function() {
+        var reportName = document.getElementById('report-name').value;
+        var inchi = document.getElementById('inchi').value;
+        
+        var currentPath = window.location.pathname; // This will give you the current path like "/p/<project_name>/report"
+        var generateReportUrl = currentPath + '/generate_report';
+            
+        fetch(generateReportUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ report_name: reportName, inchi: inchi })
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Handle the response from the server
+        })
+        .catch(error => {
+            console.error('An error occurred:', error);
+        });
+    
+        document.getElementById('new-report-dialog').style.display = 'none';
+    });
+    
+    document.getElementById('cancel-report').addEventListener('click', function() {
+        document.getElementById('new-report-dialog').style.display = 'none';
+    });    
+</script>

@@ -1,0 +1,14 @@
+---
+title: "Report"
+output: pdf_document
+params:
+  report_name: "Default Report Name"
+  inchi: "Default InChI"
+---
+
+# Report Name
+`r params$report_name`
+
+## InChI
+`r params$inchi`
+

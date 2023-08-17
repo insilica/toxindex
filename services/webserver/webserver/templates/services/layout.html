@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Toxindex{% endblock %}</title>
+    <style>
+        /* Common styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+        .left-nav {
+            display: flex;
+            flex-direction: column;
+            flex: 0 0 auto;
+            width: 200px;
+            background-color: #20232A; /* Dark gray color */
+            padding: 10px;
+            color: white; /* Text color to contrast with background */
+            overflow-y: auto; /* Allows scrolling within the left navigation if the content overflows */
+        }
+        .content {
+            flex: 1;
+            padding: 20px;
+            background-color: #f1f1f1; /* Light gray color for content */
+        }
+        .service-link {
+            text-decoration: none;
+            color: white; /* Text color to contrast with background */
+            display: block;
+            padding: 5px;
+            padding-left:15px;
+        }
+        .service-link:hover {
+            background-color: #2649a8;; /* Blue highlight on hover */
+        }
+        .service-link.active-service {
+            background-color: #2a4288;
+        }
+        .back-control {
+            cursor: pointer;
+            color: #FFFFFF; /* Matching with other text colors */
+        }
+        .create-btn {
+            padding: 5px;
+            color: white;
+            cursor: pointer;
+            border-style: solid;
+            border-color: #383b44;
+            border-radius: 5px;
+            border-width: 1px;
+        }
+        .project-container {
+            margin-bottom: 10px;
+        }
+        .project-title {
+            padding: 5px;
+            color: white;
+            border-style: solid;
+            border-color: #383b44;
+            border-radius: 5px;
+            border-width: 1px;
+            cursor: pointer; /* To indicate clickability */
+        }
+        .project-title:hover, .create-btn:hover {
+            background-color: #2649a8; /* Slightly lighter background on hover */
+        }
+        .account-section{
+            margin-top: auto;
+        }
+        .account-section-link{
+            padding-left: 5px;
+            margin-top: auto;
+            cursor:pointer;
+        }
+        .account-section-link:hover {
+            background-color: #2649a8;
+        }
+    </style>
+    <!-- Additional CSS -->
+    {% block css %}{% endblock %}
+</head>
+<body>
+    <div class="container">
+        <div class="left-nav">
+            <div class="create-btn" onclick="createNewProject()">+ &nbsp;New Project</div>
+            <hr style="width:95%">
+            <!-- Loop through projects and include services under each -->
+            {% for project in projects %}
+                <div class="project-container">
+                    <div class="project-title {{ 'active-project' if project.name == active_project }}" onclick="toggleServices('{{ project.name }}')">
+                        {{ project.name }}
+                    </div>
+                    <div id="services-{{ project.name }}" style="display: none;">
+                        <a href="{{ url_for('overview', project=project.name) }}" class="service-link {% if project.name == active_project and active_service == 'overview' %}active-service{% endif %}">overview</a>
+                        <a href="{{ url_for('upload_get', project=project.name) }}" class="service-link {% if project.name == active_project and active_service == 'upload' %}active-service{% endif %}">upload</a>
+                        <a href="{{ url_for('reports', project=project.name, service='report') }}" class="service-link {% if project.name == active_project and active_service == 'report' %}active-service{% endif %}">report</a>
+                    </div>
+                </div>
+            {% endfor %}
+            <div class="account-section">
+                <hr>
+                <div class="account-section-link">
+                <span>account</span> <!-- Add "account" here -->
+                </div>
+            </div>
+        </div>
+        <div class="content">
+            <!-- Content block for the specific service -->
+            {% block content %}
+                {{ content | safe }} <!-- This line includes the report content -->
+            {% endblock %}
+        </div>        
+    </div>
+    <!-- Additional JavaScript -->
+    <script>
+        function toggleServices(projectName) {
+            const servicesElement = document.getElementById(`services-${projectName}`);
+            servicesElement.style.display = servicesElement.style.display === 'none' ? 'block' : 'none';
+        }
+        toggleServices('{{ active_project }}');
+    </script>
+    {% block js %}{% endblock %}
+</body>
+</html>
