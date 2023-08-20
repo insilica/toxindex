@@ -15,15 +15,11 @@ To run this project:
 
 ## Todo
 1. update flyway with the full db schema
-    1. need tables for users, projects, chemicals, sources, source_chemicals, project_sources, reports, and project_reports.
+    1. need tables for users, projects, reports
 
-1. create the upload service
-    1. upload should take a list of inchi identifiers in a file
-    2. it should store the file to s3 and reference it in the sources table
-    3. it should parse the inchi identifiers, guarantee they are valid, and store them in the chemicals table and source_chemicals table
-    4. it should associate the source with the project in the project_source table
-    5. it should have a webservice view for uploading the inchi lines file
+2. create account page
 
-2. create the overview service
-    1. should have a webservice view that just lists the number of uploaded compounds
-    2. should have other stuff, get creative.
+3. create project settings page 
+    1. invite other users to project
+
+4. create actual reports
