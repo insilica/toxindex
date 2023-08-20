@@ -56,38 +56,6 @@ def favicon():
 def active_projects():
   return [{"name":'test'},{"name":'test2'},{"name":"test3"}]
 
-# OVERVIEW =====================================================================================
-@app.route('/p/<project>/overview', methods=['GET'])
-def overview(project):
-    return flask.render_template('services/overview/overview.html', 
-                                 active_project = project, 
-                                 active_service = 'overview',
-                                 projects = active_projects())
-  
-# UPLOAD =======================================================================================
-# Directory to save uploaded files
-@app.route('/p/<project>/upload', methods=['GET'])
-def upload_get(project):
-    return flask.render_template('services/upload/upload.html', 
-                              active_project = project, 
-                              active_service = 'upload',
-                              projects = active_projects())
-
-
-@app.route('/p/<project>/upload', methods=['POST'])
-def upload_post(project):
-    # Get the file from the request
-    file = request.files['file']
-
-    # You can now handle the file as needed (e.g., store in database, analyze, etc.)
-    return flask.jsonify({"message": "File uploaded successfully", "file_path": file.filename})
-  
-# CHEMICALS ====================================================================================
-@app.route('/p/<project>/chemicals', methods=['GET'])
-def chemicals():
-    template_name = 'services/upload/upload.html'
-    return flask.render_template(template_name)
-
 # REPORTS ====================================================================================
 @app.route('/p/<project>/<service>', methods=['GET'])
 @app.route('/p/<project>/<service>/<path:path>', methods=['GET'])
