@@ -98,17 +98,15 @@
                         {{ project.name }}
                     </div>
                     <div id="services-{{ project.name }}" style="display: none;">
-                        <a href="{{ url_for('overview', project=project.name) }}" class="service-link {% if project.name == active_project and active_service == 'overview' %}active-service{% endif %}">overview</a>
-                        <a href="{{ url_for('upload_get', project=project.name) }}" class="service-link {% if project.name == active_project and active_service == 'upload' %}active-service{% endif %}">upload</a>
                         <a href="{{ url_for('reports', project=project.name, service='report') }}" class="service-link {% if project.name == active_project and active_service == 'report' %}active-service{% endif %}">report</a>
                     </div>
                 </div>
             {% endfor %}
             <div class="account-section">
                 <hr>
-                <div class="account-section-link">
-                <span>account</span> <!-- Add "account" here -->
-                </div>
+                <div class="account-section-link" onclick="window.location.href='https://billing.stripe.com/p/login/14k9Ei89m2gAga4eUU'">
+                    <span>account</span>
+                </div>                
             </div>
         </div>
         <div class="content">
