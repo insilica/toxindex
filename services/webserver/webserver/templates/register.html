@@ -1,5 +1,64 @@
-<form method="POST" action="/register">
-  <div>{{ form.email.label }}: {{ form.email(class="css_class") }}</div>
-  <div>{{ form.password.label }}: {{ form.password() }}</div>
-  <input type="submit">	
-</form>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Toxindex</title>
+    <style>
+        body {
+            background-color: #1A1E25;
+            color: white;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            text-align: center;
+            width: 300px;
+        }
+        form {
+            margin-bottom: 10px;
+        }
+        img {
+            width: 100px; /* Adjust size as needed */
+            margin-bottom: 20px;
+        }
+        input[type="text"], input[type="password"], input[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: none;
+            box-sizing: border-box;
+            background: #f3f3f3;
+        }
+        input[type="submit"] {
+            background-color: #28a745;
+            color: white;
+            cursor: pointer;
+        }
+        a {
+            color: #28a745;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Register for Toxindex</h2>
+        <form action="register" method="POST">
+            <input type="text" name="name" id="name" placeholder="Name"><br>
+            <input type="text" name="email" id="email" placeholder="Email"><br>
+            <input type="password" name="password" id="password" placeholder="Password"><br>
+            <input type="password" name="password_confirmation" id="password_confirmation" placeholder="Confirm Password"><br>
+            <input type="submit" name="submit" value="Register">
+        </form>
+        <a href="{{ url_for('login') }}">Already have an account? Log in</a>
+    </div>
+</body>
+</html>
