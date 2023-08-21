@@ -23,7 +23,7 @@ def index():
     return flask.render_template('index.html')
   else:
     print('user is not logged in')
-    return flask.redirect('login')
+    return flask.render_template('landing.html')
   
 
 # Login and Registration
@@ -56,15 +56,15 @@ def favicon():
 def active_projects():
   return [{"name":'test'},{"name":'test2'},{"name":"test3"}]
 
-# REPORTS ====================================================================================
+# SERVICES ====================================================================================
 @app.route('/p/<project>/<service>', methods=['GET'])
 @app.route('/p/<project>/<service>/<path:path>', methods=['GET'])
-def reports(project,service,path=""):
+def service_get(project,service,path=""):
     
     response = requests.get(f'http://{service}:6515/{path}')
 
     if response.headers['Content-Type'].startswith('text/html'):
-        return flask.render_template('services/layout.html', 
+        return flask.render_template('layout.html', 
                                      content=response.content.decode('utf-8'), 
                                      projects=active_projects(), 
                                      active_project=project,

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preload" href="static/images/splash.webp" as="image">
+    <title>Toxindex</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+        }
+        .page-header {
+            background-image: url('static/images/splash.webp');
+            background-size: cover;
+            background-repeat: no-repeat;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            height: 100vh;
+            padding-left: 5%;
+        }
+        .container {
+            text-align: center;
+            width: 50%;
+        }
+        h1 {
+            font-size: 5rem;
+            color:white;
+        }
+        h4 {
+            font-size: 3rem;
+            color:white;
+        }
+        .btn {
+            padding: 10px 20px;
+            margin: 5px;
+            border: 2px solid #28a745;
+            color: #28a745;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 1.5rem;
+        }
+        .btn:hover {
+            background-color: #28a745;
+            color: #fff;
+        }
+        p {
+            font-size: 2rem;
+            color:white;
+        }
+    </style>
+</head>
+<body>
+    <header class="page-header">
+        <div class="container">
+            <h1>Toxicology Informatics Services</h1>
+            <h4>Generate and manage toxicology reports</h4>
+            <p>
+                <a href="/login" type="button" class="btn"><strong>Log in</strong></a>
+                <a href="/register" type="button" class="btn"><strong>Sign up</strong></a>
+            </p>
+        </div>
+    </header>
+</body>
+</html>
