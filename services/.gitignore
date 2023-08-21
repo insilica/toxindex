@@ -3,3 +3,5 @@ portal.db
 .env
 __pycache__/
 .vscode/
+
+test.env
