@@ -1,5 +1,5 @@
 CREATE TABLE users (
- user_id   INTEGER PRIMARY KEY,
+ user_id SERIAL PRIMARY KEY,
  email TEXT NOT NULL UNIQUE,
  token TEXT NOT NULL UNIQUE,
  stripe_customer_id TEXT NOT NULL UNIQUE,

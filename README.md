@@ -14,7 +14,6 @@ To run this project:
 4. webserver - a flask web user interface, it has users, projects, and projects have views for each services
 
 ## Todo
-0. better portal for login/registration
 
 1. update flyway with the full db schema
     1. need tables for users, projects, reports

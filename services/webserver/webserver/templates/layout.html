@@ -82,11 +82,31 @@
         .account-section-link:hover {
             background-color: #2649a8;
         }
+        .flashes {
+            text-align: center;
+            padding: 10px;
+            color: #28a745; /* or whatever color fits your design */
+        }
+        .flash {
+            margin: 5px;
+            padding: 5px;
+            background-color: rgba(255, 255, 255, 0.1); /* or another background style */
+        }        
     </style>
     <!-- Additional CSS -->
     {% block css %}{% endblock %}
 </head>
 <body>
+    <!-- This section is for displaying flash messages -->
+    {% with messages = get_flashed_messages() %}
+     {% if messages %}
+         <div class="flashes">
+             {% for message in messages %}
+                 <div class="flash">{{ message }}</div>
+             {% endfor %}
+         </div>
+     {% endif %}
+    {% endwith %}
     <div class="container">
         <div class="left-nav">
             <div class="create-btn" onclick="createNewProject()">+ &nbsp;New Project</div>
@@ -106,8 +126,11 @@
                 <hr>
                 <div class="account-section-link" onclick="window.location.href='https://billing.stripe.com/p/login/14k9Ei89m2gAga4eUU'">
                     <span>account</span>
-                </div>                
-            </div>
+                </div>
+                <div class="account-section-link" onclick="window.location.href='{{ url_for('logout') }}'">
+                    <span>logout</span>
+                </div> 
+            </div>            
         </div>
         <div class="content">
             <!-- Content block for the specific service -->

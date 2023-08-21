@@ -1,33 +1,34 @@
 from webserver import login_manager as LM
 from webserver.controller import login
-
-import requests
 from flask import request, Response
-import logging
-import flask
-import flask_login
-import os
 
+import flask, flask_login
+import os, logging, requests
 
 # Defining the static folder path
 static_folder_path = os.path.join(os.path.dirname(__file__), 'webserver', 'static')
 app = flask.Flask(__name__, template_folder="templates")
+
+app.config['SERVER_NAME'] = os.environ.get('SERVER_NAME')
+app.config['PREFERRED_URL_SCHEME'] = os.environ.get('PREFERRED_URL_SCHEME')
+app.secret_key =  os.environ.get('FLASK_APP_SECRET_KEY')
 app.logger.setLevel(logging.INFO)
-app.secret_key = 'super secret string'  # TODO Change this!
+logging.basicConfig(level=logging.DEBUG) # Use INFO for less verbose output
+
 LM.init(app)
 
 @app.route('/', methods=['GET'])
 def index():
   if flask_login.current_user.is_authenticated:
     print(f'user {flask_login.current_user} is logged in')
-    return flask.render_template('index.html')
+    return flask.render_template('layout.html')
   else:
     print('user is not logged in')
     return flask.render_template('landing.html')
-  
 
 # Login and Registration
 app.route('/register', methods=['GET','POST'])(login.register)
+app.route('/verify', methods=['GET'])(login.verify_message)
 app.route('/verification/<token>', methods=['GET','POST'])(login.verification)
 app.route('/login', methods=['GET','POST'])(login.login)
 app.route('/logout', methods=['GET'])(login.logout)

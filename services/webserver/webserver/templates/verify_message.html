@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Verification - YourAppName</title>
+    <style>
+        body {
+            background-color: #1A1E25;
+            color: white;
+            font-family: Arial, sans-serif;
+            font-size: 18px;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            text-align: center;
+            width: 300px;
+        }
+        .message {
+            background: #f3f3f3;
+            padding: 15px;
+            color: #333;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+        a {
+            color: #28a745;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Email Verification</h2>
+        <div class="message">
+            <p>Thank you for registering! A verification link has been sent to <strong>{{ email }}</strong>.</p>
+            <p>Please check your email and click on the link to verify your account.</p>
+        </div>
+        <a href="{{ url_for('login') }}">Back to Login</a>
+    </div>
+</body>
+</html>

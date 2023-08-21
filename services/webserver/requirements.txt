@@ -5,7 +5,10 @@ flask-login
 Flask-WTF==1.1.1
 sendgrid==6.10.0
 gunicorn==21.2.0
-psycopg
+psycopg2-binary
+
+# WEBSERVER ===============================================================
+email_validator
 
 # UPLOAD SERVICE ==========================================================
 boto3
