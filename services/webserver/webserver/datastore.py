@@ -1,29 +1,31 @@
-import psycopg
+import psycopg2
+import psycopg2.extras
 import os
+import logging
 
 # Read environment variables for PostgreSQL connection
-dbhost = os.environ.get('POSTGRES_HOST')
-dbport = os.environ.get('POSTGRES_PORT')
-dbname = os.environ.get('POSTGRES_DB')
-dbuser = os.environ.get('POSTGRES_USER')
-dbpass = os.environ.get('POSTGRES_PASSWORD')
+dbhost = os.getenv('DB_HOST')
+dbport = os.getenv('DB_PORT')
+dbname = os.getenv('DB_NAME')
+dbuser = os.getenv('DB_USER')
+dbpass = os.getenv('DB_PASSWORD')
 
 def find(query, param=None):
     res = None
     con = None
     cur = None
     try:
-        con = psycopg.connect(host=dbhost, port=dbport, dbname=dbname, user=dbuser, password=dbpass)
-        cur = con.cursor()
+        con = psycopg2.connect(host=dbhost, port=dbport, dbname=dbname, user=dbuser, password=dbpass)
+        cur = con.cursor(cursor_factory=psycopg2.extras.DictCursor) # Use DictCursor here
         if param is None:
             cur.execute(query)
         else:
             cur.execute(query, param)
         res = cur.fetchone()
     except Exception as e:
-        print("error executing query") # TODO actually log this.
-        print(query)
-        print(e)
+        logging.debug("error executing query")
+        logging.debug(query)
+        logging.debug(e)
     finally:
         if cur: cur.close()
         if con: con.close()
@@ -32,7 +34,7 @@ def find(query, param=None):
 def execute(query, param=None):
     con = None
     try:
-        con = psycopg.connect(host=dbhost, port=dbport, dbname=dbname, user=dbuser, password=dbpass)
+        con = psycopg2.connect(host=dbhost, port=dbport, dbname=dbname, user=dbuser, password=dbpass)
         cur = con.cursor()
         if param is None:
             cur.execute(query)
@@ -40,9 +42,9 @@ def execute(query, param=None):
             cur.execute(query, param)
         con.commit()
     except Exception as e:
-        print("error executing query") # TODO actually log this.
-        print(query)
-        print(e)
+        logging.debug("error executing query") # TODO actually log this.
+        logging.debug(query)
+        logging.debug(e)
     finally:
         if con: con.close()
-        return "done"
+        logging.debug("done")
