@@ -32,6 +32,12 @@ services:
       DB_NAME: ${DB_NAME}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
+      SENDGRID_API_KEY: ${SENDGRID_API_KEY}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_TEST_SECRET_KEY: ${STRIPE_TEST_SECRET_KEY}
+      SERVER_NAME: 'localhost:6513'
+      PREFERRED_URL_SCHEME: 'http'
+      FLASK_APP_SECRET_KEY: ${FLASK_APP_SECRET_KEY}
     depends_on:
       - postgres
       - flyway

@@ -6,6 +6,8 @@ import secrets, types
 import flask_login
 from werkzeug.security import generate_password_hash, check_password_hash
 
+import logging
+
 class User(flask_login.UserMixin):
   
   def __init__(self, user_id, email, token, hashpw, stripe_customer_id):
@@ -14,6 +16,7 @@ class User(flask_login.UserMixin):
     self.token = token
     self.hashpw = hashpw
     self.stripe_customer_id = stripe_customer_id
+    self.name = email.split('@')[0] if '@' in email else email
 
   def is_authenticated(self):
     return super().is_authenticated
@@ -32,7 +35,7 @@ class User(flask_login.UserMixin):
 
   @staticmethod
   def user_exists(email):
-    res = ds.find("SELECT email from user where email = (?)",(email,))
+    res = ds.find("SELECT email from users where email = (%s)",(email,))
     return res is not None
 
   @staticmethod
@@ -45,30 +48,29 @@ class User(flask_login.UserMixin):
 
   @staticmethod
   def get(user_id):
-    res = ds.find("SELECT * from user where user_id = (?)",(user_id,))
+    res = ds.find("SELECT * from users where user_id = (%s)",(user_id,))
     return User.from_row(res) if res is not None else None
 
   @staticmethod
   def get_user(email):
-    res = ds.find("SELECT * from user where email = (?)",(email,))
+    res = ds.find("SELECT * from users where email = (%s)",(email,))
     return User.from_row(res) if res is not None else None
 
-  # @staticmethod
-  # def create_stripe_customer(email):
-  #   return ToxindexStripe.create_customer(email)
+  @staticmethod
+  def create_stripe_customer(email):
+    return ToxindexStripe.create_customer(email)
   
   def create_datastore_customer(email, password, stripe_customer_id):
     hashpw = generate_password_hash(password)
     token = User.make_token()
     params = (email,hashpw,token,stripe_customer_id)
-    ds.execute("INSERT INTO user (email,hashpw,token,stripe_customer_id) values (?,?,?,?)",params)
+    logging.info(f"creating user with params {params}")
+    ds.execute("INSERT INTO users (email,hashpw,token,stripe_customer_id) values (%s,%s,%s,%s)",params)
   
   @staticmethod
   def create_user(email, password):
     if User.user_exists(email): raise ValueError(f"{email} already exists")
-    # customer = User.create_stripe_customer(email)
-    # TODO add stripe back
-    customer = types.SimpleNamespace(**{"id": "cus_123"})
+    customer = User.create_stripe_customer(email)
     User.create_datastore_customer(email, password, customer.id)
     return User.get_user(email)
 
@@ -77,4 +79,4 @@ class User(flask_login.UserMixin):
   #   if not User.user_exists: raise ValueError(f"{email} does not exist")
   #   user = User.get_user(email)
   #   ToxindexStripe.delete_customer(user.stripe_customer_id)
-  #   ds.execute("DELETE FROM user WHERE email = (?)",(email,))
+  #   ds.execute("DELETE FROM user WHERE email = (%s)",(email,))

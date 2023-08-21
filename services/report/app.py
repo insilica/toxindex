@@ -1,5 +1,5 @@
 import boto3
-import os, re, psycopg, flask
+import os, re, flask
 from flask import Flask, request, jsonify, render_template_string
 from werkzeug.utils import secure_filename
 from reportlab.pdfgen import canvas
