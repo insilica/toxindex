@@ -98,7 +98,7 @@
                         {{ project.name }}
                     </div>
                     <div id="services-{{ project.name }}" style="display: none;">
-                        <a href="{{ url_for('reports', project=project.name, service='report') }}" class="service-link {% if project.name == active_project and active_service == 'report' %}active-service{% endif %}">report</a>
+                        <a href="{{ url_for('service_get', project=project.name, service='report') }}" class="service-link {% if project.name == active_project and active_service == 'report' %}active-service{% endif %}">report</a>
                     </div>
                 </div>
             {% endfor %}
