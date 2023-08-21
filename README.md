@@ -5,7 +5,7 @@ To run this project:
 1. make sure you have `docker --version` 24.0.0 or higher
 2. navigate to the services directory `cd services`
 3. get `test.env` from a team member and add it to ./services/test.env
-3. start the project `docker-compose --env-file /test.env up`
+3. start the project `docker compose --env-file test.env up`
 4. go to localhost:6513
 
 ## Services
@@ -15,10 +15,6 @@ To run this project:
 4. webserver - a flask web user interface, it has users, projects, and projects have views for each services
 
 ## Todo
-
-1. update flyway with the full db schema
-    1. need tables for users, projects, reports
-
-2. create account page
-
-4. create actual reports
+1. correctly list the projects a user has access to in the left sidebar
+2. when a user has no projects, populate the content area with a message to click '+ new project'
+3. when a user creates a report, update the relevant tables accordingly
