@@ -4,7 +4,8 @@ To run this project:
 
 1. make sure you have `docker --version` 24.0.0 or higher
 2. navigate to the services directory `cd services`
-3. start the project `docker compose up`
+3. get `test.env` from a team member and add it to ./services/test.env
+3. start the project `docker-compose --env-file /test.env up`
 4. go to localhost:6513
 
 ## Services
@@ -19,8 +20,5 @@ To run this project:
     1. need tables for users, projects, reports
 
 2. create account page
-
-3. create project settings page 
-    1. invite other users to project
 
 4. create actual reports
