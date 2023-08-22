@@ -42,7 +42,7 @@ def execute(query, param=None):
             cur.execute(query, param)
         con.commit()
     except Exception as e:
-        logging.debug("error executing query") # TODO actually log this.
+        logging.debug("error executing query")
         logging.debug(query)
         logging.debug(e)
     finally:
