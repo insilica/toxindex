@@ -1,6 +1,6 @@
 from pickle import TRUE
 import webserver.datastore as ds
-from webserver.controller.stripe import ToxindexStripe
+from webserver.controller import stripe
 
 import secrets, types
 import flask_login
@@ -58,7 +58,7 @@ class User(flask_login.UserMixin):
 
   @staticmethod
   def create_stripe_customer(email):
-    return ToxindexStripe.create_customer(email)
+    return stripe.create_customer(email)
   
   def create_datastore_customer(email, password, stripe_customer_id):
     hashpw = generate_password_hash(password)
@@ -74,9 +74,9 @@ class User(flask_login.UserMixin):
     User.create_datastore_customer(email, password, customer.id)
     return User.get_user(email)
 
-  # @staticmethod
-  # def delete_user(email):
-  #   if not User.user_exists: raise ValueError(f"{email} does not exist")
-  #   user = User.get_user(email)
-  #   ToxindexStripe.delete_customer(user.stripe_customer_id)
-  #   ds.execute("DELETE FROM user WHERE email = (%s)",(email,))
+  @staticmethod
+  def delete_user(email):
+    if not User.user_exists: raise ValueError(f"{email} does not exist")
+    user = User.get_user(email)
+    stripe.delete_customer(user.stripe_customer_id)
+    ds.execute("DELETE FROM user WHERE email = (%s)",(email,))
