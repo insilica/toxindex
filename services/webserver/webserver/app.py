@@ -1,5 +1,5 @@
 from webserver import login_manager as LM
-from webserver.controller import login
+from webserver.controller import login, stripe
 from flask import request, Response
 
 import flask, flask_login
@@ -36,12 +36,12 @@ app.route('/logout', methods=['GET'])(login.logout)
 app.route('/forgot_password', methods=['GET','POST'])(login.forgot_password)
 app.route('/reset_password/<token>', methods=['GET','POST'])(login.reset_password)
 
-# @app.route('/customer_portal', methods=['GET'])
-# @flask_login.login_required
-# def customer_portal():
-#   customer_id = flask_login.current_user.stripe_customer_id
-#   session = ToxindexStripe.create_customer_portal_session(customer_id)
-#   return flask.redirect(session.url)
+@app.route('/customer_portal', methods=['GET'])
+@flask_login.login_required
+def customer_portal():
+  customer_id = flask_login.current_user.stripe_customer_id
+  session = stripe.create_customer_portal_session(customer_id)
+  return flask.redirect(session.url)
 
 @app.route('/token', methods=['GET'])
 @flask_login.login_required

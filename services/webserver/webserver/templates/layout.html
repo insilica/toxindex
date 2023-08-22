@@ -124,7 +124,7 @@
             {% endfor %}
             <div class="account-section">
                 <hr>
-                <div class="account-section-link" onclick="window.location.href='https://billing.stripe.com/p/login/14k9Ei89m2gAga4eUU'">
+                <div class="account-section-link" onclick="window.location.href='{{url_for('customer_portal')}}'">
                     <span>account</span>
                 </div>
                 <div class="account-section-link" onclick="window.location.href='{{ url_for('logout') }}'">

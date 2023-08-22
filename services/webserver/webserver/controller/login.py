@@ -1,4 +1,3 @@
-# from ToxindexWebServer.controller.stripe import ToxindexStripe
 from webserver.model.user import User
 from webserver.forms.registration_form import RegistrationForm, ForgotPasswordForm, UpdatePasswordForm
 from webserver.controller import sendgrid
