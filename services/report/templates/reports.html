@@ -139,10 +139,7 @@
             },
             body: JSON.stringify({ report_name: reportName, inchi: inchi })
         })
-        .then(response => response.json())
-        .then(data => {
-            // Handle the response from the server
-        })
+        .then(response => window.location.reload() ) //reload the page 
         .catch(error => {
             console.error('An error occurred:', error);
         });
@@ -153,4 +150,6 @@
     document.getElementById('cancel-report').addEventListener('click', function() {
         document.getElementById('new-report-dialog').style.display = 'none';
     });    
+
+    console.log(reports);
 </script>
