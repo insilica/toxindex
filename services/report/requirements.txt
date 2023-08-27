@@ -2,3 +2,5 @@ flask
 psycopg
 boto3
 reportlab
+pdfkit
+requests
