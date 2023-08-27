@@ -18,8 +18,8 @@ def reports(project_id):
 
 @app.route('/<project_id>/generate_report', methods=['POST'])
 def generate_report(project_id):
-    inchi = request.form.get('inchi')
-    report_name = request.form.get('report_name')
+    inchi = request.json['inchi']
+    report_title = request.json['title']
 
     # Generate the report using the ReprotoxReport class
     report = ReprotoxReport.from_inchi(inchi)
@@ -31,7 +31,7 @@ def generate_report(project_id):
     pdf_filename = f"report.pdf"
     
     report.save_report(html_filename, pdf_filename, html_content, pdf_content)
-    report = Report.create_report(project_id, pdf_filename, 1, report_name, "This is a test report")
+    report = Report.create_report(project_id, pdf_filename, 1, report_title, "This is a test report")
     
     logging.info(f"Generated report for {inchi} and saved HTML to {html_filename} and PDF to {pdf_filename}")
 
