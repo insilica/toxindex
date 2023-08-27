@@ -22,8 +22,9 @@ LM.init(app)
 def index():
   if flask_login.current_user.is_authenticated:
     active_projects = [p.to_dict() for p in Project.get_projects_by_creator(flask_login.current_user.user_id)]
+    active_project = active_projects[0]["project_id"] if len(active_projects) > 0 else None
     logging.info(f"active projects: {active_projects}")
-    return flask.render_template('layout.html', projects=active_projects, active_project=active_projects[0]["project_id"])
+    return flask.render_template('layout.html', projects=active_projects, active_project=active_project)
   else:
     print('user is not logged in')
     return flask.render_template('landing.html')
