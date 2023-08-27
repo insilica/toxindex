@@ -45,7 +45,7 @@ class Report:
         s3_filename = f"report/{filehash}{filetype}"
         
         s3_client = boto3.client('s3')
-        s3_client.upload_file(file_path, s3_filename)
+        s3_client.upload_file(file_path, "toxindex", s3_filename)
         
         return f"s3://toxindex/{s3_filename}"
 
