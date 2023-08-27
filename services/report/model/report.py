@@ -39,21 +39,20 @@ class Report:
         return Report.from_row(res) if res else None
 
     @staticmethod
-    def upload_to_s3(file_path, bucket_name, s3_filename):
+    def upload_to_s3(file_path):
+        filetype = os.path.splitext(file_path)[1]
+        filehash = hashlib.md5(open(file_path, 'rb').read()).hexdigest()
+        s3_filename = f"report/{filehash}{filetype}"
+        
         s3_client = boto3.client('s3')
-        s3_client.upload_file(file_path, bucket_name, s3_filename)
-        return f"s3://{bucket_name}/{s3_filename}"
+        s3_client.upload_file(file_path, s3_filename)
+        
+        return f"s3://toxindex/{s3_filename}"
 
     @staticmethod
     def create_report(project_id, file_path, user_id, title, description):
         
-        # TODO get s3 reference actually working
-        bucket_name = "toxindex"
-        filetype = os.path.splitext(file_path)[1]
-        filehash = hashlib.md5(open(file_path, 'rb').read()).hexdigest()
-        s3_filename = f"/report/{filehash}{filetype}"
-        # s3_reference = Report.upload_to_s3(file_path, bucket_name, s3_filename)
-        s3_reference = f"s3://{bucket_name}/{s3_filename}"
+        s3_reference = Report.upload_to_s3(file_path)
 
         params = (s3_reference, user_id, title, description)
         ds.execute("INSERT INTO reports (s3_reference, user_id, title, description) values (%s, %s, %s, %s)", params)
