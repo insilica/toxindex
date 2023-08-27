@@ -1,5 +1,6 @@
 from webserver import login_manager as LM
 from webserver.controller import login, stripe
+from webserver.model.project import Project
 from flask import request, Response
 
 import flask, flask_login
@@ -20,8 +21,9 @@ LM.init(app)
 @app.route('/', methods=['GET'])
 def index():
   if flask_login.current_user.is_authenticated:
-    print(f'user {flask_login.current_user} is logged in')
-    return flask.render_template('layout.html')
+    active_projects = [p.to_dict() for p in Project.get_projects_by_creator(flask_login.current_user.user_id)]
+    logging.info(f"active projects: {active_projects}")
+    return flask.render_template('layout.html', projects=active_projects, active_project=active_projects[0]["project_id"])
   else:
     print('user is not logged in')
     return flask.render_template('landing.html')
@@ -54,38 +56,41 @@ def token():
 def favicon():
     return app.send_static_file('favicon.png')
 
-def active_projects():
-  return [{"name":'test'},{"name":'test2'},{"name":"test3"}]
-
 # PROJECTS ====================================================================================
-@app.route('/project/create', methods=['GET'])
-def project_create():
-  return flask.render_template('project_create.html', projects=active_projects())
+@app.route('/create_new_project', methods=['POST'])
+def create_new_project():
+    data = request.get_json()
+    logging.info(f"Creating new project with name: {data['name']} for user {flask_login.current_user}")
+    Project.create_project(data['name'], data.get("description"), flask_login.current_user.user_id)
+    return flask.jsonify(success=True, message="Project created successfully.")
+
 
 # SERVICES ====================================================================================
-@app.route('/p/<project>/<service>', methods=['GET'])
-@app.route('/p/<project>/<service>/<path:path>', methods=['GET'])
-def service_get(project,service,path=""):
-    logging.info(f"project: {project}, service: {service}, path: {path}")
-    response = requests.get(f'http://{service}:6515/{path}')
-
+@app.route('/p/<project_id>/<service>', methods=['GET'])
+@app.route('/p/<project_id>/<service>/<path:path>', methods=['GET'])
+def service_get(project_id,service,path=""):
+    logging.info(f"project: {project_id}, service: {service}, path: {path}")
+    logging.info(f"getting url http://{service}:6515/{project_id}/{path}")
+    response = requests.get(f'http://{service}:6515/{project_id}/{path}')
+    active_projects = [p.to_dict() for p in Project.get_projects_by_creator(flask_login.current_user.user_id)]
+    
     if response.headers['Content-Type'].startswith('text/html'):
         return flask.render_template('layout.html', 
                                      content=response.content.decode('utf-8'), 
-                                     projects=active_projects(), 
-                                     active_project=project,
-                                     active_service='report')
+                                     projects=active_projects, 
+                                     active_project=project_id,
+                                     active_service=service)
     
     return Response(response.content, 
                         response.status_code,
                         dict(response.headers))
 
-@app.route('/p/<project>/<service>', methods=['POST'])
-@app.route('/p/<project>/<service>/<path:path>', methods=['POST'])
-def service_post(project,service,path=""):
+@app.route('/p/<project_id>/<service>', methods=['POST'])
+@app.route('/p/<project_id>/<service>/<path:path>', methods=['POST'])
+def service_post(project_id,service,path=""):
     
-    
-    service_url = f'http://{service}:6515/{path}'
+    service_url = f'http://{service}:6515/{project_id}/{path}'
+    logging.info(f"service_url: {service_url}")
     
     response = requests.request(
         method=request.method,

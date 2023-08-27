@@ -114,11 +114,12 @@
             <!-- Loop through projects and include services under each -->
             {% for project in projects %}
                 <div class="project-container">
-                    <div class="project-title {{ 'active-project' if project.name == active_project }}" onclick="toggleServices('{{ project.name }}')">
+                    <div class="project-title {{ 'active-project' if project.project_id|string == active_project }}" onclick="toggleServices('{{ project.project_id }}')">
                         {{ project.name }}
                     </div>
-                    <div id="services-{{ project.name }}" style="display: none;">
-                        <a href="{{ url_for('service_get', project=project.name, service='report') }}" class="service-link {% if project.name == active_project and active_service == 'report' %}active-service{% endif %}">report</a>
+                    <div id="services-{{ project.project_id }}" style="display: none;">
+                        <a href="{{ url_for('service_get', project_id=project.project_id, service='report') }}" 
+                            class="service-link {% if active_service == 'report' %}active-service{% endif %}">report</a>
                     </div>
                 </div>
             {% endfor %}
@@ -141,11 +142,42 @@
     </div>
     <!-- Additional JavaScript -->
     <script>
-        function toggleServices(projectName) {
-            const servicesElement = document.getElementById(`services-${projectName}`);
+        console.log('active service is {{ active_service }}')
+        console.log('active project is {{ active_project }}')
+        console.log('projects are {{ projects }}')  
+        const myprojects = {{ projects | tojson }};
+        const myactive = {{ active_project | tojson }};
+        function toggleServices(project_id) {
+            const servicesElement = document.getElementById(`services-${project_id}`);
+            if (!servicesElement) { return; }
             servicesElement.style.display = servicesElement.style.display === 'none' ? 'block' : 'none';
         }
         toggleServices('{{ active_project }}');
+
+        function createNewProject() {
+            const projectName = prompt("Please enter the name of your new project:");
+            
+            if (projectName && projectName.trim() !== "") {
+                // Send the project name to the server
+                fetch('/create_new_project', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name: projectName })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Project created successfully!');
+                        // Optionally, you can refresh the page to see the changes
+                        location.reload();
+                    } else {
+                        alert('Error creating project: ' + data.message);
+                    }
+                });
+            }
+        }        
     </script>
     {% block js %}{% endblock %}
 </body>
