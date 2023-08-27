@@ -1,10 +1,11 @@
-import boto3
-import os, re, flask
+import boto3, requests
+import os, re, flask, logging, pdfkit
 from flask import Flask, request, jsonify, render_template_string
 from werkzeug.utils import secure_filename
-from reportlab.pdfgen import canvas
+from .model.report.reprotox import ReprotoxReport
 
 app = Flask(__name__, template_folder="templates")
+logging.basicConfig(level=logging.DEBUG) # Use INFO for less verbose output
 
 reports_data = [
         {'name': 'Report 1', 'time': '12/12/2022', 'path': 'report.pdf'},
@@ -24,21 +25,28 @@ def generate_report():
     inchi = request.form.get('inchi')
     report_name = request.form.get('report_name')
 
-    # Placeholder code to generate a PDF
-    pdf_filename = "report.pdf"
-    pdf_path = os.path.join(os.getcwd(), pdf_filename)
-    c = canvas.Canvas(pdf_path)
-    c.drawString(100, 750, f"InChI: {inchi}")
-    c.drawString(100, 730, f"Report: {report_name}")
-    c.save()
+    # Generate the report using the ReprotoxReport class
+    report = ReprotoxReport.from_inchi(inchi)
 
-    reports_data.append({'name': report_name, 'time': '12/12/2022', 
-                         'path': pdf_path})
-    return jsonify({
-        "status": "success",
-        "message": "Report generated successfully",
-        "path": pdf_path
+    html_content = report.generate_html_content("reports/reprotox.html")
+    pdf_content = report.generate_pdf_content(html_content)
+
+    html_filename = f"report.html"
+    pdf_filename = f"report.pdf"
+    
+    report.save_report(html_filename, pdf_filename, html_content, pdf_content)
+
+    # Store the details in the reports_data object
+    reports_data.append({
+        'name': report_name,
+        'time': '12/12/2022',
+        'path_html': html_filename,
+        'path_pdf': pdf_filename
     })
+
+    logging.info(f"Generated report for {inchi} and saved HTML to {html_filename} and PDF to {pdf_filename}")
+
+    return "Report generated successfully!", 200
 
 @app.route('/download_report/<path:path>')
 def download_report(path):

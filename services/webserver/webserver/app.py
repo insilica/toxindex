@@ -57,11 +57,16 @@ def favicon():
 def active_projects():
   return [{"name":'test'},{"name":'test2'},{"name":"test3"}]
 
+# PROJECTS ====================================================================================
+@app.route('/project/create', methods=['GET'])
+def project_create():
+  return flask.render_template('project_create.html', projects=active_projects())
+
 # SERVICES ====================================================================================
 @app.route('/p/<project>/<service>', methods=['GET'])
 @app.route('/p/<project>/<service>/<path:path>', methods=['GET'])
 def service_get(project,service,path=""):
-    
+    logging.info(f"project: {project}, service: {service}, path: {path}")
     response = requests.get(f'http://{service}:6515/{path}')
 
     if response.headers['Content-Type'].startswith('text/html'):

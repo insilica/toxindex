@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toxindex Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: auto;
+            color: #333;
+            width: 8.27in; /* A4 paper width */
+        }
+
+        header {
+            background-color: #20232A;
+            padding: 10px 0;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            color: #18B9A0;
+            margin: 0;
+            font-size: 24px;
+        }
+
+        section {
+            margin-bottom: 40px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid #ccc;
+        }
+
+        th, td {
+          border: 1px solid #ccc;
+          padding: 8px;
+          vertical-align: top;  /* This ensures the content aligns to the top */
+          text-align: left;
+      }
+
+        th {
+            background-color: #f4f4f4;
+        }
+
+        #identity .identity-content {
+            display: flex;
+            align-items: flex-start;  /* This ensures top alignment */
+        }
+
+        .depiction {
+            flex: 1;
+            margin-right: 20px;
+        }
+
+        .depiction img {
+            max-width: 100%;
+            display: block;  /* To remove any unwanted space */
+        }
+
+        .identifiers-table {
+            flex: 2;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Toxindex - Reproductive Hazard Report</h1>
+    </header>
+    <section id="identity">
+        <h2>Identity</h2>
+        <div class="identity-content">
+            <div class="depiction">
+                <img src="https://pubchem.ncbi.nlm.nih.gov/image/imgsrv.fcgi?cid=241&t=l" alt="2D depiction">
+            </div>
+            <div class="identifiers-table">
+                <table style="margin:0;">
+                    <thead>
+                        <tr>
+                            <th>Identifiers</th>
+                            <th>Values</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>InChI</td>
+                            <td>Sample InChI Value</td>
+                        </tr>
+                        <tr>
+                            <td>Smiles</td>
+                            <td>Sample Smiles Value</td>
+                        </tr>
+                        <tr>
+                          <td>Selfies</td>
+                          <td>Sample Selfies Value</td>
+                      </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+    <section id="classification">
+        <h2>Chemical Classification</h2>
+        <p>The chemical represented by the InChI <strong>{INCHI-VALUE}</strong> has been assessed and
+            estimated to fall under the <strong>{RISK-CLASSIFICATION}</strong> risk category for <strong>{CLASSIFICATION-CATEGORY}</strong>.
+            Endpoint classifications include:</p>
+        <table border="1" cellspacing="0" cellpadding="8" style="border-collapse: collapse; width: 100%; margin-top: 20px;">
+            <thead style="background-color: #20232A; color: #18B9A0;">
+                <tr>
+                    <th>Endpoint</th>
+                    <th>Classification</th>
+                    <th>Model</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Reproductive Toxicity</td>
+                    <td>Sample Reproductive Toxicity Value</td>
+                    <td>Model Example 1</td>
+                </tr>
+                <tr>
+                    <td>Developmental Toxicity</td>
+                    <td>Sample Developmental Toxicity Value</td>
+                    <td>Model Example 2</td>
+                </tr>
+                <tr>
+                    <td>Endocrine Disruption</td>
+                    <td>Sample Endocrine Disruption Value</td>
+                    <td>Model Example 3</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+    <section id="known-hazards">
+        <h2>Known Hazards</h2>
+        <p>The chemical represented by the InChI <strong>{INCHI-VALUE}</strong> has been assessed and
+            estimated to fall under the <strong>{RISK-CLASSIFICATION}</strong> risk category for <strong>{CLASSIFICATION-CATEGORY}</strong>.
+            Endpoint classifications include:</p>
+        <table border="1" cellspacing="0" cellpadding="8" style="border-collapse: collapse; width: 100%; margin-top: 20px;">
+            <thead style="background-color: #20232A; color: #18B9A0;">
+                <tr>
+                    <th>Endpoint</th>
+                    <th>Classification</th>
+                    <th>Model</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Reproductive Toxicity</td>
+                    <td>Sample Reproductive Toxicity Value</td>
+                    <td>Model Example 1</td>
+                </tr>
+                <tr>
+                    <td>Developmental Toxicity</td>
+                    <td>Sample Developmental Toxicity Value</td>
+                    <td>Model Example 2</td>
+                </tr>
+                <tr>
+                    <td>Endocrine Disruption</td>
+                    <td>Sample Endocrine Disruption Value</td>
+                    <td>Model Example 3</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+    <section id="analogues">
+        <h2>Analogues</h2>
+        <p>Sample content for analogues.</p>
+    </section>
+</body>
+
+</html>

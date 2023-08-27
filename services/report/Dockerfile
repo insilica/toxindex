@@ -1,7 +1,10 @@
 FROM python:3.10-slim-buster
 
-# Install PostgreSQL development package
-RUN apt-get update && apt-get install -y libpq-dev
+# Install dependencies including wkhtmltopdf
+RUN apt-get update && \
+    apt-get install -y libpq-dev wkhtmltopdf && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Install the requirements
 COPY requirements.txt requirements.txt
