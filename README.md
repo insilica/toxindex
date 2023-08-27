@@ -15,10 +15,5 @@ To run this project:
 4. webserver - a flask web user interface, it has users, projects, and projects have views for each services
 
 ## Todo
-1. Iterate on services/report by:
-    1. docker compose up
-    2. create an account
-    3. create a project
-    4. click on the project and then the report link
-    5. now you can edit /services/report and see the changes in real time
-    6. work on basic report crud, make the table prettier, report names, delete, etc.
+1. add a postgrest or postgraphile service as a datastore
+2. migrate existing functionality to use the datastore
