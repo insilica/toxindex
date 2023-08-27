@@ -15,7 +15,4 @@ To run this project:
 4. webserver - a flask web user interface, it has users, projects, and projects have views for each services
 
 ## Todo
-0. get project creation working with postgres and the webserver views
-1. correctly list the projects a user has access to in the left sidebar
-2. when a user has no projects, populate the content area with a message to click '+ new project'
 3. in services/report when a user creates a report, update the relevant postgres tables accordingly

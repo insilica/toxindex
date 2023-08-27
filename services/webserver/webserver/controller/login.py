@@ -38,7 +38,7 @@ def verify_message():
 
 def verification(token):
   user_id = ds.find('SELECT user_id from user_link WHERE link_token=(%s)',(token,))['user_id']
-  ds.execute('UPDATE user set email_verified = 1 WHERE user_id = (%s)',(user_id,))
+  ds.execute('UPDATE users set email_verified = 1 WHERE user_id = (%s)',(user_id,))
   if User.get(user_id) is not None:
     flask_login.login_user(User.get(user_id))
   return flask.redirect('/')
@@ -68,7 +68,7 @@ def reset_password(token):
   
   passw = flask.request.form['password']
   user_id = ds.find('SELECT user_id from user_link WHERE link_token=(%s)',(token,))['user_id']
-  ds.execute('UPDATE user set password = (%s) WHERE user_id = (%s)',(passw,user_id,))
+  ds.execute('UPDATE users set password = (%s) WHERE user_id = (%s)',(passw,user_id,))
   
   if User.get(user_id) is not None:
     flask_login.login_user(User.get(user_id))
