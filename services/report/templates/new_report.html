@@ -1,0 +1,104 @@
+<!-- Additional styles -->
+<style>
+    .section {
+        background-color: white;
+        margin: 20px 0;
+        padding: 0px;
+        border-style: solid;
+        border-width: 1px;
+        border-color: #6d6d6d;
+        border-bottom-color: black;
+        box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
+    }
+    .section-header {
+        padding: 5px 10px;
+        background-color: #f1f1f1;
+        border-bottom-style: solid;
+        border-bottom-width: 1px;
+        border-bottom-color: #ccc;
+    }
+    .section-header h2 {
+        font-size: large;
+    }
+    .section-content {
+        padding: 10px;
+        margin: 5px;
+    }
+    select, input {
+        box-sizing: border-box;
+        width: 98%;
+        margin: 10px 0;
+        padding: 5px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+    }
+    .crumbs a {
+        color: #007BFF; /* Change this to your desired color */
+        text-decoration: none; /* Optional: Removes the underline */
+    }
+</style>
+
+<div class="crumbs">
+    <a href="/p/{{project_id}}">Toxindex</a> > <a href="{{url_for('reports',project_id=project_id)}}">Reports</a> > Create a report
+</div>
+<div class="header">
+    <h1>Create a report</h1>
+    <p>Toxindex allows you to create and store reports</p>
+</div>
+
+<div class="section">
+    <div class="section-header">
+        <h2>Name</h2>
+    </div>
+    <div class="section-content">
+        <label for="report-name">Name of the Report</label>
+        <input type="text" id="report-name">
+        <br>
+        <label for="report-type">Type of Report</label>
+        <select id="report-type">
+            <option value="reprotox">Reprotox</option>
+        </select>
+    </div>
+</div>
+
+<div class="section">
+    <div class="section-header">
+        <h2>Report Specific Parameters</h2>
+    </div>
+    <div class="section-content">
+        <label for="inchi">InChI</label><br>
+        <input type="text" id="inchi">
+    </div>
+</div>
+
+<button id="submit-report-form">Submit Report Form</button>
+
+
+<script>
+    document.getElementById('submit-report-form').addEventListener('click', function() {
+        // Extract data from the input fields
+        var inchi = document.getElementById('inchi').value;
+        var reportName = document.getElementById('report-name').value;
+
+        // URL for the Flask endpoint
+        var currentPath = window.location.pathname;
+        var projectId = currentPath.split('/')[2]; // Assumes the path format is "/p/{project_id}/..."
+        var generateReportUrl = `/p/${projectId}/report/generate_report`;
+
+        // Sending data to the Flask endpoint using fetch API
+        fetch(generateReportUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ 
+                title: reportName, 
+                inchi: inchi 
+            })
+        })
+        .then(response => 
+            // redirect to {{url_for('reports',project_id=project_id)}}
+            window.location.href = "{{url_for('reports', project_id=project_id)}}"
+        )
+    });
+</script>
