@@ -9,14 +9,17 @@ from report import datastore as ds
 app = Flask(__name__, template_folder="templates")
 logging.basicConfig(level=logging.DEBUG) # Use INFO for less verbose output
 
-@app.route('/<project_id>/')
+@app.route('/p/<project_id>/report/')
 def reports(project_id):
     reports = [r.to_dict() for r in Report.get_reports_by_project(project_id)]
     logging.info(f"reports: {reports}")
-    return flask.render_template("reports.html", reports=reports)
+    return flask.render_template("reports.html", reports=reports, project_id=project_id)
 
+@app.route('/p/<project_id>/report/new_report_form')
+def new_report_form(project_id):
+    return flask.render_template("new_report.html", project_id=project_id)
 
-@app.route('/<project_id>/generate_report', methods=['POST'])
+@app.route('/p/<project_id>/report/generate_report', methods=['POST'])
 def generate_report(project_id):
     inchi = request.json['inchi']
     report_title = request.json['title']
@@ -37,7 +40,7 @@ def generate_report(project_id):
 
     return "Report generated successfully!", 200
 
-@app.route('/<project_id>/download_report/<path:path>')
+@app.route('/p/<project_id>/download_report/<path:path>')
 def download_report(project_id,path):
     return flask.send_from_directory(os.getcwd(), path, 
                                      as_attachment=True, 
