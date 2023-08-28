@@ -114,7 +114,7 @@
             <!-- Loop through projects and include services under each -->
             {% for project in projects %}
                 <div class="project-container">
-                    <div class="project-title {{ 'active-project' if project.project_id|string == active_project }}" onclick="toggleServices('{{ project.project_id }}')">
+                    <div class="project-title {{ 'active-project' if project.project_id == active_project|int }}" onclick="toggleServices('{{ project.project_id }}')">
                         {{ project.name }}
                     </div>
                     <div id="services-{{ project.project_id }}" style="display: none;">
