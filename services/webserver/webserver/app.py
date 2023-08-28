@@ -29,6 +29,13 @@ def index():
     print('user is not logged in')
     return flask.render_template('landing.html')
 
+@app.route('/p/<project_id>')
+def layout(project_id):
+  active_projects = [p.to_dict() for p in Project.get_projects_by_creator(flask_login.current_user.user_id)]
+  active_project = project_id
+  logging.info(f"active projects: {active_projects}")
+  return flask.render_template('layout.html', projects=active_projects, active_project=active_project)
+
 # Login and Registration
 app.route('/register', methods=['GET','POST'])(login.register)
 app.route('/verify', methods=['GET'])(login.verify_message)
@@ -67,12 +74,11 @@ def create_new_project():
 
 
 # SERVICES ====================================================================================
-@app.route('/p/<project_id>/<service>', methods=['GET'])
+@app.route('/p/<project_id>/<service>/', methods=['GET'])
 @app.route('/p/<project_id>/<service>/<path:path>', methods=['GET'])
 def service_get(project_id,service,path=""):
-    logging.info(f"project: {project_id}, service: {service}, path: {path}")
-    logging.info(f"getting url http://{service}:6515/{project_id}/{path}")
-    response = requests.get(f'http://{service}:6515/{project_id}/{path}')
+    logging.info(f"getting url http://{service}:6515/p/{project_id}/{service}/{path}")
+    response = requests.get(f'http://{service}:6515/p/{project_id}/{service}/{path}')
     active_projects = [p.to_dict() for p in Project.get_projects_by_creator(flask_login.current_user.user_id)]
     
     if response.headers['Content-Type'].startswith('text/html'):
@@ -86,11 +92,11 @@ def service_get(project_id,service,path=""):
                         response.status_code,
                         dict(response.headers))
 
-@app.route('/p/<project_id>/<service>', methods=['POST'])
+@app.route('/p/<project_id>/<service>/', methods=['POST'])
 @app.route('/p/<project_id>/<service>/<path:path>', methods=['POST'])
 def service_post(project_id,service,path=""):
     
-    service_url = f'http://{service}:6515/{project_id}/{path}'
+    service_url = f'http://{service}:6515/p/{project_id}/{service}/{path}'
     logging.info(f"service_url: {service_url}")
     
     response = requests.request(
