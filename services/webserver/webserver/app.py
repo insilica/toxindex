@@ -88,9 +88,7 @@ def service_get(project_id,service,path=""):
                                      active_project=project_id,
                                      active_service=service)
     
-    return Response(response.content, 
-                        response.status_code,
-                        dict(response.headers))
+    return Response(response.content, response.status_code, dict(response.headers))
 
 @app.route('/p/<project_id>/<service>/', methods=['POST'])
 @app.route('/p/<project_id>/<service>/<path:path>', methods=['POST'])
