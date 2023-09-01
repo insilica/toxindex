@@ -23,7 +23,7 @@
     .report-table {
         width: 100%;
         border-collapse: collapse;
-        margin: 20px 0;
+        margin: 5px 0;
     }
     .report-table tr {
         border-bottom: 1px solid #e0e0e0;
@@ -46,17 +46,11 @@
         cursor: pointer;
         transition: background-color 0.3s;
     }
-    .action-btn.download {
+    .action-btn {
         background-color: #4CAF50;
     }
-    .action-btn.download:hover {
+    .action-btn {
         background-color: #45a049;
-    }
-    .action-btn.send {
-        background-color: #007BFF;
-    }
-    .action-btn.send:hover {
-        background-color: #0056b3;
     }
 </style>
 
@@ -74,9 +68,10 @@
                     <br>
                     <span class="report-time">Created: {{ report.created_at }}</span>
                 </td>
-                <td>
+                <td style="text-align: right;">
                     <button class="action-btn download">Download</button>
                     <button class="action-btn send">Send</button>
+                    <button class="action-btn view">View</button>
                 </td>
             </tr>
         {% endfor %}
