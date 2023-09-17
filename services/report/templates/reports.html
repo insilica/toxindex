@@ -90,48 +90,20 @@
             var downloadReportUrl = currentPath + '/download_report/' + pdfPath;
         
             fetch("/p/test/report/download_report/report.pdf ") // By default, this will be a GET request
-            .then(response => response.blob())
-            .then(blob => {
-                var url = window.URL.createObjectURL(blob);
-                var a = document.createElement('a');
-                a.href = url;
-                a.download = 'report.pdf';
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-            });
+                .then(response => response.blob())
+                .then(blob => {
+                    var url = window.URL.createObjectURL(blob);
+                    var a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'report.pdf';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                });
         });
     });
 
     document.querySelector('.new-report').addEventListener('click', function() {
         window.location.href = "{{url_for('new_report_form',project_id=project_id)}}"
     });
-    
-    document.getElementById('submit-report').addEventListener('click', function() {
-        var reportName = document.getElementById('report-name').value;
-        var inchi = document.getElementById('inchi').value;
-        
-        var currentPath = window.location.pathname; // This will give you the current path like "/p/<project_name>/report"
-        var generateReportUrl = currentPath + '/generate_report';
-            
-        fetch(generateReportUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ title: reportName, inchi: inchi })
-        })
-        .then(response => window.location.reload() ) //reload the page 
-        .catch(error => {
-            console.error('An error occurred:', error);
-        });
-    
-        document.getElementById('new-report-dialog').style.display = 'none';
-    });
-    
-    document.getElementById('cancel-report').addEventListener('click', function() {
-        document.getElementById('new-report-dialog').style.display = 'none';
-    });    
-
-    console.log(reports);
 </script>
