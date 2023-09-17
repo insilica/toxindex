@@ -40,6 +40,10 @@ def generate_report(project_id):
 
     return "Report generated successfully!", 200
 
+@app.route('/p/<project_id>/report/view_report/<path:path>')
+def view_report(project_id, path):
+    return flask.send_from_directory(os.getcwd(), path, as_attachment=False)
+
 @app.route('/p/<project_id>/report/download_report/<path:path>')
 def download_report(project_id,path):
     return flask.send_from_directory(os.getcwd(), path, as_attachment=True, download_name="report.pdf")
