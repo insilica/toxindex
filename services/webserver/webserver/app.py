@@ -7,109 +7,137 @@ import flask, flask_login
 import os, logging, requests
 
 # Defining the static folder path
-static_folder_path = os.path.join(os.path.dirname(__file__), 'webserver', 'static')
+static_folder_path = os.path.join(os.path.dirname(__file__), "webserver", "static")
 app = flask.Flask(__name__, template_folder="templates")
 
-app.config['SERVER_NAME'] = os.environ.get('SERVER_NAME')
-app.config['PREFERRED_URL_SCHEME'] = os.environ.get('PREFERRED_URL_SCHEME')
-app.secret_key =  os.environ.get('FLASK_APP_SECRET_KEY')
+app.config["SERVER_NAME"] = os.environ.get("SERVER_NAME")
+app.config["PREFERRED_URL_SCHEME"] = os.environ.get("PREFERRED_URL_SCHEME")
+app.secret_key = os.environ.get("FLASK_APP_SECRET_KEY")
 app.logger.setLevel(logging.INFO)
-logging.basicConfig(level=logging.DEBUG) # Use INFO for less verbose output
+logging.basicConfig(level=logging.DEBUG)  # Use INFO for less verbose output
 
 LM.init(app)
 
-@app.route('/', methods=['GET'])
-def index():
-  if flask_login.current_user.is_authenticated:
-    active_projects = [p.to_dict() for p in Project.get_projects_by_creator(flask_login.current_user.user_id)]
-    active_project = active_projects[0]["project_id"] if len(active_projects) > 0 else None
-    logging.info(f"active projects: {active_projects}")
-    return flask.render_template('layout.html', projects=active_projects, active_project=active_project)
-  else:
-    print('user is not logged in')
-    return flask.render_template('landing.html')
 
-@app.route('/p/<project_id>')
+@app.route("/", methods=["GET"])
+def index():
+    if flask_login.current_user.is_authenticated:
+        active_projects = [
+            p.to_dict()
+            for p in Project.get_projects_by_creator(flask_login.current_user.user_id)
+        ]
+        active_project = (
+            active_projects[0]["project_id"] if len(active_projects) > 0 else None
+        )
+        logging.info(f"active projects: {active_projects}")
+        return flask.render_template(
+            "layout.html", projects=active_projects, active_project=active_project
+        )
+    else:
+        print("user is not logged in")
+        return flask.render_template("landing.html")
+
+
+@app.route("/p/<project_id>")
 def layout(project_id):
-  active_projects = [p.to_dict() for p in Project.get_projects_by_creator(flask_login.current_user.user_id)]
-  active_project = project_id
-  logging.info(f"active projects: {active_projects}")
-  return flask.render_template('layout.html', projects=active_projects, active_project=active_project)
+    active_projects = [
+        p.to_dict()
+        for p in Project.get_projects_by_creator(flask_login.current_user.user_id)
+    ]
+    active_project = project_id
+    logging.info(f"active projects: {active_projects}")
+    return flask.render_template(
+        "layout.html", projects=active_projects, active_project=active_project
+    )
+
 
 # Login and Registration
-app.route('/register', methods=['GET','POST'])(login.register)
-app.route('/verify', methods=['GET'])(login.verify_message)
-app.route('/verification/<token>', methods=['GET','POST'])(login.verification)
-app.route('/login', methods=['GET','POST'])(login.login)
-app.route('/logout', methods=['GET'])(login.logout)
+app.route("/register", methods=["GET", "POST"])(login.register)
+app.route("/verify", methods=["GET"])(login.verify_message)
+app.route("/verification/<token>", methods=["GET", "POST"])(login.verification)
+app.route("/login", methods=["GET", "POST"])(login.login)
+app.route("/logout", methods=["GET"])(login.logout)
 
-app.route('/forgot_password', methods=['GET','POST'])(login.forgot_password)
-app.route('/reset_password/<token>', methods=['GET','POST'])(login.reset_password)
+app.route("/forgot_password", methods=["GET", "POST"])(login.forgot_password)
+app.route("/reset_password/<token>", methods=["GET", "POST"])(login.reset_password)
 
-@app.route('/customer_portal', methods=['GET'])
+
+@app.route("/customer_portal", methods=["GET"])
 @flask_login.login_required
 def customer_portal():
-  customer_id = flask_login.current_user.stripe_customer_id
-  session = stripe.create_customer_portal_session(customer_id)
-  return flask.redirect(session.url)
+    customer_id = flask_login.current_user.stripe_customer_id
+    session = stripe.create_customer_portal_session(customer_id)
+    return flask.redirect(session.url)
 
-@app.route('/token', methods=['GET'])
+
+@app.route("/token", methods=["GET"])
 @flask_login.login_required
 def token():
-  token = flask_login.current_user.token
-  return f"your token is below. please do not share it with anyone <br><b>{token}</b>"
+    token = flask_login.current_user.token
+    return f"your token is below. please do not share it with anyone <br><b>{token}</b>"
+
 
 # Serving the favicon
-@app.route('/favicon.ico')
+@app.route("/favicon.ico")
 def favicon():
-    return app.send_static_file('favicon.png')
+    return app.send_static_file("favicon.png")
+
 
 # PROJECTS ====================================================================================
-@app.route('/create_new_project', methods=['POST'])
+@app.route("/create_new_project", methods=["POST"])
 def create_new_project():
     data = request.get_json()
-    logging.info(f"Creating new project with name: {data['name']} for user {flask_login.current_user}")
-    Project.create_project(data['name'], data.get("description"), flask_login.current_user.user_id)
+    logging.info(
+        f"Creating new project with name: {data['name']} for user {flask_login.current_user}"
+    )
+    Project.create_project(
+        data["name"], data.get("description"), flask_login.current_user.user_id
+    )
     return flask.jsonify(success=True, message="Project created successfully.")
 
 
 # SERVICES ====================================================================================
-@app.route('/p/<project_id>/<service>/', methods=['GET'])
-@app.route('/p/<project_id>/<service>/<path:path>', methods=['GET'])
-def service_get(project_id,service,path=""):
-    logging.info(f"getting url http://{service}:6515/p/{project_id}/{service}/{path}")
-    response = requests.get(f'http://{service}:6515/p/{project_id}/{service}/{path}')
-    active_projects = [p.to_dict() for p in Project.get_projects_by_creator(flask_login.current_user.user_id)]
-    
-    if response.headers['Content-Type'].startswith('text/html'):
-        return flask.render_template('layout.html', 
-                                     content=response.content.decode('utf-8'), 
-                                     projects=active_projects, 
-                                     active_project=project_id,
-                                     active_service=service)
-    
+@app.route("/p/<project_id>/<service>/", methods=["GET"])
+@app.route("/p/<project_id>/<service>/<path:path>", methods=["GET"])
+def service_get(project_id, service, path=""):
+    logging.info(f"getting url http://localhost:6515/p/{project_id}/{service}/{path}")
+    response = requests.get(f"http://localhost:6515/p/{project_id}/{service}/{path}")
+    active_projects = [
+        p.to_dict()
+        for p in Project.get_projects_by_creator(flask_login.current_user.user_id)
+    ]
+
+    if response.headers["Content-Type"].startswith("text/html"):
+        return flask.render_template(
+            "layout.html",
+            content=response.content.decode("utf-8"),
+            projects=active_projects,
+            active_project=project_id,
+            active_service=service,
+        )
+
     return Response(response.content, response.status_code, dict(response.headers))
 
-@app.route('/p/<project_id>/<service>/', methods=['POST'])
-@app.route('/p/<project_id>/<service>/<path:path>', methods=['POST'])
-def service_post(project_id,service,path=""):
-    
-    service_url = f'http://{service}:6515/p/{project_id}/{service}/{path}'
+
+@app.route("/p/<project_id>/<service>/", methods=["POST"])
+@app.route("/p/<project_id>/<service>/<path:path>", methods=["POST"])
+def service_post(project_id, service, path=""):
+    service_url = f"http://localhost:6515/p/{project_id}/{service}/{path}"
     logging.info(f"service_url: {service_url}")
-    
+
     response = requests.request(
         method=request.method,
         url=service_url,
-        headers={key: value for (key, value) in request.headers if key != 'Host'},
+        headers={key: value for (key, value) in request.headers if key != "Host"},
         data=request.get_data(),
         cookies=request.cookies,
-        params=request.args
+        params=request.args,
     )
-    
+
     proxied_response = app.response_class(
         response=response.content,
         status=response.status_code,
-        headers=dict(response.headers)
+        headers=dict(response.headers),
     )
-    
+
     return proxied_response

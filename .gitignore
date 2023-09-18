@@ -1,0 +1,6 @@
+.direnv/
+/.devenv/
+/services/report/report.pdf
+/services/report/report.html
+/.env
+/.pre-commit-config.yaml

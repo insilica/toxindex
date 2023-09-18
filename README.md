@@ -1,19 +1,35 @@
 # Toxindex Portal
 
-To run this project:
+## Setup
 
-1. make sure you have `docker --version` 24.0.0 or higher
-2. navigate to the services directory `cd services`
-3. get `test.env` from a team member and add it to ./services/test.env
-3. start the project `docker compose --env-file test.env up`
-4. go to localhost:6513
+- Install `nix` via package manager or [nix-installer](https://github.com/DeterminateSystems/nix-installer)
+- Ensure nix flake support is enabled
+
+  ```sh
+  # ~/.config/nix/nix.conf
+  experimental-features = nix-command flakes
+  ```
+
+- Install `direnv` ([instructions](https://direnv.net/docs/installation.html))
+- Enable `.envrc` file for project directory
+
+  ```console
+  $ direnv allow
+  ## Your shell will now load the project environment automatically
+  ```
+
+- Get a copy of the `.env` file from a team member and add it to project root
+- Run the project with `devenv up` (configuration in `flake.nix`)
+- Go to http://localhost:6513
 
 ## Services
+
 1. postgres
-2. flyway - runs at the start of docker compose up and performs all necessary migrations on postgres service.
+2. flyway - runs on startup and performs all necessary migrations on postgres db
 3. report - generates pdf reports and returns a report view
 4. webserver - a flask web user interface, it has users, projects, and projects have views for each services
 
 ## Todo
+
 1. add a postgrest or postgraphile service as a datastore
 2. migrate existing functionality to use the datastore

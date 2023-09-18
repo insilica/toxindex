@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "toxindex-webserver"
+version = "0.1.0"
+description = ""
+authors=[]
+
+[tool.poetry.dependencies]
+python = "3.11.4"
+Flask = "2.2.2"
+# python-dotenv = "0.21.0"
+stripe = "4.2.0"
+flask-login = "0.6.2"
+Flask-WTF = "1.1.1"
+sendgrid = "6.10.0"
+gunicorn = "21.2.0"
+psycopg2-binary = "2.9.7"
+email-validator = "2.0.0.post2"
+boto3 = "1.28.49"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

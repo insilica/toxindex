@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "toxindex-reports"
+version = "0.1.0"
+description = ""
+authors=[]
+
+[tool.poetry.dependencies]
+python = "3.11.4"
+flask = "2.2.2"
+# python-dotenv = "0.21.0"
+psycopg2-binary = "2.9.7"
+boto3 = "1.28.49"
+reportlab = "4.0.4"
+pdfkit = "1.0.0"
+requests = "2.31.0"
+rdkit = "2023.3.3"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
