@@ -130,7 +130,9 @@
                 };
                 pre-commit.settings = { nixfmt.width = 80; };
 
-                enterShell = "";
+                enterShell = ''
+                  [ -e .env ] && source .env
+                '';
               }
             ];
           };
