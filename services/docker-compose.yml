@@ -12,19 +12,19 @@ services:
     ports:
       - 5415:5432
 
-  postgrest:
-    image: postgrest/postgrest:v11.2.0
-    ports:
-      - "3000:3000"
-    environment:
-      PGRST_DB_URI: postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
-      PGRST_DB_SCHEMA: public
-      PGRST_DB_ANON_ROLE: web_anon
-      PGRST_SERVER_PORT: 3000
-    volumes:
-      - ./path/to/postgrest.conf:/etc/postgrest.conf
-    depends_on:
-      - postgres
+  # postgrest:
+  #   image: postgrest/postgrest:v11.2.0
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     PGRST_DB_URI: postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
+  #     PGRST_DB_SCHEMA: public
+  #     PGRST_DB_ANON_ROLE: web_anon
+  #     PGRST_SERVER_PORT: 3000
+  #   volumes:
+  #     - ./path/to/postgrest.conf:/etc/postgrest.conf
+  #   depends_on:
+  #     - postgres
 
   flyway:
     image: flyway/flyway
@@ -57,19 +57,19 @@ services:
       - postgres
       - flyway
 
-  upload:
-    build:
-      context: ./upload
-    environment:
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_NAME: ${DB_NAME}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-    volumes:
-      - ./upload:/upload
-    ports:
-      - "6514:5000"
+  # upload:
+  #   build:
+  #     context: ./upload
+  #   environment:
+  #     DB_HOST: postgres
+  #     DB_PORT: 5432
+  #     DB_NAME: ${DB_NAME}
+  #     DB_USER: ${DB_USER}
+  #     DB_PASSWORD: ${DB_PASSWORD}
+  #   volumes:
+  #     - ./upload:/upload
+  #   ports:
+  #     - "6514:5000"
   
   report:
     build:
