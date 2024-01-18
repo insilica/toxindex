@@ -56,20 +56,6 @@ services:
     depends_on:
       - postgres
       - flyway
-
-  # upload:
-  #   build:
-  #     context: ./upload
-  #   environment:
-  #     DB_HOST: postgres
-  #     DB_PORT: 5432
-  #     DB_NAME: ${DB_NAME}
-  #     DB_USER: ${DB_USER}
-  #     DB_PASSWORD: ${DB_PASSWORD}
-  #   volumes:
-  #     - ./upload:/upload
-  #   ports:
-  #     - "6514:5000"
   
   report:
     build:
@@ -81,9 +67,26 @@ services:
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "6515:6515"
+      - "6516:6515"
     volumes:
       - ./report:/report
+    depends_on:
+      - postgres
+      - flyway
+  
+  search:
+    build:
+      context: ./search
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "6515:6515"
+    volumes:
+      - ./search:/search
     depends_on:
       - postgres
       - flyway

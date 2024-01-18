@@ -120,6 +120,8 @@
                     <div id="services-{{ project.project_id }}" style="display: none;">
                         <a href="{{ url_for('service_get', project_id=project.project_id, service='report') }}" 
                             class="service-link {% if active_service == 'report' %}active-service{% endif %}">report</a>
+                        <a href="{{ url_for('service_get', project_id=project.project_id, service='search') }}" 
+                            class="service-link {% if active_service == 'search' %}active-service{% endif %}">search</a>
                     </div>
                 </div>
             {% endfor %}
@@ -138,7 +140,8 @@
             {% block content %}
                 {{ content | safe }} <!-- This line includes the report content -->
             {% endblock %}
-        </div>        
+        </div>
+        <iframe id="download-frame" style="display: none;"></iframe>
     </div>
     <!-- Additional JavaScript -->
     <script>

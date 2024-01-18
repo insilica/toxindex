@@ -14,6 +14,8 @@ To run this project:
 3. report - generates pdf reports and returns a report view
 4. webserver - a flask web user interface, it has users, projects, and projects have views for each services
 
-## Todo
-1. add a postgrest or postgraphile service as a datastore
-2. migrate existing functionality to use the datastore
+## How to add a service
+1. create a new directory in services
+2. add a dockerfile
+3. add the service in services/docker-compose.yml
+4. add the service to the ./services/webserver/webserver/templates/layout.html in the id="services-{{ project.project_id }}" object. 
