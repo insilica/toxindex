@@ -79,7 +79,7 @@
 </div>
 
 <script>
-
+    
     var reports = {{ reports | tojson }};
 
     // download the report when user clicks download button
@@ -104,6 +104,10 @@
     });
 
     document.querySelector('.new-report').addEventListener('click', function() {
-        window.location.href = "{{url_for('new_report_form',project_id=project_id)}}"
+        // newhref = window.location.protocol + "//" + window.location.host + window.location.pathname + 'new_report_form?project_id={{project_id}}'
+        newhref = '{{ url_for("new_report_form", project_id=project_id, _external=True) }}'
+        console.log(newhref)
+        // window.location.href = '{{ url_for("new_report_form", project_id=project_id) }}'
+        window.open('/new_report_form?project_id={{project_id}}', '_self')
     });
 </script>

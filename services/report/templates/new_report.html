@@ -38,14 +38,10 @@
     }
 </style>
 
-<div class="crumbs">
-    <a href="/p/{{project_id}}">Toxindex</a> > <a href="{{url_for('reports',project_id=project_id)}}">Reports</a> > Create a report
-</div>
 <div class="header">
     <h1>Create a report</h1>
     <p>Toxindex allows you to create and store reports</p>
 </div>
-
 <div class="section">
     <div class="section-header">
         <h2>Name</h2>
@@ -75,30 +71,14 @@
 
 
 <script>
-    document.getElementById('submit-report-form').addEventListener('click', function() {
+    document.getElementById('submit-report-form').addEventListener('click', function(event) {
+        event.preventDefault();
         // Extract data from the input fields
         var inchi = document.getElementById('inchi').value;
         var reportName = document.getElementById('report-name').value;
 
-        // URL for the Flask endpoint
-        var currentPath = window.location.pathname;
-        var projectId = currentPath.split('/')[2]; // Assumes the path format is "/p/{project_id}/..."
-        var generateReportUrl = `/p/${projectId}/report/generate_report`;
-
-        // Sending data to the Flask endpoint using fetch API
-        fetch(generateReportUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ 
-                title: reportName, 
-                inchi: inchi 
-            })
-        })
-        .then(response => 
-            // redirect to {{url_for('reports',project_id=project_id)}}
-            window.location.href = "{{url_for('reports', project_id=project_id)}}"
-        )
-    });
+        bodys = JSON.stringify({  title: reportName, inchi: inchi, project_id: '{{project_id}}' })
+        req = fetch('{{url_for("generate_report")}}', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: bodys})
+        req.then(response => window.open("{{url_for('index', project_id=project_id)}}") )
+    }); 
 </script>

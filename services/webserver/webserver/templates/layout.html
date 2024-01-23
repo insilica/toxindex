@@ -26,9 +26,15 @@
             overflow-y: auto; /* Allows scrolling within the left navigation if the content overflows */
         }
         .content {
-            flex: 1;
-            padding: 20px;
+            flex: 1; /* Takes up the remaining space */
+            padding: 0; /* Removed padding to allow iframe to fill the entire content area */
             background-color: #f1f1f1; /* Light gray color for content */
+            overflow: hidden; /* Hides any overflow */
+        }
+        .content iframe {
+            width: 100%; /* Full width of the content area */
+            height: 100vh; /* Full height of the viewport */
+            border: none; /* Removes the border */
         }
         .service-link {
             text-decoration: none;
@@ -136,12 +142,8 @@
             </div>            
         </div>
         <div class="content">
-            <!-- Content block for the specific service -->
-            {% block content %}
-                {{ content | safe }} <!-- This line includes the report content -->
-            {% endblock %}
-        </div>
-        <iframe id="download-frame" style="display: none;"></iframe>
+            <iframe src="http://{{active_service}}.localhost/?project_id={{active_project}}" frameborder="0"></iframe>
+        </div>        
     </div>
     <!-- Additional JavaScript -->
     <script>
@@ -181,6 +183,31 @@
                 });
             }
         }        
+    </script>
+
+    <!-- manage link clicks within an iframe, change iframe src to link target relative to current service-->
+    <script>
+        active_service = '{{ active_service }}'
+        iframe = document.querySelector('iframe');
+        iframe.contentWindow.addEventListener('click', function(event) {
+            if (event.target.tagName === 'A') {
+                event.preventDefault();
+                let path = event.target.href.split('/').slice(3).join('/');
+                let href = event.target.href.replace('localhost/', 'localhost/{{active_service}}/');
+
+                // Check if URL already has query parameters
+                let separator = href.includes('?') ? '&' : '?';
+
+                // Add project_id to href if it is not already there
+                if (!href.includes('project_id=')) {
+                    href += separator + 'project_id={{active_project}}';
+                }
+
+                console.log('clicked on link: ' + event.target.href);
+                console.log('new href:' + href);
+                iframe.src = href;
+            }
+        });
     </script>
     {% block js %}{% endblock %}
 </body>
