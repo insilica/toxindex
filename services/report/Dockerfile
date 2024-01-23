@@ -16,6 +16,6 @@ EXPOSE 6515
 # Command to run the application
 ENV FLASK_APP=report.app
 ENV FLASK_ENV=development
-ENV ROOT_URL=http://localhost:6515
+ENV ROOT_URL=http://localhost:6515/report
 
 CMD ["flask", "run", "--debug", "--host=0.0.0.0", "--port=6515"]

@@ -16,4 +16,5 @@ ENV FLASK_ENV=development
 ENV ROOT_URL=http://localhost:6513
 
 # Command to run the application
-CMD ["flask", "run", "--host=0.0.0.0", "--port=6513"]
+# CMD ["flask", "run", "--host=0.0.0.0", "--port=6513"]
+CMD ["flask", "run", "--debug", "--host=0.0.0.0", "--port=6513"]

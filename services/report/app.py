@@ -5,22 +5,27 @@ from werkzeug.utils import secure_filename
 from report.model.reports.reprotox import ReprotoxReport
 from report.model.report import Report
 from report import datastore as ds
+from flask import url_for
+
 
 app = Flask(__name__, template_folder="templates")
 logging.basicConfig(level=logging.DEBUG) # Use INFO for less verbose output
 
-@app.route('/p/<project_id>/report/')
-def reports(project_id):
+@app.route('/')
+def index():
+    project_id = request.args.get('project_id')
     reports = [r.to_dict() for r in Report.get_reports_by_project(project_id)]
     logging.info(f"reports: {reports}")
     return flask.render_template("reports.html", reports=reports, project_id=project_id)
 
-@app.route('/p/<project_id>/report/new_report_form')
-def new_report_form(project_id):
+@app.route('/new_report_form')
+def new_report_form():
+    project_id = request.args.get('project_id')
     return flask.render_template("new_report.html", project_id=project_id)
 
-@app.route('/p/<project_id>/report/generate_report', methods=['POST'])
-def generate_report(project_id):
+@app.route('/generate_report', methods=['POST'])
+def generate_report():
+    project_id = request.args.get('project_id')
     inchi = request.json['inchi']
     report_title = request.json['title']
 
@@ -40,10 +45,10 @@ def generate_report(project_id):
 
     return "Report generated successfully!", 200
 
-@app.route('/p/<project_id>/report/view_report/<path:path>')
+@app.route('/view_report/<path:path>')
 def view_report(project_id, path):
     return flask.send_from_directory(os.getcwd(), path, as_attachment=False)
 
-@app.route('/p/<project_id>/report/download_report/<path:path>')
+@app.route('/download_report/<path:path>')
 def download_report(project_id,path):
     return flask.send_from_directory(os.getcwd(), path, as_attachment=True, download_name="report.pdf")

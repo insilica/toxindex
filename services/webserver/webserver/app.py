@@ -78,17 +78,20 @@ def create_new_project():
 @app.route('/p/<project_id>/<service>/<path:path>', methods=['GET'])
 def service_get(project_id,service,path=""):
     logging.info(f"getting url http://{service}:6515/p/{project_id}/{service}/{path}")
-    response = requests.get(f'http://{service}:6515/p/{project_id}/{service}/{path}')
+    # response = requests.get(f'http://{service}:6515/p/{project_id}/{service}/{path}')
     active_projects = [p.to_dict() for p in Project.get_projects_by_creator(flask_login.current_user.user_id)]
+    logging.info(f"active projects: {active_projects}")
+    logging.info(f"active project: {project_id}")
+    logging.info(f"active service: {service}")
+    return flask.render_template('layout.html', projects=active_projects, active_project=project_id, active_service=service)
+    # if response.headers['Content-Type'].startswith('text/html'):
+    #     return flask.render_template('layout.html', 
+    #                                  content=response.content.decode('utf-8'), 
+    #                                  projects=active_projects, 
+    #                                  active_project=project_id,
+    #                                  active_service=service)
     
-    if response.headers['Content-Type'].startswith('text/html'):
-        return flask.render_template('layout.html', 
-                                     content=response.content.decode('utf-8'), 
-                                     projects=active_projects, 
-                                     active_project=project_id,
-                                     active_service=service)
-    
-    return Response(response.content, response.status_code, dict(response.headers))
+    # return Response(response.content, response.status_code, dict(response.headers))
 
 @app.route('/p/<project_id>/<service>/', methods=['POST'])
 @app.route('/p/<project_id>/<service>/<path:path>', methods=['POST'])
