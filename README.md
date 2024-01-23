@@ -37,7 +37,7 @@ update your /etc/hosts file to include {subdomain}.localhost for each service:
 5. JW get report generation working with pending reports
    1. generate a dummy microservice response, this can be anything for now, but work in some random delay
    2. handle long delays (1-2 minutes) for report generation, make the UI not suck for that.
-   3. 
+   3. return json version of the report as well
 
 6. get chemical search working ---------- Jan 23
 7. deploy to toxindex ------------------- Jan 24
