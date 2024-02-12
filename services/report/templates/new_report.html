@@ -62,7 +62,7 @@
         <h2>Report Specific Parameters</h2>
     </div>
     <div class="section-content">
-        <label for="inchi">InChI</label><br>
+        <label for="inchi">InChI eg. InChI=1S/C9H8O4/c1-6(10)13-8-5-3-2-4-7(8)9(11)12/h2-5H,1H3,(H,11,12)</label><br>
         <input type="text" id="inchi">
     </div>
 </div>
@@ -79,6 +79,6 @@
 
         bodys = JSON.stringify({  title: reportName, inchi: inchi, project_id: '{{project_id}}' })
         req = fetch('{{url_for("generate_report")}}', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: bodys})
-        req.then(response => window.open("{{url_for('index', project_id=project_id)}}") )
+        req.then(response => window.location.href = "{{url_for('index', project_id=project_id)}}") 
     }); 
 </script>
