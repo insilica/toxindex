@@ -27,19 +27,17 @@ update your /etc/hosts file to include {subdomain}.localhost for each service:
 4. add the service to the ./services/webserver/webserver/templates/layout.html in the id="services-{{ project.project_id }}" object. 
 
 ## TODO
-1. [x] TL set up cvae microservice ------------- Jan 23
-2. [ ] TL update microservice to return property **titles**, categories, reasons_for_categorization, known_values, predicted_values
-3. [ ] TL update microservice to allow requesting properties for a specific category
+1. 
 
-4. JW get the services iframe working with ports other than 80
-5. JW get the user registration working with ports other than 80.
-6. JW get the new_report form submission to open the report's `/` route rather than opening a new window
+1. JW get the services iframe working with ports other than 80
+2. JW get the user registration working with ports other than 80.
+3. JW get the new_report form submission to open the report's `/` route rather than opening a new window
 
-7. JW get report generation working with pending reports
+4. JW get report generation working with pending reports
    1. generate a dummy microservice response, this can be anything for now, but work in some random delay
    2. handle long delays (1-2 minutes) for report generation, make the UI not suck for that.
    3. return json version of the report as well
 
-8. get chemical search working ---------- Jan 23
-9. deploy to toxindex ------------------- Jan 24
-10. test with partners ------------------- Jan 25
+5. get chemical search working ---------- Jan 23
+6. deploy to toxindex ------------------- Jan 24
+7. test with partners ------------------- Jan 25

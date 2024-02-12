@@ -37,8 +37,8 @@ def verify_message():
     return flask.render_template('verify_message.html', email=flask.request.args.get('email'))
 
 def verification(token):
-  user_id = ds.find('SELECT user_id from user_link WHERE link_token=(%s)',(token,))['user_id']
-  ds.execute('UPDATE users set email_verified = 1 WHERE user_id = (%s)',(user_id,))
+  user_id = ds.find('SELECT user_id from user_link WHERE link_token=(%s)', (token,))['user_id']
+  ds.execute('UPDATE users SET email_verified = TRUE WHERE user_id = (%s)', (user_id,))
   if User.get(user_id) is not None:
     flask_login.login_user(User.get(user_id))
   return flask.redirect('/')
@@ -93,7 +93,11 @@ def register():
       else:
         logging.debug('user is none!')
         flask.flash("An error occurred while creating the user. Please try again.")
-
+  else:
+      logging.debug('form did not validate')
+      logging.debug(form.errors)
+      flask.flash("An error occurred while creating the user. Please try again.")
+      
   return flask.render_template('register.html', form=form)
 
 # USER LOGIN/OUT ==================================================================================

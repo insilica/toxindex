@@ -1,7 +1,8 @@
-flask
-psycopg2-binary
-boto3
-reportlab
-pdfkit
-requests
-rdkit
+flask==3.0.0
+psycopg2-binary==2.9.9
+boto3==1.34.19
+# reportlab==4.0.9
+pdfkit==1.0.0
+requests==2.31.0
+rdkit==2023.9.4
+pandas==2.2.0
