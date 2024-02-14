@@ -1,5 +1,7 @@
-import requests, pdfkit, flask, json
+import requests, pdfkit, flask, json, tempfile, uuid, boto3, dotenv, os, logging
 from rdkit import Chem
+from report.model.report import Report
+from report import s3store
 
 def inchi2smi(inchi):
     mol = Chem.MolFromInchi(inchi)
@@ -8,50 +10,35 @@ def inchi2smi(inchi):
 
 class ReprotoxReport:
 
-    def __init__(self, inchi, prediction, analogue_info):
+    def __init__(self, title, inchi):
+        self.title = title
         self.inchi = inchi
-        self.smiles = inchi2smi(inchi)
-        self.prediction = prediction
-        self.analogue_info = analogue_info
-
+        self.smiles = inchi2smi(inchi)   
+        
+    @staticmethod
+    def from_json(json):
+        return ReprotoxReport(json['title'], json['inchi'])
+    
     @classmethod
-    def from_inchi(cls, inchi):
-
-        # TODO need a model service
-        # TODO need to update cvae with reprotox labels
-        url = "https://api.insilica.co/service/run/chemsim/predict"
-        params = { "inchi": inchi, "label": "25", "k": 5 }
-        data = json.loads(requests.get(url,params).text)
+    def generate(cls, report_id, title, inchi):
+        """Generates a pdf report, an html report and a json report"""
         
-        # Accessing specific keys in the parsed data
-        weights = data['weights']
-        analogue_smiles = data['analogue_smiles']
-        analogue_values = data['analogue_values']
-        prediction = data['prediction']
+        s3 = s3store.S3Store()
         
-        analogue_info = []
+        report = ReprotoxReport(title, inchi)
+        html_content = flask.render_template("reports/reprotox.html", report=report)
 
-        for weight, smile, value in zip(weights, analogue_smiles, analogue_values):
-            analogue = { 'weight': weight, 'smile': smile, 'value': value}
-            analogue_info.append(analogue)
+        config = pdfkit.configuration(wkhtmltopdf="/usr/bin/wkhtmltopdf")
+        
+        with tempfile.NamedTemporaryFile(suffix='.html') as html_file, \
+             tempfile.NamedTemporaryFile(suffix='.pdf') as pdf_file:
 
-        return cls(inchi, prediction, analogue_info)
+            html_file.write(html_content.encode())
+            html_file.flush() 
 
-    def generate_html_content(self, template_path):
-        # Render HTML content using the given template path and this object's data
-        return flask.render_template(template_path, report=self)
+            pdfkit.from_file(html_file.name, pdf_file.name, configuration=config)
 
-    def generate_pdf_content(self, html_content, config_path='/usr/bin/wkhtmltopdf'):
-        # Convert HTML content to a PDF using pdfkit
-        config = pdfkit.configuration(wkhtmltopdf=config_path)
-        return pdfkit.from_string(html_content, False, configuration=config)
-
-    def save_report(self, html_filename, pdf_filename, html_content, pdf_content):
-        # Save HTML content
-        with open(html_filename, 'w') as html_file:
-            html_file.write(html_content)
-
-        # Save PDF content
-        with open(pdf_filename, 'wb') as pdf_file:
-            pdf_file.write(pdf_content)
-
+            object_url = s3.upload_file(pdf_file.name, f'{uuid.uuid4()}.pdf')
+            Report.update_s3_reference(report_id, object_url)
+            Report.update_status(report_id, Report.STATUS.GENERATED)
+        

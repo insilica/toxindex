@@ -76,8 +76,9 @@
         // Extract data from the input fields
         var inchi = document.getElementById('inchi').value;
         var reportName = document.getElementById('report-name').value;
+        var project_id = {{ project_id }};
 
-        bodys = JSON.stringify({  title: reportName, inchi: inchi, project_id: '{{project_id}}' })
+        bodys = JSON.stringify({  title: reportName, inchi: inchi, project_id: project_id })
         req = fetch('{{url_for("generate_report")}}', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: bodys})
         req.then(response => window.location.href = "{{url_for('index', project_id=project_id)}}") 
     }); 
