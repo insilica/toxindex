@@ -3,8 +3,12 @@ import hashlib
 import os
 import report.datastore as ds
 import logging
+import types
+import report.s3store as s3store
 
 class Report:
+    
+    STATUS = types.SimpleNamespace(PENDING='PENDING', GENERATED='GENERATED', FAILED='FAILED')
 
     def __init__(self, report_id, s3_reference, user_id, title, description, created_at, updated_at, status):
         self.report_id = report_id
@@ -39,34 +43,42 @@ class Report:
         return Report.from_row(res) if res else None
 
     @staticmethod
-    def upload_to_s3(file_path):
-        filetype = os.path.splitext(file_path)[1]
-        filehash = hashlib.md5(open(file_path, 'rb').read()).hexdigest()
-        s3_filename = f"report/{filehash}{filetype}"
-        
-        s3_client = boto3.client('s3')
-        s3_client.upload_file(file_path, "toxindex", s3_filename)
-        
-        return f"s3://toxindex/{s3_filename}"
-
-    @staticmethod
-    def create_report(project_id, file_path, user_id, title, description):
-        
-        s3_reference = Report.upload_to_s3(file_path)
-
-        params = (s3_reference, user_id, title, description)
-        ds.execute("INSERT INTO reports (s3_reference, user_id, title, description) values (%s, %s, %s, %s)", params)
-        
-        # Fetch and return the newly created report
-        res = ds.find("SELECT * from reports where s3_reference = %s AND user_id = %s", (s3_reference, user_id))
-        report = Report.from_row(res) if res else None
-        ds.execute("INSERT INTO project_reports (project_id, report_id) values (%s, %s)", (project_id, report.report_id))
-        
-        return report 
-
-    @staticmethod
-    def associate_with_project(report_id, project_id):
-        ds.execute("INSERT INTO project_reports (project_id, report_id) values (%s, %s)", (project_id, report_id))
+    def create_report(project_id, user_id, title, description):
+        con = ds.get_connection()
+        try:
+            # Start a transaction
+            con.autocommit = False
+            cur = con.cursor()
+            
+            # Insert report
+            params = (user_id, title, description)
+            query = """
+                INSERT INTO reports (user_id, title, description, status, s3_reference)
+                VALUES (%s, %s, %s, 'PENDING', 'none')
+                RETURNING report_id
+            """
+            cur.execute(query, params)
+            report_id = cur.fetchone()[0]
+            
+            # Associate report with project
+            query = "INSERT INTO project_reports (project_id, report_id) VALUES (%s, %s)"
+            cur.execute(query, (project_id, report_id))
+            
+            # Commit the transaction if both operations are successful
+            con.commit()
+            
+            # Assuming you want to return the report_id of the created report
+            return report_id
+        except Exception as e:
+            # Roll back the transaction in case of an error
+            con.rollback()
+            logging.error("Failed to create report and associate it with project", exc_info=e)
+            raise  # Re-raise the exception for the caller to handle
+        finally:
+            # Clean up
+            if con:
+                con.autocommit = True  # Reset autocommit to its default state
+                con.close()
 
     @staticmethod
     def get_reports_by_project(project_id):
@@ -77,4 +89,45 @@ class Report:
         rows = ds.find_all(query, (project_id,))
         return [Report.from_row(row) for row in rows]
     
-    # Other methods, like update, delete, etc., can also be implemented as needed.
+    @staticmethod
+    def update_status(report_id, status):
+        
+        if status not in Report.STATUS.__dict__.values():
+            raise ValueError(f"Invalid status: {status}")
+        
+        query = "UPDATE reports SET status = %s WHERE report_id = %s"
+        ds.execute(query, (status, report_id))
+            
+    @staticmethod
+    def update_s3_reference(report_id, s3_reference):
+        query = "UPDATE reports SET s3_reference = %s WHERE report_id = %s"
+        ds.execute(query, (s3_reference, report_id))
+    
+    @staticmethod                            
+    def delete(report_id):
+        
+        report = Report.get(report_id)
+        con = ds.get_connection()
+        s3 = s3store.S3Store()
+        
+        try:
+            # Start a transaction
+            con.autocommit = False
+            cur = con.cursor()
+            
+            query = "DELETE FROM project_reports WHERE report_id = %s"
+            cur.execute(query, (report_id,))
+            
+            query = "DELETE FROM reports WHERE report_id = %s"
+            cur.execute(query, (report_id,))
+            
+            s3.delete_object(report.s3_reference)
+            
+            con.commit()
+        except Exception as e:
+            con.rollback()
+            logging.error("Failed to delete report", exc_info=e)
+            raise
+        finally:
+            con.autocommit = True
+            con.close()

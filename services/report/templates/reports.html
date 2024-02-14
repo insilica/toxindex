@@ -1,10 +1,15 @@
 <style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: white;
+    }
+
     .content-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
         padding: 10px;
-        background-color: #f2f2f2;
+        background-color: white;
         border-bottom: 1px solid #e0e0e0;
     }
     .report-count {
@@ -13,17 +18,20 @@
         color: #333;
     }
     .new-report {
-        font-size: 14px;
+        font-size: 1em;
         cursor: pointer;
-        color: #007BFF;
+        color: white;
+        background-color: #007BFF;
+        margin: 5px;
+        padding: 5px;
     }
     .new-report:hover {
         text-decoration: underline;
     }
+
     .report-table {
         width: 100%;
         border-collapse: collapse;
-        margin: 5px 0;
     }
     .report-table tr {
         border-bottom: 1px solid #e0e0e0;
@@ -31,47 +39,93 @@
     .report-table tr td {
         padding: 10px;
     }
+    .report-table th, .report-table td {
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .report-table th {
+        background-color: #f2f2f2;
+    }
+
     .report-name {
         font-weight: bold;
     }
     .report-time {
         color: #888;
-        font-size: 12px;
     }
     .action-btn {
-        padding: 5px 10px;
+        font-size: 0.9em; /* Larger font size for buttons */
+        padding: 5px 10px; /* More padding for better touch target */
         margin-right: 5px;
         border: none;
-        color: white;
+        border-radius: 4px;
         cursor: pointer;
-        transition: background-color 0.3s;
     }
-    .action-btn {
-        background-color: #4CAF50;
+
+    .delete {
+        background-color: #dc3545; /* Red color for delete button */
+        color: white;
     }
-    .action-btn {
-        background-color: #45a049;
+
+    .download {
+        background-color: #007BFF; /* Blue color for download button */
+        color: white;
     }
+
+    .btn-disabled {
+        color: #c0c0c0;
+        pointer-events: none; /* Makes it non-clickable */
+        background-color: #f9f9f9;
+    }
+
+    .status-label {
+        display: inline-block;
+        margin-left: 0; /* Aligns to the left */
+        margin-right: 10px; /* Ensures spacing between this and any following elements */
+    }
+
+    .pending {
+        background-color: #ffc107; /* Brighter orange for better contrast */
+        color: #212529; /* Dark text for better readability */
+        font-size: 0.9em; /* Maintains current size */
+    }
+
+    .completed {
+        color: #28a745;
+    }
+
 </style>
 
-<div class="content" style="max-width:800px">
+<div class="content">
     <div class="content-header">
         <div class="report-count">{{reports | length}} Reports</div>
-        <div class="new-report">New Report</div>
+        <button class="new-report">New Report</div>
     </div>
     <table class="report-table">
         {% for report in reports %}
             <tr>
-                <td><input type="checkbox"></td>
+                <td style="max-width: 5px;"><input type="checkbox"></td>
                 <td>
-                    <span class="report-name">{{ report.title }}</span>
-                    <br>
-                    <span class="report-time">Created: {{ report.created_at }}</span>
+                    <div>
+                        <span class="report-name">{{ report.title }}</span>
+                        <br>
+                        <span class="report-time">Created: {{ report.created_at }}</span>
+                        <br>
+                        {% if report.status == 'PENDING' %}
+                            <span class="status-label pending">Pending</span>
+                        {% else %}
+                            <span class="status-label completed">Completed</span>
+                        {% endif %}
+                    </div>
                 </td>
                 <td style="text-align: right;">
-                    <button class="action-btn download">Download</button>
-                    <button class="action-btn send">Send</button>
-                    <button class="action-btn view">View</button>
+                    {% if report.status == 'PENDING' %}
+                        <button class="action-btn download btn-disabled">Download</button>
+                    {% else %}
+                        <button class="action-btn download">Download</button>
+                    {% endif %}
+                    <button class="action-btn delete">Delete</button>
                 </td>
             </tr>
         {% endfor %}
@@ -81,33 +135,43 @@
 <script>
     
     var reports = {{ reports | tojson }};
+    var project_id = {{ project_id }};
 
-    // download the report when user clicks download button
+    // DOWNLOAD REPORT =======================================================================
     document.querySelectorAll('.action-btn.download').forEach(function(button, index) {
         button.addEventListener('click', function() {
-            var pdfPath = reports[index].path;
-            var currentPath = window.location.pathname;
-            var downloadReportUrl = currentPath + '/download_report/' + pdfPath;
-        
-            fetch("/p/test/report/download_report/report.pdf ") // By default, this will be a GET request
-                .then(response => response.blob())
-                .then(blob => {
-                    var url = window.URL.createObjectURL(blob);
+            var report_id = reports[index].report_id;
+            var body = JSON.stringify({ report_id: report_id })
+            var fetchjs = { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: body }
+            fetch('{{url_for("download_report")}}',  fetchjs )
+                .then(response => response.json())  // Parse the JSON response
+                .then(data => {
+                    // Use the presigned URL from the response
+                    var url = data.url;
                     var a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'report.pdf';
+                    a.href = url;  // Set the href to the presigned URL
+                    a.download = 'report.pdf';  // Set the desired download file name
                     document.body.appendChild(a);
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                });
+                    a.click();  // Programmatically click the anchor to trigger the download
+                    document.body.removeChild(a);  // Optionally remove the anchor from the DOM
+                })
+                .catch(error => console.error('Error downloading the file:', error));
         });
     });
 
+    // DELETE REPORT =======================================================================
+    document.querySelectorAll('.action-btn.delete').forEach(function(button, index) {
+        button.addEventListener('click', function() {
+            var report_id = reports[index].report_id;
+            var bodys = JSON.stringify({ project_id: project_id, report_id: report_id })
+            req = fetch('{{url_for("delete_report")}}', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: bodys})
+            req.then(response => window.location.href = "{{url_for('index', project_id=project_id)}}") 
+        });
+    });
+
+    // NEW REPORT =======================================================================
     document.querySelector('.new-report').addEventListener('click', function() {
-        // newhref = window.location.protocol + "//" + window.location.host + window.location.pathname + 'new_report_form?project_id={{project_id}}'
-        newhref = '{{ url_for("new_report_form", project_id=project_id, _external=True) }}'
-        console.log(newhref)
-        // window.location.href = '{{ url_for("new_report_form", project_id=project_id) }}'
+        newhref = '{{ url_for("new_report_form", _external=True) }}' + "?project_id=" + project_id;
         window.open('/new_report_form?project_id={{project_id}}', '_self')
     });
 </script>
