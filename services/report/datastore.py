@@ -10,6 +10,9 @@ dbname = os.getenv('DB_NAME')
 dbuser = os.getenv('DB_USER')
 dbpass = os.getenv('DB_PASSWORD')
 
+def get_connection():
+    return psycopg2.connect(host=dbhost, port=dbport, dbname=dbname, user=dbuser, password=dbpass)
+
 def find(query, param=None):
     res = None
     con = None
@@ -41,6 +44,7 @@ def execute(query, param=None):
         else:
             cur.execute(query, param)
         con.commit()
+        return cur.statusmessage
     except Exception as e:
         logging.debug("error executing query")
         logging.debug(query)
