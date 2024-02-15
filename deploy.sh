@@ -1,3 +1,5 @@
+scp services/prod.env toxindex:/mnt/ebs/toxindex/services
+
 # zip the entire directory
 zip -r deploy.zip .
 
