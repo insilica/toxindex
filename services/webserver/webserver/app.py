@@ -83,7 +83,7 @@ def service_get(project_id,service,path=""):
     logging.info(f"active projects: {active_projects}")
     logging.info(f"active project: {project_id}")
     logging.info(f"active service: {service}")
-    return flask.render_template('layout.html', projects=active_projects, active_project=project_id, active_service=service)
+    return flask.render_template('layout.html', projects=active_projects, active_project=project_id, host=os.getenv('HOST'), active_service=service)
     # if response.headers['Content-Type'].startswith('text/html'):
     #     return flask.render_template('layout.html', 
     #                                  content=response.content.decode('utf-8'), 
