@@ -27,11 +27,8 @@ update your /etc/hosts file to include {subdomain}.localhost for each service:
 4. add the service to the ./services/webserver/webserver/templates/layout.html in the id="services-{{ project.project_id }}" object. 
 
 ## TODO
-1. [ ] get reports downloading
-2. [ ] deploy to toxindex.com
-3. [ ] talk to hartung
-4. [ ] write phase 2 report
-
-5. get chemical search working ---------- Jan 23
-6. deploy to toxindex ------------------- Jan 24
-7. test with partners ------------------- Jan 25
+1. [x] get reports downloading
+2. [ ] deploy to toxindex.com --- feb 15
+2. [ ] update the report -------- feb 16
+3. [ ] talk to hartung ---------- feb 18
+4. [ ] write phase 2 report ----- feb 20-29
