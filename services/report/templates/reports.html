@@ -17,16 +17,33 @@
         font-weight: bold;
         color: #333;
     }
+
     .new-report {
         font-size: 1em;
         cursor: pointer;
         color: white;
         background-color: #007BFF;
         margin: 5px;
-        padding: 5px;
+        padding: 10px 15px; /* Increase padding for better visual appearance */
+        border: none; /* Remove default border */
+        border-radius: 5px; /* Rounded corners for a modern look */
+        transition: background-color 0.3s, box-shadow 0.2s, transform 0.1s; /* Smooth transitions for interaction */
+        outline: none; /* Remove the outline to customize focus state */
     }
+
     .new-report:hover {
-        text-decoration: underline;
+        text-decoration: none; /* Remove underline on hover, as it's not a standard for buttons */
+        background-color: #0056b3; /* Darker shade on hover */
+        box-shadow: 0 4px 8px rgba(0, 123, 255, 0.5); /* Larger shadow on hover for a 'lifted' effect */
+    }
+
+    .new-report:active {
+        transform: translateY(2px); /* Slight push-down effect on click */
+        box-shadow: 0 1px 2px rgba(0, 123, 255, 0.3); /* Smaller shadow to give a sense of being pressed */
+    }
+
+    .new-report:focus {
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5); /* Glowing effect for focus */
     }
 
     .report-table {

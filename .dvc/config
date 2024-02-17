@@ -1,0 +1,4 @@
+[core]
+  remote = toxindex.com
+['remote "toxindex.com"']
+  url = s3://toxindex/
