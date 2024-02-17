@@ -23,8 +23,15 @@ def index():
   if flask_login.current_user.is_authenticated:
     active_projects = [p.to_dict() for p in Project.get_projects_by_creator(flask_login.current_user.user_id)]
     active_project = active_projects[0]["project_id"] if len(active_projects) > 0 else None
+    if not active_project:
+      res = Project.create_project("default", "user default project", flask_login.current_user.user_id)
+      active_projects = active_projects + [res]
+      active_project = res.project_id
+      
     logging.info(f"active projects: {active_projects}")
-    return flask.render_template('layout.html', projects=active_projects, active_project=active_project)
+    logging.info(f"active project: {active_project}")
+    return flask.redirect(f'p/{active_project}/report')
+    # return flask.render_template('layout.html', projects=active_projects, active_project=active_project)
   else:
     print('user is not logged in')
     return flask.render_template('landing.html')
@@ -76,43 +83,30 @@ def create_new_project():
 # SERVICES ====================================================================================
 @app.route('/p/<project_id>/<service>/', methods=['GET'])
 @app.route('/p/<project_id>/<service>/<path:path>', methods=['GET'])
-def service_get(project_id,service,path=""):
-    logging.info(f"getting url http://{service}:6515/p/{project_id}/{service}/{path}")
-    # response = requests.get(f'http://{service}:6515/p/{project_id}/{service}/{path}')
-    active_projects = [p.to_dict() for p in Project.get_projects_by_creator(flask_login.current_user.user_id)]
-    logging.info(f"active projects: {active_projects}")
-    logging.info(f"active project: {project_id}")
-    logging.info(f"active service: {service}")
-    return flask.render_template('layout.html', projects=active_projects, active_project=project_id, host=os.getenv('HOST'), active_service=service)
-    # if response.headers['Content-Type'].startswith('text/html'):
-    #     return flask.render_template('layout.html', 
-    #                                  content=response.content.decode('utf-8'), 
-    #                                  projects=active_projects, 
-    #                                  active_project=project_id,
-    #                                  active_service=service)
-    
-    # return Response(response.content, response.status_code, dict(response.headers))
+def service_get(project_id,service="report",path=""):
+    ap = [p.to_dict() for p in Project.get_projects_by_creator(flask_login.current_user.user_id)]
+    return flask.render_template('layout.html', projects=ap, active_project=project_id, host=os.getenv('HOST'), 
+      active_service=service)
 
-@app.route('/p/<project_id>/<service>/', methods=['POST'])
-@app.route('/p/<project_id>/<service>/<path:path>', methods=['POST'])
-def service_post(project_id,service,path=""):
+# @app.route('/p/<project_id>/<service>/<path:path>', methods=['POST'])
+# def service_post(project_id,service,path=""):
     
-    service_url = f'http://{service}:6515/p/{project_id}/{service}/{path}'
-    logging.info(f"service_url: {service_url}")
+#     service_url = f'http://{service}:6515/p/{project_id}/{service}/{path}'
+#     logging.info(f"service_url: {service_url}")
     
-    response = requests.request(
-        method=request.method,
-        url=service_url,
-        headers={key: value for (key, value) in request.headers if key != 'Host'},
-        data=request.get_data(),
-        cookies=request.cookies,
-        params=request.args
-    )
+#     response = requests.request(
+#         method=request.method,
+#         url=service_url,
+#         headers={key: value for (key, value) in request.headers if key != 'Host'},
+#         data=request.get_data(),
+#         cookies=request.cookies,
+#         params=request.args
+#     )
     
-    proxied_response = app.response_class(
-        response=response.content,
-        status=response.status_code,
-        headers=dict(response.headers)
-    )
+#     proxied_response = app.response_class(
+#         response=response.content,
+#         status=response.status_code,
+#         headers=dict(response.headers)
+#     )
     
-    return proxied_response
+#     return proxied_response
