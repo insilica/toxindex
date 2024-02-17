@@ -1,0 +1,5 @@
+outs:
+- md5: 58bd399af35a653d49521bf0f6e7388a
+  size: 7417442304
+  hash: md5
+  path: cvae.sqlite

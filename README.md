@@ -28,7 +28,13 @@ update your /etc/hosts file to include {subdomain}.localhost for each service:
 
 ## TODO
 1. [x] get reports downloading
-2. [ ] deploy to toxindex.com --- feb 15
-2. [ ] update the report -------- feb 16
-3. [ ] talk to hartung ---------- feb 18
+2. [x] deploy to toxindex.com --- feb 15
+3. [ ] update the report -------- feb 16
 4. [ ] write phase 2 report ----- feb 20-29
+5. [ ] talk to hartung ---------- feb 19
+
+
+extra
+-- get https working
+-- store .env files in s3
+-- store raw data in s3
