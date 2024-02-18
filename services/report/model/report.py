@@ -82,9 +82,7 @@ class Report:
 
     @staticmethod
     def get_reports_by_project(project_id):
-        # TODO need to actually get by project_id, but routing doesn't work for that right now.
-        query = "SELECT * FROM reports r INNER JOIN project_reports pr ON pr.report_id = r.report_id"
-        # query = f"{query} WHERE pr.project_id = %s"
+        query = "SELECT * FROM reports r INNER JOIN project_reports pr ON pr.report_id = r.report_id AND pr.project_id = %s"
         
         rows = ds.find_all(query, (project_id,))
         return [Report.from_row(row) for row in rows]
