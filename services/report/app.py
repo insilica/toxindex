@@ -7,6 +7,9 @@ from report.model.report import Report
 from report import datastore as ds
 from report import s3store 
 from flask import url_for
+from threading import Thread
+from concurrent.futures import ThreadPoolExecutor
+
 
 
 app = Flask(__name__, template_folder="templates")
@@ -36,11 +39,29 @@ def generate_report():
     logging.info(f"Creating report for {inchi} in project {project_id}")
     report_id = Report.create_report(project_id, 1, report_title, "This is a test report")
     
-    # Generate the report using the ReprotoxReport class
-    ReprotoxReport.generate(report_id, report_title, inchi)
-    logging.info(f"Generated report for {report_title}")
+    def generate_report_async():
+        ReprotoxReport.generate(report_id, report_title, inchi)
 
-    return "Report generated successfully!", 200
+    # Generate the report using the ReprotoxReport class
+    thread = Thread(target=generate_report_async)
+    thread.start()
+    logging.info(f"Report generation started for {report_title}")
+
+    return "Report generation initiated.", 202
+
+@app.route('/tmp')
+def tmp():
+    inchi = 'InChI=1S/C9H8O4/c1-6(10)13-8-5-3-2-4-7(8)9(11)12/h2-5H,1H3,(H,11,12)'
+    predictions = ReprotoxReport._generate_predictions(inchi)
+    report = ReprotoxReport('a test', inchi, predictions)
+    group_preds = report.prediction_df.groupby('category').apply(lambda x: x.to_dict(orient='records')).to_dict()
+    report_data = {
+        "title": report.title,
+        "generated_on": report.generated_on.strftime('%Y-%m-%d %H:%M'),
+        "inchi": report.inchi,
+        "smiles": report.smiles
+    }
+    return flask.render_template("reports/reprotox.html", report=report_data, grouped_data = group_preds)
 
 @app.route('/delete_report', methods=['POST'])
 def delete_report():

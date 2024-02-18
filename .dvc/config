@@ -1,4 +1,5 @@
 [core]
-  remote = toxindex.com
+    remote = toxindex.com
 ['remote "toxindex.com"']
-  url = s3://toxindex/
+    url = s3://toxindex/
+    profile = toxindex
