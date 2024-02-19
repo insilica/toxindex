@@ -10,8 +10,6 @@ from flask import url_for
 from threading import Thread
 from concurrent.futures import ThreadPoolExecutor
 
-
-
 app = Flask(__name__, template_folder="templates")
 s3 = s3store.S3Store()
 logging.basicConfig(level=logging.DEBUG) # Use INFO for less verbose output
@@ -34,7 +32,10 @@ def generate_report():
     project_id = request.json['project_id']
     inchi = request.json['inchi']
     report_title = request.json['title']
-
+    
+    if ReprotoxReport.validate_form(inchi)[0] == False:
+        return jsonify({"error": "Invalid InChI provided, please copy a valid inchi"}), 400
+    
     # Create a new 'pending' report
     logging.info(f"Creating report for {inchi} in project {project_id}")
     report_id = Report.create_report(project_id, 1, report_title, "This is a test report")
@@ -46,8 +47,8 @@ def generate_report():
     thread = Thread(target=generate_report_async)
     thread.start()
     logging.info(f"Report generation started for {report_title}")
-
-    return "Report generation initiated.", 202
+    
+    return jsonify({"message": "Report generation initiated."}), 200
 
 @app.route('/tmp')
 def tmp():

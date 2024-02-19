@@ -36,6 +36,16 @@ class ReprotoxReport:
         self.smiles = inchi2smi(inchi)
         self.prediction_df = prediction_df
         self.generated_on = pd.Timestamp.now(tz='UTC')
+        
+    @staticmethod
+    def validate_form(inchi):
+        try:
+            mol = Chem.MolFromInchi(inchi)
+            if mol is None:
+                return (False, f"Invalid InChI: {inchi}")
+            return (True, "Valid InChI")
+        except Exception as e:
+            return (False, f"Error processing InChI: {str(e)}")
     
     # inchi = 'InChI=1S/C9H8O4/c1-6(10)13-8-5-3-2-4-7(8)9(11)12/h2-5H,1H3,(H,11,12)'
     @staticmethod
