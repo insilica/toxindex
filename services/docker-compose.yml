@@ -17,7 +17,7 @@ services:
     environment:
       - SERVER_NAME=${HOST:-localhost}
     ports:
-      - "80:80" # Expose Nginx on port 80 of the host
+      - "127.0.0.1:8080:80"
     volumes:
       - ./nginx/nginx.template:/etc/nginx/nginx.template
     depends_on:
