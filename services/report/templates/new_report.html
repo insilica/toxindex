@@ -78,8 +78,28 @@
         var reportName = document.getElementById('report-name').value;
         var project_id = {{ project_id }};
 
-        bodys = JSON.stringify({  title: reportName, inchi: inchi, project_id: project_id })
-        req = fetch('{{url_for("generate_report")}}', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: bodys})
-        req.then(response => window.location.href = "{{url_for('index', project_id=project_id)}}") 
-    }); 
+        var body = JSON.stringify({ title: reportName, inchi: inchi, project_id: project_id });
+        fetch('{{url_for("generate_report")}}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: body
+        })
+        .then(response => {
+            if (!response.ok) {
+                // If the server responded with a non-OK (2xx) status, handle the error.
+                return response.json().then(err => {
+                    // Assuming the server responds with a JSON object containing an "error" key when there's an error
+                    throw new Error(err.error);
+                });
+            }
+            // If the server responded with an OK status, redirect to the index page.
+            window.location.href = "{{url_for('index', project_id=project_id)}}";
+        })
+        .catch(error => {
+            // Handle errors, such as showing an error message to the user.
+            console.error('Error:', error.message);
+            // Optionally, display the error message to the user in the UI.
+            alert('Failed to generate report: ' + error.message);
+        });
+    });
 </script>
