@@ -1,46 +1,52 @@
 events {}
 
 http {
-    # Main server dynamic domain
+    # HTTP server to redirect all requests to HTTPS
     server {
         listen 80;
+        server_name ${SERVER_NAME} report.${SERVER_NAME} search.${SERVER_NAME};
+        return 301 https://$host$request_uri;
+    }
+
+    # HTTPS server
+    server {
+        listen 443 ssl;
         server_name ${SERVER_NAME};
+
+        ssl_certificate /etc/nginx/ssl/your_domain.crt;
+        ssl_certificate_key /etc/nginx/ssl/your_domain.key;
 
         location / {
             proxy_pass http://webserver:6513;
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
+            # Include proxy settings
         }
     }
 
-    # Subdomain for 'report' service dynamic domain
+    # HTTPS server for 'report' subdomain
     server {
-        listen 80;
+        listen 443 ssl;
         server_name report.${SERVER_NAME};
+
+        ssl_certificate /etc/nginx/ssl/your_domain.crt;
+        ssl_certificate_key /etc/nginx/ssl/your_domain.key;
 
         location / {
             proxy_pass http://report:6515;
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
+            # Include proxy settings
         }
     }
 
-    # Subdomain for 'search' service dynamic domain
+    # HTTPS server for 'search' subdomain
     server {
-        listen 80;
+        listen 443 ssl;
         server_name search.${SERVER_NAME};
+
+        ssl_certificate /etc/nginx/ssl/your_domain.crt;
+        ssl_certificate_key /etc/nginx/ssl/your_domain.key;
 
         location / {
             proxy_pass http://search:6515;
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
+            # Include proxy settings
         }
     }
 }
-
