@@ -10,8 +10,8 @@ import os, logging, requests
 static_folder_path = os.path.join(os.path.dirname(__file__), 'webserver', 'static')
 app = flask.Flask(__name__, template_folder="templates")
 
-app.config['SERVER_NAME'] = os.environ.get('SERVER_NAME')
-app.config['PREFERRED_URL_SCHEME'] = os.environ.get('PREFERRED_URL_SCHEME')
+app.config['SERVER_NAME'] = os.environ.get('WEBSERVER_SERVER_NAME')
+app.config['PREFERRED_URL_SCHEME'] = os.environ.get('WEBSERVER_PREFERRED_URL_SCHEME')
 app.secret_key =  os.environ.get('FLASK_APP_SECRET_KEY')
 app.logger.setLevel(logging.INFO)
 logging.basicConfig(level=logging.DEBUG) # Use INFO for less verbose output
