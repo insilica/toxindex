@@ -40,3 +40,4 @@ extra
 -- microservices should upload their own (json, pdf, and html) reports
 -- store .env files in s3
 -- store raw data in s3
+-- store databse between reboots

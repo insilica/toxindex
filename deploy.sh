@@ -1,4 +1,5 @@
 scp services/prod.env toxindex:/mnt/ebs/toxindex/services
+scp services/report/data/cvae.sqlite toxindex:/mnt/ebs/toxindex/services/report/data/cvae.sqlite
 
 # zip the entire directory
 zip -r deploy.zip .
