@@ -17,9 +17,12 @@ services:
     environment:
       - SERVER_NAME=${HOST:-localhost}
     ports:
-      - "80:80" # Expose Nginx on port 80 of the host
+      - "80:80"
+      - "443:443"
     volumes:
       - ./nginx/nginx.template:/etc/nginx/nginx.template
+      - ${SSL_CERT}:/etc/nginx/ssl/your_domain.crt
+      - ${SSL_KEY}:/etc/nginx/ssl/your_domain.key
     depends_on:
       - webserver
       - report
