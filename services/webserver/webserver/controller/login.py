@@ -20,7 +20,7 @@ def generate_validation_link(user):
 
 def validate(user: User):
   link = generate_validation_link(user)
-  route = f"https://toxindex.com?token={link}" # url_for("verification", token=link, _external=True)
+  route = f"https://toxindex.com/verification/{link}" # url_for("verification", token=link, _external=True)
   msg = (
     f"<p>Dear {user.name if user.name else 'User'},</p>"
     "<p>Thank you for registering with Toxindex.com! To complete your registration and activate your account, please click on the link below:</p>"
