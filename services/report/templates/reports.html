@@ -90,6 +90,11 @@
         color: white;
     }
 
+    .view {
+        background-color: #007BFF; /* Blue color for download button */
+        color: white;
+    }
+
     .btn-disabled {
         color: #c0c0c0;
         pointer-events: none; /* Makes it non-clickable */
@@ -138,8 +143,10 @@
                 </td>
                 <td style="text-align: right;">
                     {% if report.status == 'PENDING' %}
+                        <button class="action-btn view btn-disabled">View</button>
                         <button class="action-btn download btn-disabled">Download</button>
                     {% else %}
+                        <button class="action-btn view">View</button>
                         <button class="action-btn download">Download</button>
                     {% endif %}
                     <button class="action-btn delete">Delete</button>
@@ -153,6 +160,18 @@
     
     var reports = {{ reports | tojson }};
     var project_id = {{ project_id }};
+
+    // VIEW REPORT =======================================================================
+    document.querySelectorAll('.action-btn.view').forEach(function(button, index) {
+        button.addEventListener('click', function() {
+            var report_id = reports[index].report_id;
+            // Construct the URL for the GET request with the report_id as a query parameter
+            var viewReportUrl = '{{ url_for("view_report") }}' + '?report_id=' + report_id;
+            console.log('Redirecting to:', viewReportUrl);
+            // Redirect to the URL, the server will fetch the HTML and render it
+            window.location.href = viewReportUrl;
+        });
+    });
 
     // DOWNLOAD REPORT =======================================================================
     document.querySelectorAll('.action-btn.download').forEach(function(button, index) {
