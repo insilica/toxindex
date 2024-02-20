@@ -91,7 +91,7 @@ class S3Store:
         try:
             self.s3_client.download_file(self.bucket_name, object_name, file_name)
             logging.info(f"Downloaded {object_name} to {file_name}")
-            return True
+            return file_name
         except ClientError as e:
             logging.error(e)
             return False

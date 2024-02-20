@@ -81,7 +81,7 @@ class ReprotoxReport:
         # put it together
         output = pdf.merge(property, on='property_token')
         cvaesql.close()
-        return output[['title','prediction','category','prediction','value']]
+        return output[['property_token','title','prediction','category','prediction','value']]
     
     @classmethod
     def generate(cls, report_id, title, inchi):
@@ -113,5 +113,8 @@ class ReprotoxReport:
 
             object_url = s3.upload_file(pdf_file.name, f'{uuid.uuid4()}.pdf')
             Report.update_s3_reference(report_id, object_url)
+            
+            html_object_url = s3.upload_file(html_file.name, f'{uuid.uuid4()}.html')
+            Report.create_report_object(report_id, html_object_url, 'text/html')
+            
             Report.update_status(report_id, Report.STATUS.GENERATED)
-        

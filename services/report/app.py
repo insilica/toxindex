@@ -1,4 +1,4 @@
-import boto3, requests
+import boto3, requests, sqlite3, json
 import os, re, flask, logging, pdfkit
 from flask import Flask, request, jsonify, render_template_string
 from werkzeug.utils import secure_filename
@@ -50,20 +50,6 @@ def generate_report():
     
     return jsonify({"message": "Report generation initiated."}), 200
 
-@app.route('/tmp')
-def tmp():
-    inchi = 'InChI=1S/C9H8O4/c1-6(10)13-8-5-3-2-4-7(8)9(11)12/h2-5H,1H3,(H,11,12)'
-    predictions = ReprotoxReport._generate_predictions(inchi)
-    report = ReprotoxReport('a test', inchi, predictions)
-    group_preds = report.prediction_df.groupby('category').apply(lambda x: x.to_dict(orient='records')).to_dict()
-    report_data = {
-        "title": report.title,
-        "generated_on": report.generated_on.strftime('%Y-%m-%d %H:%M'),
-        "inchi": report.inchi,
-        "smiles": report.smiles
-    }
-    return flask.render_template("reports/reprotox.html", report=report_data, grouped_data = group_preds)
-
 @app.route('/delete_report', methods=['POST'])
 def delete_report():
     _ = request.json['project_id']
@@ -84,3 +70,79 @@ def download_report():
     presigned_url = s3.generate_presigned_url(s3_url)
     
     return {"url": presigned_url}, 200
+
+@app.route('/view_report', methods=['GET'])
+def view_report():
+    report_id = request.args.get('report_id')
+    
+    # Assuming get_report_object and url_to_object are implemented correctly
+    html_s3_url = Report.get_report_object(report_id, "text/html")
+    html_s3_object = s3.url_to_object(html_s3_url)
+
+    # Assuming download_file method saves the file locally and returns the file path
+    file_path = s3.download_file(html_s3_object, "report.html")
+    
+    # Open the file and read its content
+    with open(file_path, 'r') as file:
+        html_content = file.read()
+    
+    # Return the HTML content directly with the appropriate MIME type
+    return html_content, 200, {'Content-Type': 'text/html'}
+
+@app.route('/tmp')
+def tmp():
+    inchi = 'InChI=1S/C9H8O4/c1-6(10)13-8-5-3-2-4-7(8)9(11)12/h2-5H,1H3,(H,11,12)'
+    predictions = ReprotoxReport._generate_predictions(inchi)
+    report = ReprotoxReport('a test', inchi, predictions)
+    group_preds = report.prediction_df.groupby('category').apply(lambda x: x.to_dict(orient='records')).to_dict()
+    report_data = {
+        "title": report.title,
+        "generated_on": report.generated_on.strftime('%Y-%m-%d %H:%M'),
+        "inchi": report.inchi,
+        "smiles": report.smiles
+    }
+    return flask.render_template("reports/reprotox.html", report=report_data, grouped_data = group_preds)
+
+@app.route('/property/<property_token>')
+def property_view(property_token):  # Renamed to avoid conflict with `property` keyword
+    # Connect to the SQLite database
+    conn = sqlite3.connect('report/data/cvae.sqlite')
+    cursor = conn.cursor()
+    
+    # Get property data
+    property_query = """
+    SELECT source, title, data as metadata FROM property p
+    INNER JOIN source s ON p.source_id = s.source_id 
+    WHERE p.property_token = ?
+    """
+    
+    # Execute the property query with the provided property_token
+    cursor.execute(property_query, (property_token,))
+    property_results = cursor.fetchall()
+    property_columns = [column[0] for column in cursor.description]
+    properties_list = dict(zip(property_columns, property_results[0]))
+    
+    # remove metadata from the properties list
+    metadata = properties_list.pop('metadata')
+    # make it into json
+    metadata = json.loads(metadata)
+    
+    # Get category data
+    category_query = """
+    SELECT category, strength, reason FROM property p
+    INNER JOIN property_category pc ON p.property_id = pc.property_id
+    INNER JOIN category c ON pc.category_id = c.category_id
+    WHERE p.property_token = ?
+    """
+    
+    # Execute the category query with the provided property_token
+    cursor.execute(category_query, (property_token,))
+    category_results = cursor.fetchall()
+    category_columns = [column[0] for column in cursor.description]
+    categories_list = [dict(zip(category_columns, result)) for result in category_results]
+    
+    # Close the connection
+    conn.close()
+    
+    # Return the response with both properties and categories data
+    return flask.render_template("property.html", properties=properties_list, metadata= metadata, categories=categories_list)
