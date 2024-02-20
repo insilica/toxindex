@@ -101,6 +101,17 @@ class Report:
         query = "UPDATE reports SET s3_reference = %s WHERE report_id = %s"
         ds.execute(query, (s3_reference, report_id))
     
+    @staticmethod
+    def create_report_object(report_id, s3_reference, mimetype):
+        query = "INSERT INTO report_object (report_id, s3_reference, mimetype) VALUES (%s, %s, %s)"
+        ds.execute(query, (report_id, s3_reference, mimetype))
+    
+    @staticmethod
+    def get_report_object(report_id, mimetype):
+        query = "SELECT s3_reference FROM report_object WHERE report_id = %s AND mimetype = %s"
+        res = ds.find(query, (report_id, mimetype))
+        return res['s3_reference'] if res else None
+        
     @staticmethod                            
     def delete(report_id):
         

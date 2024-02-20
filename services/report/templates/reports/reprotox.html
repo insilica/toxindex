@@ -117,7 +117,7 @@
                 {% for prediction in grouped_data[category] | sort(attribute='prediction', reverse=true) %}
                     {% if prediction.value == 'positive' or (prediction.prediction > 0.5 and prediction.value != 'negative') %}
                         <tr>
-                            <td>{{ prediction.title }}</td>
+                            <td><a href="https://report.toxindex.com/property/{{prediction.property_token}}">{{ prediction.title }}</a></td>
                             <td>{{ prediction.value }}</td>
                             {% if prediction.value != 'positive' %}
                                 <td>{{ '%0.1f'|format(prediction.prediction * 100) }}</td>
