@@ -86,7 +86,7 @@ def create_new_project():
 def service_get(project_id,service="report",path=""):
     ap = [p.to_dict() for p in Project.get_projects_by_creator(flask_login.current_user.user_id)]
     return flask.render_template('layout.html', projects=ap, active_project=project_id, host=os.getenv('HOST'), 
-      active_service=service)
+      active_service=service, path=path)
 
 # @app.route('/p/<project_id>/<service>/<path:path>', methods=['POST'])
 # def service_post(project_id,service,path=""):
