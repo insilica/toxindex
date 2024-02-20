@@ -124,6 +124,9 @@ class Report:
             con.autocommit = False
             cur = con.cursor()
             
+            query = "DELETE FROM report_object WHERE report_id = %s"
+            cur.execute(query, (report_id,))
+            
             query = "DELETE FROM project_reports WHERE report_id = %s"
             cur.execute(query, (report_id,))
             
