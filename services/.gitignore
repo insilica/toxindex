@@ -1,7 +1,0 @@
-portal.db
-/env
-.env
-__pycache__/
-.vscode/
-
-test.env
