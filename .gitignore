@@ -2,3 +2,14 @@
 scratch.py
 deploy.zip
 *.sqlite
+
+# add python ignore
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pyw
+*.pyz
+
+# postgres
+pgdata/
