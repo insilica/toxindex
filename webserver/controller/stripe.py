@@ -2,7 +2,7 @@ import stripe
 import os
   
 stripe.api_version = '2020-08-27'
-stripe.api_key = os.getenv('STRIPE_TEST_SECRET_KEY')
+stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
 
 def create_customer(email):
   return stripe.Customer.create(email=email)

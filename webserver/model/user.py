@@ -28,9 +28,6 @@ class User(flask_login.UserMixin):
     return super().is_anonymous
   
   def validate_password(self,password):
-    print(f"""validating password {password} for {self.email} 
-      it is {check_password_hash(self.hashpw,password)}""")
-
     return check_password_hash(self.hashpw,password)
 
   @staticmethod

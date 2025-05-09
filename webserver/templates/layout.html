@@ -3,220 +3,343 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Toxindex{% endblock %}</title>
+    <title>AI Chat</title>
     <style>
-        /* Common styling */
-        body {
-            font-family: Arial, sans-serif;
+        :root {
+            --sidebar-bg: #202123;
+            --sidebar-hover: #2A2B32;
+            --main-bg: #343541;
+            --chat-bg: #444654;
+            --text-color: #FFFFFF;
+            --border-color: #4D4D4F;
+            --button-color: #828487;
+            --primary-button: #10A37F;
+        }
+        
+        body, html {
             margin: 0;
             padding: 0;
-            font-size: 1.25em;
+            font-family: Arial, sans-serif;
+            height: 100%;
+            color: var(--text-color);
         }
+        
         .container {
             display: flex;
-            min-height: 100vh;
+            height: 100vh;
         }
-        .left-nav {
+        
+        .sidebar {
+            width: 260px;
+            background-color: var(--sidebar-bg);
+            padding: 10px;
             display: flex;
             flex-direction: column;
-            flex: 0 0 auto;
-            width: 250px;
-            background-color: #20232A; /* Dark gray color */
+            overflow-y: auto;
+        }
+        
+        .new-chat {
+            margin-bottom: 20px;
+        }
+        
+        .new-chat-button {
+            display: flex;
+            align-items: center;
+            background-color: transparent;
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
             padding: 10px;
-            color: white; /* Text color to contrast with background */
-            overflow-y: auto; /* Allows scrolling within the left navigation if the content overflows */
-        }
-        .content {
-            flex: 1; /* Takes up the remaining space */
-            padding: 0; /* Removed padding to allow iframe to fill the entire content area */
-            background-color: #f1f1f1; /* Light gray color for content */
-            overflow: hidden; /* Hides any overflow */
-        }
-        .content iframe {
-            width: 100%; /* Full width of the content area */
-            height: 100vh; /* Full height of the viewport */
-            border: none; /* Removes the border */
-        }
-        .service-link {
-            text-decoration: none;
-            color: white; /* Text color to contrast with background */
-            display: block;
-            padding: 5px;
-            padding-left:15px;
-        }
-        .service-link:hover {
-            background-color: #2649a8;; /* Blue highlight on hover */
-        }
-        .service-link.active-service {
-            background-color: #2a4288;
-        }
-        .disabled{
-            color: rgba(255, 255, 255, 0.394);
-            display: block;
-            padding: 5px;
-            padding-left:15px;
-        }   
-        .back-control {
+            width: 100%;
             cursor: pointer;
-            color: #FFFFFF; /* Matching with other text colors */
+            text-align: left;
         }
-        .create-btn {
-            padding: 5px;
-            color: white;
+        
+        .new-chat-button:hover {
+            background-color: var(--sidebar-hover);
+        }
+        
+        .conversations {
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+        
+        .conversation-item {
+            padding: 10px;
+            margin-bottom: 5px;
             cursor: pointer;
-            border-style: solid;
-            border-color: #383b44;
-            border-radius: 5px;
-            border-width: 1px;
+            border-radius: 4px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
-        .project-container {
-            margin-bottom: 10px;
+        
+        .conversation-item:hover {
+            background-color: var(--sidebar-hover);
         }
-        .project-title {
+        
+        .user-section {
+            margin-top: auto;
+            padding: 10px;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .logout-button {
+            background-color: transparent;
+            color: var(--text-color);
+            border: none;
+            cursor: pointer;
             padding: 5px;
+            display: block;
+            width: 100%;
+            text-align: left;
+        }
+        
+        .logout-button:hover {
+            text-decoration: underline;
+        }
+        
+        .main {
+            flex-grow: 1;
+            background-color: var(--main-bg);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-container {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .message {
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            border-radius: 4px;
+            max-width: 80%;
+        }
+        
+        .user-message {
+            align-self: flex-end;
+            background-color: var(--primary-button);
+        }
+        
+        .assistant-message {
+            align-self: flex-start;
+            background-color: var(--chat-bg);
+        }
+        
+        .input-container {
+            padding: 20px;
+            display: flex;
+            background-color: var(--main-bg);
+            border-top: 1px solid var(--border-color);
+        }
+        
+        #message-input {
+            flex-grow: 1;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            background-color: var(--sidebar-hover);
+            color: var(--text-color);
+            resize: none;
+        }
+        
+        .send-button {
+            background-color: var(--primary-button);
             color: white;
-            border-style: none;
-            border-color: #383b44;
-            border-radius: 5px;
-            border-width: 1px;
-            cursor: pointer; /* To indicate clickability */
+            border: none;
+            border-radius: 4px;
+            padding: 10px 20px;
+            margin-left: 10px;
+            cursor: pointer;
         }
-        .project-title:hover, .create-btn:hover {
-            background-color: #2649a8; /* Slightly lighter background on hover */
-        }
-        .account-section{
-            margin-top: auto;
-        }
-        .account-section-link{
-            padding-left: 5px;
-            margin-top: auto;
-            cursor:pointer;
-        }
-        .account-section-link:hover {
-            background-color: #2649a8;
-        }
-        .flashes {
+        
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
             text-align: center;
-            padding: 10px;
-            color: #28a745; /* or whatever color fits your design */
+            color: var(--button-color);
         }
-        .flash {
-            margin: 5px;
-            padding: 5px;
-            background-color: rgba(255, 255, 255, 0.1); /* or another background style */
-        }    
-         
+        
+        .empty-state h1 {
+            margin-bottom: 20px;
+        }
+        
+        .empty-state p {
+            margin-bottom: 30px;
+            max-width: 600px;
+        }
     </style>
-    <!-- Additional CSS -->
-    {% block css %}{% endblock %}
 </head>
 <body>
-    <!-- This section is for displaying flash messages -->
-    {% with messages = get_flashed_messages() %}
-     {% if messages %}
-         <div class="flashes">
-             {% for message in messages %}
-                 <div class="flash">{{ message }}</div>
-             {% endfor %}
-         </div>
-     {% endif %}
-    {% endwith %}
     <div class="container">
-        <div class="left-nav">
-            <div class="create-btn" onclick="createNewProject()">+ &nbsp;New Project</div>
-            <hr style="width:95%">
-            <!-- Loop through projects and include services under each -->
-            {% for project in projects %}
-                <div class="project-container">
-                    <div class="project-title {{ 'active-project' if project.project_id == active_project|int }}" onclick="toggleServices('{{ project.project_id }}')">
-                        {{ project.name }}
-                    </div>
-                    <div id="services-{{ project.project_id }}" style="display: none;">
-                        <a href="{{ url_for('service_get', project_id=project.project_id, service='report') }}" 
-                            class="service-link {% if active_service == 'report' %}active-service{% endif %}">report</a>
-                        <span
-                            class="disabled">search</a>
-                    </div>
+        <div class="sidebar">
+            <div class="new-chat">
+                <button class="new-chat-button" id="new-chat-btn">+ New chat</button>
+            </div>
+            <div class="conversations" id="conversations-list">
+                <!-- Conversations will be listed here -->
+                {% for conversation in conversations %}
+                <div class="conversation-item" data-id="{{ conversation.conversation_id }}">
+                    {{ conversation.title }}
                 </div>
-            {% endfor %}
-            <div class="account-section">
-                <hr>
-                <div class="account-section-link" onclick="window.location.href='{{url_for('customer_portal')}}'">
-                    <span>account</span>
-                </div>
-                <div class="account-section-link" onclick="window.location.href='{{ url_for('logout') }}'">
-                    <span>logout</span>
-                </div> 
-            </div>            
+                {% endfor %}
+            </div>
+            <div class="user-section">
+                <a href="{{ url_for('logout') }}" class="logout-button">Log out</a>
+            </div>
         </div>
-        <div class="content">
-            <iframe src="https://{{active_service}}.{{host}}/{{path}}?project_id={{active_project}}" frameborder="0"></iframe>
+        <div class="main">
+            <div class="chat-container" id="chat-container">
+                <!-- Messages will appear here -->
+                <div class="empty-state" id="empty-state">
+                    <h1>AI Chat Assistant</h1>
+                    <p>Start a new conversation by typing a message below or selecting a conversation from the sidebar.</p>
+                </div>
+            </div>
+            <div class="input-container">
+                <textarea id="message-input" placeholder="Type a message..."></textarea>
+                <button class="send-button" id="send-btn">Send</button>
+            </div>
         </div>
     </div>
-    <!-- Additional JavaScript -->
+
     <script>
-        console.log('active service is {{ active_service }}')
-        console.log('active project is {{ active_project }}')
-        console.log('projects are {{ projects }}')  
-        const myprojects = {{ projects | tojson }};
-        const myactive = {{ active_project | tojson }};
-        function toggleServices(project_id) {
-            const servicesElement = document.getElementById(`services-${project_id}`);
-            if (!servicesElement) { return; }
-            servicesElement.style.display = servicesElement.style.display === 'none' ? 'block' : 'none';
-        }
-        toggleServices('{{ active_project }}');
-
-        function createNewProject() {
-            const projectName = prompt("Please enter the name of your new project:");
-            
-            if (projectName && projectName.trim() !== "") {
-                // Send the project name to the server
-                fetch('/create_new_project', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ name: projectName })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Project created successfully!');
-                        // Optionally, you can refresh the page to see the changes
-                        location.reload();
-                    } else {
-                        alert('Error creating project: ' + data.message);
-                    }
-                });
-            }
-        }        
-    </script>
-
-    <!-- manage link clicks within an iframe, change iframe src to link target relative to current service-->
-    <script>
-        active_service = '{{ active_service }}'
-        iframe = document.querySelector('iframe');
-        iframe.contentWindow.addEventListener('click', function(event) {
-            if (event.target.tagName === 'A') {
-                event.preventDefault();
-                let path = event.target.href.split('/').slice(3).join('/');
-                let href = event.target.href.replace('localhost/', 'localhost/{{active_service}}/');
-
-                // Check if URL already has query parameters
-                let separator = href.includes('?') ? '&' : '?';
-
-                // Add project_id to href if it is not already there
-                if (!href.includes('project_id=')) {
-                    href += separator + 'project_id={{active_project}}';
-                }
-
-                console.log('clicked on link: ' + event.target.href);
-                console.log('new href:' + href);
-                iframe.src = href;
+        let currentConversationId = null;
+        
+        // DOM elements
+        const newChatBtn = document.getElementById('new-chat-btn');
+        const conversationsList = document.getElementById('conversations-list');
+        const chatContainer = document.getElementById('chat-container');
+        const emptyState = document.getElementById('empty-state');
+        const messageInput = document.getElementById('message-input');
+        const sendBtn = document.getElementById('send-btn');
+        
+        // Event listeners
+        newChatBtn.addEventListener('click', createNewConversation);
+        sendBtn.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
             }
         });
+        
+        // Load conversation items
+        document.querySelectorAll('.conversation-item').forEach(item => {
+            item.addEventListener('click', function() {
+                loadConversation(this.dataset.id);
+            });
+        });
+        
+        function createNewConversation() {
+            fetch('/conversations', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    title: 'New Conversation'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                currentConversationId = data.conversation_id;
+                
+                // Add conversation to sidebar
+                const conversationItem = document.createElement('div');
+                conversationItem.className = 'conversation-item';
+                conversationItem.dataset.id = data.conversation_id;
+                conversationItem.textContent = data.title;
+                conversationItem.addEventListener('click', function() {
+                    loadConversation(data.conversation_id);
+                });
+                
+                conversationsList.prepend(conversationItem);
+                
+                // Clear chat and show input
+                chatContainer.innerHTML = '';
+                emptyState.style.display = 'none';
+                messageInput.focus();
+            });
+        }
+        
+        function loadConversation(conversationId) {
+            currentConversationId = conversationId;
+            
+            fetch(`/conversations/${conversationId}`)
+            .then(response => response.json())
+            .then(messages => {
+                chatContainer.innerHTML = '';
+                emptyState.style.display = 'none';
+                
+                messages.forEach(message => {
+                    appendMessage(message.role, message.content);
+                });
+                
+                // Scroll to bottom
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            });
+        }
+        
+        function sendMessage() {
+            const messageText = messageInput.value.trim();
+            if (!messageText) return;
+            
+            // If no conversation exists, create one
+            if (!currentConversationId) {
+                createNewConversation().then(() => {
+                    sendMessageToAPI(messageText);
+                });
+                return;
+            }
+            
+            sendMessageToAPI(messageText);
+        }
+        
+        function sendMessageToAPI(messageText) {
+            // Clear input
+            messageInput.value = '';
+            
+            // Add user message to UI
+            appendMessage('user', messageText);
+            
+            // Send to API
+            fetch(`/conversations/${currentConversationId}/messages`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: messageText
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Add assistant response to UI
+                appendMessage('assistant', data.response);
+                
+                // Scroll to bottom
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            });
+        }
+        
+        function appendMessage(role, content) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}-message`;
+            messageDiv.textContent = content;
+            chatContainer.appendChild(messageDiv);
+            
+            // Scroll to bottom
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
     </script>
-    {% block js %}{% endblock %}
 </body>
 </html>

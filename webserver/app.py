@@ -1,6 +1,5 @@
 from webserver import login_manager as LM
 from webserver.controller import login, stripe
-from webserver.model.project import Project
 from flask import request, Response
 
 import flask, flask_login
@@ -22,17 +21,7 @@ LM.init(app)
 def index():
   logging.info(f"current user: {flask_login.current_user}")
   if flask_login.current_user.is_authenticated:
-    active_projects = [p.to_dict() for p in Project.get_projects_by_creator(flask_login.current_user.user_id)]
-    active_project = active_projects[0]["project_id"] if len(active_projects) > 0 else None
-    if not active_project:
-      res = Project.create_project("default", "user default project", flask_login.current_user.user_id)
-      active_projects = active_projects + [res]
-      active_project = res.project_id
-      
-    logging.info(f"active projects: {active_projects}")
-    logging.info(f"active project: {active_project}")
-    return flask.redirect(f'p/{active_project}/report')
-    # return flask.render_template('layout.html', projects=active_projects, active_project=active_project)
+    return flask.render_template('layout.html')
   else:
     print('user is not logged in')
     return flask.render_template('landing.html')
@@ -50,11 +39,3 @@ app.route('/reset_password/<token>', methods=['GET','POST'])(login.reset_passwor
 @app.route('/favicon.ico')
 def favicon():
     return app.send_static_file('favicon.png')
-
-# PROJECTS ====================================================================================
-@app.route('/create_new_project', methods=['POST'])
-def create_new_project():
-    data = request.get_json()
-    logging.info(f"Creating new project with name: {data['name']} for user {flask_login.current_user}")
-    Project.create_project(data['name'], data.get("description"), flask_login.current_user.user_id)
-    return flask.jsonify(success=True, message="Project created successfully.")
