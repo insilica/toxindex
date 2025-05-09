@@ -2,3 +2,6 @@
 scratch.py
 deploy.zip
 *.sqlite
+
+__pycache__/
+pgdata/
