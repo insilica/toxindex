@@ -76,4 +76,4 @@ class User(flask_login.UserMixin):
     if not User.user_exists: raise ValueError(f"{email} does not exist")
     user = User.get_user(email)
     stripe.delete_customer(user.stripe_customer_id)
-    ds.execute("DELETE FROM user WHERE email = (%s)",(email,))
+    ds.execute("DELETE FROM users WHERE email = (%s)",(email,))

@@ -1,0 +1,24 @@
+{
+  "workflows": [
+    {
+      "id": 1,
+      "title": "Predict",
+      "description": "Predict chemical properties including toxicity, bioactivity, and environmental fate. Trained on extensive datasets to provide accurate predictions for novel compounds."
+    },
+    {
+      "id": 2,
+      "title": "Metabolise",
+      "description": "Generate metabolism transformations. Identifies key metabolic intermediates across multiple species and generates metabolic pathways and enzyme interactions."
+    },
+    {
+      "id": 3,
+      "title": "Pathways",
+      "description": "Predict interactions with chemical pathways. Maps how chemicals interact with biological pathways and systems. Analyzes potential disruptions and effects on cellular processes to identify mechanisms of toxicity."
+    },
+    {
+      "id": 4,
+      "title": "Integrate",
+      "description": "Integrate chemical data. Combines insights from prediction, metabolism and pathway analysis to provide a comprehensive toxicological assessment of chemical compounds."
+    }
+  ]
+}

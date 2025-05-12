@@ -1,0 +1,63 @@
+<div class="sidebar">
+    <div class="platform-title">
+        <a href="/" style="text-decoration: none; color: var(--text-color);">Toxindex</a>
+    </div>
+    
+    <div class="new-run">
+        <button class="new-run-button" id="new-run-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;">
+                <path d="M12 5V19M5 12H19" stroke="white" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            New Run
+        </button>
+    </div>
+    
+    <div class="runs" id="runs-list">
+        {% for run in runs %}
+        <div class="run-item" data-id="{{ run.id }}">
+            <span>{{ run.title }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="sidebar-footer">
+        <a href="/logout" class="logout-button">Logout</a>
+    </div>
+</div>
+
+<script>
+    // DOM elements
+    const newRunBtn = document.getElementById('new-run-btn');
+    const runsList = document.getElementById('runs-list');
+    
+    // Event listeners
+    newRunBtn.addEventListener('click', createNewRun);
+    
+    // Load workflow items
+    document.querySelectorAll('.run-item').forEach(item => {
+        item.addEventListener('click', function() {
+            loadRun(this.dataset.id);
+        });
+    });
+    
+    function createNewRun() {
+        fetch('/run/new', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                title: 'New workflow',
+                workflow: 'predict'
+            })
+        })
+        .then(response => response.json())
+        .then(data => { window.location.href = `/run/${data.run_id}`; })
+        .catch(error => console.error('Error creating run:', error));
+    }
+    
+    function loadRun(runId) {
+        window.location.href = `/run/${runId}`;
+    }
+</script>

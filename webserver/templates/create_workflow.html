@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toxindex - Create New Workflow</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        {% include "sidebar.html" %}
+
+        <div class="main">
+            <div class="header">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h1>Create New Workflow</h1>
+                    <a href="/workflows" class="create-workflow-button">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" 
+                             xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;">
+                            <path d="M19 12H5M12 19L5 12L12 5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Back to Workflows
+                    </a>
+                </div>
+                <p>Create a new workflow to organize your toxicological analyses.</p>
+            </div>
+            
+            <div class="workflow-form-container">
+                <form id="create-workflow-form" method="POST" action="/workflow/new">
+                    <div class="form-group">
+                        <label for="title">Workflow Title</label>
+                        <input type="text" id="title" name="title" required placeholder="Enter workflow title">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea id="description" name="description" rows="4" placeholder="Describe the purpose of this workflow"></textarea>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="primary-button">Create Workflow</button>
+                        <a href="/workflows" class="secondary-button">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('create-workflow-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                title: document.getElementById('title').value,
+                description: document.getElementById('description').value
+            };
+            
+            fetch('/workflow/new', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.workflow_id) {
+                    window.location.href = `/workflow/${data.workflow_id}`;
+                } else {
+                    alert('Error creating workflow');
+                }
+            })
+            .catch(error => console.error('Error creating workflow:', error));
+        });
+    </script>
+</body>
+</html>
