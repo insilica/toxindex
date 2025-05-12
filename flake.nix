@@ -136,6 +136,12 @@
             echo "PostgreSQL is accessible on: ${pgSettings.host}:${pgSettings.port} (TCP/IP)"
             echo "PostgreSQL server socket directory: $PG_SOCKET_DIR"
             echo "Database: ${pgSettings.dbName}, User: ${pgSettings.user}"
+
+            export FLASK_APP=webserver.app
+            export FLASK_ENV=development
+            export DEBUG=1 
+            export PREFERRED_URL_SCHEME=http
+            export SERVER_NAME="${pgSettings.host}:6513" 
           '';
         };
 

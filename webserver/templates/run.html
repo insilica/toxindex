@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Toxindex</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/chat.css') }}">
+  
+</head>
+<body>
+  <div class="container">
+    {% include 'sidebar.html' %}
+    <div class="main">
+      <div class="content-wrapper">
+
+        <div class="tabs">
+          <button class="tab-button active" data-tab="chat">Chat</button>
+          <button class="tab-button" data-tab="activity">Activity</button>
+          <button class="tab-button" data-tab="results">Results</button>
+          <button class="tab-button" data-tab="workflow">Workflow</button>
+        </div>
+
+        <div class="tab-content" id="chat-tab">
+          <div class="message">
+              TODO this should be a system message from the LLM
+          </div>
+        </div>
+
+        <div class="tab-content" id="activity-tab" style="display: none;">
+          <p>Recent activity will appear here.</p>
+        </div>
+
+        <div class="tab-content" id="results-tab" style="display: none;">
+          <p>Collected results will appear here.</p>
+        </div>
+
+        <div class="tab-content" id="workflow-tab" style="display: none;">
+          <p>Workflow will appear here.</p>
+        </div>
+      </div>
+
+      <div class="input-bar">
+        <form id="chat-form">
+          <textarea name="message" rows="2" placeholder="Type your question or paste SMILES notation..."></textarea>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const tabs = document.querySelectorAll('.tab-button');
+    const contents = document.querySelectorAll('.tab-content');
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        contents.forEach(c => c.style.display = 'none');
+        document.getElementById(`${tab.dataset.tab}-tab`).style.display = 'block';
+      });
+    });
+
+    const form = document.getElementById('chat-form');
+    const textarea = form.querySelector('textarea');
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      console.log('Message sent:', textarea.value);
+      textarea.value = '';
+      textarea.style.height = 'auto';
+    });
+
+    textarea.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        form.dispatchEvent(new Event('submit'));
+      }
+    });
+
+    textarea.addEventListener('input', function () {
+      this.style.height = 'auto';
+      this.style.height = (this.scrollHeight) + 'px';
+    });
+  </script>
+</body>
+</html>

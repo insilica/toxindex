@@ -13,7 +13,7 @@ ssh toxindex
 # stop all running containers
 docker stop $(docker ps -a -q)
 
-# mv and unzip depoy.zip
+# mv and unzip deploy.zip
 mv ~/deploy.zip /mnt/ebs/toxindex
 cd /mnt/ebs
 

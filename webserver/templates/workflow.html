@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toxindex - Workflow Information</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        {% include "sidebar.html" %}
+
+        <div class="main">
+            <div class="header">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h1>Workflow Information</h1>
+                    <a href="/" class="create-workflow-button">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" 
+                             xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;">
+                            <path d="M19 12H5M12 19L5 12L12 5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Back to Workflows
+                    </a>
+                </div>
+                <p>View details about this workflow.</p>
+            </div>
+            
+            <div class="workflow-info-container">
+                <form id="workflow-form" style="display: none;">
+                    <div class="workflow-details">
+                        <div class="form-group">
+                            <label for="title">Title:</label>
+                            <input type="text" id="title" name="title" value="{{ workflow.title }}">
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Created:</span>
+                            <span class="value">{{ workflow.created_at }}</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="description">Description:</label>
+                            <textarea id="description" name="description" rows="4">{{ workflow.description }}</textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="workflow-actions">
+                        <button type="submit" class="primary-button">Save Changes</button>
+                        <button type="button" id="cancel-edit" class="secondary-button">Cancel</button>
+                    </div>
+                </form>
+                
+                <div id="workflow-view">
+                    <div class="workflow-details">
+                        <h2>{{ workflow.title }}</h2>
+                        <div class="info-row">
+                            <span class="label">Created:</span>
+                            <span class="value">{{ workflow.created_at }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Description:</span>
+                            <p class="value">{{ workflow.description }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="workflow-actions">
+                        <button id="edit-workflow" class="secondary-button">Edit Workflow</button>
+                        <a href="/workflow/{{ workflow.workflow_id }}/run" class="primary-button">Run Workflow</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const workflowView = document.getElementById('workflow-view');
+            const workflowForm = document.getElementById('workflow-form');
+            const editButton = document.getElementById('edit-workflow');
+            const cancelButton = document.getElementById('cancel-edit');
+            
+            // Toggle edit mode
+            editButton.addEventListener('click', function() {
+                workflowView.style.display = 'none';
+                workflowForm.style.display = 'block';
+            });
+            
+            // Cancel edit mode
+            cancelButton.addEventListener('click', function() {
+                workflowForm.style.display = 'none';
+                workflowView.style.display = 'block';
+            });
+            
+            // Handle form submission
+            workflowForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = {
+                    title: document.getElementById('title').value,
+                    description: document.getElementById('description').value
+                };
+                
+                fetch('/workflow/update/{{ workflow.workflow_id }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Refresh the page to show updated data
+                        window.location.reload();
+                    } else {
+                        alert('Error updating workflow');
+                    }
+                })
+                .catch(error => console.error('Error updating workflow:', error));
+            });
+        });
+    </script>
+</body>
+</html>
