@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toxindex - Task Interface</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        {% include "sidebar.html" %}
+
+        <div class="main">
+            <div class="header-bar">
+                <div class="task-title">Task: {{ task_title if task_title else "New Task" }}</div>
+                <div class="task-actions">
+                    <button class="action-button">Export</button>
+                    <button class="action-button">Share</button>
+                </div>
+            </div>
+            
+            <div class="chat-container">
+                {% if messages %}
+                    {% for message in messages %}
+                    <div class="message {{ 'user-message' if message.sender == 'user' else 'system-message' }}">
+                        <div class="message-header">
+                            <div {% if message.sender != 'user' %} class="message-avatar">T</div><div {% endif %}>{{ 'You' if message.sender == 'user' else 'Toxindex' }}</div>
+                        </div>
+                        <div class="message-content">
+                            {{ message.content }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <div class="message system-message">
+                    <div class="message-header">
+                        <div class="message-avatar">T</div>
+                        <div>Toxindex</div>
+                    </div>
+                    <div class="message-content">
+                        Welcome to Toxindex. I'm here to help with your toxicology research. What would you like to analyze today?
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="input-container">
+                <div class="dropdown-container">
+                    <select class="model-dropdown">
+                        <option value="predict">Predict - Chemical properties</option>
+                        <option value="metabolize">Metabolise - Metabolism transformations</option>
+                        <option value="pathways">Pathways - Chemical pathway interactions</option>
+                        <option value="integrate">Integrate - Chemical data integration</option>
+                    </select>
+                </div>
+                
+                <div class="input-area">
+                    <form method="POST" action="/task/{{ task_id }}">
+                        <textarea name="message" class="message-input" placeholder="Type your question or paste SMILES notation..."></textarea>
+                        <input type="hidden" name="model" id="selected-model" value="predict">
+                        <button type="submit" class="send-button">Send</button>
+                    </form>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <script>
+        // DOM elements
+        const messageInput = document.querySelector('.message-input');
+        const modelDropdown = document.querySelector('.model-dropdown');
+        const selectedModelInput = document.getElementById('selected-model');
+        const chatContainer = document.querySelector('.chat-container');
+        const newTaskBtn = document.getElementById('new-task-btn');
+        const tasksList = document.getElementById('tasks-list');
+        
+        // Update hidden input when dropdown changes
+        modelDropdown.addEventListener('change', function() {
+            selectedModelInput.value = this.value;
+        });
+        
+        // Function to auto-resize textarea
+        messageInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+        
+        // Scroll chat to bottom on load
+        document.addEventListener('DOMContentLoaded', function() {
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        });
+        
+        // Event listeners for tasks
+        document.querySelectorAll('.task-item').forEach(item => {
+            item.addEventListener('click', function() {
+                window.location.href = '/task/' + this.dataset.id;
+            });
+        });
+        
+        // New task button
+        newTaskBtn.addEventListener('click', function() {
+            fetch('/task/new', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                window.location.href = '/task/' + data.task_id;
+            })
+            .catch(error => {
+                console.error('Error creating new task:', error);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background - transparent -->
+  <rect width="300" height="300" fill="none" />
+  
+  <!-- Circle outline -->
+  <circle cx="150" cy="150" r="120" stroke="#000000" stroke-width="4" fill="none" />
+  
+  <!-- Main vertical lines -->
+  <line x1="90" y1="70" x2="90" y2="230" stroke="#000000" stroke-width="3" />
+  <line x1="150" y1="70" x2="150" y2="230" stroke="#000000" stroke-width="3" />
+  <line x1="210" y1="70" x2="210" y2="180" stroke="#000000" stroke-width="3" />
+  
+  <!-- Main horizontal lines -->
+  <line x1="60" y1="110" x2="240" y2="110" stroke="#000000" stroke-width="3" />
+  <line x1="60" y1="170" x2="240" y2="170" stroke="#000000" stroke-width="3" />
+  
+  <!-- Bridge effects for overlapping lines -->
+  <line x1="86" y1="107" x2="94" y2="113" stroke="white" stroke-width="5" />
+  <line x1="146" y1="107" x2="154" y2="113" stroke="white" stroke-width="5" />
+  <line x1="206" y1="107" x2="214" y2="113" stroke="white" stroke-width="5" />
+  
+  <line x1="86" y1="167" x2="94" y2="173" stroke="white" stroke-width="5" />
+  <line x1="146" y1="167" x2="154" y2="173" stroke="white" stroke-width="5" />
+  <line x1="206" y1="167" x2="214" y2="173" stroke="white" stroke-width="5" />
+  
+  <!-- Off-grid branch lines -->
+  <line x1="90" y1="140" x2="150" y2="140" stroke="#000000" stroke-width="3" />
+  <line x1="150" y1="200" x2="210" y2="200" stroke="#000000" stroke-width="3" />
+  <line x1="180" y1="110" x2="180" y2="170" stroke="#000000" stroke-width="3" />
+  <line x1="120" y1="170" x2="120" y2="230" stroke="#000000" stroke-width="3" />
+  
+  <!-- Directional arrows -->
+  <line x1="200" y1="165" x2="210" y2="170" stroke="#000000" stroke-width="2.5" />
+  <line x1="200" y1="175" x2="210" y2="170" stroke="#000000" stroke-width="2.5" />
+  
+  <line x1="90" y1="125" x2="90" y2="135" stroke="#000000" stroke-width="2.5" />
+  <line x1="85" y1="130" x2="90" y2="135" stroke="#000000" stroke-width="2.5" />
+  <line x1="95" y1="130" x2="90" y2="135" stroke="#000000" stroke-width="2.5" />
+  
+  <line x1="230" y1="110" x2="240" y2="110" stroke="#000000" stroke-width="2.5" />
+  <line x1="235" y1="105" x2="240" y2="110" stroke="#000000" stroke-width="2.5" />
+  <line x1="235" y1="115" x2="240" y2="110" stroke="#000000" stroke-width="2.5" />
+  
+  <!-- Nodes at intersections (mostly grid-based but with a few variations) -->
+  <!-- Vertical line at x=90 -->
+  <circle cx="90" cy="110" r="6" stroke="#000000" stroke-width="2" fill="#ffffff" />
+  <circle cx="90" cy="140" r="6" stroke="#000000" stroke-width="2" fill="#ffffff" />
+  <circle cx="90" cy="170" r="6" stroke="#000000" stroke-width="2" fill="#ffffff" />
+  <circle cx="90" cy="230" r="6" stroke="#000000" stroke-width="2" fill="#ffffff" />
+  
+  <!-- Vertical line at x=150 -->
+  <circle cx="150" cy="110" r="6" stroke="#000000" stroke-width="2" fill="#ffffff" />
+  <circle cx="150" cy="140" r="6" stroke="#000000" stroke-width="2" fill="#ffffff" />
+  <circle cx="150" cy="170" r="6" stroke="#000000" stroke-width="2" fill="#ffffff" />
+  <circle cx="150" cy="200" r="6" stroke="#000000" stroke-width="2" fill="#ffffff" />
+  
+  <!-- Vertical line at x=210 -->
+  <circle cx="210" cy="110" r="6" stroke="#000000" stroke-width="2" fill="#ffffff" />
+  <circle cx="210" cy="170" r="6" stroke="#000000" stroke-width="2" fill="#ffffff" />
+  <circle cx="210" cy="200" r="6" stroke="#000000" stroke-width="2" fill="#ffffff" />
+  
+  <!-- Other nodes -->
+  <circle cx="120" cy="170" r="6" stroke="#000000" stroke-width="2" fill="#ffffff" />
+  <circle cx="120" cy="230" r="6" stroke="#000000" stroke-width="2" fill="#ffffff" />
+  <circle cx="180" cy="110" r="6" stroke="#000000" stroke-width="2" fill="#ffffff" />
+  <circle cx="180" cy="170" r="6" stroke="#000000" stroke-width="2" fill="#ffffff" />
+</svg>

@@ -1,0 +1,21 @@
+<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="black" stroke-width="3">
+  <!-- Input circles -->
+  <circle cx="30" cy="15" r="12" fill="black"/>
+  <circle cx="30" cy="50" r="12" fill="black"/>
+  <circle cx="30" cy="85" r="12" fill="black"/>
+
+  <!-- Output circle -->
+  <circle cx="170" cy="50" r="15" fill="black"/>
+
+  <!-- Merging curves -->
+  <path d="M42 15 C60 15, 70 40, 130 50" stroke="black"/>
+  <path d="M42 50 C65 50, 70 50, 130 50" stroke="black" marker-end="url(#arrow)"/>
+  <path d="M42 85 C60 85, 70 60, 130 50" stroke="black"/>
+
+  <!-- Arrowhead definition -->
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="5" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="black" />
+    </marker>
+  </defs>
+</svg>

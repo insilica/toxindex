@@ -1,0 +1,63 @@
+<div class="sidebar">
+    <div class="platform-title">
+        <span>Toxindex</span>
+    </div>
+    
+    <div class="new-task">
+        <button class="new-task-button" id="new-task-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;">
+                <path d="M12 5V19M5 12H19" stroke="white" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            New Task
+        </button>
+    </div>
+    
+    <div class="tasks" id="tasks-list">
+        {% for task in tasks %}
+        <div class="task-item" data-id="{{ task.id }}">
+            <span>{{ task.title }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="sidebar-footer">
+        <a href="/logout" class="logout-button">Logout</a>
+    </div>
+</div>
+
+<script>
+    // DOM elements
+    const newTaskBtn = document.getElementById('new-task-btn');
+    const tasksList = document.getElementById('tasks-list');
+    
+    // Event listeners
+    newTaskBtn.addEventListener('click', createNewTask);
+    
+    // Load task items
+    document.querySelectorAll('.task-item').forEach(item => {
+        item.addEventListener('click', function() {
+            loadTask(this.dataset.id);
+        });
+    });
+    
+    function createNewTask() {
+        fetch('/task/new', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                title: 'New Task',
+                agent: 'predict'
+            })
+        })
+        .then(response => response.json())
+        .then(data => { window.location.href = `/task/${data.task_id}`; })
+        .catch(error => console.error('Error creating task:', error));
+    }
+    
+    function loadTask(taskId) {
+        window.location.href = `/task/${taskId}`;
+    }
+</script>
