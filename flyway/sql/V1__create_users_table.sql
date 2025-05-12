@@ -7,7 +7,7 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE user_link (
+CREATE TABLE user_links (
     link_id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(user_id),
     link_token VARCHAR(255) NOT NULL,
