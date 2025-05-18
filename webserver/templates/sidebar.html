@@ -3,20 +3,20 @@
         <a href="/" style="text-decoration: none; color: var(--text-color);">Toxindex</a>
     </div>
     
-    <div class="new-run">
-        <button class="new-run-button" id="new-run-btn">
+    <div class="new-task">
+        <button class="new-task-button" id="new-task-btn">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
                  xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;">
                 <path d="M12 5V19M5 12H19" stroke="white" stroke-width="2" stroke-linecap="round"/>
             </svg>
-            New Run
+            New Task
         </button>
     </div>
-    
-    <div class="runs" id="runs-list">
-        {% for run in runs %}
-        <div class="run-item" data-id="{{ run.id }}">
-            <span>{{ run.title }}</span>
+
+    <div class="tasks" id="tasks-list">
+        {% for task in tasks %}
+        <div class="task-item" data-id="{{ task.task_id }}">
+            <span>{{ task.title }}</span>
         </div>
         {% endfor %}
     </div>
@@ -28,36 +28,36 @@
 
 <script>
     // DOM elements
-    const newRunBtn = document.getElementById('new-run-btn');
-    const runsList = document.getElementById('runs-list');
+    const newTaskBtn = document.getElementById('new-task-btn');
+    const tasksList = document.getElementById('tasks-list');
     
     // Event listeners
-    newRunBtn.addEventListener('click', createNewRun);
+    newTaskBtn.addEventListener('click', createNewTask);
     
     // Load workflow items
-    document.querySelectorAll('.run-item').forEach(item => {
+    document.querySelectorAll('.task-item').forEach(item => {
         item.addEventListener('click', function() {
-            loadRun(this.dataset.id);
+            loadTask(this.dataset.id);
         });
     });
-    
-    function createNewRun() {
-        fetch('/run/new', {
+
+    function createNewTask() {
+        fetch('/task/new', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                title: 'New workflow',
-                workflow: 'predict'
+                message: 'New task',
+                workflow: '1'
             })
         })
         .then(response => response.json())
-        .then(data => { window.location.href = `/run/${data.run_id}`; })
-        .catch(error => console.error('Error creating run:', error));
+        .then(data => { window.location.href = `/task/${data.task_id}`; })
+        .catch(error => console.error('Error creating task:', error));
     }
-    
-    function loadRun(runId) {
-        window.location.href = `/run/${runId}`;
+
+    function loadTask(taskId) {
+        window.location.href = `/task/${taskId}`;
     }
 </script>
