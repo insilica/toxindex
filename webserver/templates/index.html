@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toxindex</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        {% include "sidebar.html" %}
+        <div class="main" style="display:flex;justify-content:center;align-items:center;">
+            <div>
+                <textarea id="task-message" rows="4" placeholder="Describe your task..."></textarea>
+                <div style="text-align:center;margin-top:10px;">
+                    <button id="go-button" class="primary-button">Go</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.getElementById('go-button').addEventListener('click', () => {
+            const message = document.getElementById('task-message').value;
+            fetch('/task/new', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({message})
+            })
+            .then(r => r.json())
+            .then(data => {
+                window.location.href = `/task/${data.task_id}`;
+            })
+            .catch(err => console.error('Error creating task:', err));
+        });
+    </script>
+</body>
+</html>
