@@ -1,6 +1,7 @@
 from webserver import login_manager as LM
 from webserver.controller import login, stripe
-from webserver.model import Run, Workflow
+from webserver.model import Task, Workflow
+from webserver.ai_service import generate_title
 from flask import request, Response, send_from_directory
 
 import flask, flask_login
@@ -23,35 +24,38 @@ Workflow.load_default_workflows()
 @app.route('/', methods=['GET'])
 def index():
   logging.info(f"current user: {flask_login.current_user}")
-  runs = Run.get_runs_by_user(flask_login.current_user.user_id)
+  tasks = Task.get_tasks_by_user(flask_login.current_user.user_id)
   if flask_login.current_user.is_authenticated:
-    return flask.render_template('landing.html', runs=runs)
+    return flask.render_template('index.html', tasks=tasks)
   else:
     print('user is not logged in')
     return flask.render_template('login_register.html')
 
-@app.route('/run/new', methods=['POST'])
-def run_create():
-    logging.info(f"run_create called with {request.method}")
+@app.route('/task/new', methods=['POST'])
+def task_create():
+    logging.info(f"task_create called with {request.method}")
     
     if request.method == 'POST':
-        run_data = request.get_json()
-        title = run_data.get('title', 'New run')
-        workflow_id = int(run_data.get('workflow', 1))
-        
-        # Create new run
-        run = Run.create_run(
+        task_data = request.get_json()
+        message = task_data.get('message', '')
+        workflow_id = int(task_data.get('workflow', 1))
+
+        title = generate_title(message)
+
+        task = Task.create_task(
             title=title,
             user_id=flask_login.current_user.user_id,
             workflow_id=workflow_id
         )
-        
-        return flask.jsonify({'run_id': run.run_id})
-    return flask.render_template('run.html')
 
-@app.route('/run/<run_id>', methods=['GET'])
-def run(run_id):
-    return flask.render_template('run.html', run_id=run_id)
+        Task.add_message(task.task_id, flask_login.current_user.user_id, 'user', message)
+
+        return flask.jsonify({'task_id': task.task_id})
+    return flask.render_template('task.html')
+
+@app.route('/task/<task_id>', methods=['GET'])
+def task(task_id):
+    return flask.render_template('task.html', task_id=task_id)
   
 @app.route('/workflow/new', methods=['GET', 'POST'])
 def workflow_new():
