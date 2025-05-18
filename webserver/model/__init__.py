@@ -1,5 +1,5 @@
-from webserver.model.run import Run
+from webserver.model.task import Task
 from webserver.model.user import User
 from webserver.model.workflow import Workflow
 
-__all__ = ['Run', 'User', 'Workflow']
+__all__ = ['Task', 'User', 'Workflow']
