@@ -48,13 +48,13 @@ body, html {
     margin-right: 10px;
 }
 
-.new-run {
+.new-task {
     margin-bottom: 20px;
     display: flex;
     align-items: center;
 }
 
-.new-run-button {
+.new-task-button {
     display: flex;
     align-items: center;
     background-color: transparent;
@@ -67,11 +67,11 @@ body, html {
     text-align: left;
 }
 
-.new-run-button:hover {
+.new-task-button:hover {
     background-color: var(--sidebar-hover);
 }
 
-.recent-runs-header {
+.recent-tasks-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -85,12 +85,12 @@ body, html {
     font-weight: bold;
 }
 
-.runs {
+.tasks {
     flex-grow: 1;
     overflow-y: auto;
 }
 
-.run-item {
+.task-item {
     padding: 10px;
     margin-bottom: 5px;
     cursor: pointer;
@@ -102,11 +102,11 @@ body, html {
     align-items: center;
 }
 
-.run-item:hover {
+.task-item:hover {
     background-color: var(--sidebar-hover);
 }
 
-.run-item .check-icon {
+.task-item .check-icon {
     color: var(--primary-button);
     margin-right: 10px;
 }
@@ -431,12 +431,12 @@ body, html {
     border-bottom: 1px solid var(--border-color);
 }
 
-.run-title {
+.task-title {
     font-size: 18px;
     font-weight: bold;
 }
 
-.run-actions {
+.task-actions {
     margin-left: auto;
     display: flex;
     align-items: center;
@@ -456,8 +456,8 @@ body, html {
     background-color: var(--sidebar-hover);
 }
 
-/* Updated main styles for run view */
-.main.run-view {
+/* Updated main styles for task view */
+.main.task-view {
     padding: 0;
 }
 
