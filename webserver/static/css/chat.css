@@ -20,6 +20,8 @@ body, html {
     flex-direction: column;
     align-items: center;
     position: relative;
+    overflow-x: hidden; /* Prevent horizontal scroll */
+    width: 100%;
 }
 
 .content-wrapper {
