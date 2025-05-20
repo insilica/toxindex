@@ -10,8 +10,21 @@ A collection of toxicology workflows
 1. nix develop
 2. flask run --app webserver.app --host=0.0.0.0 --port=6513
 
-# TODO
-1. build actual chat page
-2. fix sidebar styling
-3. add streamlit application
-4. 
+## Roadmap
+The basic idea is that: 
+
+1. Users create environments
+2. Users execute workflows in their environments
+
+We should drive towards a ProbRA workflow.see tasks in pfoa_tasks.md. We (WP5) were asked to:
+
+1. predict hazard with toxtransformer
+
+To do this we can:
+
+1. create a workflow run for probra
+2. user puts in a prompt "Is PFOA hepatotoxic?"
+3. create a task, for now there is no back and forth. 
+    1. Adds a task to a table of tasks under the prompt
+    2. Send task to workflow
+    3. Create a webhook for activities and results
