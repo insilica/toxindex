@@ -13,3 +13,4 @@ celery = make_celery()
 
 # task modules
 import workflows.probra as probra_task
+import workflows.ber as ber_task
