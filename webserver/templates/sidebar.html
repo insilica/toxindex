@@ -3,16 +3,6 @@
         <a href="/" style="text-decoration: none; color: var(--text-color);">Toxindex</a>
     </div>
     
-    <div class="new-task">
-        <button class="new-task-button" id="new-task-btn">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                 xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;">
-                <path d="M12 5V19M5 12H19" stroke="white" stroke-width="2" stroke-linecap="round"/>
-            </svg>
-            New Task
-        </button>
-    </div>
-
     <div class="tasks" id="tasks-list">
         {% for task in tasks %}
         <div class="task-item" data-id="{{ task.task_id }}">
@@ -30,9 +20,6 @@
     // DOM elements
     const newTaskBtn = document.getElementById('new-task-btn');
     const tasksList = document.getElementById('tasks-list');
-    
-    // Event listeners
-    newTaskBtn.addEventListener('click', createNewTask);
     
     // Load workflow items
     document.querySelectorAll('.task-item').forEach(item => {
@@ -60,4 +47,33 @@
     function loadTask(taskId) {
         window.location.href = `/task/${taskId}`;
     }
+
+    function loadTasks() {
+        fetch('/tasks')
+        .then(response => response.json())
+        .then(data => {
+            if (data.tasks) {
+                tasksList.innerHTML = '';
+                data.tasks.forEach(task => {
+                    const taskItem = document.createElement('div');
+                    taskItem.classList.add('task-item');
+                    taskItem.dataset.id = task.task_id;
+                    
+                    const taskTitle = document.createElement('span');
+                    taskTitle.textContent = task.title;
+                    
+                    taskItem.appendChild(taskTitle);
+                    taskItem.addEventListener('click', function() {
+                        loadTask(task.task_id);
+                    });
+                    
+                    tasksList.appendChild(taskItem);
+                });
+            }
+        })
+        .catch(error => console.error('Error loading tasks:', error));
+    }
+    
+    // Load tasks when the page loads
+    document.addEventListener('DOMContentLoaded', loadTasks);
 </script>

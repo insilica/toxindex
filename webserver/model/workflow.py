@@ -4,11 +4,12 @@ import datetime
 import json
 
 class Workflow:
-    def __init__(self, workflow_id, title, user_id, description=None, created_at=None):
+    def __init__(self, workflow_id, title, user_id, description=None, initial_prompt=None, created_at=None):
         self.workflow_id = workflow_id
         self.title = title
         self.user_id = user_id
         self.description = description
+        self.initial_prompt = initial_prompt
         self.created_at = created_at
 
     def to_dict(self):
@@ -17,6 +18,7 @@ class Workflow:
             'title': self.title,
             'user_id': self.user_id,
             'description': self.description,
+            'initial_prompt': self.initial_prompt,
             'created_at': self.created_at.strftime('%Y-%m-%d %H:%M:%S') if self.created_at else None
         }
 
@@ -27,21 +29,22 @@ class Workflow:
             title=row['title'], 
             user_id=row['user_id'],
             description=row.get('description'),
+            initial_prompt=row.get('initial_prompt'),
             created_at=row['created_at']
         )
 
     @staticmethod
-    def create_workflow(title, user_id=None, description=None):
-        params = (title, user_id, description)
-        ds.execute("INSERT INTO workflows (title, user_id, description) VALUES (%s, %s, %s)", params)
+    def create_workflow(title, user_id=None, description=None, initial_prompt=None):
+        params = (title, user_id, description, initial_prompt)
+        ds.execute("INSERT INTO workflows (title, user_id, description, initial_prompt) VALUES (%s, %s, %s, %s)", params)
         logging.info(f"created workflow {title} for user {user_id}")
         res = ds.find("SELECT * FROM workflows WHERE title = %s ORDER BY created_at DESC LIMIT 1", (title))
         return Workflow.from_row(res) if res else None
     
     @staticmethod
-    def update_workflow(workflow_id, title=None, description=None):
-        params = (title, description, workflow_id)
-        ds.execute("UPDATE workflows SET title = %s, description = %s WHERE workflow_id = %s", params)
+    def update_workflow(workflow_id, user_id=None,title=None, description=None, initial_prompt=None):
+        params = (title, description, initial_prompt, workflow_id)
+        ds.execute("UPDATE workflows SET title = %s, description = %s, initial_prompt = %s WHERE workflow_id = %s", params)
         logging.info(f"updated workflow {workflow_id}")
         return Workflow.get_workflow(workflow_id)
     
@@ -75,8 +78,11 @@ class Workflow:
                 for row in rows]
     
     @staticmethod
-    def load_default_workflows(user_id=None):
+    def load_default_workflows():
         with open('resources/default_workflows.json', 'r') as f:
             for w in json.load(f)['workflows']:
-                if not ds.find("SELECT 1 FROM workflows WHERE title = %s", (w['title'],)):
-                    Workflow.create_workflow(w['title'], user_id, w['description'])
+                if not ds.find("SELECT 1 FROM workflows WHERE workflow_id = %s", (w['workflow_id'],)):
+                    del w['workflow_id']
+                    Workflow.create_workflow(**w)
+                else:
+                    Workflow.update_workflow(**w)
