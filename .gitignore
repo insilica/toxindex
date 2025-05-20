@@ -17,3 +17,10 @@ __pycache__/*
 pgdata/
 
 .aws-profile
+
+# celery
+celery_tasks.db
+dump.rdb
+
+# redis
+redis-server.log

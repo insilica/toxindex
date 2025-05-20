@@ -1,24 +1,28 @@
 {
   "workflows": [
     {
-      "id": 1,
-      "title": "Predict",
-      "description": "Predict chemical properties including toxicity, bioactivity, and environmental fate. Trained on extensive datasets to provide accurate predictions for novel compounds."
+      "workflow_id": 1,
+      "title": "probRA",
+      "description": "Generate probabilisty risk assessments.",
+      "initial_prompt": "Describe your probabilistic risk assessment."
     },
     {
-      "id": 2,
-      "title": "Metabolise",
-      "description": "Generate metabolism transformations. Identifies key metabolic intermediates across multiple species and generates metabolic pathways and enzyme interactions."
+      "workflow_id": 2,
+      "title": "metabolise",
+      "description": "Generate metabolism transformations. Identifies key metabolic intermediates across multiple species and generates metabolic pathways and enzyme interactions.",
+      "initial_prompt": "what chemical are you interested in?"
     },
     {
-      "id": 3,
-      "title": "Pathways",
-      "description": "Predict interactions with chemical pathways. Maps how chemicals interact with biological pathways and systems. Analyzes potential disruptions and effects on cellular processes to identify mechanisms of toxicity."
+      "workflow_id": 3,
+      "title": "pathways",
+      "description": "Predict interactions with chemical pathways. Maps how chemicals interact with biological pathways and systems. Analyzes potential disruptions and effects on cellular processes to identify mechanisms of toxicity.",
+      "initial_prompt": "what chemical and pathway are you interested in?"
     },
     {
-      "id": 4,
-      "title": "Integrate",
-      "description": "Integrate chemical data. Combines insights from prediction, metabolism and pathway analysis to provide a comprehensive toxicological assessment of chemical compounds."
+      "workflow_id": 4,
+      "title": "orchestrate",
+      "description": "Combines insights from prediction, metabolism and pathway analysis to provide a comprehensive toxicological assessment of chemical compounds.",
+      "initial_prompt": "what chemical are you interested in?"
     }
   ]
 }

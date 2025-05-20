@@ -32,6 +32,12 @@
           psycopg2-binary
           email-validator
           boto3
+          openai
+          celery
+          redis
+          flask-socketio
+          eventlet
+          pandas
         ]);
       in
       {
@@ -41,6 +47,7 @@
             python-with-deps
             pkgs.postgresql_15
             pkgs.postgresql_jdbc
+            pkgs.redis
             pkgs.awscli2
           ];
 
@@ -131,6 +138,15 @@
 
             echo "Loading application environment script..."
             bash scripts/load_environment.sh "$AWS_PROFILE" "insilica/toxindex+development"
+
+            echo "Starting Redis server..."
+            if ! pgrep redis-server > /dev/null; then
+              echo "Starting Redis server..."
+              redis-server --daemonize yes
+            else
+              echo "Redis is already running."
+            fi
+
 
             echo "Development environment ready."
             echo "PostgreSQL is accessible on: ${pgSettings.host}:${pgSettings.port} (TCP/IP)"

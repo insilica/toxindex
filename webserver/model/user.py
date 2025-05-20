@@ -2,7 +2,7 @@ from pickle import TRUE
 import webserver.datastore as ds
 from webserver.controller import stripe
 
-import secrets, types
+import secrets, types, uuid
 import flask_login
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -60,9 +60,10 @@ class User(flask_login.UserMixin):
   def create_datastore_customer(email, password, stripe_customer_id):
     hashpw = generate_password_hash(password)
     token = User.make_token()
-    params = (email,hashpw,token,stripe_customer_id)
+    user_id = uuid.uuid4()
+    params = (user_id, email, hashpw, token, stripe_customer_id)
     logging.info(f"creating user with params {params}")
-    ds.execute("INSERT INTO users (email,hashpw,token,stripe_customer_id) values (%s,%s,%s,%s)",params)
+    ds.execute("INSERT INTO users (user_id, email, hashpw, token, stripe_customer_id) values (%s,%s,%s,%s,%s)", params)
   
   @staticmethod
   def create_user(email, password):
