@@ -66,3 +66,61 @@ class File:
             logging.info(f"Stored file {filename} for task_id={task.task_id}")
         else:
             logging.warning("Malformed task_file event received")
+
+    # ------------------------------------------------------------------
+    def read_text(self):
+        """Return file contents if the file is available on disk."""
+        try:
+            with open(self.filepath, "r", encoding="utf-8") as f:
+                return f.read()
+        except Exception as e:
+            logging.warning(f"Could not read file {self.filepath}: {e}")
+            return ""
+
+    def markdown_to_html(self):
+        """Very small markdown to HTML converter supporting headings, lists,
+        bold and italic text."""
+        text = self.read_text()
+        if not text:
+            return ""
+
+        import html
+        import re
+
+        def repl_heading(match):
+            hashes = match.group(1)
+            content = match.group(2)
+            level = len(hashes)
+            return f"<h{level}>" + html.escape(content) + f"</h{level}>"
+
+        # Headings
+        text = re.sub(r"^(#{1,6})\s*(.+)$", repl_heading, text, flags=re.MULTILINE)
+
+        # Bold and italic
+        text = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", text)
+        text = re.sub(r"\*(.+?)\*", r"<em>\1</em>", text)
+
+        # Lists
+        lines = text.split("\n")
+        html_lines = []
+        in_list = False
+        for line in lines:
+            if re.match(r"^[-*]\s+", line):
+                if not in_list:
+                    html_lines.append("<ul>")
+                    in_list = True
+                item = re.sub(r"^[-*]\s+", "", line)
+                html_lines.append(f"<li>{html.escape(item)}</li>")
+            else:
+                if in_list:
+                    html_lines.append("</ul>")
+                    in_list = False
+                if line.strip() == "":
+                    html_lines.append("<br>")
+                else:
+                    html_lines.append(f"<p>{html.escape(line)}</p>")
+        if in_list:
+            html_lines.append("</ul>")
+
+        return "\n".join(html_lines)
+
