@@ -2,12 +2,14 @@ import eventlet
 eventlet.monkey_patch()
 
 import dotenv
+import uuid
 dotenv.load_dotenv()
 
 from webserver import login_manager as LM
 from webserver.controller import login, stripe
-from webserver.model import Task, Workflow
+from webserver.model import Task, Workflow, Message, File
 from webserver.ai_service import generate_title
+from workflows.chat_response_task import chat_response_task
 from flask import request, Response, send_from_directory
 
 import flask, flask_login
@@ -16,20 +18,24 @@ from datetime import datetime
 
 # CELERY ======================================================================
 from workflows.probra import probra_task
+from workflows.chat_response_task import chat_response_task
+
 from celery.result import AsyncResult
 from workflows.celery_worker import celery
 
 # SOCKETIO ====================================================================
 from flask_socketio import SocketIO, emit
+from flask_socketio import join_room
 
 # FLASK APP ===================================================================
 static_folder_path = os.path.join(os.path.dirname(__file__), 'webserver', 'static')
 app = flask.Flask(__name__, template_folder="templates")
 app.config['SERVER_NAME'] = os.environ.get('SERVER_NAME')
 app.config['PREFERRED_URL_SCHEME'] = os.environ.get('PREFERRED_URL_SCHEME')
+app.config['TEMPLATES_AUTO_RELOAD'] = True
 app.secret_key = os.environ.get('FLASK_APP_SECRET_KEY')
 
-socketio = SocketIO(app, cors_allowed_origins="*", message_queue='redis://localhost:6379/0')
+socketio = SocketIO(app, cors_allowed_origins="*", message_queue='redis://localhost:6379/0', manage_session=False)
 
 app.logger.setLevel(logging.INFO)
 logging.basicConfig(level=logging.DEBUG)
@@ -37,24 +43,51 @@ LM.init(app)
 Workflow.load_default_workflows()
 
 # REDIS PUB/SUB BACKGROUND LISTENER ==========================================
-def redis_listener():
+def redis_listener(name):
     r = redis.Redis()
     pubsub = r.pubsub()
     pubsub.subscribe("celery_updates")
 
-    for message in pubsub.listen():
-        if message["type"] != "message":
+    for redis_message in pubsub.listen():
+        if redis_message["type"] != "message":
             continue
+
         try:
-            data = json.loads(message["data"])
-            sid = data["sid"]
-            event = data["event"]
-            payload = data["data"]
-            socketio.emit(event, payload, to=sid)
+            raw_data = redis_message["data"]
+            if isinstance(raw_data, bytes):
+                raw_data = raw_data.decode()
+
+            event = json.loads(raw_data)
+
+            event_type = event.get("type")
+            event_task_id = event.get("task_id")
+            event_sid = event.get("sid")
+            event_data = event.get("data")
+
+            if event_task_id is None or event_sid is None or event_data is None:
+                logging.warning(
+                    f"Redis event missing required fields: event_type={event_type}, "
+                    f"task_id={event_task_id}, sid={event_sid}, data={event_data}"
+                )
+                continue
+
+            if event_type != "task_message":
+                continue
+
+            task = Task.get_task(event_task_id)
+            if not task:
+                logging.warning(f"No task found for task_id={event_task_id}")
+                continue
+
+            Message.process_event(task, event_data)
+            room = f"task_{task.task_id}"
+            socketio.emit(event_type, event_data, to=room)
+            logging.info(f"task_message sent to {room}")
+
+        except json.JSONDecodeError:
+            logging.error("Failed to decode Redis message as JSON.")
         except Exception as e:
             logging.error(f"Redis listener error: {e}")
-
-threading.Thread(target=redis_listener, daemon=True).start()
 
 # INDEX / ROOT ===============================================================
 @app.route('/', methods=['GET'])
@@ -70,45 +103,45 @@ def index():
 
 # SOCKETIO HANDLERS ==========================================================
 @socketio.on('connect')
-def handle_connect():
-    logging.info(f"Client connected: {request.sid}")
+def handle_connect(auth):
     emit('connected', {'sid': request.sid})
+    logging.info(f"user connected {request.sid}")
+
+# TODO right now I think any user can join any task room
+@socketio.on("join_task_room")
+def handle_join_task_room(data):
+    task_id = data.get("task_id")
+    room = f"task_{task_id}"
+    join_room(room)
+    logging.info(f"user joined task room: {room}")
+    emit('joined_task_room', {'task_id': task_id})
+
 
 # TASK MANAGEMENT ============================================================
 @app.route('/task/new', methods=['POST'])
 def task_create():
     logging.info(f"task_create called with {request.method}")
-
-    if request.method == 'POST':
-        task_data = request.get_json()
-        message = task_data.get('message', '')
-        workflow_id = int(task_data.get('workflow', 1))
-        sid = task_data.get('sid')
-
-        title = generate_title(message)
-
-        celery_task = probra_task.delay({
-            "payload": message,
-            "sid": sid
-        })
-
-        task = Task.create_task(
-            title=title,
-            user_id=flask_login.current_user.user_id,
-            workflow_id=workflow_id,
-            celery_task_id=celery_task.id
-        )
-
-        Task.add_message(task.task_id, flask_login.current_user.user_id, 'user', message)
-
-        return flask.jsonify({'task_id': task.task_id, 'celery_id': celery_task.id})
+    task_data = request.get_json()
+    message = task_data.get('message', '')
     
-    return flask.render_template('task.html')
 
-@app.route('/task/status/<task_id>', methods=['GET'])
+    title = generate_title(message)
+    user_id = flask_login.current_user.user_id
+    workflow_id = int(task_data.get('workflow', 1))
+    sid = task_data.get('sid')
+    task = Task.create_task(title=title, user_id=user_id, workflow_id=workflow_id)
+
+    Task.add_message(task.task_id, flask_login.current_user.user_id, 'user', message)
+    celery_task = probra_task.delay({"payload": message, "sid": sid, "task_id": task.task_id})
+    Task.update_celery_task_id(task.task_id, celery_task.id)
+    
+
+    return flask.jsonify({'task_id': task.task_id, 'celery_id': celery_task.id})
+
+@app.route('/task/<task_id>/status', methods=['GET'])
 def task_status(task_id):
-    # TODO You might want to load your Task object here and link it to a celery_id
-    celery_id = request.args.get('celery_id')  # Pass celery_id via query param or load from DB
+    task = Task.get_task(task_id, flask_login.current_user.user_id)
+    celery_id = task.celery_task_id
     if not celery_id:
         return flask.jsonify({'error': 'Missing celery_id'}), 400
 
@@ -139,7 +172,24 @@ def get_user_tasks():
 
 @app.route('/task/<task_id>', methods=['GET'])
 def task(task_id):
-    return flask.render_template('task.html', task_id=task_id)
+    messages = Message.get_messages(task_id)
+    return flask.render_template('task.html', task_id=task_id, messages=messages)
+
+# MESSAGE MANAGEMENT =========================================================
+@app.route('/message/new', methods=['POST'])
+def message_new():
+    # user_id = flask_login.current_user.user_id
+    message_data = request.get_json()
+    # Message.create_message(message_data.get('task_id'), user_id, message_data.get('role'), message_data.get('content'))
+    # conversation = Message.get_messages(message_data.get('task_id'))
+    # conversation_data = [message.to_json() for message in conversation]
+    # celery_task = chat_response_task.delay({
+    #     "sid": message_data.get('sid'),
+    #     "task_id": message_data.get('task_id'),
+    #     "user_id": user_id,
+    #     "conversation": conversation_data
+    # })
+    return flask.jsonify({'message_id': message_data.get('message_id')})
 
 # WORKFLOW MANAGEMENT ========================================================
 @app.route('/workflow/new', methods=['GET', 'POST'])
@@ -183,5 +233,13 @@ def serve_icon(filename):
 
 # LAUNCH =====================================================================
 if __name__ == '__main__':
-    app.secret_key
-    socketio.run(app, host="0.0.0.0", port=6513)
+    if os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
+        thread_name = f"RedisListenerThread-{uuid.uuid4().hex[:8]}"
+        threading.Thread(
+            target=redis_listener,
+            args=(thread_name,),  # <- fix here
+            daemon=True,
+            name=thread_name
+        ).start()
+
+    socketio.run(app, host="0.0.0.0", port=6513, debug=True, use_reloader=True)
