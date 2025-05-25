@@ -143,6 +143,27 @@ body, html {
     border-radius: 10px;
 }
 
+/* Results styling */
+.result-box {
+    background-color: #023749;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 20px;
+}
+
+.result-header {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.result-image {
+    max-width: 100%;
+    border-radius: 6px;
+}
+
+.markdown-content {
+    line-height: 1.5;
+
 .file-list {
     margin-top: 6px;
     font-size: 0.9rem;
@@ -151,4 +172,5 @@ body, html {
 
 .file-list div {
     margin-bottom: 4px;
+
 }
