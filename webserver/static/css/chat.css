@@ -163,4 +163,14 @@ body, html {
 
 .markdown-content {
     line-height: 1.5;
+
+.file-list {
+    margin-top: 6px;
+    font-size: 0.9rem;
+    color: #ccc;
+}
+
+.file-list div {
+    margin-bottom: 4px;
+
 }

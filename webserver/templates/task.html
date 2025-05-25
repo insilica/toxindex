@@ -65,12 +65,16 @@
       <div class="input-bar">
         <form id="chat-form" data-task-id="{{ task_id }}">
           <textarea name="message" rows="2" placeholder="Type your question or paste SMILES notation..." autofocus></textarea>
+          <div id="file-list" class="file-list"></div>
         </form>
       </div>
     </div>
   </div>
 
   <script>
+
+    let currentSid = null;
+    let droppedFiles = [];
 
     const socket = io("http://localhost:6513");
     const task_id = "{{ task_id }}";
@@ -121,6 +125,13 @@
 
     const form = document.getElementById('chat-form');
     const textarea = form.querySelector('textarea');
+    const fileList = document.getElementById('file-list');
+
+    textarea.addEventListener('dragover', e => e.preventDefault());
+    textarea.addEventListener('drop', e => {
+        e.preventDefault();
+        handleFiles(e.dataTransfer.files);
+    });
     form.addEventListener('submit', (e) => {
         e.preventDefault();
         const message = textarea.value.trim();
@@ -137,7 +148,8 @@
                 'task_id': taskId,
                 'sid': currentSid,
                 'role': 'user',
-                'content': message
+                'content': message,
+                'files': droppedFiles
             })
         })
         .then(response => response.json())
@@ -154,6 +166,8 @@
         // Clear input
         textarea.value = '';
         textarea.style.height = 'auto';
+        fileList.innerHTML = '';
+        droppedFiles = [];
     });
 
     textarea.addEventListener('keydown', e => {
@@ -167,6 +181,19 @@
       this.style.height = 'auto';
       this.style.height = (this.scrollHeight) + 'px';
     });
+
+    function handleFiles(files) {
+        Array.from(files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = () => {
+                droppedFiles.push({name: file.name, data: reader.result});
+                const div = document.createElement('div');
+                div.textContent = file.name;
+                fileList.appendChild(div);
+            };
+            reader.readAsDataURL(file);
+        });
+    }
   </script>
 </body>
 </html>
