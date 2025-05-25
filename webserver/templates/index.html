@@ -30,6 +30,16 @@
       box-sizing: border-box;
     }
 
+    #file-list {
+      margin-top: 8px;
+      font-size: 14px;
+      color: #ccc;
+    }
+
+    #file-list div {
+      margin-bottom: 4px;
+    }
+
     .button-bar {
       margin-bottom: 15px;
       display: flex;
@@ -106,6 +116,7 @@
         </div>
         <div id="task-input">
           <textarea id="task-message" placeholder="{{ workflow.initial_prompt }}" autofocus></textarea>
+          <div id="file-list"></div>
         </div>
         <div id="progress-log"></div>
       </div>
@@ -114,6 +125,7 @@
 
   <script>
     let currentSid = null;
+    let droppedFiles = [];
 
     const socket = io("http://localhost:6513");
 
@@ -137,7 +149,16 @@
       log.appendChild(entry);
     }
 
-    document.getElementById('task-message').addEventListener('keydown', function(event) {
+    const taskTextarea = document.getElementById('task-message');
+    const fileList = document.getElementById('file-list');
+
+    taskTextarea.addEventListener('dragover', e => e.preventDefault());
+    taskTextarea.addEventListener('drop', e => {
+        e.preventDefault();
+        handleFiles(e.dataTransfer.files);
+    });
+
+    taskTextarea.addEventListener('keydown', function(event) {
         console.log('keydown', event.key);
         if (event.key === 'Enter' && !event.shiftKey) {
             event.preventDefault();
@@ -145,8 +166,21 @@
         }
     });
 
+    function handleFiles(files) {
+        Array.from(files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = () => {
+                droppedFiles.push({name: file.name, data: reader.result});
+                const div = document.createElement('div');
+                div.textContent = file.name;
+                fileList.appendChild(div);
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
     function submitTask() {
-      const message = document.getElementById('task-message').value.trim();
+      const message = taskTextarea.value.trim();
       if (!message || !currentSid) return;
 
       fetch('/task/new', {
@@ -155,14 +189,17 @@
         body: JSON.stringify({
           message: message,
           sid: currentSid,
-          workflow: 1
+          workflow: 1,
+          files: droppedFiles
         })
       })
       .then(response => response.json())
       .then(data => {
         if (data.task_id) {
           appendLog(`🚀 Submitted task ${data.task_id}`);
-          document.getElementById('task-message').value = "";
+          taskTextarea.value = "";
+          fileList.innerHTML = '';
+          droppedFiles = [];
           window.location.href = `/task/${data.task_id}`;
         }
       })
