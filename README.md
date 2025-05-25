@@ -8,7 +8,8 @@ A collection of toxicology workflows
 
 ## Development
 1. nix develop
-2. flask run --app webserver.app --host=0.0.0.0 --port=6513
+2. python -m webserver.app
+3. celery -A webserver.celery worker --loglevel=info
 
 ## Roadmap
 The basic idea is that: 
@@ -28,3 +29,7 @@ To do this we can:
     1. Adds a task to a table of tasks under the prompt
     2. Send task to workflow
     3. Create a webhook for activities and results
+
+To get this working we can:
+
+1. create a docker container that 

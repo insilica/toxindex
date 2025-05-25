@@ -69,8 +69,25 @@ body, html {
 }
 
 .message {
-    margin-left: 0px;
-    margin-bottom: 12px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.user-message {
+    align-self: flex-end;
+    max-width: 70%;
+    background-color: #023749;
+    padding: 12px 16px;
+    border-radius: 12px;
+    color: white;
+}
+
+.assistant-message {
+    align-self: flex-start;
+    width: 100%;
+    padding: 12px 0;
+    color: white;
 }
 
 .input-bar {

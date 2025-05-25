@@ -1,6 +1,11 @@
 <div class="sidebar">
     <div class="platform-title">
         <a href="/" style="text-decoration: none; color: var(--text-color);">Toxindex</a>
+        <button id="sidebar-collapse-btn" class="collapse-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
     </div>
     
     <div class="tasks" id="tasks-list">
@@ -20,7 +25,22 @@
     // DOM elements
     const newTaskBtn = document.getElementById('new-task-btn');
     const tasksList = document.getElementById('tasks-list');
+    const sidebar = document.querySelector('.sidebar');
+    const collapseBtn = document.getElementById('sidebar-collapse-btn');
+    const mainContent = document.querySelector('.main');
     
+    // Collapse functionality
+    collapseBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('collapsed');
+        if (mainContent) {
+            mainContent.classList.toggle('expanded');
+        }
+        
+        // Rotate collapse button icon
+        collapseBtn.querySelector('svg').style.transform = 
+            sidebar.classList.contains('collapsed') ? 'rotate(180deg)' : '';
+    });
+
     // Load workflow items
     document.querySelectorAll('.task-item').forEach(item => {
         item.addEventListener('click', function() {
@@ -76,4 +96,73 @@
     
     // Load tasks when the page loads
     document.addEventListener('DOMContentLoaded', loadTasks);
+
+    // Add these styles to your CSS
+    const style = document.createElement('style');
+    style.textContent = `
+        .platform-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-right: 10px;
+        }
+        
+        .collapse-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            color: var(--text-color);
+            transition: transform 0.3s ease;
+        }
+        
+        .collapse-btn:hover {
+            opacity: 0.8;
+        }
+        
+        .sidebar {
+            transition: width 0.3s ease;
+            width: 250px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(155, 155, 155, 0.5) transparent;
+        }
+        
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .sidebar::-webkit-scrollbar-thumb {
+            background-color: rgba(155, 155, 155, 0.5);
+            border-radius: 3px;
+            border: transparent;
+        }
+        
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(155, 155, 155, 0.8);
+        }
+        
+        .sidebar.collapsed {
+            width: 60px;
+        }
+        
+        .sidebar.collapsed .tasks,
+        .sidebar.collapsed .sidebar-footer,
+        .sidebar.collapsed .platform-title a {
+            display: none;
+        }
+        
+        .main {
+            transition: margin-left 0.3s ease;
+        }
+        
+        .main.expanded {
+            margin-left: 60px;
+        }
+    `;
+    document.head.appendChild(style);
 </script>
