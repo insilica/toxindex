@@ -10,12 +10,17 @@ dbname = os.getenv('DB_NAME')
 dbuser = os.getenv('DB_USER')
 dbpass = os.getenv('DB_PASSWORD')
 
+def get_connection():
+    con = psycopg2.connect(host=dbhost, port=dbport, dbname=dbname, user=dbuser, password=dbpass)
+    psycopg2.extras.register_uuid(conn_or_curs=con)
+    return con
+
 def find(query, param=None):
     res = None
     con = None
     cur = None
     try:
-        con = psycopg2.connect(host=dbhost, port=dbport, dbname=dbname, user=dbuser, password=dbpass)
+        con = get_connection()
         cur = con.cursor(cursor_factory=psycopg2.extras.DictCursor) # Use DictCursor here
         if param is None:
             cur.execute(query)
@@ -34,7 +39,7 @@ def find(query, param=None):
 def execute(query, param=None):
     con = None
     try:
-        con = psycopg2.connect(host=dbhost, port=dbport, dbname=dbname, user=dbuser, password=dbpass)
+        con = get_connection()
         cur = con.cursor()
         if param is None:
             cur.execute(query)
@@ -54,7 +59,7 @@ def find_all(query, param=None):
     con = None
     cur = None
     try:
-        con = psycopg2.connect(host=dbhost, port=dbport, dbname=dbname, user=dbuser, password=dbpass)
+        con = get_connection()
         cur = con.cursor(cursor_factory=psycopg2.extras.DictCursor)  # Use DictCursor here
         if param is None:
             cur.execute(query)
