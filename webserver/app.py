@@ -71,7 +71,7 @@ def redis_listener(name):
                 )
                 continue
 
-            if event_type != "task_message":
+            if event_type not in ("task_message", "task_file"):
                 continue
 
             task = Task.get_task(event_task_id)
@@ -79,10 +79,14 @@ def redis_listener(name):
                 logging.warning(f"No task found for task_id={event_task_id}")
                 continue
 
-            Message.process_event(task, event_data)
+            if event_type == "task_message":
+                Message.process_event(task, event_data)
+            elif event_type == "task_file":
+                File.process_event(task, event_data)
+
             room = f"task_{task.task_id}"
             socketio.emit(event_type, event_data, to=room)
-            logging.info(f"task_message sent to {room}")
+            logging.info(f"{event_type} sent to {room}")
 
         except json.JSONDecodeError:
             logging.error("Failed to decode Redis message as JSON.")
@@ -132,7 +136,12 @@ def task_create():
     task = Task.create_task(title=title, user_id=user_id, workflow_id=workflow_id)
 
     Task.add_message(task.task_id, flask_login.current_user.user_id, 'user', message)
-    celery_task = probra_task.delay({"payload": message, "sid": sid, "task_id": task.task_id})
+    celery_task = probra_task.delay({
+        "payload": message,
+        "sid": sid,
+        "task_id": task.task_id,
+        "user_id": str(user_id),
+    })
     Task.update_celery_task_id(task.task_id, celery_task.id)
     
 
