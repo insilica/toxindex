@@ -173,7 +173,20 @@ def get_user_tasks():
 @app.route('/task/<task_id>', methods=['GET'])
 def task(task_id):
     messages = Message.get_messages(task_id)
-    return flask.render_template('task.html', task_id=task_id, messages=messages)
+    files = File.get_files(task_id)
+
+    # Pre-render markdown content for convenience
+    rendered_files = []
+    for f in files:
+        file_info = f.to_dict()
+        if f.filename.lower().endswith(('.md', '.markdown')):
+            file_info['html'] = f.markdown_to_html()
+        else:
+            file_info['html'] = ''
+        rendered_files.append(file_info)
+
+    return flask.render_template('task.html', task_id=task_id,
+                                 messages=messages, files=rendered_files)
 
 # MESSAGE MANAGEMENT =========================================================
 @app.route('/message/new', methods=['POST'])
