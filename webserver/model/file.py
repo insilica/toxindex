@@ -1,6 +1,10 @@
-import webserver.datastore as ds
+import os
 import logging
 import datetime
+from typing import Optional
+
+import webserver.datastore as ds
+from webserver.storage import S3FileStorage
 
 class File:
 
@@ -44,6 +48,23 @@ class File:
             "INSERT INTO files (task_id, user_id, filename, filepath, s3_url) VALUES (%s, %s, %s, %s, %s)",
             params
         )
+
+    @staticmethod
+    def upload_and_create(
+        task_id: int,
+        user_id: str,
+        local_path: str,
+        storage: S3FileStorage,
+        key: Optional[str] = None,
+        content_type: Optional[str] = None,
+    ) -> str:
+        """Upload a file to S3 and create a database record."""
+        filename = os.path.basename(local_path)
+        s3_key = key or f"{user_id}/{filename}"
+        storage_key = storage.upload_file(local_path, s3_key, content_type)
+        download_url = storage.generate_download_url(storage_key)
+        File.create_file(task_id, user_id, filename, storage_key, download_url)
+        return download_url
 
     @staticmethod
     def get_files(task_id):
