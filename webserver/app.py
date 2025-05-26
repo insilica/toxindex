@@ -1,13 +1,15 @@
 import eventlet
+
 eventlet.monkey_patch()
 
 import dotenv
 import uuid
+
 dotenv.load_dotenv()
 
 from webserver import login_manager as LM
 from webserver.controller import login, stripe
-from webserver.model import Task, Workflow, Message, File
+from webserver.model import Task, Workflow, Message, File, Environment
 from webserver.ai_service import generate_title
 from workflows.chat_response_task import chat_response_task
 from flask import request, Response, send_from_directory
@@ -28,19 +30,25 @@ from flask_socketio import SocketIO, emit
 from flask_socketio import join_room
 
 # FLASK APP ===================================================================
-static_folder_path = os.path.join(os.path.dirname(__file__), 'webserver', 'static')
+static_folder_path = os.path.join(os.path.dirname(__file__), "webserver", "static")
 app = flask.Flask(__name__, template_folder="templates")
-app.config['SERVER_NAME'] = os.environ.get('SERVER_NAME')
-app.config['PREFERRED_URL_SCHEME'] = os.environ.get('PREFERRED_URL_SCHEME')
-app.config['TEMPLATES_AUTO_RELOAD'] = True
-app.secret_key = os.environ.get('FLASK_APP_SECRET_KEY')
+app.config["SERVER_NAME"] = os.environ.get("SERVER_NAME")
+app.config["PREFERRED_URL_SCHEME"] = os.environ.get("PREFERRED_URL_SCHEME")
+app.config["TEMPLATES_AUTO_RELOAD"] = True
+app.secret_key = os.environ.get("FLASK_APP_SECRET_KEY")
 
-socketio = SocketIO(app, cors_allowed_origins="*", message_queue='redis://localhost:6379/0', manage_session=False)
+socketio = SocketIO(
+    app,
+    cors_allowed_origins="*",
+    message_queue="redis://localhost:6379/0",
+    manage_session=False,
+)
 
 app.logger.setLevel(logging.INFO)
 logging.basicConfig(level=logging.DEBUG)
 LM.init(app)
 Workflow.load_default_workflows()
+
 
 # REDIS PUB/SUB BACKGROUND LISTENER ==========================================
 def redis_listener(name):
@@ -93,23 +101,27 @@ def redis_listener(name):
         except Exception as e:
             logging.error(f"Redis listener error: {e}")
 
+
 # INDEX / ROOT ===============================================================
-@app.route('/', methods=['GET'])
+@app.route("/", methods=["GET"])
 def index():
     logging.info(f"current user: {flask_login.current_user}")
     if flask_login.current_user.is_authenticated:
-        tasks = Task.get_tasks_by_user(flask_login.current_user.user_id)
-        workflow = Workflow.get_workflow(1)
-        return flask.render_template('index.html', tasks=tasks, workflow=workflow)
+        environments = Environment.get_environments_by_user(
+            flask_login.current_user.user_id
+        )
+        return flask.render_template("index.html", environments=environments)
     else:
-        print('user is not logged in')
-        return flask.render_template('login_register.html')
+        print("user is not logged in")
+        return flask.render_template("login_register.html")
+
 
 # SOCKETIO HANDLERS ==========================================================
-@socketio.on('connect')
+@socketio.on("connect")
 def handle_connect(auth):
-    emit('connected', {'sid': request.sid})
+    emit("connected", {"sid": request.sid})
     logging.info(f"user connected {request.sid}")
+
 
 # TODO right now I think any user can join any task room
 @socketio.on("join_task_room")
@@ -118,68 +130,88 @@ def handle_join_task_room(data):
     room = f"task_{task_id}"
     join_room(room)
     logging.info(f"user joined task room: {room}")
-    emit('joined_task_room', {'task_id': task_id})
+    emit("joined_task_room", {"task_id": task_id})
 
 
 # TASK MANAGEMENT ============================================================
-@app.route('/task/new', methods=['POST'])
+@app.route("/task/new", methods=["POST"])
 def task_create():
     logging.info(f"task_create called with {request.method}")
     task_data = request.get_json()
-    message = task_data.get('message', '')
-    
+    message = task_data.get("message", "")
 
     title = generate_title(message)
     user_id = flask_login.current_user.user_id
-    workflow_id = int(task_data.get('workflow', 1))
-    sid = task_data.get('sid')
-    task = Task.create_task(title=title, user_id=user_id, workflow_id=workflow_id)
+    workflow_id = int(task_data.get("workflow", 1))
+    environment_id = task_data.get("environment_id")
+    sid = task_data.get("sid")
+    task = Task.create_task(
+        title=title,
+        user_id=user_id,
+        workflow_id=workflow_id,
+        environment_id=environment_id,
+    )
 
-    Task.add_message(task.task_id, flask_login.current_user.user_id, 'user', message)
-    celery_task = probra_task.delay({
-        "payload": message,
-        "sid": sid,
-        "task_id": task.task_id,
-        "user_id": str(user_id),
-    })
+    Task.add_message(task.task_id, flask_login.current_user.user_id, "user", message)
+    celery_task = probra_task.delay(
+        {
+            "payload": message,
+            "sid": sid,
+            "task_id": task.task_id,
+            "user_id": str(user_id),
+        }
+    )
     Task.update_celery_task_id(task.task_id, celery_task.id)
-    
 
-    return flask.jsonify({'task_id': task.task_id, 'celery_id': celery_task.id})
+    return flask.jsonify({"task_id": task.task_id, "celery_id": celery_task.id})
 
-@app.route('/task/<task_id>/status', methods=['GET'])
+
+@app.route("/task/<task_id>/status", methods=["GET"])
 def task_status(task_id):
     task = Task.get_task(task_id, flask_login.current_user.user_id)
     celery_id = task.celery_task_id
     if not celery_id:
-        return flask.jsonify({'error': 'Missing celery_id'}), 400
+        return flask.jsonify({"error": "Missing celery_id"}), 400
 
     result = AsyncResult(celery_id, app=celery)
-    return flask.jsonify({
-        "state": result.state,
-        "info": result.info if result.info else {},
-        "ready": result.ready(),
-        "result": result.result if result.ready() else None,
-    })
+    return flask.jsonify(
+        {
+            "state": result.state,
+            "info": result.info if result.info else {},
+            "ready": result.ready(),
+            "result": result.result if result.ready() else None,
+        }
+    )
 
-@app.route('/tasks', methods=['GET'])
+
+@app.route("/tasks", methods=["GET"])
 @flask_login.login_required
 def get_user_tasks():
     try:
         user_id = flask_login.current_user.user_id
-        tasks = Task.get_tasks_by_user(user_id)
-        tasks_data = [{
-            'task_id': task.task_id,
-            'title': task.title,
-            'created_at': task.created_at.isoformat() if hasattr(task, 'created_at') else None,
-            'workflow_id': task.workflow_id
-        } for task in tasks]
-        return flask.jsonify({'tasks': tasks_data})
+        env_id = request.args.get("environment_id")
+        if env_id:
+            tasks = Task.get_tasks_by_environment(env_id, user_id)
+        else:
+            tasks = Task.get_tasks_by_user(user_id)
+        tasks_data = [
+            {
+                "task_id": task.task_id,
+                "title": task.title,
+                "created_at": (
+                    task.created_at.isoformat() if hasattr(task, "created_at") else None
+                ),
+                "workflow_id": task.workflow_id,
+            }
+            for task in tasks
+        ]
+        return flask.jsonify({"tasks": tasks_data})
     except Exception as e:
         logging.error(f"Error retrieving tasks: {str(e)}")
-        return flask.jsonify({'error': 'Failed to retrieve tasks'}), 500
+        return flask.jsonify({"error": "Failed to retrieve tasks"}), 500
 
-@app.route('/task/<task_id>', methods=['GET'])
+
+@app.route("/task/<task_id>", methods=["GET"])
 def task(task_id):
     messages = Message.get_messages(task_id)
     files = File.get_files(task_id)
@@ -188,17 +220,19 @@ def task(task_id):
     rendered_files = []
     for f in files:
         file_info = f.to_dict()
-        if f.filename.lower().endswith(('.md', '.markdown')):
-            file_info['html'] = f.markdown_to_html()
+        if f.filename.lower().endswith((".md", ".markdown")):
+            file_info["html"] = f.markdown_to_html()
         else:
-            file_info['html'] = ''
+            file_info["html"] = ""
         rendered_files.append(file_info)
 
-    return flask.render_template('task.html', task_id=task_id,
-                                 messages=messages, files=rendered_files)
+    return flask.render_template(
+        "task.html", task_id=task_id, messages=messages, files=rendered_files
+    )
+
 
 # MESSAGE MANAGEMENT =========================================================
-@app.route('/message/new', methods=['POST'])
+@app.route("/message/new", methods=["POST"])
 def message_new():
     # user_id = flask_login.current_user.user_id
     message_data = request.get_json()
@@ -211,57 +245,94 @@ def message_new():
     #     "user_id": user_id,
     #     "conversation": conversation_data
     # })
-    return flask.jsonify({'message_id': message_data.get('message_id')})
+    return flask.jsonify({"message_id": message_data.get("message_id")})
+
 
 # WORKFLOW MANAGEMENT ========================================================
-@app.route('/workflow/new', methods=['GET', 'POST'])
+@app.route("/workflow/new", methods=["GET", "POST"])
 def workflow_new():
-    if request.method == 'POST':
+    if request.method == "POST":
         workflow_data = request.get_json()
-        title = workflow_data.get('title', 'New workflow')
-        description = workflow_data.get('description', '')
+        title = workflow_data.get("title", "New workflow")
+        description = workflow_data.get("description", "")
         workflow = Workflow.create_workflow(
             title=title,
             description=description,
-            user_id=flask_login.current_user.user_id
+            user_id=flask_login.current_user.user_id,
         )
         logging.info(f"created workflow {workflow.workflow_id}")
-        return flask.jsonify({'workflow_id': workflow.workflow_id})
-    return flask.render_template('create_workflow.html')
+        return flask.jsonify({"workflow_id": workflow.workflow_id})
+    return flask.render_template("create_workflow.html")
 
-@app.route('/workflow/<workflow_id>', methods=['GET'])
+
+@app.route("/workflow/<workflow_id>", methods=["GET"])
 def workflow(workflow_id):
     workflow = Workflow.get_workflow(workflow_id)
-    return flask.render_template('workflow_run.html', workflow=workflow)
+    return flask.render_template("workflow_run.html", workflow=workflow)
+
+
+# ENVIRONMENT MANAGEMENT =====================================================
+@app.route("/environment/new", methods=["POST"])
+@flask_login.login_required
+def environment_new():
+    env_data = request.get_json()
+    title = env_data.get("title", "New Environment")
+    description = env_data.get("description")
+    env = Environment.create_environment(
+        title, flask_login.current_user.user_id, description
+    )
+    return flask.jsonify({"environment_id": env.environment_id})
+
+
+@app.route("/environments", methods=["GET"])
+@flask_login.login_required
+def environment_list():
+    envs = Environment.get_environments_by_user(flask_login.current_user.user_id)
+    return flask.jsonify({"environments": [e.to_dict() for e in envs]})
+
+
+@app.route("/environment/<env_id>", methods=["GET"])
+@flask_login.login_required
+def environment_view(env_id):
+    workflow = Workflow.get_workflow(1)
+    tasks = Task.get_tasks_by_environment(env_id, flask_login.current_user.user_id)
+    env = Environment.get_environment(env_id)
+    return flask.render_template(
+        "environment.html", tasks=tasks, workflow=workflow, environment=env
+    )
+
 
 # LOGIN MANAGEMENT ===========================================================
-app.route('/register', methods=['GET','POST'])(login.register)
-app.route('/verify', methods=['GET'])(login.verify_message)
-app.route('/verification/<token>', methods=['GET','POST'])(login.verification)
-app.route('/login', methods=['GET','POST'])(login.login)
-app.route('/logout', methods=['GET'])(login.logout)
-app.route('/forgot_password', methods=['GET','POST'])(login.forgot_password)
-app.route('/reset_password/<token>', methods=['GET','POST'])(login.reset_password)
+app.route("/register", methods=["GET", "POST"])(login.register)
+app.route("/verify", methods=["GET"])(login.verify_message)
+app.route("/verification/<token>", methods=["GET", "POST"])(login.verification)
+app.route("/login", methods=["GET", "POST"])(login.login)
+app.route("/logout", methods=["GET"])(login.logout)
+app.route("/forgot_password", methods=["GET", "POST"])(login.forgot_password)
+app.route("/reset_password/<token>", methods=["GET", "POST"])(login.reset_password)
+
 
 # ICONS ======================================================================
-@app.route('/favicon.ico')
+@app.route("/favicon.ico")
 def favicon():
-    return app.send_static_file('favicon.png')
+    return app.send_static_file("favicon.png")
 
-@app.route('/icons/<path:filename>')
+
+@app.route("/icons/<path:filename>")
 def serve_icon(filename):
-    icons_dir = os.path.join(os.path.dirname(__file__), 'icons')
+    icons_dir = os.path.join(os.path.dirname(__file__), "icons")
     return send_from_directory(icons_dir, filename)
 
+
 # LAUNCH =====================================================================
-if __name__ == '__main__':
-    if os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
+if __name__ == "__main__":
+    if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
         thread_name = f"RedisListenerThread-{uuid.uuid4().hex[:8]}"
         threading.Thread(
             target=redis_listener,
             args=(thread_name,),  # <- fix here
             daemon=True,
-            name=thread_name
+            name=thread_name,
         ).start()
 
     socketio.run(app, host="0.0.0.0", port=6513, debug=True, use_reloader=True)
