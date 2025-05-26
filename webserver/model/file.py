@@ -74,19 +74,28 @@ class File:
         )
         return [File.from_row(row) for row in rows]
 
-    @staticmethod
+    @staticmethod  
     def process_event(task, event_data):
-        payload = event_data.get("data", {})
-        user_id = payload.get("user_id")
-        filename = payload.get("filename")
-        filepath = payload.get("filepath")
-        s3_url = payload.get("s3_url")
+        user_id = event_data.get("user_id")
+        filename = event_data.get("filename")
+        filepath = event_data.get("filepath")
+        s3_url = event_data.get("s3_url")
 
         if user_id and filename and filepath and s3_url:
             File.create_file(task.task_id, user_id, filename, filepath, s3_url)
             logging.info(f"Stored file {filename} for task_id={task.task_id}")
         else:
-            logging.warning("Malformed task_file event received")
+            missing = []
+            if not user_id:
+                missing.append("user_id")
+            if not filename:
+                missing.append("filename") 
+            if not filepath:
+                missing.append("filepath")
+            if not s3_url:
+                missing.append("s3_url")
+            logging.warning(f"Malformed task_file event received - missing fields: {', '.join(missing)}")
+            logging.debug(f"Received payload: {event_data}")
 
     # ------------------------------------------------------------------
     def read_text(self):
