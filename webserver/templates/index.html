@@ -3,220 +3,37 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Toxindex</title>
-  <script src="{{ url_for('static', filename='js/socket.io.4.7.2.min.js') }}"></script>
+  <title>Toxindex - Environments</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
-  <style>
-    .chat-wrapper {
-      margin: 0 auto;
-      width: 100%;
-      max-width: 800px;
-      padding: 0 16px;
-      box-sizing: border-box;
-      overflow-x: hidden;
-    }
-
-    #task-message {
-      width: 100%;
-      height: 100px;
-      padding: 16px;
-      font-size: 18px;
-      border-radius: 16px;
-      border: none;
-      background-color: #1e1e1e;
-      color: #fff;
-      resize: none;
-      box-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
-      box-sizing: border-box;
-    }
-
-    #file-list {
-      margin-top: 8px;
-      font-size: 14px;
-      color: #ccc;
-    }
-
-    #file-list div {
-      margin-bottom: 4px;
-    }
-
-    .button-bar {
-      margin-bottom: 15px;
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
-    .action-button {
-      padding: 10px 18px;
-      border: none;
-      border-radius: 12px;
-      background-color: #2a2a2a;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .action-button:hover {
-      background-color: #3a3a3a;
-      transform: translateY(-2px);
-    }
-
-    .action-button.active {
-        background-color: #166534; /* deep forest green */
-        color: #e0fce4;
-    }
-
-    .action-button.active:after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        height: 3px;
-        background: linear-gradient(90deg, #22c55e, #15803d); /* vibrant forest gradient */
-    }
-
-    .primary-button {
-      margin-top: 20px;
-      padding: 12px 24px;
-      font-size: 18px;
-      background-color: #3b82f6;
-      border-radius: 14px;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-
-    .primary-button:hover {
-      background-color: #2563eb;
-    }
-
-    #progress-log {
-      margin-top: 20px;
-      font-family: monospace;
-      color: #ccc;
-    }
-  </style>
 </head>
 <body>
   <div class="container">
     {% include "sidebar.html" %}
     <div class="main">
-      <div class="chat-wrapper">
-        <div class="button-bar">
-          <button class="action-button active">ProbRA</button>
-          <button class="action-button">Metabolise</button>
-          <button class="action-button">Pathways</button>
-          <button class="action-button">Predict</button>
-        </div>
-        <div id="task-input">
-          <textarea id="task-message" placeholder="{{ workflow.initial_prompt }}" autofocus></textarea>
-          <div id="file-list"></div>
-        </div>
-        <div id="progress-log"></div>
-      </div>
+      <h1>Create Environment</h1>
+      <form id="env-form">
+        <input type="text" id="env-title" placeholder="Environment name" required />
+        <button type="submit" class="primary-button">Create</button>
+      </form>
     </div>
   </div>
-
-  <script>
-    let currentSid = null;
-    let droppedFiles = [];
-
-    const socket = io("http://localhost:6513");
-
-    socket.on("connected", (data) => {
-      currentSid = data.sid;
-      console.log("Connected with sid:", currentSid);
+<script>
+  document.getElementById('env-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const title = document.getElementById('env-title').value.trim();
+    if(!title) return;
+    fetch('/environment/new', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({title: title})
+    })
+    .then(r => r.json())
+    .then(data => {
+      if(data.environment_id){
+        window.location.href = `/environment/${data.environment_id}`;
+      }
     });
-
-    socket.on("progress", (data) => {
-      appendLog(`Progress: Step ${data.step}`);
-    });
-
-    socket.on("complete", (data) => {
-      appendLog(`✅ Task complete: ${data.result}`);
-    });
-
-    function appendLog(text) {
-      const log = document.getElementById("progress-log");
-      const entry = document.createElement("div");
-      entry.textContent = text;
-      log.appendChild(entry);
-    }
-
-    const taskTextarea = document.getElementById('task-message');
-    const fileList = document.getElementById('file-list');
-
-    taskTextarea.addEventListener('dragover', e => e.preventDefault());
-    taskTextarea.addEventListener('drop', e => {
-        e.preventDefault();
-        handleFiles(e.dataTransfer.files);
-    });
-
-    taskTextarea.addEventListener('keydown', function(event) {
-        console.log('keydown', event.key);
-        if (event.key === 'Enter' && !event.shiftKey) {
-            event.preventDefault();
-            submitTask();
-        }
-    });
-
-    function handleFiles(files) {
-        Array.from(files).forEach(file => {
-            const reader = new FileReader();
-            reader.onload = () => {
-                droppedFiles.push({name: file.name, data: reader.result});
-                const div = document.createElement('div');
-                div.textContent = file.name;
-                fileList.appendChild(div);
-            };
-            reader.readAsDataURL(file);
-        });
-    }
-
-    function submitTask() {
-      const message = taskTextarea.value.trim();
-      if (!message || !currentSid) return;
-
-      fetch('/task/new', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: message,
-          sid: currentSid,
-          workflow: 1,
-          files: droppedFiles
-        })
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.task_id) {
-          appendLog(`🚀 Submitted task ${data.task_id}`);
-          taskTextarea.value = "";
-          fileList.innerHTML = '';
-          droppedFiles = [];
-          window.location.href = `/task/${data.task_id}`;
-        }
-      })
-      .catch(error => {
-        appendLog("❌ Error submitting task.");
-        console.error(error);
-      });
-    }
-
-    // Activate clicked button, deactivate others
-    document.querySelectorAll('.action-button').forEach(button => {
-        button.addEventListener('click', () => {
-        document.querySelectorAll('.action-button').forEach(btn => btn.classList.remove('active'));
-        button.classList.add('active');
-        // Optionally: update workflow id or prompt here if needed
-        });
-    });
-  </script>
+  });
+</script>
 </body>
 </html>
