@@ -1,3 +1,5 @@
+app.log
+
 *.env
 scratch.py
 deploy.zip
