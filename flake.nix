@@ -158,6 +158,8 @@
             export DEBUG=1 
             export PREFERRED_URL_SCHEME=http
             export SERVER_NAME="${pgSettings.host}:6513" 
+            source .env
+            export PYTHONPATH="$PWD"
           '';
         };
 

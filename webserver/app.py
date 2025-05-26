@@ -37,8 +37,20 @@ app.secret_key = os.environ.get('FLASK_APP_SECRET_KEY')
 
 socketio = SocketIO(app, cors_allowed_origins="*", message_queue='redis://localhost:6379/0', manage_session=False)
 
+# Configure logging to output to file with detailed formatting
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s',
+    handlers=[
+        logging.FileHandler('app.log'),
+        logging.StreamHandler()  # Also keep console output
+    ]
+)
+
+# Set Flask app logger to use same configuration
 app.logger.setLevel(logging.INFO)
-logging.basicConfig(level=logging.DEBUG)
+for handler in logging.getLogger().handlers:
+    app.logger.addHandler(handler)
 LM.init(app)
 Workflow.load_default_workflows()
 
@@ -61,13 +73,12 @@ def redis_listener(name):
 
             event_type = event.get("type")
             event_task_id = event.get("task_id")
-            event_sid = event.get("sid")
             event_data = event.get("data")
 
-            if event_task_id is None or event_sid is None or event_data is None:
+            if event_task_id is None or event_data is None:
                 logging.warning(
                     f"Redis event missing required fields: event_type={event_type}, "
-                    f"task_id={event_task_id}, sid={event_sid}, data={event_data}"
+                    f"task_id={event_task_id}, data={event_data}"
                 )
                 continue
 
@@ -82,6 +93,7 @@ def redis_listener(name):
             if event_type == "task_message":
                 Message.process_event(task, event_data)
             elif event_type == "task_file":
+                logging.info(f"task_file {raw_data}")
                 File.process_event(task, event_data)
 
             room = f"task_{task.task_id}"
