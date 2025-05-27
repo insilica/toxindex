@@ -14,3 +14,4 @@ celery = make_celery()
 # task modules
 import workflows.probra as probra_task
 import workflows.chat_response_task as chat_response_task
+import workflows.interactive_echo_task as interactive_echo_task
