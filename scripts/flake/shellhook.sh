@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+export SKIP_AWS_SECRET_LOADING=false
+
 source scripts/flake/setup_postgres.sh \
   "postgres" \
   "devpassword" \
@@ -7,21 +9,18 @@ source scripts/flake/setup_postgres.sh \
   "toxindex" \
   "localhost" \
   "socket" \
-  "/nix/store/..." # use actual path or pass as env
+  "/nix/store/3pzlrs5nddszkpgasnrcpf4ifrzm76lb-postgresql-15.13/bin"
 
-echo -e "\nLogging in to AWS..."
 source scripts/flake/aws_login.sh
 
-echo -e "\nRunning flyway migrations..."
 source scripts/flake/run_flyway.sh
 
-echo -e "\nStarting redis..."
 source scripts/flake/start_redis.sh
 
-echo -e "\nLoading application environment script..."
-source scripts/load_environment.sh "$AWS_PROFILE" "insilica/toxindex+development"
+source scripts/load_environment.sh "$AWS_PROFILE" "insilica/toxindex+dev-secret"
 
-echo -e "\nDevelopment environment ready."
+
+
 export FLASK_APP=webserver.app
 export FLASK_ENV=development
 export DEBUG=1
