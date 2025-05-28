@@ -1,6 +1,6 @@
 from pickle import TRUE
 import webserver.datastore as ds
-from webserver.controller import stripe
+from webserver.controller import stripe_controller
 
 import secrets, types, uuid
 import flask_login
@@ -55,7 +55,7 @@ class User(flask_login.UserMixin):
 
   @staticmethod
   def create_stripe_customer(email):
-    return stripe.create_customer(email)
+    return stripe_controller.create_customer(email)
   
   def create_datastore_customer(email, password, stripe_customer_id):
     hashpw = generate_password_hash(password)
@@ -76,5 +76,5 @@ class User(flask_login.UserMixin):
   def delete_user(email):
     if not User.user_exists: raise ValueError(f"{email} does not exist")
     user = User.get_user(email)
-    stripe.delete_customer(user.stripe_customer_id)
+    stripe_controller.delete_customer(user.stripe_customer_id)
     ds.execute("DELETE FROM users WHERE email = (%s)",(email,))

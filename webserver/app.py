@@ -8,7 +8,7 @@ import uuid
 dotenv.load_dotenv()
 
 from webserver import login_manager as LM
-from webserver.controller import login, stripe
+from webserver.controller import login
 from webserver.model import Task, Workflow, Message, File, Environment
 from webserver.ai_service import generate_title
 from workflows.chat_response_task import chat_response_task
