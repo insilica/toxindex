@@ -51,32 +51,7 @@
             pkgs.awscli2
           ];
 
-          shellHook = ''
-            scripts/flake/setup_postgres.sh \
-              "${pgSettings.user}" \
-              "${pgSettings.password}" \
-              "${pgSettings.port}" \
-              "${pgSettings.dbName}" \
-              "${pgSettings.host}" \
-              "${pgSettings.socketDirSubPath}" \
-              "${pkgs.postgresql_15}/bin"
-
-            scripts/flake/aws_login.sh
-            scripts/flake/run_flyway.sh
-            scripts/flake/start_redis.sh
-
-            echo "Loading application environment script..."
-            bash scripts/load_environment.sh "$AWS_PROFILE" "insilica/toxindex+development"
-
-            echo "Development environment ready."
-            export FLASK_APP=webserver.app
-            export FLASK_ENV=development
-            export DEBUG=1
-            export PREFERRED_URL_SCHEME=http
-            export SERVER_NAME="${pgSettings.host}:6513" 
-            source .env
-            export PYTHONPATH="$PWD"
-          '';
+          shellHook = ''source scripts/flake/shellhook.sh'';
         };
 
         apps.flask = flake-utils.lib.mkApp {
