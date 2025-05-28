@@ -2,7 +2,7 @@
   description = "Dev shell with Flyway, Python, PostgreSQL (TCP/IP focus)";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
@@ -25,11 +25,13 @@
           flask
           python-dotenv
           stripe
+          requests
+          urllib3
           flask-login
           flask-wtf
           sendgrid
           gunicorn
-          psycopg2-binary
+          psycopg2
           email-validator
           boto3
           openai
@@ -38,6 +40,7 @@
           flask-socketio
           eventlet
           pandas
+          pydantic
         ]);
       in
       {
@@ -49,6 +52,8 @@
             pkgs.postgresql_jdbc
             pkgs.redis
             pkgs.awscli2
+            pkgs.python310Packages.pip
+            pkgs.gcc
           ];
 
           shellHook = ''source scripts/flake/shellhook.sh'';
