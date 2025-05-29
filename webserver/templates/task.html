@@ -76,7 +76,7 @@
     let currentSid = null;
     let droppedFiles = [];
 
-    const socket = io("http://localhost:6513");
+    const socket = io(`${location.protocol}//${location.host}`, { transports: ['websocket'] });
     const task_id = "{{ task_id }}";
 
     socket.on("connected", (data) => {

@@ -1,6 +1,5 @@
-import eventlet
-
-eventlet.monkey_patch()
+from gevent import monkey
+monkey.patch_all()
 
 import dotenv
 import uuid
@@ -43,6 +42,9 @@ socketio = SocketIO(
     cors_allowed_origins="*",
     message_queue="redis://localhost:6379/0",
     manage_session=False,
+    async_mode='gevent',
+    logger=True,
+    engineio_logger=True
 )
 
 # Configure logging to output to file with detailed formatting
@@ -79,7 +81,8 @@ def redis_listener(name):
                 raw_data = raw_data.decode()
 
             event = json.loads(raw_data)
-
+            logging.info(f"Redis event: {event}")
+            
             event_type = event.get("type")
             event_task_id = event.get("task_id")
             event_data = event.get("data")
@@ -112,7 +115,7 @@ def redis_listener(name):
         except json.JSONDecodeError:
             logging.error("Failed to decode Redis message as JSON.")
         except Exception as e:
-            logging.error(f"Redis listener error: {e}")
+            logging.error(f"Redis listener error: {e}", exc_info=True)
 
 
 # INDEX / ROOT ===============================================================
