@@ -12,6 +12,7 @@ from webserver.controller import login
 from webserver.model import Task, Workflow, Message, File, Environment
 from webserver.ai_service import generate_title
 from workflows.chat_response_task import chat_response_task
+from workflows.interactive_echo_task import interactive_echo_task
 from flask import request, Response, send_from_directory
 
 import flask, flask_login
@@ -165,14 +166,45 @@ def task_create():
     )
 
     Task.add_message(task.task_id, flask_login.current_user.user_id, "user", message)
-    celery_task = probra_task.delay(
-        {
-            "payload": message,
-            "sid": sid,
-            "task_id": task.task_id,
-            "user_id": str(user_id),
-        }
-    )
+    
+    # Select the appropriate task based on workflow_id
+    if workflow_id == 1:
+        celery_task = probra_task.delay(
+            {
+                "payload": message,
+                "sid": sid,
+                "task_id": task.task_id,
+                "user_id": str(user_id),
+            }
+        )
+    elif workflow_id == 2:
+        celery_task = chat_response_task.delay(
+            {
+                "payload": message,
+                "sid": sid,
+                "task_id": task.task_id,
+                "user_id": str(user_id),
+            }
+        )
+    elif workflow_id == 3:
+        celery_task = interactive_echo_task.delay(
+            {
+                "payload": message,
+                "sid": sid,
+                "task_id": task.task_id,
+                "user_id": str(user_id),
+            }
+        )
+    else:
+        celery_task = probra_task.delay(  # Default to probra_task for unknown workflows
+            {
+                "payload": message,
+                "sid": sid,
+                "task_id": task.task_id,
+                "user_id": str(user_id),
+            }
+        )
+    
     Task.update_celery_task_id(task.task_id, celery_task.id)
 
     return flask.jsonify({"task_id": task.task_id, "celery_id": celery_task.id})
