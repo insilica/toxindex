@@ -1,6 +1,13 @@
 import redis, json
+import pydantic
 from workflows.celery_worker import celery
 from webserver.model.message import MessageSchema
+
+def get_pydantic_serializer(obj):
+    """Get the appropriate serialization method based on Pydantic version."""
+    if pydantic.__version__.startswith('2'):
+        return obj.model_dump()
+    return obj.dict()
 
 def build_prompt_from_conversation(conversation):
     prompt_parts = ["You are a helpful assistant. Answer the user's question.\n\n"]
@@ -29,7 +36,7 @@ def chat_response_task(self, payload):
     response_message = MessageSchema(role="assistant", content=assistant_content)
     event = {
         "event": "task_message",
-        "data": response_message.model_dump(),
+        "data": get_pydantic_serializer(response_message),
         "sid": sid,
         "task_id": task_id
     }
