@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -euo pipefail
 
 if ! pgrep redis-server > /dev/null; then
   echo "Starting Redis server..."
