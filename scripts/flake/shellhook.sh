@@ -2,6 +2,9 @@
 
 export SKIP_AWS_SECRET_LOADING=false
 
+OLD_OPTS=$(set +o)
+set -euo pipefail
+
 source scripts/flake/setup_postgres.sh \
   "postgres" \
   "devpassword" \
@@ -19,7 +22,7 @@ source scripts/flake/start_redis.sh
 
 source scripts/load_environment.sh "$AWS_PROFILE" "insilica/toxindex+dev-secret"
 
-
+eval "$OLD_OPTS"
 
 export FLASK_APP=webserver.app
 export FLASK_ENV=development

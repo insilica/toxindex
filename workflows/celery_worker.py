@@ -1,17 +1,14 @@
 from celery import Celery
+from . import celery_config
 
+celery = Celery(
+    'workflows',
+    broker='redis://localhost:6379/0',
+    backend='redis://localhost:6379/0',
+)
+celery.config_from_object(celery_config)
 
-def make_celery(app_name=__name__):
-    return Celery(
-        app_name,
-        broker='redis://localhost:6379/0',
-        backend='redis://localhost:6379/0',
-    )
-
-celery = make_celery()
-# celery -A workflows.celery_worker.celery worker --loglevel=info
-
-# task modules
-import workflows.probra as probra_task
-import workflows.chat_response_task as chat_response_task
-import workflows.interactive_echo_task as interactive_echo_task
+# Import tasks so they are registered
+import workflows.probra
+import workflows.chat_response_task
+import workflows.interactive_echo_task
