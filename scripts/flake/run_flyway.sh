@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -euo pipefail
 
 # This script assumes the following environment variables are set and exported
 # by the preceding PostgreSQL setup script (shellhook_postgres.sh):

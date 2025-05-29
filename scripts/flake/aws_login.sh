@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -euo pipefail
 
 if [ -f .aws-profile ]; then
   export AWS_PROFILE=$(cat .aws-profile)
