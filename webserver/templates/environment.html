@@ -122,10 +122,10 @@
     <div class="main">
       <div class="chat-wrapper">
         <div class="button-bar">
-          <button class="action-button active">ProbRA</button>
-          <button class="action-button">Metabolise</button>
-          <button class="action-button">Pathways</button>
-          <button class="action-button">Predict</button>
+          <button class="action-button active" data-workflow="1">ProbRA</button>
+          <button class="action-button" data-workflow="2">Metabolise</button>
+          <button class="action-button" data-workflow="3">Pathways</button>
+          <button class="action-button" data-workflow="4">Predict</button>
         </div>
         <div id="task-input">
           <textarea id="task-message" placeholder="{{ workflow.initial_prompt }}" autofocus></textarea>
@@ -144,20 +144,21 @@
   <script>
     let currentSid = null;
     let droppedFiles = [];
+    let currentWorkflowId = 1; // Default to ProbRA
 
     const socket = io("http://localhost:6513");
-
-    socket.on("connected", (data) => {
-      currentSid = data.sid;
-      console.log("Connected with sid:", currentSid);
+    socket.on("connect", () => {
+        currentSid = socket.id;
+        appendLog("✅ Connected to server");
     });
 
-    socket.on("progress", (data) => {
-      appendLog(`Progress: Step ${data.step}`);
+    socket.on("disconnect", () => {
+        currentSid = null;
+        appendLog("❌ Disconnected from server");
     });
 
-    socket.on("complete", (data) => {
-      appendLog(`✅ Task complete: ${data.result}`);
+    socket.on("celery_update", (data) => {
+        appendLog(data.message);
     });
 
     function appendLog(text) {
@@ -198,34 +199,34 @@
     }
 
     function submitTask() {
-      const message = taskTextarea.value.trim();
-      if (!message || !currentSid) return;
+        const message = taskTextarea.value.trim();
+        if (!message || !currentSid) return;
 
-      fetch('/task/new', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: message,
-          sid: currentSid,
-          workflow: 1,
-          environment_id: {{ environment.environment_id }},
-          files: droppedFiles
+        fetch('/task/new', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                message: message,
+                sid: currentSid,
+                workflow: currentWorkflowId,
+                environment_id: {{ environment.environment_id }},
+                files: droppedFiles
+            })
         })
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.task_id) {
-          appendLog(`🚀 Submitted task ${data.task_id}`);
-          taskTextarea.value = "";
-          fileList.innerHTML = '';
-          droppedFiles = [];
-          window.location.href = `/task/${data.task_id}`;
-        }
-      })
-      .catch(error => {
-        appendLog("❌ Error submitting task.");
-        console.error(error);
-      });
+        .then(response => response.json())
+        .then(data => {
+            if (data.task_id) {
+                appendLog(`🚀 Submitted task ${data.task_id}`);
+                taskTextarea.value = "";
+                fileList.innerHTML = '';
+                droppedFiles = [];
+                window.location.href = `/task/${data.task_id}`;
+            }
+        })
+        .catch(error => {
+            appendLog("❌ Error submitting task.");
+            console.error(error);
+        });
     }
 
     document.querySelectorAll('#env-task-list .task-item').forEach(item => {
@@ -238,9 +239,9 @@
     // Activate clicked button, deactivate others
     document.querySelectorAll('.action-button').forEach(button => {
         button.addEventListener('click', () => {
-        document.querySelectorAll('.action-button').forEach(btn => btn.classList.remove('active'));
-        button.classList.add('active');
-        // Optionally: update workflow id or prompt here if needed
+            document.querySelectorAll('.action-button').forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            currentWorkflowId = parseInt(button.dataset.workflow);
         });
     });
   </script>
