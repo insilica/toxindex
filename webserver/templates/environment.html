@@ -204,15 +204,16 @@
         const message = taskTextarea.value.trim();
         if (!message || !currentSid) return;
 
-      fetch('/task/new', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: message,
-          sid: currentSid,
-          workflow: 1,
-          environment_id: environmentId,
-          files: droppedFiles
+        fetch('/task/new', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                message: message,
+                sid: currentSid,
+                workflow: currentWorkflowId,
+                environment_id: environmentId,
+                files: droppedFiles
+            })
         })
         .then(response => response.json())
         .then(data => {
