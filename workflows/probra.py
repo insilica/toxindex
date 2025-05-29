@@ -7,7 +7,7 @@ import logging
 import pydantic
 from workflows.celery_worker import celery
 from webserver.model.message import MessageSchema
-from webserver import S3FileStorage
+from webserver.storage import S3FileStorage
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +34,7 @@ def probra_task(self, payload):
             message = MessageSchema(role="assistant", content=f"Step {i}")
             event = {
                 "type": "task_message",
-                "data": get_pydantic_serializer(message),
+                "data": message.dict(),
                 "task_id": task_id,
             }
             r.publish("celery_updates", json.dumps(event))

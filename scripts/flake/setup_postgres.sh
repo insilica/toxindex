@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -euo pipefail
 
 # Arguments:
 #   1 - PostgreSQL user

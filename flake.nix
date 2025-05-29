@@ -38,9 +38,28 @@
           celery
           redis
           flask-socketio
-          eventlet
+          gevent
+          gevent-websocket
           pandas
-          pydantic
+          annotated-types
+          (ps.buildPythonPackage {
+            pname   = "pydantic-core";
+            version = "2.16.3";
+            format  = "wheel";
+            src = pkgs.fetchurl {
+              url = "https://files.pythonhosted.org/packages/18/0e/1e39cfbffa57e92ab9f1f0869b32ead8a48ab11e4a373421d625f25fcb26/pydantic_core-2.16.3-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl";
+              sha256 = "prG7CCf1ZlS0Q3lVVV3Dru6+3cR8LX7VdUd/CCYixJ4=";
+            };
+          })
+          (ps.buildPythonPackage rec {
+            pname   = "pydantic";
+            version = "2.6.4";
+            format  = "wheel";
+            src = pkgs.fetchurl {
+              url    = "https://files.pythonhosted.org/packages/e5/f3/8296f550276194a58c5500d55b19a27ae0a5a3a51ffef66710c58544b32d/pydantic-2.6.4-py3-none-any.whl";
+              sha256 = "zEb86GYHWAhnvcM2GtRiurnCIu8ELT2oby+zM+HZFsU=";
+            };
+          })
         ]);
       in
       {
