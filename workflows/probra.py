@@ -4,11 +4,18 @@ import time
 import os
 import uuid
 import logging
+import pydantic
 from workflows.celery_worker import celery
 from webserver.model.message import MessageSchema
 from webserver import S3FileStorage
 
 logger = logging.getLogger(__name__)
+
+def get_pydantic_serializer(obj):
+    """Get the appropriate serialization method based on Pydantic version."""
+    if pydantic.__version__.startswith('2'):
+        return obj.model_dump()
+    return obj.dict()
 
 @celery.task(bind=True)
 def probra_task(self, payload):
@@ -27,7 +34,7 @@ def probra_task(self, payload):
             message = MessageSchema(role="assistant", content=f"Step {i}")
             event = {
                 "type": "task_message",
-                "data": message.model_dump(),
+                "data": get_pydantic_serializer(message),
                 "task_id": task_id,
             }
             r.publish("celery_updates", json.dumps(event))
