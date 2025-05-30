@@ -26,3 +26,18 @@ dump.rdb
 
 # redis
 redis-server.log
+
+.venv
+
+.envrc
+
+# Ignore generated reports
+report.html
+report.json
+
+# Ignore result/output directories
+result/
+tmp/
+result 
+# Uncomment to ignore VSCode settings (if user-specific)
+# .vscode/

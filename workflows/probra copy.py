@@ -9,9 +9,6 @@ from workflows.celery_worker import celery
 from webserver.model.message import MessageSchema
 from webserver.storage import S3FileStorage
 
-from RAP.tool_deeptox import deeptox_agent
-from RAP.toxicity_schema import TOXICITY_SCHEMA
-
 logger = logging.getLogger(__name__)
 
 def get_pydantic_serializer(obj):
@@ -32,36 +29,24 @@ def probra_task(self, payload):
         if not all([task_id, user_id]):
             raise ValueError(f"Missing required fields. task_id={task_id}, user_id={user_id}")
 
-        chemprop_query = payload.get("payload", "Is Gentamicin nephrotoxic?")
-        logger.info(f"User query for deeptox_agent: {chemprop_query}")
-        response = deeptox_agent.run(chemprop_query)
-
-        # event = {
-        #     "type": "task_message",
-        #     "data": response,
-        #     "task_id": task_id,
-        # }
-        # r.publish("celery_updates", json.dumps(event))
-
-        # for i in range(5):
-        #     logger.debug(f"Processing step {i}")
-        #     message = MessageSchema(role="assistant", content=f"Step {i}")
-        #     event = {
-        #         "type": "task_message",
-        #         "data": message.dict(),
-        #         "task_id": task_id,
-        #     }
-        #     r.publish("celery_updates", json.dumps(event))
-        #     time.sleep(1)
+        for i in range(5):
+            logger.debug(f"Processing step {i}")
+            message = MessageSchema(role="assistant", content=f"Step {i}")
+            event = {
+                "type": "task_message",
+                "data": message.dict(),
+                "task_id": task_id,
+            }
+            r.publish("celery_updates", json.dumps(event))
+            time.sleep(1)
 
         # Create a simple result file and upload it to S3
-        tmp_filename = f"probra_result_{uuid.uuid4().hex}.md"
+        tmp_filename = f"probra_result_{uuid.uuid4().hex}.txt"
         tmp_path = os.path.join("/tmp", tmp_filename)
         logger.info(f"Creating temporary file: {tmp_path}")
         print(f"Creating temporary file: {tmp_path}")
-        # Save the response based on its type
-        with open(tmp_path, 'w', encoding='utf-8') as f:
-            f.write(response.content)
+        with open(tmp_path, "w", encoding="utf-8") as f:
+            f.write("ProbRA task complete.\n")
 
         storage = S3FileStorage()
         s3_key = storage.upload_file(tmp_path, f"{task_id}/{tmp_filename}", "text/plain")
@@ -79,22 +64,8 @@ def probra_task(self, payload):
             },
         }
         r.publish("celery_updates", json.dumps(file_event))
-
-        # display download url
-        message = MessageSchema(role="assistant", content=f"download_url {download_url}")
-        event = {
-            "type": "task_message",
-            "data": message.model_dump(),
-            "task_id": task_id,
-        }
-        r.publish("celery_updates", json.dumps(event))
-
-
         logger.info("Task completed successfully")
         return {"done": True}
-    
-
-
 
     except Exception as e:
         logger.error(f"Error in probra_task: {str(e)}", exc_info=True)
