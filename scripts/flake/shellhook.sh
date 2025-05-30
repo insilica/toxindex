@@ -30,4 +30,4 @@ export DEBUG=1
 export PREFERRED_URL_SCHEME=http
 export SERVER_NAME=localhost:6513
 source .env
-export PYTHONPATH="$PWD"
+export PYTHONPATH="${PYTHONPATH:+${PYTHONPATH}:}${PWD}"
