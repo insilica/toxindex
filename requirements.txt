@@ -1,6 +1,7 @@
 Flask==3.0.0
 python-dotenv==0.21.0
 stripe==4.2.0
+requests
 flask-login
 Flask-WTF==1.2.1
 sendgrid==6.10.0
@@ -12,4 +13,42 @@ email_validator==2.1.0.post1
 
 # UPLOAD SERVICE ==========================================================
 boto3==1.34.19
-openai==0.28.1
+botocore==1.34.19
+s3transfer==0.10.0
+openai>=1.68.2,<2.0.0
+
+# ADDITIONAL PACKAGES ======================================================
+celery
+redis
+flask-socketio
+gevent
+gevent-websocket
+pandas
+annotated-types
+rdkit
+rapidfuzz
+aiohttp
+tenacity
+pyarrow
+fastparquet
+seaborn
+matplotlib
+scikit-learn
+cython
+blosc2
+langchain
+langchain-openai
+langchain-community
+langchain-core
+langgraph
+agno
+typing-extensions
+idna
+pubchempy
+httpx
+duckduckgo-search
+pydantic
+sqlalchemy
+numpy
+git+ssh://git@github.com/toxindex/RAP.git
+git+ssh://git@github.com/toxindex/RAPtool.git
