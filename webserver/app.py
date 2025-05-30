@@ -281,17 +281,29 @@ def task(task_id):
 # MESSAGE MANAGEMENT =========================================================
 @app.route("/message/new", methods=["POST"])
 def message_new():
-    # user_id = flask_login.current_user.user_id
     message_data = request.get_json()
-    # Message.create_message(message_data.get('task_id'), user_id, message_data.get('role'), message_data.get('content'))
-    # conversation = Message.get_messages(message_data.get('task_id'))
-    # conversation_data = [message.to_json() for message in conversation]
-    # celery_task = chat_response_task.delay({
-    #     "sid": message_data.get('sid'),
-    #     "task_id": message_data.get('task_id'),
-    #     "user_id": user_id,
-    #     "conversation": conversation_data
-    # })
+    task_id = message_data.get('task_id')
+    content = message_data.get('content')
+    sid = message_data.get('sid')
+    
+    if not all([task_id, content]):
+        return flask.jsonify({"error": "Missing required fields"}), 400
+        
+    # Get the task to check its workflow
+    task = Task.get_task(task_id)
+    if not task:
+        return flask.jsonify({"error": "Task not found"}), 404
+        
+    # Store the user message
+    Message.create_message(task_id, None, "user", content)
+    
+    # For interactive echo task (workflow_id 3), publish to Redis channel
+    if task.workflow_id == 3:
+        r = redis.Redis()
+        input_channel = f"task:{task_id}:input"
+        r.publish(input_channel, json.dumps({"content": content}))
+        logging.info(f"Published message to {input_channel}: {content}")
+    
     return flask.jsonify({"message_id": message_data.get("message_id")})
 
 
