@@ -9,8 +9,8 @@ A collection of toxicology workflows
 ## Development
 1. nix develop
 2. python -m webserver.app
+3. celery -A webserver.celery worker --loglevel=info
 3. celery -A workflows.celery_worker worker --loglevel=info
-
 
 ## Roadmap
 The basic idea is that: 
