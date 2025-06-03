@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/chat.css') }}">
   <script src="{{ url_for('static', filename='js/socket.io.4.7.2.min.js') }}"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
   <div class="container">
@@ -72,6 +73,29 @@
   </div>
 
   <script>
+    // Configure marked to enable table support
+    marked.setOptions({
+      gfm: true,
+      tables: true,
+      breaks: true,
+      smartLists: true,
+      smartypants: true,
+      headerIds: true,
+    });
+
+    function appendMessage(role, content) {
+      const messagesContainer = document.querySelector('#chat-tab .messages');
+      const messageDiv = document.createElement('div');
+      messageDiv.className = 'message';
+      
+      const contentDiv = document.createElement('div');
+      contentDiv.className = role === 'user' ? 'user-message' : 'assistant-message';
+      contentDiv.innerHTML = role === 'assistant' ? marked(content) : content;
+      
+      messageDiv.appendChild(contentDiv);
+      messagesContainer.appendChild(messageDiv);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
 
     let currentSid = null;
     let droppedFiles = [];
@@ -88,20 +112,6 @@
     socket.on("joined_task_room", (data) => {
       console.log("Joined task room:", data);
     });
-
-    function appendMessage(role, content) {
-      const messagesContainer = document.querySelector('#chat-tab .messages');
-      const messageDiv = document.createElement('div');
-      messageDiv.className = 'message';
-      
-      const contentDiv = document.createElement('div');
-      contentDiv.className = role === 'user' ? 'user-message' : 'assistant-message';
-      contentDiv.textContent = content;
-      
-      messageDiv.appendChild(contentDiv);
-      messagesContainer.appendChild(messageDiv);
-      messagesContainer.scrollTop = messagesContainer.scrollHeight;
-    }
 
     function appendResultFile(file) {
       const container = document.getElementById('results-tab');

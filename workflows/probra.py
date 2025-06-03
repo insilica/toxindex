@@ -21,6 +21,7 @@ def get_pydantic_serializer(obj):
     return obj.dict()
 
 @celery.task(bind=True)
+# async def probra_task(self, payload):
 def probra_task(self, payload):
     """Example background task that emits progress messages and uploads a file."""
     try:
@@ -34,25 +35,25 @@ def probra_task(self, payload):
 
         chemprop_query = payload.get("payload", "Is Gentamicin nephrotoxic?")
         logger.info(f"User query for deeptox_agent: {chemprop_query}")
-        response = deeptox_agent.run(chemprop_query)
 
-        # event = {
-        #     "type": "task_message",
-        #     "data": response,
-        #     "task_id": task_id,
-        # }
-        # r.publish("celery_updates", json.dumps(event))
-
-        # for i in range(5):
-        #     logger.debug(f"Processing step {i}")
-        #     message = MessageSchema(role="assistant", content=f"Step {i}")
+        # async for chunk in await deeptox_agent.arun(chemprop_query, stream=True):
+        #     message = MessageSchema(role="assistant", content=chunk)
         #     event = {
         #         "type": "task_message",
-        #         "data": message.dict(),
+        #         "data": message.model_dump(),
         #         "task_id": task_id,
         #     }
         #     r.publish("celery_updates", json.dumps(event))
-        #     time.sleep(1)
+
+        response = deeptox_agent.run(chemprop_query)
+        # display raw markdown content directly to user
+        message = MessageSchema(role="assistant", content=response.content)
+        event = {
+            "type": "task_message",
+            "data": message.model_dump(),
+            "task_id": task_id,
+        }
+        r.publish("celery_updates", json.dumps(event))
 
         # Create a simple result file and upload it to S3
         tmp_filename = f"probra_result_{uuid.uuid4().hex}.md"
@@ -79,17 +80,6 @@ def probra_task(self, payload):
             },
         }
         r.publish("celery_updates", json.dumps(file_event))
-
-        # display download url
-        message = MessageSchema(role="assistant", content=f"download_url {download_url}")
-        event = {
-            "type": "task_message",
-            "data": message.model_dump(),
-            "task_id": task_id,
-        }
-        r.publish("celery_updates", json.dumps(event))
-
-
         logger.info("Task completed successfully")
         return {"done": True}
     
