@@ -52,6 +52,7 @@ def probra_task(self, payload):
         s3_key = storage.upload_file(tmp_path, f"{task_id}/{tmp_filename}", "text/plain")
         download_url = storage.generate_download_url(s3_key)
         logger.info(f"File uploaded to S3: {s3_key}")
+        # generate a download URL for the file, return it in the response
 
         file_event = {
             "type": "task_file",
