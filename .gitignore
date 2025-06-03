@@ -26,3 +26,9 @@ dump.rdb
 
 # redis
 redis-server.log
+
+# Python virtual environment
+.venv/
+
+# Cytoscape
+logs/
