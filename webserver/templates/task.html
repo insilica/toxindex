@@ -73,29 +73,6 @@
   </div>
 
   <script>
-    // Configure marked to enable table support
-    marked.setOptions({
-      gfm: true,
-      tables: true,
-      breaks: true,
-      smartLists: true,
-      smartypants: true,
-      headerIds: true,
-    });
-
-    function appendMessage(role, content) {
-      const messagesContainer = document.querySelector('#chat-tab .messages');
-      const messageDiv = document.createElement('div');
-      messageDiv.className = 'message';
-      
-      const contentDiv = document.createElement('div');
-      contentDiv.className = role === 'user' ? 'user-message' : 'assistant-message';
-      contentDiv.innerHTML = role === 'assistant' ? marked(content) : content;
-      
-      messageDiv.appendChild(contentDiv);
-      messagesContainer.appendChild(messageDiv);
-      messagesContainer.scrollTop = messagesContainer.scrollHeight;
-    }
 
     let currentSid = null;
     let droppedFiles = [];
@@ -112,6 +89,41 @@
     socket.on("joined_task_room", (data) => {
       console.log("Joined task room:", data);
     });
+
+    // Configure marked to enable table support
+    marked.setOptions({
+      gfm: true,
+      tables: true,
+      breaks: true,
+      smartLists: true,
+      smartypants: true,
+      headerIds: true,
+    });
+
+    function appendMessage(role, content) {
+      console.log("[appendMessage] Called with role:", role, "content:", content);
+      const messagesContainer = document.querySelector('#chat-tab .messages');
+      if (!messagesContainer) {
+        console.error("[appendMessage] No messages container found!");
+        return;
+      }
+      const messageDiv = document.createElement('div');
+      messageDiv.className = 'message';
+      
+      const contentDiv = document.createElement('div');
+      contentDiv.className = role === 'user' ? 'user-message' : 'assistant-message';
+      if (role === 'assistant') {
+        console.log("[appendMessage] Rendering assistant markdown:", content);
+        contentDiv.innerHTML = marked.parse(content);
+      } else {
+        contentDiv.innerHTML = content;
+      }
+      
+      messageDiv.appendChild(contentDiv);
+      messagesContainer.appendChild(messageDiv);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      console.log("[appendMessage] Message appended. messagesContainer.scrollHeight:", messagesContainer.scrollHeight);
+    }
 
     function appendResultFile(file) {
       const container = document.getElementById('results-tab');
@@ -146,7 +158,7 @@
     }
 
     socket.on("task_message", (data) => {
-        console.log("task_message", data);
+        console.log("[socket.on task_message] Received:", data);
         appendMessage('assistant', data['content']);
     });
 
