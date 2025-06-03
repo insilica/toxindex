@@ -7,9 +7,15 @@ A collection of toxicology workflows
 3. webserver - a flask web user interface, it has users, projects, and projects have views for each services
 
 ## Development
+deactivate
+rm -rf .venv
+rm -rf ~/.cache/uv
+unset LD_LIBRARY_PATH
+nix flake update
+nix develop
+
 1. nix develop
 2. python -m webserver.app
-3. celery -A webserver.celery worker --loglevel=info
 3. celery -A workflows.celery_worker worker --loglevel=info
 
 ## Roadmap

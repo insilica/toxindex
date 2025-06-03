@@ -2,7 +2,7 @@
   description = "toxindex fullstack devShell with venv and GitHub SSH Python deps";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
@@ -14,9 +14,9 @@
       {
         devShells.default = pkgs.mkShell {
           buildInputs = [
-            pkgs.python3
+            pkgs.python310
+            pkgs.uv
             pkgs.git
-            pkgs.python3.pkgs.venvShellHook
             pkgs.flyway
             pkgs.postgresql_15
             pkgs.postgresql_jdbc
@@ -41,22 +41,17 @@
             fi
 
             if [ ! -d .venv ]; then
-              echo "Creating local venv and installing pip packages..."
-              python -m venv .venv
-              . .venv/bin/activate
-              unset PYTHONPATH
-              export LD_LIBRARY_PATH="${pkgs.stdenv.cc.cc.lib}/lib:$LD_LIBRARY_PATH"
-              pip install --upgrade pip
-              GIT_CLONE_PROTECTION_ACTIVE=false pip install -r requirements.txt
+              uv venv
+              source .venv/bin/activate
+              GIT_CLONE_PROTECTION_ACTIVE=false uv pip install -r requirements.txt
             else
-              echo "Using existing .venv"
-              . .venv/bin/activate
-              unset PYTHONPATH
-              export LD_LIBRARY_PATH="${pkgs.stdenv.cc.cc.lib}/lib:$LD_LIBRARY_PATH"
+              source .venv/bin/activate
             fi
-
-            echo "Python packages in venv:"
-            pip list
+            unset PYTHONPATH
+            
+            export LD_LIBRARY_PATH="${pkgs.stdenv.cc.cc.lib}/lib:$LD_LIBRARY_PATH"
+            echo "Python packages in uv venv:"
+            uv pip list
           '';
         };
       }
