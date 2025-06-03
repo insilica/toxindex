@@ -361,6 +361,17 @@ def environment_view(env_id):
     )
 
 
+@app.route("/environment/<env_id>", methods=["DELETE"])
+@flask_login.login_required
+def environment_delete(env_id):
+    try:
+        Environment.delete_environment(env_id, flask_login.current_user.user_id)
+        return flask.jsonify({"success": True})
+    except Exception as e:
+        logging.error(f"Failed to delete environment {env_id}: {e}")
+        return flask.jsonify({"success": False, "error": str(e)}), 500
+
+
 # LOGIN MANAGEMENT ===========================================================
 app.route("/register", methods=["GET", "POST"])(login.register)
 app.route("/verify", methods=["GET"])(login.verify_message)

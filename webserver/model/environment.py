@@ -63,3 +63,13 @@ class Environment:
             "SELECT * FROM environments WHERE environment_id = %s", (environment_id,)
         )
         return Environment.from_row(row) if row else None
+
+    @staticmethod
+    def delete_environment(environment_id, user_id=None):
+        params = (environment_id,)
+        query = "DELETE FROM environments WHERE environment_id = %s"
+        if user_id is not None:
+            query += " AND user_id = %s"
+            params = (environment_id, user_id)
+        ds.execute(query, params)
+        logging.info(f"Deleted environment {environment_id} for user {user_id}")

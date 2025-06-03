@@ -253,6 +253,12 @@
             reader.readAsDataURL(file);
         });
     }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.assistant-message').forEach(div => {
+        div.innerHTML = marked.parse(div.textContent.trim());
+      });
+    });
   </script>
 </body>
 </html>
