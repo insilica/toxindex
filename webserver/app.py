@@ -263,6 +263,11 @@ def task(task_id):
     messages = Message.get_messages(task_id)
     files = File.get_files(task_id)
 
+    # Find the latest assistant message
+    assistant_messages = [m for m in messages if m.role == "assistant"]
+    latest_assistant_message = assistant_messages[-1].content if assistant_messages else None
+
+
     # Pre-render markdown content for convenience
     rendered_files = []
     for f in files:
@@ -274,7 +279,11 @@ def task(task_id):
         rendered_files.append(file_info)
 
     return flask.render_template(
-        "task.html", task_id=task_id, messages=messages, files=rendered_files
+        "task.html", 
+        task_id=task_id, 
+        messages=messages, 
+        files=rendered_files, 
+        latest_assistant_message=latest_assistant_message
     )
 
 
