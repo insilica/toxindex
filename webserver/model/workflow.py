@@ -38,7 +38,7 @@ class Workflow:
         params = (title, user_id, description, initial_prompt)
         ds.execute("INSERT INTO workflows (title, user_id, description, initial_prompt) VALUES (%s, %s, %s, %s)", params)
         logging.info(f"created workflow {title} for user {user_id}")
-        res = ds.find("SELECT * FROM workflows WHERE title = %s ORDER BY created_at DESC LIMIT 1", (title))
+        res = ds.find("SELECT * FROM workflows WHERE title = %s ORDER BY created_at DESC LIMIT 1", (title,))
         return Workflow.from_row(res) if res else None
     
     @staticmethod
