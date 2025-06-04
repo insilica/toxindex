@@ -49,6 +49,20 @@
             </div>
           {% endif %}
 
+          {% if files %}
+            <div class="result-box">
+              <div class="result-body">
+                {{ files|length }} result file{{ 's' if files|length > 1 else '' }} found.
+              </div>
+            </div>
+          {% else %}
+            <div class="result-box">
+              <div class="result-body">
+                No result files found.
+              </div>
+            </div>
+          {% endif %}
+
           {% for file in files %}
             <div class="result-box">
               <div class="result-header">{{ file.filename }}</div>
@@ -136,8 +150,41 @@
       console.log("[appendMessage] Message appended. messagesContainer.scrollHeight:", messagesContainer.scrollHeight);
     }
 
+    function updateResultCount() {
+      const container = document.getElementById('results-tab');
+      // Remove any existing result count message
+      const countBox = container.querySelector('.result-box.result-count');
+      if (countBox) countBox.remove();
+
+      // Count the number of result-boxes that are actual files (not count or main result)
+      const fileBoxes = Array.from(container.querySelectorAll('.result-box'))
+        .filter(box => !box.classList.contains('main-result-box') && !box.classList.contains('result-count'));
+
+      // Only show the count if there is at least one file
+      if (fileBoxes.length > 0) {
+        const countDiv = document.createElement('div');
+        countDiv.className = 'result-box result-count';
+        const body = document.createElement('div');
+        body.className = 'result-body';
+        body.textContent = `${fileBoxes.length} result file${fileBoxes.length > 1 ? 's' : ''} found.`;
+        countDiv.appendChild(body);
+        // Insert after the main result, or at the top if no main result
+        const mainResult = container.querySelector('.main-result-box');
+        if (mainResult && mainResult.nextSibling) {
+          container.insertBefore(countDiv, mainResult.nextSibling);
+        } else {
+          container.insertBefore(countDiv, container.firstChild);
+        }
+      }
+    }
+
     function appendResultFile(file) {
       const container = document.getElementById('results-tab');
+      // Remove 'No result files found.' message if present
+      const noFilesMsg = container.querySelector('.result-body');
+      if (noFilesMsg && noFilesMsg.textContent.trim() === 'No result files found.') {
+        noFilesMsg.parentElement.remove();
+      }
       const box = document.createElement('div');
       box.className = 'result-box';
 
@@ -166,11 +213,41 @@
 
       box.appendChild(body);
       container.appendChild(box);
+
+      // Update the result count message
+      updateResultCount();
+    }
+
+    function updateMainResult(content) {
+      // Remove any existing main result box
+      const resultsTab = document.getElementById('results-tab');
+      const oldMainResult = resultsTab.querySelector('.main-result-box');
+      if (oldMainResult) {
+        oldMainResult.remove();
+      }
+      // Create new main result box
+      const box = document.createElement('div');
+      box.className = 'result-box main-result-box';
+      const header = document.createElement('div');
+      header.className = 'result-header';
+      header.textContent = 'Main Result';
+      box.appendChild(header);
+      const body = document.createElement('div');
+      body.className = 'result-body';
+      const markdown = document.createElement('div');
+      markdown.className = 'markdown-content';
+      markdown.innerHTML = marked.parse(content);
+      body.appendChild(markdown);
+      box.appendChild(body);
+      // Insert at the top of the results tab
+      resultsTab.insertBefore(box, resultsTab.firstChild);
     }
 
     socket.on("task_message", (data) => {
         console.log("[socket.on task_message] Received:", data);
         appendMessage('assistant', data['content']);
+        // Also update the main result in the Results tab
+        updateMainResult(data['content']);
     });
 
     socket.on("task_file", (data) => {
@@ -190,6 +267,18 @@
         tab.classList.add('active');
         contents.forEach(c => c.style.display = 'none');
         document.getElementById(`${tab.dataset.tab}-tab`).style.display = 'block';
+        // Add log to browser console for tab switch
+        console.log(`[Tab Switch] Switched to tab: ${tab.dataset.tab} at ${new Date().toISOString()}`);
+        // Send a request to the server to log this event
+        fetch('/log_tab_switch', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            tab: tab.dataset.tab,
+            task_id: task_id,
+            timestamp: new Date().toISOString()
+          })
+        });
       });
     });
 
