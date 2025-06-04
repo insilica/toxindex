@@ -7,11 +7,24 @@ import logging
 import pydantic
 from workflows.celery_worker import celery
 from webserver.model.message import MessageSchema
+from webserver.model.file import File
 from webserver.storage import S3FileStorage
 
 from RAP.tool_deeptox import deeptox_agent
 from RAP.toxicity_schema import TOXICITY_SCHEMA
 
+# os.makedirs(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'logs')), exist_ok=True)
+# log_filename = os.path.abspath(os.path.join(
+#     os.path.dirname(__file__), '..', 'logs', f'app_{datetime.now().strftime("%Y-%m-%d_%H")}.log'))
+
+# # This will add a file handler to the root logger if not already present
+# if not any(isinstance(h, logging.FileHandler) and h.baseFilename == log_filename for h in logging.getLogger().handlers):
+#     file_handler = logging.FileHandler(log_filename)
+#     file_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s'))
+#     logging.getLogger().addHandler(file_handler)
+#     logging.getLogger().setLevel(logging.DEBUG)
+
+logging.getLogger().info("probra.py module loaded")
 logger = logging.getLogger(__name__)
 
 def get_pydantic_serializer(obj):
@@ -62,30 +75,35 @@ def probra_task(self, payload):
         os.makedirs(project_tmp_dir, exist_ok=True)
         tmp_path = os.path.join(project_tmp_dir, tmp_filename)
 
+        logger.info(f"File creating in tmp: {tmp_path} for task {task_id}")
         # Save the response based on its type
         with open(tmp_path, 'w', encoding='utf-8') as f:
             f.write(response.content)
-
-        # Create a simple result file and upload it to S3
-        logger.info(f"Creating temporary file: {tmp_path}")
+        logger.info(f"File created in tmp: {tmp_path} for task {task_id}")
         
 
-        # storage = S3FileStorage()
-        # s3_key = storage.upload_file(tmp_path, f"{task_id}/{tmp_filename}", "text/plain")
-        # download_url = storage.generate_download_url(s3_key)
-        # logger.info(f"File uploaded to S3: {s3_key}")
+        # Create a simple result file and upload it to S3
+        # logger.info(f"File creating in DB: {tmp_path} for task {task_id}")
+        # File.create_file(task_id=task_id, user_id=user_id, filename=tmp_filename, filepath=tmp_path, s3_url=None)
+        # logger.info(f"File registered in DB: {tmp_path} for task {task_id}")
 
-        # file_event = {
-        #     "type": "task_file",
-        #     "task_id": task_id,
-        #     "data": {
-        #         "user_id": user_id,
-        #         "filename": tmp_filename,
-        #         "filepath": s3_key,
-        #         "s3_url": download_url,
-        #     },
-        # }
-        # r.publish("celery_updates", json.dumps(file_event))
+        storage = S3FileStorage()
+        s3_key = storage.upload_file(tmp_path, f"{task_id}/{tmp_filename}", "text/plain")
+        download_url = storage.generate_download_url(s3_key)
+        logger.info(f"File uploaded to S3: {s3_key}")
+
+        file_event = {
+            "type": "task_file",
+            "task_id": task_id,
+            "data": {
+                "user_id": user_id,
+                "filename": tmp_filename,
+                "filepath": s3_key,
+                "s3_url": download_url,
+            },
+        }
+        r.publish("celery_updates", json.dumps(file_event))
+
         logger.info("Task completed successfully")
         return {"done": True}
 

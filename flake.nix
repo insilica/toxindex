@@ -23,6 +23,7 @@
             pkgs.redis
             pkgs.awscli2
             pkgs.gcc
+            pkgs.zlib 
           ];
 
           shellHook = ''
@@ -49,7 +50,7 @@
             fi
             unset PYTHONPATH
             
-            export LD_LIBRARY_PATH="${pkgs.stdenv.cc.cc.lib}/lib:$LD_LIBRARY_PATH"
+            export LD_LIBRARY_PATH="${pkgs.zlib.out}/lib:${pkgs.stdenv.cc.cc.lib}/lib:$LD_LIBRARY_PATH"
             echo "Python packages in uv venv:"
             uv pip list
           '';
