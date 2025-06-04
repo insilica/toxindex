@@ -82,7 +82,7 @@ def probra_task(self, payload):
         logger.info(f"File created in tmp: {tmp_path} for task {task_id}")
         
 
-        # Create a simple result file and upload it to S3
+        # Create a simple result file and save it to local
         # logger.info(f"File creating in DB: {tmp_path} for task {task_id}")
         # File.create_file(task_id=task_id, user_id=user_id, filename=tmp_filename, filepath=tmp_path, s3_url=None)
         # logger.info(f"File registered in DB: {tmp_path} for task {task_id}")
