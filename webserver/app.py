@@ -3,6 +3,7 @@ monkey.patch_all()
 
 import dotenv
 import uuid
+import os
 
 dotenv.load_dotenv()
 
@@ -29,6 +30,9 @@ from workflows.celery_worker import celery
 from flask_socketio import SocketIO, emit
 from flask_socketio import join_room
 
+# BD ENC
+logging.info(f"DB ENV (Flask startup): PGHOST={os.getenv('PGHOST')}, PGPORT={os.getenv('PGPORT')}, PGDATABASE={os.getenv('PGDATABASE')}, PGUSER={os.getenv('PGUSER')}, PGPASSWORD={os.getenv('PGPASSWORD')}")
+
 # FLASK APP ===================================================================
 static_folder_path = os.path.join(os.path.dirname(__file__), "webserver", "static")
 app = flask.Flask(__name__, template_folder="templates")
@@ -47,12 +51,16 @@ socketio = SocketIO(
     engineio_logger=True
 )
 
+# Generate a unique log filename with date and time
+os.makedirs('logs', exist_ok=True)
+log_filename = f"logs/app_{datetime.now().strftime('%Y-%m-%d_%H')}.log"
+
 # Configure logging to output to file with detailed formatting
 logging.basicConfig(
     level=logging.DEBUG,
     format='%(asctime)s - %(name)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s',
     handlers=[
-        logging.FileHandler('app.log'),
+        logging.FileHandler(log_filename),
         logging.StreamHandler()  # Also keep console output
     ]
 )
@@ -415,3 +423,12 @@ if __name__ == "__main__":
         ).start()
 
     socketio.run(app, host="0.0.0.0", port=6513, debug=True, use_reloader=True)
+
+@app.route('/log_tab_switch', methods=['POST'])
+def log_tab_switch():
+    data = flask.request.get_json()
+    tab = data.get('tab')
+    task_id = data.get('task_id')
+    timestamp = data.get('timestamp')
+    logging.info(f"[Tab Switch] User switched to tab '{tab}' for task_id={task_id} at {timestamp}")
+    return flask.jsonify({'status': 'ok'})

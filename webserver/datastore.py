@@ -4,11 +4,12 @@ import os
 import logging
 
 # Read environment variables for PostgreSQL connection
-dbhost = os.getenv('DB_HOST')
-dbport = os.getenv('DB_PORT')
-dbname = os.getenv('DB_NAME')
-dbuser = os.getenv('DB_USER')
-dbpass = os.getenv('DB_PASSWORD')
+# Use standard PostgreSQL environment variable names
+dbhost = os.getenv('PGHOST')
+dbport = os.getenv('PGPORT')
+dbname = os.getenv('PGDATABASE')
+dbuser = os.getenv('PGUSER')
+dbpass = os.getenv('PGPASSWORD')
 
 def get_connection():
     con = psycopg2.connect(host=dbhost, port=dbport, dbname=dbname, user=dbuser, password=dbpass)

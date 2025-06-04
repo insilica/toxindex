@@ -42,12 +42,17 @@ class File:
 
     @staticmethod
     def create_file(task_id, user_id, filename, filepath, s3_url):
+        logging.info(f"DB ENV (create_file): PGHOST={os.getenv('PGHOST')}, PGPORT={os.getenv('PGPORT')}, PGDATABASE={os.getenv('PGDATABASE')}, PGUSER={os.getenv('PGUSER')}, PGPASSWORD={os.getenv('PGPASSWORD')}")
         logging.info(f"Storing file for task_id={task_id}, filename={filename}")
         params = (task_id, user_id, filename, filepath, s3_url)
-        ds.execute(
-            "INSERT INTO files (task_id, user_id, filename, filepath, s3_url) VALUES (%s, %s, %s, %s, %s)",
-            params
-        )
+        try:
+            ds.execute(
+                "INSERT INTO files (task_id, user_id, filename, filepath, s3_url) VALUES (%s, %s, %s, %s, %s)",
+                params
+            )
+            logging.info(f"Successfully inserted file for task_id={task_id}, filename={filename}")
+        except Exception as e:
+            logging.error(f"Failed to insert file for task_id={task_id}, filename={filename}: {e}")
 
     @staticmethod
     def upload_and_create(
@@ -68,11 +73,24 @@ class File:
 
     @staticmethod
     def get_files(task_id):
-        rows = ds.find_all(
-            "SELECT * FROM files WHERE task_id = %s ORDER BY created_at ASC",
-            (task_id,)
-        )
-        return [File.from_row(row) for row in rows]
+        import os
+        try:
+            task_id_int = int(task_id)
+            logging.info(f"DB ENV (get_files): PGHOST={os.getenv('PGHOST')}, PGPORT={os.getenv('PGPORT')}, PGDATABASE={os.getenv('PGDATABASE')}, PGUSER={os.getenv('PGUSER')}, PGPASSWORD={os.getenv('PGPASSWORD')}")
+            logging.info(f"Calling get_files with task_id={task_id_int} (type: {type(task_id_int)})")
+            rows = ds.find_all(
+                "SELECT * FROM files WHERE task_id = %s ORDER BY created_at ASC",
+                (task_id_int,)
+            )
+            logging.info(f"Raw rows returned from DB for task_id={task_id_int}: {rows}")
+            if not rows:
+                logging.warning(f"No files found in DB for task_id={task_id_int}")
+            else:
+                logging.info(f"Found {len(rows)} files in DB for task_id={task_id_int}")
+            return [File.from_row(row) for row in rows]
+        except Exception as e:
+            logging.error(f"Error retrieving files for task_id={task_id}: {e}")
+            return []
 
     @staticmethod  
     def process_event(task, event_data):
