@@ -35,26 +35,37 @@
         </div>
 
         <div class="tab-content" id="activity-tab" style="display: none;">
-          <p>Recent activity will appear here.</p>
+          <p>Recent activity will appear here. Under construction...</p>
         </div>
 
         <div class="tab-content" id="results-tab" style="display: none;">
-          {% for file in files %}
-          <div class="result-box">
-            <div class="result-header">{{ file.filename }}</div>
-            <div class="result-body">
-              {% if file.filename.lower().endswith('.png') or
-                    file.filename.lower().endswith('.jpg') or
-                    file.filename.lower().endswith('.jpeg') or
-                    file.filename.lower().endswith('.gif') %}
-                <img src="{{ file.s3_url or file.filepath }}" alt="{{ file.filename }}" class="result-image">
-              {% elif file.filename.lower().endswith('.md') or file.filename.lower().endswith('.markdown') %}
-                <div class="markdown-content">{{ file.html|safe }}</div>
-              {% else %}
-                <a href="{{ file.s3_url or file.filepath }}">Download {{ file.filename }}</a>
-              {% endif %}
+
+          {% if latest_assistant_message %}
+            <div class="result-box">
+              <div class="result-header">Main Result</div>
+              <div class="result-body">
+                <div class="markdown-content">{{ latest_assistant_message|safe }}</div>
+              </div>
             </div>
-          </div>
+          {% endif %}
+
+          {% for file in files %}
+            <div class="result-box">
+              <div class="result-header">{{ file.filename }}</div>
+              <div class="result-body">
+                {% if file.filename.lower().endswith('.png') or
+                      file.filename.lower().endswith('.jpg') or
+                      file.filename.lower().endswith('.jpeg') or
+                      file.filename.lower().endswith('.gif') %}
+                  <img src="{{ file.s3_url or file.filepath }}" alt="{{ file.filename }}" class="result-image">
+                {% elif file.filename.lower().endswith('.md') or file.filename.lower().endswith('.markdown') %}
+                  <div class="markdown-content">{{ file.html|safe }}</div>
+                  <a href="{{ file.s3_url or file.filepath }}" download>Download {{ file.filename }}</a>
+                {% else %}
+                  <a href="{{ file.s3_url or file.filepath }}">Download {{ file.filename }}</a>
+                {% endif %}
+              </div>
+            </div>
           {% endfor %}
         </div>
 
