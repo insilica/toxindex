@@ -45,7 +45,7 @@ def probra_task(self, payload):
         #     }
         #     r.publish("celery_updates", json.dumps(event))
 
-        response = deeptox_agent.run(chemprop_query)
+        response = deeptox_agent.run(chemprop_query, history=True)
         # display raw markdown content directly to user
         message = MessageSchema(role="assistant", content=response.content)
         event = {
@@ -55,36 +55,39 @@ def probra_task(self, payload):
         }
         r.publish("celery_updates", json.dumps(event))
 
-        # Create a simple result file and upload it to S3
+        
+        # the tmp path is within nix environment, not local project folder.
         tmp_filename = f"probra_result_{uuid.uuid4().hex}.md"
-        tmp_path = os.path.join("/tmp", tmp_filename)
-        logger.info(f"Creating temporary file: {tmp_path}")
-        print(f"Creating temporary file: {tmp_path}")
+        project_tmp_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'tmp'))
+        os.makedirs(project_tmp_dir, exist_ok=True)
+        tmp_path = os.path.join(project_tmp_dir, tmp_filename)
+
         # Save the response based on its type
         with open(tmp_path, 'w', encoding='utf-8') as f:
             f.write(response.content)
 
-        storage = S3FileStorage()
-        s3_key = storage.upload_file(tmp_path, f"{task_id}/{tmp_filename}", "text/plain")
-        download_url = storage.generate_download_url(s3_key)
-        logger.info(f"File uploaded to S3: {s3_key}")
+        # Create a simple result file and upload it to S3
+        logger.info(f"Creating temporary file: {tmp_path}")
+        
 
-        file_event = {
-            "type": "task_file",
-            "task_id": task_id,
-            "data": {
-                "user_id": user_id,
-                "filename": tmp_filename,
-                "filepath": s3_key,
-                "s3_url": download_url,
-            },
-        }
-        r.publish("celery_updates", json.dumps(file_event))
+        # storage = S3FileStorage()
+        # s3_key = storage.upload_file(tmp_path, f"{task_id}/{tmp_filename}", "text/plain")
+        # download_url = storage.generate_download_url(s3_key)
+        # logger.info(f"File uploaded to S3: {s3_key}")
+
+        # file_event = {
+        #     "type": "task_file",
+        #     "task_id": task_id,
+        #     "data": {
+        #         "user_id": user_id,
+        #         "filename": tmp_filename,
+        #         "filepath": s3_key,
+        #         "s3_url": download_url,
+        #     },
+        # }
+        # r.publish("celery_updates", json.dumps(file_event))
         logger.info("Task completed successfully")
         return {"done": True}
-    
-
-
 
     except Exception as e:
         logger.error(f"Error in probra_task: {str(e)}", exc_info=True)
