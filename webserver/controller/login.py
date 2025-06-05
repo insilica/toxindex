@@ -6,6 +6,7 @@ from webserver import datastore as ds
 from flask import url_for
 
 import flask, flask_login, secrets, datetime, logging
+import pprint
 
 
 login_page = flask.Blueprint('login', __name__, template_folder='templates')
@@ -79,23 +80,33 @@ def reset_password(token):
 def register():
   form = RegistrationForm()
 
-  logging.debug('This is a debug message')
+  logging.debug(f"[register] Request method: {flask.request.method}")
+  logging.debug(f"[register] Raw form data: {flask.request.form}")
+  logging.debug(f"[register] Raw data: {flask.request.data}")
+  logging.debug(f"[register] Form populated data: email={form.email.data}, password={form.password.data}, password_confirmation={form.password_confirmation.data}")
+
   if form.validate_on_submit(): # Validates form data
+      logging.debug(f"[register] Form validated successfully for email: {form.email.data}")
       if User.user_exists(form.email.data):
           flask.flash(f"{form.email.data} already exists, please log in")
+          logging.debug(f"[register] User already exists: {form.email.data}")
           return flask.redirect('register')
 
       user = User.create_user(form.email.data, form.password.data)
 
       if user is not None: # Checks if the user object is valid
+          logging.debug(f"[register] User created: {user.email}")
           validate(user)
           return flask.redirect(url_for('verify_message', email=form.email.data))
       else:
-        logging.debug('user is none!')
+        logging.debug('[register] user is none!')
         flask.flash("An error occurred while creating the user. Please try again.")
   else:
-      logging.debug('form did not validate')
-      logging.debug(form.errors)
+      logging.debug('[register] form did not validate')
+      logging.debug(f"[register] form.errors: {pprint.pformat(form.errors)}")
+      for field, errors in form.errors.items():
+          for error in errors:
+              logging.debug(f"[register] Field '{field}' error: {error}")
       flask.flash("An error occurred while creating the user. Please try again.")
       
   return flask.render_template('register.html', form=form)
