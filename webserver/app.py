@@ -80,52 +80,44 @@ def redis_listener(name):
     r = redis.Redis()
     pubsub = r.pubsub()
     pubsub.subscribe("celery_updates")
-
+    logging.info(f"[redis_listener] Started Redis listener thread: {name}")
     for redis_message in pubsub.listen():
+        logging.debug(f"[redis_listener] Raw redis_message: {redis_message}")
         if redis_message["type"] != "message":
             continue
-
         try:
             raw_data = redis_message["data"]
             if isinstance(raw_data, bytes):
                 raw_data = raw_data.decode()
-
             event = json.loads(raw_data)
-            logging.info(f"Redis event: {event}")
-            
+            logging.info(f"[redis_listener] Redis event: {event}")
             event_type = event.get("type")
             event_task_id = event.get("task_id")
             event_data = event.get("data")
-
             if event_task_id is None or event_data is None:
-                logging.warning(
-                    f"Redis event missing required fields: event_type={event_type}, "
-                    f"task_id={event_task_id}, data={event_data}"
-                )
+                logging.warning(f"[redis_listener] Redis event missing required fields: event_type={event_type}, task_id={event_task_id}, data={event_data}")
                 continue
-
             if event_type not in ("task_message", "task_file"):
+                logging.debug(f"[redis_listener] Ignoring event_type={event_type}")
                 continue
-
             task = Task.get_task(event_task_id)
             if not task:
-                logging.warning(f"No task found for task_id={event_task_id}")
+                logging.warning(f"[redis_listener] No task found for task_id={event_task_id}")
                 continue
-
             if event_type == "task_message":
+                logging.info(f"[redis_listener] Processing task_message for task_id={event_task_id}")
                 Message.process_event(task, event_data)
             elif event_type == "task_file":
-                logging.info(f"task_file {raw_data}")
+                logging.info(f"[redis_listener] Processing task_file for task_id={event_task_id}")
                 File.process_event(task, event_data)
-
             room = f"task_{task.task_id}"
+            logging.info(f"[redis_listener] Emitting {event_type} to room {room} with data: {event_data}")
             socketio.emit(event_type, event_data, to=room)
-            logging.info(f"{event_type} sent to {room}")
-
+            logging.info(f"[redis_listener] {event_type} sent to {room}")
         except json.JSONDecodeError:
-            logging.error("Failed to decode Redis message as JSON.")
+            logging.error("[redis_listener] Failed to decode Redis message as JSON.")
         except Exception as e:
-            logging.error(f"Redis listener error: {e}", exc_info=True)
+            logging.error(f"[redis_listener] Redis listener error: {e}", exc_info=True)
 
 
 # INDEX / ROOT ===============================================================
@@ -145,8 +137,8 @@ def index():
 # SOCKETIO HANDLERS ==========================================================
 @socketio.on("connect")
 def handle_connect(auth):
+    logging.info(f"[socketio] Client connected: {request.sid}")
     emit("connected", {"sid": request.sid})
-    logging.info(f"user connected {request.sid}")
 
 
 # TODO right now I think any user can join any task room
@@ -154,30 +146,32 @@ def handle_connect(auth):
 def handle_join_task_room(data):
     task_id = data.get("task_id")
     room = f"task_{task_id}"
+    logging.info(f"[socketio] {request.sid} joining room: {room}")
     join_room(room)
-    logging.info(f"user joined task room: {room}")
+    logging.info(f"[socketio] {request.sid} joined room: {room}")
     emit("joined_task_room", {"task_id": task_id})
 
 
 # TASK MANAGEMENT ============================================================
 @app.route("/task/new", methods=["POST"])
 def task_create():
-    logging.info(f"task_create called with {request.method}")
+    logging.info(f"[task_create] Called with {request.method}")
     task_data = request.get_json()
     message = task_data.get("message", "")
-
+    logging.info(f"[task_create] Received message: {message}")
     title = generate_title(message)
     user_id = flask_login.current_user.user_id
     workflow_id = int(task_data.get("workflow", 1))
     environment_id = task_data.get("environment_id")
     sid = task_data.get("sid")
+    logging.info(f"[task_create] Creating task for user_id={user_id}, workflow_id={workflow_id}, environment_id={environment_id}, sid={sid}")
     task = Task.create_task(
         title=title,
         user_id=user_id,
         workflow_id=workflow_id,
         environment_id=environment_id,
     )
-
+    logging.info(f"[task_create] Created task: {task.to_dict() if task else None}")
     Task.add_message(task.task_id, flask_login.current_user.user_id, "user", message)
     
     # Select the appropriate task based on workflow_id

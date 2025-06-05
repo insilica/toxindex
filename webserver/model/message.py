@@ -45,12 +45,13 @@ class Message():
 
     @staticmethod
     def create_message(task_id, user_id, role, content):
-        logging.info(f"Storing message for task_id={task_id}, user_id={user_id}, role={role}")
+        logging.info(f"[Message.create_message] Storing message for task_id={task_id}, user_id={user_id}, role={role}, content={content}")
         params = (task_id, user_id, role, content)
         ds.execute(
             "INSERT INTO messages (task_id, user_id, role, content) VALUES (%s, %s, %s, %s)",
             params
         )
+        logging.info(f"[Message.create_message] Message stored for task_id={task_id}")
 
     @staticmethod
     def get_messages(task_id):
@@ -65,11 +66,11 @@ class Message():
     def process_event(task, event_data):
         role = event_data.get("role", "assistant")
         content = event_data.get("content")
-
+        logging.info(f"[Message.process_event] Processing event for task_id={task.task_id}, role={role}, content={content}")
         if content and role:
             Message.create_message(task.task_id, None, role, content)
-            logging.info(f"Stored message for task_id={task.task_id} from role={role}")
+            logging.info(f"[Message.process_event] Stored message for task_id={task.task_id} from role={role}")
         else:
-            logging.warning(f"Malformed task_message event received data: {event_data}")
-            logging.warning(f"Role: {role}")
-            logging.warning(f"Content: {content}")
+            logging.warning(f"[Message.process_event] Malformed task_message event received data: {event_data}")
+            logging.warning(f"[Message.process_event] Role: {role}")
+            logging.warning(f"[Message.process_event] Content: {content}")
