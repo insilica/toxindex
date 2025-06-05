@@ -36,7 +36,7 @@ logging.info(f"DB ENV (Flask startup): PGHOST={os.getenv('PGHOST')}, PGPORT={os.
 # FLASK APP ===================================================================
 static_folder_path = os.path.join(os.path.dirname(__file__), "webserver", "static")
 app = flask.Flask(__name__, template_folder="templates")
-app.config["SERVER_NAME"] = os.environ.get("SERVER_NAME")
+# app.config["SERVER_NAME"] = os.environ.get("SERVER_NAME")
 app.config["PREFERRED_URL_SCHEME"] = os.environ.get("PREFERRED_URL_SCHEME")
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.secret_key = os.environ.get("FLASK_APP_SECRET_KEY")
