@@ -408,16 +408,28 @@ def serve_icon(filename):
 
 
 # LAUNCH =====================================================================
-if __name__ == "__main__":
-    if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
-        thread_name = f"RedisListenerThread-{uuid.uuid4().hex[:8]}"
-        threading.Thread(
-            target=redis_listener,
-            args=(thread_name,),  # <- fix here
-            daemon=True,
-            name=thread_name,
-        ).start()
+thread_name = f"RedisListenerThread-{uuid.uuid4().hex[:8]}"
+threading.Thread(
+    target=redis_listener,
+    args=(thread_name,),
+    daemon=True,
+    name=thread_name,
+).start()
 
+# For localhost development only:
+# Uncomment the following block to run the Flask dev server with the Redis listener thread.
+# if __name__ == "__main__":
+#     if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
+#         thread_name = f"RedisListenerThread-{uuid.uuid4().hex[:8]}"
+#         threading.Thread(
+#             target=redis_listener,
+#             args=(thread_name,),
+#             daemon=True,
+#             name=thread_name,
+#         ).start()
+#     socketio.run(app, host="0.0.0.0", port=6513, debug=True, use_reloader=True)
+
+if __name__ == "__main__":
     socketio.run(app, host="0.0.0.0", port=6513, debug=True, use_reloader=True)
 
 @app.route('/log_tab_switch', methods=['POST'])
