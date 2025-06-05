@@ -43,6 +43,9 @@ app.config["PREFERRED_URL_SCHEME"] = os.environ.get("PREFERRED_URL_SCHEME")
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.secret_key = os.environ.get("FLASK_APP_SECRET_KEY")
 
+logging.info(f"SECRET_KEY: {app.secret_key}")
+logging.info(f"WTF_CSRF_ENABLED: {app.config.get('WTF_CSRF_ENABLED', 'not set')}")
+
 socketio = SocketIO(
     app,
     cors_allowed_origins="*",
@@ -440,3 +443,10 @@ def log_tab_switch():
     timestamp = data.get('timestamp')
     logging.info(f"[Tab Switch] User switched to tab '{tab}' for task_id={task_id} at {timestamp}")
     return flask.jsonify({'status': 'ok'})
+
+from flask_wtf.csrf import CSRFError
+@app.errorhandler(CSRFError)
+def handle_csrf_error(e):
+    logging.error(f"[CSRF] {e.description}")
+    from webserver.forms.registration_form import RegistrationForm
+    return flask.render_template('register.html', form=RegistrationForm(), csrf_error=e.description), 400
