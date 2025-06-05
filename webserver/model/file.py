@@ -42,17 +42,16 @@ class File:
 
     @staticmethod
     def create_file(task_id, user_id, filename, filepath, s3_url):
-        logging.info(f"DB ENV (create_file): PGHOST={os.getenv('PGHOST')}, PGPORT={os.getenv('PGPORT')}, PGDATABASE={os.getenv('PGDATABASE')}, PGUSER={os.getenv('PGUSER')}, PGPASSWORD={os.getenv('PGPASSWORD')}")
-        logging.info(f"Storing file for task_id={task_id}, filename={filename}")
+        logging.info(f"[File.create_file] Storing file for task_id={task_id}, filename={filename}, filepath={filepath}, s3_url={s3_url}")
         params = (task_id, user_id, filename, filepath, s3_url)
         try:
             ds.execute(
                 "INSERT INTO files (task_id, user_id, filename, filepath, s3_url) VALUES (%s, %s, %s, %s, %s)",
                 params
             )
-            logging.info(f"Successfully inserted file for task_id={task_id}, filename={filename}")
+            logging.info(f"[File.create_file] Successfully inserted file for task_id={task_id}, filename={filename}")
         except Exception as e:
-            logging.error(f"Failed to insert file for task_id={task_id}, filename={filename}: {e}")
+            logging.error(f"[File.create_file] Failed to insert file for task_id={task_id}, filename={filename}: {e}")
 
     @staticmethod
     def upload_and_create(
@@ -98,10 +97,10 @@ class File:
         filename = event_data.get("filename")
         filepath = event_data.get("filepath")
         s3_url = event_data.get("s3_url")
-
+        logging.info(f"[File.process_event] Processing event for task_id={task.task_id}, filename={filename}, filepath={filepath}, s3_url={s3_url}")
         if user_id and filename and filepath and s3_url:
             File.create_file(task.task_id, user_id, filename, filepath, s3_url)
-            logging.info(f"Stored file {filename} for task_id={task.task_id}")
+            logging.info(f"[File.process_event] Stored file {filename} for task_id={task.task_id}")
         else:
             missing = []
             if not user_id:
@@ -112,8 +111,8 @@ class File:
                 missing.append("filepath")
             if not s3_url:
                 missing.append("s3_url")
-            logging.warning(f"Malformed task_file event received - missing fields: {', '.join(missing)}")
-            logging.debug(f"Received payload: {event_data}")
+            logging.warning(f"[File.process_event] Malformed task_file event received - missing fields: {', '.join(missing)}")
+            logging.debug(f"[File.process_event] Received payload: {event_data}")
 
     # ------------------------------------------------------------------
     def read_text(self):
