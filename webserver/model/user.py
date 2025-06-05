@@ -58,19 +58,29 @@ class User(flask_login.UserMixin):
     return stripe_controller.create_customer(email)
   
   def create_datastore_customer(email, password, stripe_customer_id):
-    hashpw = generate_password_hash(password)
-    token = User.make_token()
-    user_id = uuid.uuid4()
-    params = (user_id, email, hashpw, token, stripe_customer_id)
-    logging.info(f"creating user with params {params}")
-    ds.execute("INSERT INTO users (user_id, email, hashpw, token, stripe_customer_id) values (%s,%s,%s,%s,%s)", params)
+    try:
+      hashpw = generate_password_hash(password)
+      token = User.make_token()
+      user_id = uuid.uuid4()
+      params = (user_id, email, hashpw, token, stripe_customer_id)
+      logging.info(f"[User.create_datastore_customer] Params: {params}")
+      ds.execute("INSERT INTO users (user_id, email, hashpw, token, stripe_customer_id) values (%s,%s,%s,%s,%s)", params)
+    except Exception as e:
+      logging.error(f"[User.create_datastore_customer] Exception: {e}", exc_info=True)
   
   @staticmethod
   def create_user(email, password):
-    if User.user_exists(email): raise ValueError(f"{email} already exists")
-    customer = User.create_stripe_customer(email)
-    User.create_datastore_customer(email, password, customer.id)
-    return User.get_user(email)
+    try:
+      logging.info(f"[User.create_user] Creating user: {email}")
+      if User.user_exists(email):
+        logging.warning(f"[User.create_user] User already exists: {email}")
+        raise ValueError(f"{email} already exists")
+      customer = User.create_stripe_customer(email)
+      User.create_datastore_customer(email, password, customer.id)
+      return User.get_user(email)
+    except Exception as e:
+      logging.error(f"[User.create_user] Exception: {e}", exc_info=True)
+      return None
 
   @staticmethod
   def delete_user(email):

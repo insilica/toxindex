@@ -19,6 +19,11 @@ class RegistrationForm(FlaskForm):
         EqualTo('password', message="Passwords must match.")
     ])
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        import logging
+        logging.debug(f"[RegistrationForm] Initialized with data: {self.data}")
+
 class UpdatePasswordForm(FlaskForm):
   password = PasswordField('password', [validators.InputRequired()])
   
