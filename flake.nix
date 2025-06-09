@@ -51,6 +51,8 @@
             unset PYTHONPATH
             
             export LD_LIBRARY_PATH="${pkgs.zlib.out}/lib:${pkgs.stdenv.cc.cc.lib}/lib:$LD_LIBRARY_PATH"
+            # force eventlet to use the system resolver instead of DNS monkey patching
+            export EVENTLET_NO_GREENDNS=yes 
             echo "Python packages in uv venv:"
             uv pip list
           '';
