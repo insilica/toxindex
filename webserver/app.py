@@ -245,6 +245,22 @@ def task_status(task_id):
     )
 
 
+@app.route("/task/<int:task_id>/archive", methods=["POST"])
+@flask_login.login_required
+def archive_task(task_id):
+    user_id = flask_login.current_user.user_id
+    ds.execute("UPDATE tasks SET archived = TRUE WHERE task_id = %s AND user_id = %s", (task_id, user_id))
+    return flask.jsonify({"success": True})
+
+
+@app.route("/task/<int:task_id>/unarchive", methods=["POST"])
+@flask_login.login_required
+def unarchive_task(task_id):
+    user_id = flask_login.current_user.user_id
+    ds.execute("UPDATE tasks SET archived = FALSE WHERE task_id = %s AND user_id = %s", (task_id, user_id))
+    return flask.jsonify({"success": True})
+
+
 @app.route("/tasks", methods=["GET"])
 @flask_login.login_required
 def get_user_tasks():
@@ -255,18 +271,17 @@ def get_user_tasks():
             tasks = Task.get_tasks_by_environment(env_id, user_id)
         else:
             tasks = Task.get_tasks_by_user(user_id)
-        tasks_data = [
-            {
-                "task_id": task.task_id,
-                "title": task.title,
-                "created_at": (
-                    task.created_at.isoformat() if hasattr(task, "created_at") else None
-                ),
-                "workflow_id": task.workflow_id,
-            }
-            for task in tasks
-        ]
-        return flask.jsonify({"tasks": tasks_data})
+        # Split into active and archived, sort by last_accessed or created_at
+        active_tasks = [t for t in tasks if not t.archived]
+        archived_tasks = [t for t in tasks if t.archived]
+        def sort_key(t):
+            return t.last_accessed or t.created_at or datetime.datetime.min
+        active_tasks = sorted(active_tasks, key=sort_key, reverse=True)
+        archived_tasks = sorted(archived_tasks, key=sort_key, reverse=True)
+        return flask.jsonify({
+            "active_tasks": [t.to_dict() for t in active_tasks],
+            "archived_tasks": [t.to_dict() for t in archived_tasks],
+        })
     except Exception as e:
         logging.error(f"Error retrieving tasks: {str(e)}")
         return flask.jsonify({"error": "Failed to retrieve tasks"}), 500

@@ -11,13 +11,14 @@
     
     <div class="tasks" id="env-list">
         <div id="add-env-container" class="mb-3">
-            <button id="add-env-btn" type="button" class="new-env-btn d-flex align-items-center gap-2 w-100" style="background: none; border: none; color: #fff; font-size: 1.08rem; font-weight: 400; padding: 0; box-shadow: none; min-height: 36px;">
+            <button id="add-env-btn" type="button" class="new-env-btn d-flex align-items-center" style="background: none; border: none; color: #fff; font-size: 1.08rem; font-weight: 400; box-shadow: none;">
                 <span class="icon-folder-plus" style="display: flex; align-items: center;">
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                    <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" stroke="#fff" stroke-width="2"/>
+                  <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                    <path d="M3 9a2 2 0 0 1 2-2h6l2 2h14a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9z" stroke="#fff" stroke-width="2.5"/>
                     <g>
-                      <circle cx="6.5" cy="17.5" r="2" fill="#181c1f"/>
-                      <path d="M6.5 16v3M5 17.5h3" stroke="#22c55e" stroke-width="1.5" stroke-linecap="round"/>
+                      <circle cx="10" cy="24" r="3.2" fill="#181c1f"/>
+                      <path d="M10 20.2v7.6" stroke="#22c55e" stroke-width="3" stroke-linecap="round"/>
+                      <path d="M6.2 24h7.6" stroke="#22c55e" stroke-width="3" stroke-linecap="round"/>
                     </g>
                   </svg>
                 </span>
@@ -75,10 +76,58 @@
         .then(response => response.json())
         .then(data => {
             if (data.environments) {
-                const addEnvHTML = document.getElementById('add-env-container')?.outerHTML || '';
                 envList.innerHTML = '';
-                // Re-insert add-env-container HTML as first child
-                envList.insertAdjacentHTML('afterbegin', addEnvHTML);
+                // Build add-env-container from scratch
+                const addEnvContainer = document.createElement('div');
+                addEnvContainer.id = 'add-env-container';
+                addEnvContainer.className = 'mb-3';
+
+                // Create the button
+                const addEnvBtn = document.createElement('button');
+                addEnvBtn.id = 'add-env-btn';
+                addEnvBtn.type = 'button';
+                addEnvBtn.className = 'new-env-btn d-flex align-items-center';
+
+                // Icon span
+                const iconSpan = document.createElement('span');
+                iconSpan.className = 'icon-folder-plus';
+                iconSpan.style.display = 'flex';
+                iconSpan.style.alignItems = 'center';
+                iconSpan.innerHTML = `<svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                    <path d="M3 9a2 2 0 0 1 2-2h6l2 2h14a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9z" stroke="#fff" stroke-width="2.5"/>
+                    <g>
+                      <circle cx="10" cy="24" r="3.2" fill="#181c1f"/>
+                      <path d="M10 20.2v7.6" stroke="#22c55e" stroke-width="3" stroke-linecap="round"/>
+                      <path d="M6.2 24h7.6" stroke="#22c55e" stroke-width="3" stroke-linecap="round"/>
+                    </g>
+                  </svg>`;
+
+                // Text span
+                const textSpan = document.createElement('span');
+                textSpan.textContent = 'New environment';
+                textSpan.style.color = '#fff';
+                textSpan.style.fontSize = '0.95rem';
+
+                // Assemble button
+                addEnvBtn.appendChild(iconSpan);
+                addEnvBtn.appendChild(textSpan);
+
+                // Create the input
+                const addEnvInput = document.createElement('input');
+                addEnvInput.id = 'add-env-input';
+                addEnvInput.type = 'text';
+                addEnvInput.className = 'form-control mt-2';
+                addEnvInput.placeholder = 'New environment name';
+                addEnvInput.style.display = 'none';
+
+                // Assemble container
+                addEnvContainer.appendChild(addEnvBtn);
+                addEnvContainer.appendChild(addEnvInput);
+
+                // Insert at the top
+                envList.appendChild(addEnvContainer);
+
+                // Render environments
                 data.environments.forEach(env => {
                     const item = document.createElement('div');
                     item.classList.add('task-item');
@@ -106,8 +155,6 @@
                     envList.appendChild(item);
                 });
                 // Re-attach add environment button/input listeners
-                const addEnvBtn = document.getElementById('add-env-btn');
-                const addEnvInput = document.getElementById('add-env-input');
                 if (addEnvBtn && addEnvInput) {
                     addEnvBtn.onclick = () => {
                         addEnvBtn.style.display = 'none';

@@ -15,6 +15,8 @@ class Task:
         celery_task_id=None,
         description=None,
         created_at=None,
+        archived=False,
+        last_accessed=None,
     ):
         self.task_id = task_id
         self.title = title
@@ -24,6 +26,8 @@ class Task:
         self.celery_task_id = celery_task_id
         self.description = description
         self.created_at = created_at
+        self.archived = archived
+        self.last_accessed = last_accessed
 
     def to_dict(self):
         return {
@@ -36,6 +40,12 @@ class Task:
             "created_at": (
                 self.created_at.strftime("%Y-%m-%d %H:%M:%S")
                 if self.created_at
+                else None
+            ),
+            "archived": self.archived,
+            "last_accessed": (
+                self.last_accessed.strftime("%Y-%m-%d %H:%M:%S")
+                if self.last_accessed
                 else None
             ),
         }
@@ -51,6 +61,8 @@ class Task:
             celery_task_id=row["celery_task_id"],
             description=row.get("description"),
             created_at=row["created_at"],
+            archived=row.get("archived", False),
+            last_accessed=row.get("last_accessed"),
         )
 
     @staticmethod
@@ -91,7 +103,7 @@ class Task:
     @staticmethod
     def get_tasks_by_user(user_id):
         rows = ds.find_all(
-            "SELECT * FROM tasks WHERE user_id = %s ORDER BY created_at DESC",
+            "SELECT *, archived, last_accessed FROM tasks WHERE user_id = %s ORDER BY created_at DESC",
             (user_id,),
         )
         return [Task.from_row(row) for row in rows]
@@ -100,12 +112,12 @@ class Task:
     def get_tasks_by_environment(environment_id, user_id=None):
         if user_id:
             rows = ds.find_all(
-                "SELECT * FROM tasks WHERE environment_id = %s AND user_id = %s ORDER BY created_at DESC",
+                "SELECT *, archived, last_accessed FROM tasks WHERE environment_id = %s AND user_id = %s ORDER BY created_at DESC",
                 (environment_id, user_id),
             )
         else:
             rows = ds.find_all(
-                "SELECT * FROM tasks WHERE environment_id = %s ORDER BY created_at DESC",
+                "SELECT *, archived, last_accessed FROM tasks WHERE environment_id = %s ORDER BY created_at DESC",
                 (environment_id,),
             )
         return [Task.from_row(row) for row in rows]
