@@ -24,6 +24,8 @@ nix develop
 lsof -i :8000
 kill PID
 
+git add . && git commit -m "frontend update" && git push
+
 ## Roadmap
 The basic idea is that: 
 

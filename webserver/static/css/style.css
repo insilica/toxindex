@@ -532,3 +532,25 @@ a:hover {
     display: inline !important;
     word-break: break-word;
 }
+
+.new-env-btn {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1.08rem;
+    font-weight: 400;
+    padding: 0;
+    box-shadow: none;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    gap: 0.7em;
+    transition: background 0.2s;
+}
+.new-env-btn:hover, .new-env-btn:focus {
+    background: #181c1f;
+    outline: none;
+}
+.icon-folder-plus svg {
+    display: block;
+}

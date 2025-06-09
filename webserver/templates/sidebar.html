@@ -10,6 +10,21 @@
     </div>
     
     <div class="tasks" id="env-list">
+        <div id="add-env-container" class="mb-3">
+            <button id="add-env-btn" type="button" class="new-env-btn d-flex align-items-center gap-2 w-100" style="background: none; border: none; color: #fff; font-size: 1.08rem; font-weight: 400; padding: 0; box-shadow: none; min-height: 36px;">
+                <span class="icon-folder-plus" style="display: flex; align-items: center;">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                    <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" stroke="#fff" stroke-width="2"/>
+                    <g>
+                      <circle cx="6.5" cy="17.5" r="2" fill="#181c1f"/>
+                      <path d="M6.5 16v3M5 17.5h3" stroke="#22c55e" stroke-width="1.5" stroke-linecap="round"/>
+                    </g>
+                  </svg>
+                </span>
+                <span style="color: #fff;">New environment</span>
+            </button>
+            <input id="add-env-input" type="text" class="form-control mt-2" placeholder="New environment name" style="display:none;" />
+        </div>
         {% for env in environments %}
         <div class="task-item" data-id="{{ env.environment_id }}">
             <span>{{ env.title }}</span>
@@ -60,7 +75,10 @@
         .then(response => response.json())
         .then(data => {
             if (data.environments) {
+                const addEnvHTML = document.getElementById('add-env-container')?.outerHTML || '';
                 envList.innerHTML = '';
+                // Re-insert add-env-container HTML as first child
+                envList.insertAdjacentHTML('afterbegin', addEnvHTML);
                 data.environments.forEach(env => {
                     const item = document.createElement('div');
                     item.classList.add('task-item');
@@ -87,6 +105,40 @@
 
                     envList.appendChild(item);
                 });
+                // Re-attach add environment button/input listeners
+                const addEnvBtn = document.getElementById('add-env-btn');
+                const addEnvInput = document.getElementById('add-env-input');
+                if (addEnvBtn && addEnvInput) {
+                    addEnvBtn.onclick = () => {
+                        addEnvBtn.style.display = 'none';
+                        addEnvInput.style.display = 'block';
+                        addEnvInput.focus();
+                    };
+                    addEnvInput.onkeydown = function(e) {
+                        if (e.key === 'Enter') {
+                            const name = addEnvInput.value.trim();
+                            if (!name) return;
+                            fetch('/environment/new', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ title: name })
+                            })
+                            .then(r => r.json())
+                            .then(data => {
+                                if (data.environment_id) {
+                                    addEnvInput.value = '';
+                                    addEnvInput.style.display = 'none';
+                                    addEnvBtn.style.display = 'block';
+                                    loadEnvironments();
+                                }
+                            });
+                        } else if (e.key === 'Escape') {
+                            addEnvInput.value = '';
+                            addEnvInput.style.display = 'none';
+                            addEnvBtn.style.display = 'block';
+                        }
+                    };
+                }
             }
         })
         .catch(error => console.error('Error loading environments:', error));

@@ -1535,3 +1535,346 @@ def plain_openai_task(self, payload):
 2025-06-09 15:01:52,064 - engineio.server - INFO - socket.py:78 - UMpRASHYjYUUyltQAAAk: Sending packet MESSAGE data 0{"sid":"gxPYOfShHEpc2rjNAAAl"}
 2025-06-09 15:02:17,063 - engineio.server - INFO - socket.py:78 - UMpRASHYjYUUyltQAAAk: Sending packet PING data None
 2025-06-09 15:02:17,064 - engineio.server - INFO - socket.py:39 - UMpRASHYjYUUyltQAAAk: Received packet PONG data 
+2025-06-09 15:02:42,067 - engineio.server - INFO - socket.py:78 - UMpRASHYjYUUyltQAAAk: Sending packet PING data None
+2025-06-09 15:02:42,069 - engineio.server - INFO - socket.py:39 - UMpRASHYjYUUyltQAAAk: Received packet PONG data 
+2025-06-09 15:03:07,075 - engineio.server - INFO - socket.py:78 - UMpRASHYjYUUyltQAAAk: Sending packet PING data None
+2025-06-09 15:03:07,077 - engineio.server - INFO - socket.py:39 - UMpRASHYjYUUyltQAAAk: Received packet PONG data 
+2025-06-09 15:03:32,081 - engineio.server - INFO - socket.py:78 - UMpRASHYjYUUyltQAAAk: Sending packet PING data None
+2025-06-09 15:03:32,083 - engineio.server - INFO - socket.py:39 - UMpRASHYjYUUyltQAAAk: Received packet PONG data 
+2025-06-09 15:03:46,665 - root - INFO - app.py:132 - current user: <webserver.model.user.User object at 0x7fffeea18b50>
+2025-06-09 15:03:53,604 - root - INFO - app.py:132 - current user: <webserver.model.user.User object at 0x7fffee879e10>
+2025-06-09 15:06:15,663 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 15:06:15,693 - engineio.server - INFO - socket.py:78 - CitUESEkz8jqi5SzAAAm: Sending packet OPEN data {'sid': 'CitUESEkz8jqi5SzAAAm', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 15:06:15,693 - engineio.server - INFO - socket.py:90 - CitUESEkz8jqi5SzAAAm: Received request to upgrade to websocket
+2025-06-09 15:06:15,693 - engineio.server - INFO - socket.py:219 - CitUESEkz8jqi5SzAAAm: Upgrade to websocket successful
+2025-06-09 15:06:15,701 - engineio.server - INFO - socket.py:39 - CitUESEkz8jqi5SzAAAm: Received packet MESSAGE data 0
+2025-06-09 15:06:15,702 - root - INFO - app.py:146 - [socketio] Client connected: MxFE62p9lmWtZxnSAAAn
+2025-06-09 15:06:15,702 - socketio.server - INFO - server.py:164 - emitting event "connected" to MxFE62p9lmWtZxnSAAAn [/]
+2025-06-09 15:06:15,702 - engineio.server - INFO - socket.py:78 - CitUESEkz8jqi5SzAAAm: Sending packet MESSAGE data 2["connected",{"sid":"MxFE62p9lmWtZxnSAAAn"}]
+2025-06-09 15:06:15,702 - engineio.server - INFO - socket.py:78 - CitUESEkz8jqi5SzAAAm: Sending packet MESSAGE data 0{"sid":"MxFE62p9lmWtZxnSAAAn"}
+2025-06-09 15:06:40,294 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 15:06:40,333 - engineio.server - INFO - socket.py:78 - bh_HKLdmqxFxQ8C_AAAo: Sending packet OPEN data {'sid': 'bh_HKLdmqxFxQ8C_AAAo', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 15:06:40,334 - engineio.server - INFO - socket.py:90 - bh_HKLdmqxFxQ8C_AAAo: Received request to upgrade to websocket
+2025-06-09 15:06:40,334 - engineio.server - INFO - socket.py:219 - bh_HKLdmqxFxQ8C_AAAo: Upgrade to websocket successful
+2025-06-09 15:06:40,352 - engineio.server - INFO - socket.py:39 - bh_HKLdmqxFxQ8C_AAAo: Received packet MESSAGE data 0
+2025-06-09 15:06:40,353 - root - INFO - app.py:146 - [socketio] Client connected: eIUQFwd2E72p-VwKAAAp
+2025-06-09 15:06:40,353 - socketio.server - INFO - server.py:164 - emitting event "connected" to eIUQFwd2E72p-VwKAAAp [/]
+2025-06-09 15:06:40,353 - engineio.server - INFO - socket.py:78 - bh_HKLdmqxFxQ8C_AAAo: Sending packet MESSAGE data 2["connected",{"sid":"eIUQFwd2E72p-VwKAAAp"}]
+2025-06-09 15:06:40,354 - engineio.server - INFO - socket.py:78 - bh_HKLdmqxFxQ8C_AAAo: Sending packet MESSAGE data 0{"sid":"eIUQFwd2E72p-VwKAAAp"}
+2025-06-09 15:06:43,008 - root - INFO - app.py:132 - current user: <webserver.model.user.User object at 0x7fffee871a80>
+2025-06-09 15:08:06,724 - root - INFO - app.py:132 - current user: <webserver.model.user.User object at 0x7fffee873550>
+2025-06-09 15:08:07,967 - root - INFO - app.py:132 - current user: <webserver.model.user.User object at 0x7fffee7b9390>
+2025-06-09 15:08:08,514 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 15:08:08,546 - engineio.server - INFO - socket.py:78 - OrcABLalj_JTp26fAAAq: Sending packet OPEN data {'sid': 'OrcABLalj_JTp26fAAAq', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 15:08:08,546 - engineio.server - INFO - socket.py:90 - OrcABLalj_JTp26fAAAq: Received request to upgrade to websocket
+2025-06-09 15:08:08,546 - engineio.server - INFO - socket.py:219 - OrcABLalj_JTp26fAAAq: Upgrade to websocket successful
+2025-06-09 15:08:08,555 - engineio.server - INFO - socket.py:39 - OrcABLalj_JTp26fAAAq: Received packet MESSAGE data 0
+2025-06-09 15:08:08,555 - root - INFO - app.py:146 - [socketio] Client connected: rFmPxkeJYgPqyaT8AAAr
+2025-06-09 15:08:08,556 - socketio.server - INFO - server.py:164 - emitting event "connected" to rFmPxkeJYgPqyaT8AAAr [/]
+2025-06-09 15:08:08,556 - engineio.server - INFO - socket.py:78 - OrcABLalj_JTp26fAAAq: Sending packet MESSAGE data 2["connected",{"sid":"rFmPxkeJYgPqyaT8AAAr"}]
+2025-06-09 15:08:08,556 - engineio.server - INFO - socket.py:78 - OrcABLalj_JTp26fAAAq: Sending packet MESSAGE data 0{"sid":"rFmPxkeJYgPqyaT8AAAr"}
+2025-06-09 15:08:09,171 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 15:08:09,202 - engineio.server - INFO - socket.py:78 - Rzimpc-tSVbxbBO3AAAs: Sending packet OPEN data {'sid': 'Rzimpc-tSVbxbBO3AAAs', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 15:08:09,203 - engineio.server - INFO - socket.py:90 - Rzimpc-tSVbxbBO3AAAs: Received request to upgrade to websocket
+2025-06-09 15:08:09,203 - engineio.server - INFO - socket.py:219 - Rzimpc-tSVbxbBO3AAAs: Upgrade to websocket successful
+2025-06-09 15:08:09,209 - engineio.server - INFO - socket.py:39 - Rzimpc-tSVbxbBO3AAAs: Received packet MESSAGE data 0
+2025-06-09 15:08:09,210 - root - INFO - app.py:146 - [socketio] Client connected: sro3eFAmhRGHJ51QAAAt
+2025-06-09 15:08:09,210 - socketio.server - INFO - server.py:164 - emitting event "connected" to sro3eFAmhRGHJ51QAAAt [/]
+2025-06-09 15:08:09,210 - engineio.server - INFO - socket.py:78 - Rzimpc-tSVbxbBO3AAAs: Sending packet MESSAGE data 2["connected",{"sid":"sro3eFAmhRGHJ51QAAAt"}]
+2025-06-09 15:08:09,211 - engineio.server - INFO - socket.py:78 - Rzimpc-tSVbxbBO3AAAs: Sending packet MESSAGE data 0{"sid":"sro3eFAmhRGHJ51QAAAt"}
+2025-06-09 15:08:11,956 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 15:08:12,001 - engineio.server - INFO - socket.py:78 - S1sugTWMXG-v5Q3iAAAu: Sending packet OPEN data {'sid': 'S1sugTWMXG-v5Q3iAAAu', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 15:08:12,001 - engineio.server - INFO - socket.py:90 - S1sugTWMXG-v5Q3iAAAu: Received request to upgrade to websocket
+2025-06-09 15:08:12,002 - engineio.server - INFO - socket.py:219 - S1sugTWMXG-v5Q3iAAAu: Upgrade to websocket successful
+2025-06-09 15:08:12,003 - engineio.server - INFO - socket.py:39 - S1sugTWMXG-v5Q3iAAAu: Received packet MESSAGE data 0
+2025-06-09 15:08:12,003 - root - INFO - app.py:146 - [socketio] Client connected: 8nd0wiQTJua0p_QoAAAv
+2025-06-09 15:08:12,003 - socketio.server - INFO - server.py:164 - emitting event "connected" to 8nd0wiQTJua0p_QoAAAv [/]
+2025-06-09 15:08:12,003 - engineio.server - INFO - socket.py:78 - S1sugTWMXG-v5Q3iAAAu: Sending packet MESSAGE data 2["connected",{"sid":"8nd0wiQTJua0p_QoAAAv"}]
+2025-06-09 15:08:12,004 - engineio.server - INFO - socket.py:78 - S1sugTWMXG-v5Q3iAAAu: Sending packet MESSAGE data 0{"sid":"8nd0wiQTJua0p_QoAAAv"}
+2025-06-09 15:08:12,435 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 15:08:12,463 - engineio.server - INFO - socket.py:78 - 3gs5m0IXc_gCzlMPAAAw: Sending packet OPEN data {'sid': '3gs5m0IXc_gCzlMPAAAw', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 15:08:12,464 - engineio.server - INFO - socket.py:90 - 3gs5m0IXc_gCzlMPAAAw: Received request to upgrade to websocket
+2025-06-09 15:08:12,464 - engineio.server - INFO - socket.py:219 - 3gs5m0IXc_gCzlMPAAAw: Upgrade to websocket successful
+2025-06-09 15:08:12,471 - engineio.server - INFO - socket.py:39 - 3gs5m0IXc_gCzlMPAAAw: Received packet MESSAGE data 0
+2025-06-09 15:08:12,472 - root - INFO - app.py:146 - [socketio] Client connected: GdKv4vrmtStFxZ8rAAAx
+2025-06-09 15:08:12,472 - socketio.server - INFO - server.py:164 - emitting event "connected" to GdKv4vrmtStFxZ8rAAAx [/]
+2025-06-09 15:08:12,472 - engineio.server - INFO - socket.py:78 - 3gs5m0IXc_gCzlMPAAAw: Sending packet MESSAGE data 2["connected",{"sid":"GdKv4vrmtStFxZ8rAAAx"}]
+2025-06-09 15:08:12,473 - engineio.server - INFO - socket.py:78 - 3gs5m0IXc_gCzlMPAAAw: Sending packet MESSAGE data 0{"sid":"GdKv4vrmtStFxZ8rAAAx"}
+2025-06-09 15:08:37,479 - engineio.server - INFO - socket.py:78 - 3gs5m0IXc_gCzlMPAAAw: Sending packet PING data None
+2025-06-09 15:08:37,481 - engineio.server - INFO - socket.py:39 - 3gs5m0IXc_gCzlMPAAAw: Received packet PONG data 
+2025-06-09 15:09:02,484 - engineio.server - INFO - socket.py:78 - 3gs5m0IXc_gCzlMPAAAw: Sending packet PING data None
+2025-06-09 15:09:02,486 - engineio.server - INFO - socket.py:39 - 3gs5m0IXc_gCzlMPAAAw: Received packet PONG data 
+2025-06-09 15:09:26,253 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 15:09:26,288 - engineio.server - INFO - socket.py:78 - StEbemLW2L8AU7w_AAAy: Sending packet OPEN data {'sid': 'StEbemLW2L8AU7w_AAAy', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 15:09:26,289 - engineio.server - INFO - socket.py:90 - StEbemLW2L8AU7w_AAAy: Received request to upgrade to websocket
+2025-06-09 15:09:26,290 - engineio.server - INFO - socket.py:219 - StEbemLW2L8AU7w_AAAy: Upgrade to websocket successful
+2025-06-09 15:09:26,295 - engineio.server - INFO - socket.py:39 - StEbemLW2L8AU7w_AAAy: Received packet MESSAGE data 0
+2025-06-09 15:09:26,296 - root - INFO - app.py:146 - [socketio] Client connected: WQucjysgLKkfETTfAAAz
+2025-06-09 15:09:26,296 - socketio.server - INFO - server.py:164 - emitting event "connected" to WQucjysgLKkfETTfAAAz [/]
+2025-06-09 15:09:26,296 - engineio.server - INFO - socket.py:78 - StEbemLW2L8AU7w_AAAy: Sending packet MESSAGE data 2["connected",{"sid":"WQucjysgLKkfETTfAAAz"}]
+2025-06-09 15:09:26,297 - engineio.server - INFO - socket.py:78 - StEbemLW2L8AU7w_AAAy: Sending packet MESSAGE data 0{"sid":"WQucjysgLKkfETTfAAAz"}
+2025-06-09 15:09:28,966 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 15:09:28,999 - engineio.server - INFO - socket.py:78 - uGvnw_4WZpbNejN0AAA0: Sending packet OPEN data {'sid': 'uGvnw_4WZpbNejN0AAA0', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 15:09:28,999 - engineio.server - INFO - socket.py:90 - uGvnw_4WZpbNejN0AAA0: Received request to upgrade to websocket
+2025-06-09 15:09:29,000 - engineio.server - INFO - socket.py:219 - uGvnw_4WZpbNejN0AAA0: Upgrade to websocket successful
+2025-06-09 15:09:29,005 - engineio.server - INFO - socket.py:39 - uGvnw_4WZpbNejN0AAA0: Received packet MESSAGE data 0
+2025-06-09 15:09:29,006 - root - INFO - app.py:146 - [socketio] Client connected: G_8vLeBlvkC6HekFAAA1
+2025-06-09 15:09:29,006 - socketio.server - INFO - server.py:164 - emitting event "connected" to G_8vLeBlvkC6HekFAAA1 [/]
+2025-06-09 15:09:29,006 - engineio.server - INFO - socket.py:78 - uGvnw_4WZpbNejN0AAA0: Sending packet MESSAGE data 2["connected",{"sid":"G_8vLeBlvkC6HekFAAA1"}]
+2025-06-09 15:09:29,006 - engineio.server - INFO - socket.py:78 - uGvnw_4WZpbNejN0AAA0: Sending packet MESSAGE data 0{"sid":"G_8vLeBlvkC6HekFAAA1"}
+2025-06-09 15:09:29,339 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 15:09:29,372 - engineio.server - INFO - socket.py:78 - oaEc30rrlX9nGGgXAAA2: Sending packet OPEN data {'sid': 'oaEc30rrlX9nGGgXAAA2', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 15:09:29,373 - engineio.server - INFO - socket.py:90 - oaEc30rrlX9nGGgXAAA2: Received request to upgrade to websocket
+2025-06-09 15:09:29,373 - engineio.server - INFO - socket.py:219 - oaEc30rrlX9nGGgXAAA2: Upgrade to websocket successful
+2025-06-09 15:09:29,378 - engineio.server - INFO - socket.py:39 - oaEc30rrlX9nGGgXAAA2: Received packet MESSAGE data 0
+2025-06-09 15:09:29,379 - root - INFO - app.py:146 - [socketio] Client connected: 3E7-UOMfXgr-PvZ8AAA3
+2025-06-09 15:09:29,379 - socketio.server - INFO - server.py:164 - emitting event "connected" to 3E7-UOMfXgr-PvZ8AAA3 [/]
+2025-06-09 15:09:29,379 - engineio.server - INFO - socket.py:78 - oaEc30rrlX9nGGgXAAA2: Sending packet MESSAGE data 2["connected",{"sid":"3E7-UOMfXgr-PvZ8AAA3"}]
+2025-06-09 15:09:29,380 - engineio.server - INFO - socket.py:78 - oaEc30rrlX9nGGgXAAA2: Sending packet MESSAGE data 0{"sid":"3E7-UOMfXgr-PvZ8AAA3"}
+2025-06-09 15:09:29,552 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 15:09:29,568 - engineio.server - INFO - socket.py:78 - lU0K1GkZedVnlh86AAA4: Sending packet OPEN data {'sid': 'lU0K1GkZedVnlh86AAA4', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 15:09:29,568 - engineio.server - INFO - socket.py:90 - lU0K1GkZedVnlh86AAA4: Received request to upgrade to websocket
+2025-06-09 15:09:29,568 - engineio.server - INFO - socket.py:219 - lU0K1GkZedVnlh86AAA4: Upgrade to websocket successful
+2025-06-09 15:09:29,573 - engineio.server - INFO - socket.py:39 - lU0K1GkZedVnlh86AAA4: Received packet MESSAGE data 0
+2025-06-09 15:09:29,573 - root - INFO - app.py:146 - [socketio] Client connected: B2F0dtsQAXYvUzEnAAA5
+2025-06-09 15:09:29,573 - socketio.server - INFO - server.py:164 - emitting event "connected" to B2F0dtsQAXYvUzEnAAA5 [/]
+2025-06-09 15:09:29,574 - engineio.server - INFO - socket.py:78 - lU0K1GkZedVnlh86AAA4: Sending packet MESSAGE data 2["connected",{"sid":"B2F0dtsQAXYvUzEnAAA5"}]
+2025-06-09 15:09:29,574 - engineio.server - INFO - socket.py:78 - lU0K1GkZedVnlh86AAA4: Sending packet MESSAGE data 0{"sid":"B2F0dtsQAXYvUzEnAAA5"}
+2025-06-09 15:09:29,734 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 15:09:29,768 - engineio.server - INFO - socket.py:78 - I23QTnLmst_GrNH8AAA6: Sending packet OPEN data {'sid': 'I23QTnLmst_GrNH8AAA6', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 15:09:29,768 - engineio.server - INFO - socket.py:90 - I23QTnLmst_GrNH8AAA6: Received request to upgrade to websocket
+2025-06-09 15:09:29,768 - engineio.server - INFO - socket.py:219 - I23QTnLmst_GrNH8AAA6: Upgrade to websocket successful
+2025-06-09 15:09:29,777 - engineio.server - INFO - socket.py:39 - I23QTnLmst_GrNH8AAA6: Received packet MESSAGE data 0
+2025-06-09 15:09:29,778 - root - INFO - app.py:146 - [socketio] Client connected: 1OnNaB1Ecsn6N51VAAA7
+2025-06-09 15:09:29,778 - socketio.server - INFO - server.py:164 - emitting event "connected" to 1OnNaB1Ecsn6N51VAAA7 [/]
+2025-06-09 15:09:29,779 - engineio.server - INFO - socket.py:78 - I23QTnLmst_GrNH8AAA6: Sending packet MESSAGE data 2["connected",{"sid":"1OnNaB1Ecsn6N51VAAA7"}]
+2025-06-09 15:09:29,779 - engineio.server - INFO - socket.py:78 - I23QTnLmst_GrNH8AAA6: Sending packet MESSAGE data 0{"sid":"1OnNaB1Ecsn6N51VAAA7"}
+2025-06-09 15:09:31,207 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 15:09:31,247 - engineio.server - INFO - socket.py:78 - xk2ltfrdyEPCw3LSAAA8: Sending packet OPEN data {'sid': 'xk2ltfrdyEPCw3LSAAA8', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 15:09:31,247 - engineio.server - INFO - socket.py:90 - xk2ltfrdyEPCw3LSAAA8: Received request to upgrade to websocket
+2025-06-09 15:09:31,248 - engineio.server - INFO - socket.py:219 - xk2ltfrdyEPCw3LSAAA8: Upgrade to websocket successful
+2025-06-09 15:09:31,252 - engineio.server - INFO - socket.py:39 - xk2ltfrdyEPCw3LSAAA8: Received packet MESSAGE data 0
+2025-06-09 15:09:31,254 - root - INFO - app.py:146 - [socketio] Client connected: I-GeNSIv8Gkrp7ilAAA9
+2025-06-09 15:09:31,254 - socketio.server - INFO - server.py:164 - emitting event "connected" to I-GeNSIv8Gkrp7ilAAA9 [/]
+2025-06-09 15:09:31,254 - engineio.server - INFO - socket.py:78 - xk2ltfrdyEPCw3LSAAA8: Sending packet MESSAGE data 2["connected",{"sid":"I-GeNSIv8Gkrp7ilAAA9"}]
+2025-06-09 15:09:31,255 - engineio.server - INFO - socket.py:78 - xk2ltfrdyEPCw3LSAAA8: Sending packet MESSAGE data 0{"sid":"I-GeNSIv8Gkrp7ilAAA9"}
+2025-06-09 15:09:31,660 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 15:09:31,687 - engineio.server - INFO - socket.py:78 - s-XAH5p0J9MfCKgPAAA-: Sending packet OPEN data {'sid': 's-XAH5p0J9MfCKgPAAA-', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 15:09:31,687 - engineio.server - INFO - socket.py:90 - s-XAH5p0J9MfCKgPAAA-: Received request to upgrade to websocket
+2025-06-09 15:09:31,687 - engineio.server - INFO - socket.py:219 - s-XAH5p0J9MfCKgPAAA-: Upgrade to websocket successful
+2025-06-09 15:09:31,693 - engineio.server - INFO - socket.py:39 - s-XAH5p0J9MfCKgPAAA-: Received packet MESSAGE data 0
+2025-06-09 15:09:31,693 - root - INFO - app.py:146 - [socketio] Client connected: RsKawlUTxZx_L4VeAAA_
+2025-06-09 15:09:31,693 - socketio.server - INFO - server.py:164 - emitting event "connected" to RsKawlUTxZx_L4VeAAA_ [/]
+2025-06-09 15:09:31,693 - engineio.server - INFO - socket.py:78 - s-XAH5p0J9MfCKgPAAA-: Sending packet MESSAGE data 2["connected",{"sid":"RsKawlUTxZx_L4VeAAA_"}]
+2025-06-09 15:09:31,694 - engineio.server - INFO - socket.py:78 - s-XAH5p0J9MfCKgPAAA-: Sending packet MESSAGE data 0{"sid":"RsKawlUTxZx_L4VeAAA_"}
+2025-06-09 15:09:56,690 - engineio.server - INFO - socket.py:78 - s-XAH5p0J9MfCKgPAAA-: Sending packet PING data None
+2025-06-09 15:09:56,692 - engineio.server - INFO - socket.py:39 - s-XAH5p0J9MfCKgPAAA-: Received packet PONG data 
+2025-06-09 15:10:21,693 - engineio.server - INFO - socket.py:78 - s-XAH5p0J9MfCKgPAAA-: Sending packet PING data None
+2025-06-09 15:10:21,696 - engineio.server - INFO - socket.py:39 - s-XAH5p0J9MfCKgPAAA-: Received packet PONG data 
+2025-06-09 15:10:46,700 - engineio.server - INFO - socket.py:78 - s-XAH5p0J9MfCKgPAAA-: Sending packet PING data None
+2025-06-09 15:10:46,702 - engineio.server - INFO - socket.py:39 - s-XAH5p0J9MfCKgPAAA-: Received packet PONG data 
+2025-06-09 15:11:11,704 - engineio.server - INFO - socket.py:78 - s-XAH5p0J9MfCKgPAAA-: Sending packet PING data None
+2025-06-09 15:11:11,706 - engineio.server - INFO - socket.py:39 - s-XAH5p0J9MfCKgPAAA-: Received packet PONG data 
+2025-06-09 15:11:36,712 - engineio.server - INFO - socket.py:78 - s-XAH5p0J9MfCKgPAAA-: Sending packet PING data None
+2025-06-09 15:11:36,714 - engineio.server - INFO - socket.py:39 - s-XAH5p0J9MfCKgPAAA-: Received packet PONG data 
+2025-06-09 15:12:00,144 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 15:12:00,162 - engineio.server - INFO - socket.py:78 - hOIR_TgBo_Pjm_UUAABA: Sending packet OPEN data {'sid': 'hOIR_TgBo_Pjm_UUAABA', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 15:12:00,163 - engineio.server - INFO - socket.py:90 - hOIR_TgBo_Pjm_UUAABA: Received request to upgrade to websocket
+2025-06-09 15:12:00,163 - engineio.server - INFO - socket.py:219 - hOIR_TgBo_Pjm_UUAABA: Upgrade to websocket successful
+2025-06-09 15:12:00,168 - engineio.server - INFO - socket.py:39 - hOIR_TgBo_Pjm_UUAABA: Received packet MESSAGE data 0
+2025-06-09 15:12:00,168 - root - INFO - app.py:146 - [socketio] Client connected: 3Go7w_GHZS19EZX5AABB
+2025-06-09 15:12:00,168 - socketio.server - INFO - server.py:164 - emitting event "connected" to 3Go7w_GHZS19EZX5AABB [/]
+2025-06-09 15:12:00,168 - engineio.server - INFO - socket.py:78 - hOIR_TgBo_Pjm_UUAABA: Sending packet MESSAGE data 2["connected",{"sid":"3Go7w_GHZS19EZX5AABB"}]
+2025-06-09 15:12:00,169 - engineio.server - INFO - socket.py:78 - hOIR_TgBo_Pjm_UUAABA: Sending packet MESSAGE data 0{"sid":"3Go7w_GHZS19EZX5AABB"}
+2025-06-09 15:12:06,213 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 15:12:06,248 - engineio.server - INFO - socket.py:78 - k40Oo2GFQduHQrWiAABC: Sending packet OPEN data {'sid': 'k40Oo2GFQduHQrWiAABC', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 15:12:06,249 - engineio.server - INFO - socket.py:90 - k40Oo2GFQduHQrWiAABC: Received request to upgrade to websocket
+2025-06-09 15:12:06,249 - engineio.server - INFO - socket.py:219 - k40Oo2GFQduHQrWiAABC: Upgrade to websocket successful
+2025-06-09 15:12:06,255 - engineio.server - INFO - socket.py:39 - k40Oo2GFQduHQrWiAABC: Received packet MESSAGE data 0
+2025-06-09 15:12:06,256 - root - INFO - app.py:146 - [socketio] Client connected: rPgnLFIik0QdmYGBAABD
+2025-06-09 15:12:06,256 - socketio.server - INFO - server.py:164 - emitting event "connected" to rPgnLFIik0QdmYGBAABD [/]
+2025-06-09 15:12:06,256 - engineio.server - INFO - socket.py:78 - k40Oo2GFQduHQrWiAABC: Sending packet MESSAGE data 2["connected",{"sid":"rPgnLFIik0QdmYGBAABD"}]
+2025-06-09 15:12:06,258 - engineio.server - INFO - socket.py:78 - k40Oo2GFQduHQrWiAABC: Sending packet MESSAGE data 0{"sid":"rPgnLFIik0QdmYGBAABD"}
+2025-06-09 15:12:07,517 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 15:12:07,559 - engineio.server - INFO - socket.py:78 - 7toY5cbbXTmnddefAABE: Sending packet OPEN data {'sid': '7toY5cbbXTmnddefAABE', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 15:12:07,560 - engineio.server - INFO - socket.py:90 - 7toY5cbbXTmnddefAABE: Received request to upgrade to websocket
+2025-06-09 15:12:07,560 - engineio.server - INFO - socket.py:219 - 7toY5cbbXTmnddefAABE: Upgrade to websocket successful
+2025-06-09 15:12:07,567 - engineio.server - INFO - socket.py:39 - 7toY5cbbXTmnddefAABE: Received packet MESSAGE data 0
+2025-06-09 15:12:07,568 - root - INFO - app.py:146 - [socketio] Client connected: rUKznGSG62W-tlbfAABF
+2025-06-09 15:12:07,568 - socketio.server - INFO - server.py:164 - emitting event "connected" to rUKznGSG62W-tlbfAABF [/]
+2025-06-09 15:12:07,568 - engineio.server - INFO - socket.py:78 - 7toY5cbbXTmnddefAABE: Sending packet MESSAGE data 2["connected",{"sid":"rUKznGSG62W-tlbfAABF"}]
+2025-06-09 15:12:07,569 - engineio.server - INFO - socket.py:78 - 7toY5cbbXTmnddefAABE: Sending packet MESSAGE data 0{"sid":"rUKznGSG62W-tlbfAABF"}
+2025-06-09 15:12:07,878 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 15:12:07,905 - engineio.server - INFO - socket.py:78 - ehFtAf2udP6PNCXJAABG: Sending packet OPEN data {'sid': 'ehFtAf2udP6PNCXJAABG', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 15:12:07,905 - engineio.server - INFO - socket.py:90 - ehFtAf2udP6PNCXJAABG: Received request to upgrade to websocket
+2025-06-09 15:12:07,905 - engineio.server - INFO - socket.py:219 - ehFtAf2udP6PNCXJAABG: Upgrade to websocket successful
+2025-06-09 15:12:07,907 - engineio.server - INFO - socket.py:39 - ehFtAf2udP6PNCXJAABG: Received packet MESSAGE data 0
+2025-06-09 15:12:07,907 - root - INFO - app.py:146 - [socketio] Client connected: USgHAtxkojd7DDcJAABH
+2025-06-09 15:12:07,907 - socketio.server - INFO - server.py:164 - emitting event "connected" to USgHAtxkojd7DDcJAABH [/]
+2025-06-09 15:12:07,907 - engineio.server - INFO - socket.py:78 - ehFtAf2udP6PNCXJAABG: Sending packet MESSAGE data 2["connected",{"sid":"USgHAtxkojd7DDcJAABH"}]
+2025-06-09 15:12:07,908 - engineio.server - INFO - socket.py:78 - ehFtAf2udP6PNCXJAABG: Sending packet MESSAGE data 0{"sid":"USgHAtxkojd7DDcJAABH"}
+2025-06-09 15:12:32,908 - engineio.server - INFO - socket.py:78 - ehFtAf2udP6PNCXJAABG: Sending packet PING data None
+2025-06-09 15:12:32,911 - engineio.server - INFO - socket.py:39 - ehFtAf2udP6PNCXJAABG: Received packet PONG data 
+2025-06-09 15:12:48,419 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 15:12:48,439 - engineio.server - INFO - socket.py:78 - gEcFc0MiEZq8iCHHAABI: Sending packet OPEN data {'sid': 'gEcFc0MiEZq8iCHHAABI', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 15:12:48,439 - engineio.server - INFO - socket.py:90 - gEcFc0MiEZq8iCHHAABI: Received request to upgrade to websocket
+2025-06-09 15:12:48,440 - engineio.server - INFO - socket.py:219 - gEcFc0MiEZq8iCHHAABI: Upgrade to websocket successful
+2025-06-09 15:12:48,446 - engineio.server - INFO - socket.py:39 - gEcFc0MiEZq8iCHHAABI: Received packet MESSAGE data 0
+2025-06-09 15:12:48,447 - root - INFO - app.py:146 - [socketio] Client connected: UH2L7U3RiKMB4yICAABJ
+2025-06-09 15:12:48,447 - socketio.server - INFO - server.py:164 - emitting event "connected" to UH2L7U3RiKMB4yICAABJ [/]
+2025-06-09 15:12:48,447 - engineio.server - INFO - socket.py:78 - gEcFc0MiEZq8iCHHAABI: Sending packet MESSAGE data 2["connected",{"sid":"UH2L7U3RiKMB4yICAABJ"}]
+2025-06-09 15:12:48,447 - engineio.server - INFO - socket.py:78 - gEcFc0MiEZq8iCHHAABI: Sending packet MESSAGE data 0{"sid":"UH2L7U3RiKMB4yICAABJ"}
+2025-06-09 15:12:54,709 - root - DEBUG - datastore.py:56 - done
+2025-06-09 15:12:54,709 - root - INFO - environment.py:45 - created environment envD for user 078a38e9-c1b8-421e-b797-59ee3ae69df4
+2025-06-09 15:12:56,342 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 15:12:56,413 - engineio.server - INFO - socket.py:78 - 1RjMIRSTDclaJzSiAABK: Sending packet OPEN data {'sid': '1RjMIRSTDclaJzSiAABK', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 15:12:56,413 - engineio.server - INFO - socket.py:90 - 1RjMIRSTDclaJzSiAABK: Received request to upgrade to websocket
+2025-06-09 15:12:56,414 - engineio.server - INFO - socket.py:219 - 1RjMIRSTDclaJzSiAABK: Upgrade to websocket successful
+2025-06-09 15:12:56,420 - engineio.server - INFO - socket.py:39 - 1RjMIRSTDclaJzSiAABK: Received packet MESSAGE data 0
+2025-06-09 15:12:56,421 - root - INFO - app.py:146 - [socketio] Client connected: 1fUFwVZqQTlg3fcIAABL
+2025-06-09 15:12:56,421 - socketio.server - INFO - server.py:164 - emitting event "connected" to 1fUFwVZqQTlg3fcIAABL [/]
+2025-06-09 15:12:56,422 - engineio.server - INFO - socket.py:78 - 1RjMIRSTDclaJzSiAABK: Sending packet MESSAGE data 2["connected",{"sid":"1fUFwVZqQTlg3fcIAABL"}]
+2025-06-09 15:12:56,423 - engineio.server - INFO - socket.py:78 - 1RjMIRSTDclaJzSiAABK: Sending packet MESSAGE data 0{"sid":"1fUFwVZqQTlg3fcIAABL"}
+2025-06-09 15:13:21,417 - engineio.server - INFO - socket.py:78 - 1RjMIRSTDclaJzSiAABK: Sending packet PING data None
+2025-06-09 15:13:21,420 - engineio.server - INFO - socket.py:39 - 1RjMIRSTDclaJzSiAABK: Received packet PONG data 
+2025-06-09 15:13:46,427 - engineio.server - INFO - socket.py:78 - 1RjMIRSTDclaJzSiAABK: Sending packet PING data None
+2025-06-09 15:13:46,442 - engineio.server - INFO - socket.py:39 - 1RjMIRSTDclaJzSiAABK: Received packet PONG data 
+2025-06-09 15:14:11,444 - engineio.server - INFO - socket.py:78 - 1RjMIRSTDclaJzSiAABK: Sending packet PING data None
+2025-06-09 15:14:11,446 - engineio.server - INFO - socket.py:39 - 1RjMIRSTDclaJzSiAABK: Received packet PONG data 
+2025-06-09 15:14:30,445 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 15:14:30,484 - engineio.server - INFO - socket.py:78 - m5mZaTfBpzPL1GcvAABM: Sending packet OPEN data {'sid': 'm5mZaTfBpzPL1GcvAABM', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 15:14:30,484 - engineio.server - INFO - socket.py:90 - m5mZaTfBpzPL1GcvAABM: Received request to upgrade to websocket
+2025-06-09 15:14:30,484 - engineio.server - INFO - socket.py:219 - m5mZaTfBpzPL1GcvAABM: Upgrade to websocket successful
+2025-06-09 15:14:30,487 - engineio.server - INFO - socket.py:39 - m5mZaTfBpzPL1GcvAABM: Received packet MESSAGE data 0
+2025-06-09 15:14:30,487 - root - INFO - app.py:146 - [socketio] Client connected: ja4ueClV8VUlsDUTAABN
+2025-06-09 15:14:30,488 - socketio.server - INFO - server.py:164 - emitting event "connected" to ja4ueClV8VUlsDUTAABN [/]
+2025-06-09 15:14:30,488 - engineio.server - INFO - socket.py:78 - m5mZaTfBpzPL1GcvAABM: Sending packet MESSAGE data 2["connected",{"sid":"ja4ueClV8VUlsDUTAABN"}]
+2025-06-09 15:14:30,488 - engineio.server - INFO - socket.py:78 - m5mZaTfBpzPL1GcvAABM: Sending packet MESSAGE data 0{"sid":"ja4ueClV8VUlsDUTAABN"}
+2025-06-09 15:14:55,489 - engineio.server - INFO - socket.py:78 - m5mZaTfBpzPL1GcvAABM: Sending packet PING data None
+2025-06-09 15:14:55,491 - engineio.server - INFO - socket.py:39 - m5mZaTfBpzPL1GcvAABM: Received packet PONG data 
+2025-06-09 15:15:02,890 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 15:15:02,920 - engineio.server - INFO - socket.py:78 - mGEgny28dRCP9Jo0AABO: Sending packet OPEN data {'sid': 'mGEgny28dRCP9Jo0AABO', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 15:15:02,920 - engineio.server - INFO - socket.py:90 - mGEgny28dRCP9Jo0AABO: Received request to upgrade to websocket
+2025-06-09 15:15:02,921 - engineio.server - INFO - socket.py:219 - mGEgny28dRCP9Jo0AABO: Upgrade to websocket successful
+2025-06-09 15:15:02,928 - engineio.server - INFO - socket.py:39 - mGEgny28dRCP9Jo0AABO: Received packet MESSAGE data 0
+2025-06-09 15:15:02,929 - root - INFO - app.py:146 - [socketio] Client connected: M5ohtbO10RbhLwCKAABP
+2025-06-09 15:15:02,929 - socketio.server - INFO - server.py:164 - emitting event "connected" to M5ohtbO10RbhLwCKAABP [/]
+2025-06-09 15:15:02,929 - engineio.server - INFO - socket.py:78 - mGEgny28dRCP9Jo0AABO: Sending packet MESSAGE data 2["connected",{"sid":"M5ohtbO10RbhLwCKAABP"}]
+2025-06-09 15:15:02,930 - engineio.server - INFO - socket.py:78 - mGEgny28dRCP9Jo0AABO: Sending packet MESSAGE data 0{"sid":"M5ohtbO10RbhLwCKAABP"}
+2025-06-09 15:15:27,924 - engineio.server - INFO - socket.py:78 - mGEgny28dRCP9Jo0AABO: Sending packet PING data None
+2025-06-09 15:15:27,926 - engineio.server - INFO - socket.py:39 - mGEgny28dRCP9Jo0AABO: Received packet PONG data 
+2025-06-09 15:15:52,932 - engineio.server - INFO - socket.py:78 - mGEgny28dRCP9Jo0AABO: Sending packet PING data None
+2025-06-09 15:15:52,933 - engineio.server - INFO - socket.py:39 - mGEgny28dRCP9Jo0AABO: Received packet PONG data 
+2025-06-09 15:16:17,937 - engineio.server - INFO - socket.py:78 - mGEgny28dRCP9Jo0AABO: Sending packet PING data None
+2025-06-09 15:16:17,939 - engineio.server - INFO - socket.py:39 - mGEgny28dRCP9Jo0AABO: Received packet PONG data 
+2025-06-09 15:16:42,940 - engineio.server - INFO - socket.py:78 - mGEgny28dRCP9Jo0AABO: Sending packet PING data None
+2025-06-09 15:16:42,942 - engineio.server - INFO - socket.py:39 - mGEgny28dRCP9Jo0AABO: Received packet PONG data 
+2025-06-09 15:17:02,068 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 15:17:02,099 - engineio.server - INFO - socket.py:78 - Y7zknyvwT6uS0KcTAABQ: Sending packet OPEN data {'sid': 'Y7zknyvwT6uS0KcTAABQ', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 15:17:02,099 - engineio.server - INFO - socket.py:90 - Y7zknyvwT6uS0KcTAABQ: Received request to upgrade to websocket
+2025-06-09 15:17:02,100 - engineio.server - INFO - socket.py:219 - Y7zknyvwT6uS0KcTAABQ: Upgrade to websocket successful
+2025-06-09 15:17:02,108 - engineio.server - INFO - socket.py:39 - Y7zknyvwT6uS0KcTAABQ: Received packet MESSAGE data 0
+2025-06-09 15:17:02,109 - root - INFO - app.py:146 - [socketio] Client connected: StDZ_gbrj1-GjoBaAABR
+2025-06-09 15:17:02,109 - socketio.server - INFO - server.py:164 - emitting event "connected" to StDZ_gbrj1-GjoBaAABR [/]
+2025-06-09 15:17:02,110 - engineio.server - INFO - socket.py:78 - Y7zknyvwT6uS0KcTAABQ: Sending packet MESSAGE data 2["connected",{"sid":"StDZ_gbrj1-GjoBaAABR"}]
+2025-06-09 15:17:02,110 - engineio.server - INFO - socket.py:78 - Y7zknyvwT6uS0KcTAABQ: Sending packet MESSAGE data 0{"sid":"StDZ_gbrj1-GjoBaAABR"}
+2025-06-09 15:17:05,178 - engineio.server - INFO - socket.py:78 - JROZCBWxGyo4DesNAABS: Sending packet OPEN data {'sid': 'JROZCBWxGyo4DesNAABS', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 15:17:05,179 - engineio.server - INFO - socket.py:90 - JROZCBWxGyo4DesNAABS: Received request to upgrade to websocket
+2025-06-09 15:17:05,181 - engineio.server - INFO - socket.py:219 - JROZCBWxGyo4DesNAABS: Upgrade to websocket successful
+2025-06-09 15:17:05,188 - engineio.server - INFO - socket.py:39 - JROZCBWxGyo4DesNAABS: Received packet MESSAGE data 0
+2025-06-09 15:17:05,189 - root - INFO - app.py:146 - [socketio] Client connected: vMmPxXD6ZXknf66_AABT
+2025-06-09 15:17:05,189 - socketio.server - INFO - server.py:164 - emitting event "connected" to vMmPxXD6ZXknf66_AABT [/]
+2025-06-09 15:17:05,189 - engineio.server - INFO - socket.py:78 - JROZCBWxGyo4DesNAABS: Sending packet MESSAGE data 2["connected",{"sid":"vMmPxXD6ZXknf66_AABT"}]
+2025-06-09 15:17:05,189 - engineio.server - INFO - socket.py:78 - JROZCBWxGyo4DesNAABS: Sending packet MESSAGE data 0{"sid":"vMmPxXD6ZXknf66_AABT"}
+2025-06-09 15:17:06,914 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 15:17:06,939 - engineio.server - INFO - socket.py:78 - LbbOsIILCnDaU6IoAABU: Sending packet OPEN data {'sid': 'LbbOsIILCnDaU6IoAABU', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 15:17:06,939 - engineio.server - INFO - socket.py:90 - LbbOsIILCnDaU6IoAABU: Received request to upgrade to websocket
+2025-06-09 15:17:06,940 - engineio.server - INFO - socket.py:219 - LbbOsIILCnDaU6IoAABU: Upgrade to websocket successful
+2025-06-09 15:17:06,945 - engineio.server - INFO - socket.py:39 - LbbOsIILCnDaU6IoAABU: Received packet MESSAGE data 0
+2025-06-09 15:17:06,946 - root - INFO - app.py:146 - [socketio] Client connected: GcPSMc_H2iktNcR1AABV
+2025-06-09 15:17:06,946 - socketio.server - INFO - server.py:164 - emitting event "connected" to GcPSMc_H2iktNcR1AABV [/]
+2025-06-09 15:17:06,946 - engineio.server - INFO - socket.py:78 - LbbOsIILCnDaU6IoAABU: Sending packet MESSAGE data 2["connected",{"sid":"GcPSMc_H2iktNcR1AABV"}]
+2025-06-09 15:17:06,947 - engineio.server - INFO - socket.py:78 - LbbOsIILCnDaU6IoAABU: Sending packet MESSAGE data 0{"sid":"GcPSMc_H2iktNcR1AABV"}
+2025-06-09 15:17:09,550 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 15:17:09,582 - engineio.server - INFO - socket.py:78 - pm1PcmoIWU8TptR8AABW: Sending packet OPEN data {'sid': 'pm1PcmoIWU8TptR8AABW', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 15:17:09,582 - engineio.server - INFO - socket.py:90 - pm1PcmoIWU8TptR8AABW: Received request to upgrade to websocket
+2025-06-09 15:17:09,582 - engineio.server - INFO - socket.py:219 - pm1PcmoIWU8TptR8AABW: Upgrade to websocket successful
+2025-06-09 15:17:09,588 - engineio.server - INFO - socket.py:39 - pm1PcmoIWU8TptR8AABW: Received packet MESSAGE data 0
+2025-06-09 15:17:09,589 - root - INFO - app.py:146 - [socketio] Client connected: nATCAKccBLd--gKvAABX
+2025-06-09 15:17:09,590 - socketio.server - INFO - server.py:164 - emitting event "connected" to nATCAKccBLd--gKvAABX [/]
+2025-06-09 15:17:09,590 - engineio.server - INFO - socket.py:78 - pm1PcmoIWU8TptR8AABW: Sending packet MESSAGE data 2["connected",{"sid":"nATCAKccBLd--gKvAABX"}]
+2025-06-09 15:17:09,591 - engineio.server - INFO - socket.py:78 - pm1PcmoIWU8TptR8AABW: Sending packet MESSAGE data 0{"sid":"nATCAKccBLd--gKvAABX"}
+2025-06-09 15:17:34,587 - engineio.server - INFO - socket.py:78 - pm1PcmoIWU8TptR8AABW: Sending packet PING data None
+2025-06-09 15:17:34,590 - engineio.server - INFO - socket.py:39 - pm1PcmoIWU8TptR8AABW: Received packet PONG data 
+2025-06-09 15:17:58,220 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 15:17:58,253 - engineio.server - INFO - socket.py:78 - WTtFPxLkWFjBHFHkAABY: Sending packet OPEN data {'sid': 'WTtFPxLkWFjBHFHkAABY', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 15:17:58,253 - engineio.server - INFO - socket.py:90 - WTtFPxLkWFjBHFHkAABY: Received request to upgrade to websocket
+2025-06-09 15:17:58,254 - engineio.server - INFO - socket.py:219 - WTtFPxLkWFjBHFHkAABY: Upgrade to websocket successful
+2025-06-09 15:17:58,260 - engineio.server - INFO - socket.py:39 - WTtFPxLkWFjBHFHkAABY: Received packet MESSAGE data 0
+2025-06-09 15:17:58,261 - root - INFO - app.py:146 - [socketio] Client connected: -0rSKxJuXENupfuiAABZ
+2025-06-09 15:17:58,261 - socketio.server - INFO - server.py:164 - emitting event "connected" to -0rSKxJuXENupfuiAABZ [/]
+2025-06-09 15:17:58,261 - engineio.server - INFO - socket.py:78 - WTtFPxLkWFjBHFHkAABY: Sending packet MESSAGE data 2["connected",{"sid":"-0rSKxJuXENupfuiAABZ"}]
+2025-06-09 15:17:58,261 - engineio.server - INFO - socket.py:78 - WTtFPxLkWFjBHFHkAABY: Sending packet MESSAGE data 0{"sid":"-0rSKxJuXENupfuiAABZ"}
+2025-06-09 15:17:59,998 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 15:18:00,030 - engineio.server - INFO - socket.py:78 - 0MMpUujERi_uFLvKAABa: Sending packet OPEN data {'sid': '0MMpUujERi_uFLvKAABa', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 15:18:00,030 - engineio.server - INFO - socket.py:90 - 0MMpUujERi_uFLvKAABa: Received request to upgrade to websocket
+2025-06-09 15:18:00,031 - engineio.server - INFO - socket.py:219 - 0MMpUujERi_uFLvKAABa: Upgrade to websocket successful
+2025-06-09 15:18:00,040 - engineio.server - INFO - socket.py:39 - 0MMpUujERi_uFLvKAABa: Received packet MESSAGE data 0
+2025-06-09 15:18:00,041 - root - INFO - app.py:146 - [socketio] Client connected: Y-L4_KN3PeITL0YhAABb
+2025-06-09 15:18:00,041 - socketio.server - INFO - server.py:164 - emitting event "connected" to Y-L4_KN3PeITL0YhAABb [/]
+2025-06-09 15:18:00,041 - engineio.server - INFO - socket.py:78 - 0MMpUujERi_uFLvKAABa: Sending packet MESSAGE data 2["connected",{"sid":"Y-L4_KN3PeITL0YhAABb"}]
+2025-06-09 15:18:00,042 - engineio.server - INFO - socket.py:78 - 0MMpUujERi_uFLvKAABa: Sending packet MESSAGE data 0{"sid":"Y-L4_KN3PeITL0YhAABb"}
+2025-06-09 15:18:25,035 - engineio.server - INFO - socket.py:78 - 0MMpUujERi_uFLvKAABa: Sending packet PING data None
+2025-06-09 15:18:25,037 - engineio.server - INFO - socket.py:39 - 0MMpUujERi_uFLvKAABa: Received packet PONG data 
+2025-06-09 15:18:38,683 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 15:18:38,746 - engineio.server - INFO - socket.py:78 - U83X32C5rstWq0xfAABc: Sending packet OPEN data {'sid': 'U83X32C5rstWq0xfAABc', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 15:18:38,746 - engineio.server - INFO - socket.py:90 - U83X32C5rstWq0xfAABc: Received request to upgrade to websocket
+2025-06-09 15:18:38,746 - engineio.server - INFO - socket.py:219 - U83X32C5rstWq0xfAABc: Upgrade to websocket successful
+2025-06-09 15:18:38,756 - engineio.server - INFO - socket.py:39 - U83X32C5rstWq0xfAABc: Received packet MESSAGE data 0
+2025-06-09 15:18:38,757 - root - INFO - app.py:146 - [socketio] Client connected: YkaXjTdB4R5fo0HeAABd
+2025-06-09 15:18:38,757 - socketio.server - INFO - server.py:164 - emitting event "connected" to YkaXjTdB4R5fo0HeAABd [/]
+2025-06-09 15:18:38,757 - engineio.server - INFO - socket.py:78 - U83X32C5rstWq0xfAABc: Sending packet MESSAGE data 2["connected",{"sid":"YkaXjTdB4R5fo0HeAABd"}]
+2025-06-09 15:18:38,758 - engineio.server - INFO - socket.py:78 - U83X32C5rstWq0xfAABc: Sending packet MESSAGE data 0{"sid":"YkaXjTdB4R5fo0HeAABd"}
+2025-06-09 15:19:03,748 - engineio.server - INFO - socket.py:78 - U83X32C5rstWq0xfAABc: Sending packet PING data None
+2025-06-09 15:19:03,751 - engineio.server - INFO - socket.py:39 - U83X32C5rstWq0xfAABc: Received packet PONG data 
+2025-06-09 15:19:15,135 - engineio.server - INFO - socket.py:78 - mfdgtMCho8FhxcoSAABe: Sending packet OPEN data {'sid': 'mfdgtMCho8FhxcoSAABe', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 15:19:15,135 - engineio.server - INFO - socket.py:90 - mfdgtMCho8FhxcoSAABe: Received request to upgrade to websocket
+2025-06-09 15:19:15,136 - engineio.server - INFO - socket.py:219 - mfdgtMCho8FhxcoSAABe: Upgrade to websocket successful
+2025-06-09 15:19:15,141 - engineio.server - INFO - socket.py:39 - mfdgtMCho8FhxcoSAABe: Received packet MESSAGE data 0
+2025-06-09 15:19:15,142 - root - INFO - app.py:146 - [socketio] Client connected: JDqwS6gv2lal1LYLAABf
+2025-06-09 15:19:15,142 - socketio.server - INFO - server.py:164 - emitting event "connected" to JDqwS6gv2lal1LYLAABf [/]
+2025-06-09 15:19:15,142 - engineio.server - INFO - socket.py:78 - mfdgtMCho8FhxcoSAABe: Sending packet MESSAGE data 2["connected",{"sid":"JDqwS6gv2lal1LYLAABf"}]
+2025-06-09 15:19:15,143 - engineio.server - INFO - socket.py:78 - mfdgtMCho8FhxcoSAABe: Sending packet MESSAGE data 0{"sid":"JDqwS6gv2lal1LYLAABf"}
+2025-06-09 15:19:26,576 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 15:19:26,600 - engineio.server - INFO - socket.py:78 - ot6d4jAItieT_aePAABg: Sending packet OPEN data {'sid': 'ot6d4jAItieT_aePAABg', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 15:19:26,601 - engineio.server - INFO - socket.py:90 - ot6d4jAItieT_aePAABg: Received request to upgrade to websocket
+2025-06-09 15:19:26,601 - engineio.server - INFO - socket.py:219 - ot6d4jAItieT_aePAABg: Upgrade to websocket successful
+2025-06-09 15:19:26,606 - engineio.server - INFO - socket.py:39 - ot6d4jAItieT_aePAABg: Received packet MESSAGE data 0
+2025-06-09 15:19:26,607 - root - INFO - app.py:146 - [socketio] Client connected: eerBptKmPVmGMNu-AABh
+2025-06-09 15:19:26,607 - socketio.server - INFO - server.py:164 - emitting event "connected" to eerBptKmPVmGMNu-AABh [/]
+2025-06-09 15:19:26,607 - engineio.server - INFO - socket.py:78 - ot6d4jAItieT_aePAABg: Sending packet MESSAGE data 2["connected",{"sid":"eerBptKmPVmGMNu-AABh"}]
+2025-06-09 15:19:26,608 - engineio.server - INFO - socket.py:78 - ot6d4jAItieT_aePAABg: Sending packet MESSAGE data 0{"sid":"eerBptKmPVmGMNu-AABh"}
+2025-06-09 15:19:27,396 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 15:19:27,412 - engineio.server - INFO - socket.py:78 - LK_l5njlu6TSDI_lAABi: Sending packet OPEN data {'sid': 'LK_l5njlu6TSDI_lAABi', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 15:19:27,412 - engineio.server - INFO - socket.py:90 - LK_l5njlu6TSDI_lAABi: Received request to upgrade to websocket
+2025-06-09 15:19:27,412 - engineio.server - INFO - socket.py:219 - LK_l5njlu6TSDI_lAABi: Upgrade to websocket successful
+2025-06-09 15:19:27,418 - engineio.server - INFO - socket.py:39 - LK_l5njlu6TSDI_lAABi: Received packet MESSAGE data 0
+2025-06-09 15:19:27,418 - root - INFO - app.py:146 - [socketio] Client connected: hTN18y7R0RbiAS1LAABj
+2025-06-09 15:19:27,418 - socketio.server - INFO - server.py:164 - emitting event "connected" to hTN18y7R0RbiAS1LAABj [/]
+2025-06-09 15:19:27,419 - engineio.server - INFO - socket.py:78 - LK_l5njlu6TSDI_lAABi: Sending packet MESSAGE data 2["connected",{"sid":"hTN18y7R0RbiAS1LAABj"}]
+2025-06-09 15:19:27,419 - engineio.server - INFO - socket.py:78 - LK_l5njlu6TSDI_lAABi: Sending packet MESSAGE data 0{"sid":"hTN18y7R0RbiAS1LAABj"}
+2025-06-09 15:19:52,418 - engineio.server - INFO - socket.py:78 - LK_l5njlu6TSDI_lAABi: Sending packet PING data None
+2025-06-09 15:19:52,420 - engineio.server - INFO - socket.py:39 - LK_l5njlu6TSDI_lAABi: Received packet PONG data 
+2025-06-09 15:20:17,423 - engineio.server - INFO - socket.py:78 - LK_l5njlu6TSDI_lAABi: Sending packet PING data None
+2025-06-09 15:20:17,424 - engineio.server - INFO - socket.py:39 - LK_l5njlu6TSDI_lAABi: Received packet PONG data 
+2025-06-09 15:20:22,702 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 15:20:22,778 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet OPEN data {'sid': 'E8a9zTzbJ2nf6svQAABk', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 15:20:22,778 - engineio.server - INFO - socket.py:90 - E8a9zTzbJ2nf6svQAABk: Received request to upgrade to websocket
+2025-06-09 15:20:22,779 - engineio.server - INFO - socket.py:219 - E8a9zTzbJ2nf6svQAABk: Upgrade to websocket successful
+2025-06-09 15:20:22,786 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet MESSAGE data 0
+2025-06-09 15:20:22,787 - root - INFO - app.py:146 - [socketio] Client connected: sukl9d_Pn2ReKhHIAABl
+2025-06-09 15:20:22,787 - socketio.server - INFO - server.py:164 - emitting event "connected" to sukl9d_Pn2ReKhHIAABl [/]
+2025-06-09 15:20:22,787 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet MESSAGE data 2["connected",{"sid":"sukl9d_Pn2ReKhHIAABl"}]
+2025-06-09 15:20:22,788 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet MESSAGE data 0{"sid":"sukl9d_Pn2ReKhHIAABl"}
+2025-06-09 15:20:47,783 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:20:47,786 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
