@@ -14,6 +14,40 @@
       padding: 0 16px;
       box-sizing: border-box;
       overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 auto;
+      justify-content: flex-start;
+      padding-bottom: 120px; /* leave space for the fixed input */
+    }
+    html, body, .container, .main, .chat-wrapper {
+      height: 100%;
+      min-height: 100vh;
+    }
+    .main {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    #task-input {
+      position: fixed;
+      left: 250px; /* width of your sidebar */
+      right: 0;
+      bottom: 0;
+      z-index: 100;
+      max-width: 800px;
+      margin: 0 auto 24px auto;
+      box-shadow: 0 -2px 12px rgba(0,0,0,0.08);
+      background: #181c1f;
+      border-radius: 16px;
+      padding: 16px;
+    }
+    @media (max-width: 900px) {
+      #task-input {
+        left: 0;
+        max-width: 100vw;
+        border-radius: 0;
+      }
     }
 
     #task-message {
@@ -114,6 +148,10 @@
     #env-task-list .task-item:hover {
       text-decoration: underline;
     }
+
+    .sidebar-footer {
+      background: none !important;
+    }
   </style>
 </head>
 <body>
@@ -121,26 +159,33 @@
     {% include "sidebar.html" %}
     <div class="main">
       <div class="chat-wrapper">
-        <div class="button-bar">
+        <div class="button-bar-title" style="font-size:1.2rem; font-weight:600; margin-top:32px; margin-bottom:8px; color:#b5e0c7; letter-spacing:0.5px; text-align:center;">
+          Select your tool
+        </div>
+        <div class="button-bar" style="margin-top: 24px;">
           <button class="action-button active" data-workflow="1">ToxRAP</button>
           <button class="action-button" data-workflow="2">ToxDirect</button>
           <button class="action-button" data-workflow="3">ToxJson</button>
           <button class="action-button" data-workflow="4">Predict</button>
         </div>
-        <div id="task-input">
-          <textarea id="task-message" placeholder="{{ workflow.initial_prompt }}" autofocus></textarea>
-          <div id="file-list"></div>
-        </div>
         <div id="env-task-list">
+          <div class="env-task-list-title" style="font-size:1.2rem; font-weight:600; margin-bottom:8px; color:#b5e0c7; letter-spacing:0.5px;">
+            Completed Tasks
+          </div>
+          <div style="font-size:0.95rem; color:#8ab4b7; margin-bottom:8px;">Click to go back to your task</div>
           {% for task in tasks %}
             <div class="task-item" data-id="{{ task.task_id }}">
               [{{ workflow_titles[task.workflow_id|string] if (task.workflow_id|string) in workflow_titles else task.workflow_id }}]
-              {{ task.title }}
-              {% if task.created_at %}<span style="color:#888;font-size:0.9em;">({{ task.created_at }})</span>{% endif %}
+              <span class="task-title-full">{{ task.title }}</span>
+              {% if task.created_at %}<span style="color:#888;font-size:0.9em;">({{ task.created_at.strftime('%Y-%m-%d %I:%M %p') }})</span>{% endif %}
             </div>
           {% endfor %}
         </div>
         <div id="progress-log"></div>
+        <div id="task-input">
+          <textarea id="task-message" placeholder="{{ workflow.initial_prompt }}" autofocus></textarea>
+          <div id="file-list"></div>
+        </div>
       </div>
     </div>
   </div>
