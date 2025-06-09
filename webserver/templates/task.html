@@ -103,17 +103,17 @@
                   <span class="filename-tooltip ms-2" title="{{ file.filename }}">&#9432;</span>
                 </div>
                 <div class="result-body card-body">
-                  {% if file.filename.lower().endswith('.png') or
-                        file.filename.lower().endswith('.jpg') or
-                        file.filename.lower().endswith('.jpeg') or
-                        file.filename.lower().endswith('.gif') %}
+                {% if file.filename.lower().endswith('.png') or
+                      file.filename.lower().endswith('.jpg') or
+                      file.filename.lower().endswith('.jpeg') or
+                      file.filename.lower().endswith('.gif') %}
                     <img src="{{ file.s3_url or file.filepath }}" alt="{{ file.filename }}" class="result-image img-fluid mb-2">
                     <a href="{{ file.s3_url or file.filepath }}" download class="btn btn-primary" title="Download {{ file.filename }}">Download</a>
-                  {% else %}
+                {% else %}
                     <a href="{{ file.s3_url or file.filepath }}" download class="btn btn-primary" title="Download {{ file.filename }}">Download</a>
-                  {% endif %}
-                </div>
+                {% endif %}
               </div>
+            </div>
             {% endif %}
           {% endfor %}
         </div>
