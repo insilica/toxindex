@@ -45,6 +45,11 @@ class Message():
 
     @staticmethod
     def create_message(task_id, user_id, role, content):
+        # Duplicate check: does a message with this task_id, role, and content already exist?
+        existing = ds.find("SELECT 1 FROM messages WHERE task_id = %s AND role = %s AND content = %s", (task_id, role, content))
+        if existing:
+            logging.warning(f"[Message.create_message] Duplicate message for task_id={task_id}, role={role} -- skipping insert.")
+            return
         logging.info(f"[Message.create_message] Storing message for task_id={task_id}, user_id={user_id}, role={role}, content={content}")
         params = (task_id, user_id, role, content)
         ds.execute(
@@ -64,9 +69,9 @@ class Message():
 
     @staticmethod
     def process_event(task, event_data):
+        logging.info(f"[Message.process_event] Processing event for task_id={task.task_id}, role={event_data.get('role')}, content={event_data.get('content')}")
         role = event_data.get("role", "assistant")
         content = event_data.get("content")
-        logging.info(f"[Message.process_event] Processing event for task_id={task.task_id}, role={role}, content={content}")
         if content and role:
             Message.create_message(task.task_id, None, role, content)
             logging.info(f"[Message.process_event] Stored message for task_id={task.task_id} from role={role}")

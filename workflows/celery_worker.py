@@ -37,3 +37,4 @@ celery.config_from_object(celery_config)
 import workflows.probra
 import workflows.chat_response_task
 import workflows.interactive_echo_task
+import workflows.plain_openai_tasks

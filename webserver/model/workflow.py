@@ -55,7 +55,10 @@ class Workflow:
 
     @staticmethod
     def get_workflows_by_user(user_id):
-        rows = ds.find_all("SELECT * FROM workflows WHERE user_id = %s ORDER BY created_at DESC", (user_id,))
+        if user_id is None:
+            rows = ds.find_all("SELECT * FROM workflows WHERE user_id IS NULL ORDER BY created_at DESC")
+        else:
+            rows = ds.find_all("SELECT * FROM workflows WHERE user_id = %s ORDER BY created_at DESC", (user_id,))
         return [Workflow.from_row(row) for row in rows]
 
     @staticmethod

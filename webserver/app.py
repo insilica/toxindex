@@ -15,6 +15,7 @@ from webserver.model import Task, Workflow, Message, File, Environment
 from webserver.ai_service import generate_title
 from workflows.chat_response_task import chat_response_task
 from workflows.interactive_echo_task import interactive_echo_task
+from workflows.plain_openai_tasks import plain_openai_task, openai_json_schema_task
 from flask import request, Response, send_from_directory
 
 import flask, flask_login
@@ -80,12 +81,14 @@ Workflow.load_default_workflows()
 
 # REDIS PUB/SUB BACKGROUND LISTENER ==========================================
 def redis_listener(name):
+    import uuid
+    listener_id = uuid.uuid4().hex[:8]
     r = redis.Redis()
     pubsub = r.pubsub()
     pubsub.subscribe("celery_updates")
-    logging.info(f"[redis_listener] Started Redis listener thread: {name}")
+    logging.info(f"[redis_listener] ({listener_id}) Started Redis listener thread: {name}")
     for redis_message in pubsub.listen():
-        logging.debug(f"[redis_listener] Raw redis_message: {redis_message}")
+        logging.debug(f"[redis_listener] ({listener_id}) Raw redis_message: {redis_message}")
         if redis_message["type"] != "message":
             continue
         try:
@@ -93,34 +96,34 @@ def redis_listener(name):
             if isinstance(raw_data, bytes):
                 raw_data = raw_data.decode()
             event = json.loads(raw_data)
-            logging.info(f"[redis_listener] Redis event: {event}")
+            logging.info(f"[redis_listener] ({listener_id}) Redis event: {event}")
             event_type = event.get("type")
             event_task_id = event.get("task_id")
             event_data = event.get("data")
             if event_task_id is None or event_data is None:
-                logging.warning(f"[redis_listener] Redis event missing required fields: event_type={event_type}, task_id={event_task_id}, data={event_data}")
+                logging.warning(f"[redis_listener] ({listener_id}) Redis event missing required fields: event_type={event_type}, task_id={event_task_id}, data={event_data}")
                 continue
             if event_type not in ("task_message", "task_file"):
-                logging.debug(f"[redis_listener] Ignoring event_type={event_type}")
+                logging.debug(f"[redis_listener] ({listener_id}) Ignoring event_type={event_type}")
                 continue
             task = Task.get_task(event_task_id)
             if not task:
-                logging.warning(f"[redis_listener] No task found for task_id={event_task_id}")
+                logging.warning(f"[redis_listener] ({listener_id}) No task found for task_id={event_task_id}")
                 continue
             if event_type == "task_message":
-                logging.info(f"[redis_listener] Processing task_message for task_id={event_task_id}")
+                logging.info(f"[redis_listener] ({listener_id}) Processing task_message for task_id={event_task_id}")
                 Message.process_event(task, event_data)
             elif event_type == "task_file":
-                logging.info(f"[redis_listener] Processing task_file for task_id={event_task_id}")
+                logging.info(f"[redis_listener] ({listener_id}) Processing task_file for task_id={event_task_id}")
                 File.process_event(task, event_data)
             room = f"task_{task.task_id}"
-            logging.info(f"[redis_listener] Emitting {event_type} to room {room} with data: {event_data}")
+            logging.info(f"[redis_listener] ({listener_id}) Emitting {event_type} to room {room} with data: {event_data}")
             socketio.emit(event_type, event_data, to=room)
-            logging.info(f"[redis_listener] {event_type} sent to {room}")
+            logging.info(f"[redis_listener] ({listener_id}) {event_type} sent to {room}")
         except json.JSONDecodeError:
-            logging.error("[redis_listener] Failed to decode Redis message as JSON.")
+            logging.error(f"[redis_listener] ({listener_id}) Failed to decode Redis message as JSON.")
         except Exception as e:
-            logging.error(f"[redis_listener] Redis listener error: {e}", exc_info=True)
+            logging.error(f"[redis_listener] ({listener_id}) Redis listener error: {e}", exc_info=True)
 
 
 # INDEX / ROOT ===============================================================
@@ -179,6 +182,7 @@ def task_create():
     
     # Select the appropriate task based on workflow_id
     if workflow_id == 1:
+        logging.info(f"[task_create] Executing ToxRAP (probra_task) for task_id={task.task_id}")
         celery_task = probra_task.delay(
             {
                 "payload": message,
@@ -188,7 +192,8 @@ def task_create():
             }
         )
     elif workflow_id == 2:
-        celery_task = chat_response_task.delay(
+        logging.info(f"[task_create] Executing ToxDirect (plain_openai_task) for task_id={task.task_id}")
+        celery_task = plain_openai_task.delay(
             {
                 "payload": message,
                 "sid": sid,
@@ -197,7 +202,8 @@ def task_create():
             }
         )
     elif workflow_id == 3:
-        celery_task = interactive_echo_task.delay(
+        logging.info(f"[task_create] Executing ToxJson (openai_json_schema_task) for task_id={task.task_id}")
+        celery_task = openai_json_schema_task.delay(
             {
                 "payload": message,
                 "sid": sid,
@@ -206,6 +212,7 @@ def task_create():
             }
         )
     else:
+        logging.info(f"[task_create] Executing default (probra_task) for task_id={task.task_id}")
         celery_task = probra_task.delay(  # Default to probra_task for unknown workflows
             {
                 "payload": message,
@@ -274,7 +281,6 @@ def task(task_id):
     assistant_messages = [m for m in messages if m.role == "assistant"]
     latest_assistant_message = assistant_messages[-1].content if assistant_messages else None
 
-
     # Pre-render markdown content for convenience
     rendered_files = []
     for f in files:
@@ -285,12 +291,20 @@ def task(task_id):
             file_info["html"] = ""
         rendered_files.append(file_info)
 
+    # Render latest assistant message as HTML (if present)
+    if latest_assistant_message:
+        import markdown
+        latest_assistant_message_html = markdown.markdown(latest_assistant_message, extensions=["extra", "tables"])
+    else:
+        latest_assistant_message_html = None
+
     return flask.render_template(
         "task.html", 
         task_id=task_id, 
         messages=messages, 
         files=rendered_files, 
-        latest_assistant_message=latest_assistant_message
+        latest_assistant_message=latest_assistant_message,
+        latest_assistant_message_html=latest_assistant_message_html
     )
 
 
@@ -372,8 +386,13 @@ def environment_view(env_id):
     workflow = Workflow.get_workflow(1)
     tasks = Task.get_tasks_by_environment(env_id, flask_login.current_user.user_id)
     env = Environment.get_environment(env_id)
+    user_id = flask_login.current_user.user_id
+    user_workflows = Workflow.get_workflows_by_user(user_id)
+    global_workflows = Workflow.get_workflows_by_user(None)
+    all_workflows = {str(w.workflow_id): w.title for w in (user_workflows + global_workflows)}
+    logging.info(f"[environment_view] workflow_titles mapping: {all_workflows}")
     return flask.render_template(
-        "environment.html", tasks=tasks, workflow=workflow, environment=env
+        "environment.html", tasks=tasks, workflow=workflow, environment=env, workflow_titles=all_workflows
     )
 
 
@@ -411,29 +430,21 @@ def serve_icon(filename):
 
 
 # LAUNCH =====================================================================
-thread_name = f"RedisListenerThread-{uuid.uuid4().hex[:8]}"
-threading.Thread(
-    target=redis_listener,
-    args=(thread_name,),
-    daemon=True,
-    name=thread_name,
-).start()
-
-# For localhost development only:
-# Uncomment the following block to run the Flask dev server with the Redis listener thread.
-# if __name__ == "__main__":
-#     if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
-#         thread_name = f"RedisListenerThread-{uuid.uuid4().hex[:8]}"
-#         threading.Thread(
-#             target=redis_listener,
-#             args=(thread_name,),
-#             daemon=True,
-#             name=thread_name,
-#         ).start()
-#     socketio.run(app, host="0.0.0.0", port=6513, debug=True, use_reloader=True)
-
+# In development, start the Redis listener only in the reloader child process
 if __name__ == "__main__":
-    socketio.run(app, host="0.0.0.0", port=6513, debug=True, use_reloader=True)
+    # Only start the listener in the reloader child process (not parent)
+    if os.environ.get("WERKZEUG_RUN_MAIN") == "true" or not app.debug:
+        thread_name = f"RedisListenerThread-{uuid.uuid4().hex[:8]}"
+        threading.Thread(
+            target=redis_listener,
+            args=(thread_name,),
+            daemon=True,
+            name=thread_name,
+        ).start()
+    socketio.run(app, host="0.0.0.0", port=6513, debug=True, use_reloader=True) # set to true if you want to reload while editing code.
+
+# In production (Gunicorn), run the Redis listener as a separate process using redis_listener_service.py
+# See redis_listener_service.py for details.
 
 @app.route('/log_tab_switch', methods=['POST'])
 def log_tab_switch():
