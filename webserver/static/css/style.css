@@ -22,10 +22,14 @@ body, html {
 .container {
     display: flex;
     height: 100vh;
+    background: var(--main-bg);
+    min-width: 0;
 }
 
 .sidebar {
-    width: 260px;
+    transition: width 0.3s;
+    width: 250px;
+    min-width: 60px;
     background: var(--sidebar-bg);
     box-sizing: border-box;
     padding: 10px;
@@ -33,6 +37,12 @@ body, html {
     flex-direction: column;
     overflow-y: auto;
     border-right: 1px solid var(--border-color);
+}
+
+.sidebar.collapsed {
+    width: 60px;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
 }
 
 .platform-title {
@@ -182,12 +192,19 @@ body, html {
 }
 
 .main {
-    flex-grow: 1;
+    flex: 1 1 0%;
+    min-width: 0;
     background-color: var(--main-bg);
     display: flex;
     flex-direction: column;
     padding: 40px;
     overflow-y: auto;
+    transition: padding 0.3s, margin 0.3s;
+}
+
+.main.expanded {
+    padding-left: 20px;
+    padding-right: 20px;
 }
 
 .header {
@@ -492,4 +509,26 @@ a {
 a:hover {
     text-decoration: underline;
     color: #78c2fa;
+}
+
+.sidebar.collapsed .platform-title span:not(:first-child),
+.sidebar.collapsed .platform-title a,
+.sidebar.collapsed .tasks,
+.sidebar.collapsed .sidebar-footer {
+    display: none !important;
+}
+
+#env-task-list .task-item {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+    display: block !important;
+}
+
+.task-title-full {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+    display: inline !important;
+    word-break: break-word;
 }

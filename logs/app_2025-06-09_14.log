@@ -454,3 +454,1084 @@
 2025-06-09 14:17:07,563 - engineio.server - INFO - socket.py:39 - IiS66JUcLHFk3DQeAAAa: Received packet PONG data 
 2025-06-09 14:17:32,565 - engineio.server - INFO - socket.py:78 - IiS66JUcLHFk3DQeAAAa: Sending packet PING data None
 2025-06-09 14:17:32,567 - engineio.server - INFO - socket.py:39 - IiS66JUcLHFk3DQeAAAa: Received packet PONG data 
+2025-06-09 14:17:57,572 - engineio.server - INFO - socket.py:78 - IiS66JUcLHFk3DQeAAAa: Sending packet PING data None
+2025-06-09 14:17:57,574 - engineio.server - INFO - socket.py:39 - IiS66JUcLHFk3DQeAAAa: Received packet PONG data 
+2025-06-09 14:18:16,357 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 14:18:16,403 - engineio.server - INFO - socket.py:78 - WvlO9n2-0bEhy07cAAAc: Sending packet OPEN data {'sid': 'WvlO9n2-0bEhy07cAAAc', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 14:18:16,403 - engineio.server - INFO - socket.py:90 - WvlO9n2-0bEhy07cAAAc: Received request to upgrade to websocket
+2025-06-09 14:18:16,404 - engineio.server - INFO - socket.py:219 - WvlO9n2-0bEhy07cAAAc: Upgrade to websocket successful
+2025-06-09 14:18:16,413 - engineio.server - INFO - socket.py:39 - WvlO9n2-0bEhy07cAAAc: Received packet MESSAGE data 0
+2025-06-09 14:18:16,414 - root - INFO - app.py:146 - [socketio] Client connected: LbNvwVTUdZBJBSZ8AAAd
+2025-06-09 14:18:16,414 - socketio.server - INFO - server.py:164 - emitting event "connected" to LbNvwVTUdZBJBSZ8AAAd [/]
+2025-06-09 14:18:16,414 - engineio.server - INFO - socket.py:78 - WvlO9n2-0bEhy07cAAAc: Sending packet MESSAGE data 2["connected",{"sid":"LbNvwVTUdZBJBSZ8AAAd"}]
+2025-06-09 14:18:16,415 - engineio.server - INFO - socket.py:78 - WvlO9n2-0bEhy07cAAAc: Sending packet MESSAGE data 0{"sid":"LbNvwVTUdZBJBSZ8AAAd"}
+2025-06-09 14:18:41,409 - engineio.server - INFO - socket.py:78 - WvlO9n2-0bEhy07cAAAc: Sending packet PING data None
+2025-06-09 14:18:41,412 - engineio.server - INFO - socket.py:39 - WvlO9n2-0bEhy07cAAAc: Received packet PONG data 
+2025-06-09 14:19:06,425 - engineio.server - INFO - socket.py:78 - WvlO9n2-0bEhy07cAAAc: Sending packet PING data None
+2025-06-09 14:19:06,427 - engineio.server - INFO - socket.py:39 - WvlO9n2-0bEhy07cAAAc: Received packet PONG data 
+2025-06-09 14:19:31,437 - engineio.server - INFO - socket.py:78 - WvlO9n2-0bEhy07cAAAc: Sending packet PING data None
+2025-06-09 14:19:31,438 - engineio.server - INFO - socket.py:39 - WvlO9n2-0bEhy07cAAAc: Received packet PONG data 
+2025-06-09 14:19:56,441 - engineio.server - INFO - socket.py:78 - WvlO9n2-0bEhy07cAAAc: Sending packet PING data None
+2025-06-09 14:19:56,443 - engineio.server - INFO - socket.py:39 - WvlO9n2-0bEhy07cAAAc: Received packet PONG data 
+2025-06-09 14:20:21,444 - engineio.server - INFO - socket.py:78 - WvlO9n2-0bEhy07cAAAc: Sending packet PING data None
+2025-06-09 14:20:21,446 - engineio.server - INFO - socket.py:39 - WvlO9n2-0bEhy07cAAAc: Received packet PONG data 
+2025-06-09 14:20:46,450 - engineio.server - INFO - socket.py:78 - WvlO9n2-0bEhy07cAAAc: Sending packet PING data None
+2025-06-09 14:20:46,452 - engineio.server - INFO - socket.py:39 - WvlO9n2-0bEhy07cAAAc: Received packet PONG data 
+2025-06-09 14:21:11,455 - engineio.server - INFO - socket.py:78 - WvlO9n2-0bEhy07cAAAc: Sending packet PING data None
+2025-06-09 14:21:11,457 - engineio.server - INFO - socket.py:39 - WvlO9n2-0bEhy07cAAAc: Received packet PONG data 
+2025-06-09 14:21:18,870 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 14:21:18,914 - engineio.server - INFO - socket.py:78 - ZQWTm86U4deL8hh6AAAe: Sending packet OPEN data {'sid': 'ZQWTm86U4deL8hh6AAAe', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 14:21:18,914 - engineio.server - INFO - socket.py:90 - ZQWTm86U4deL8hh6AAAe: Received request to upgrade to websocket
+2025-06-09 14:21:18,915 - engineio.server - INFO - socket.py:219 - ZQWTm86U4deL8hh6AAAe: Upgrade to websocket successful
+2025-06-09 14:21:18,928 - engineio.server - INFO - socket.py:39 - ZQWTm86U4deL8hh6AAAe: Received packet MESSAGE data 0
+2025-06-09 14:21:18,928 - root - INFO - app.py:146 - [socketio] Client connected: B63ZuFkXe2btHbkbAAAf
+2025-06-09 14:21:18,929 - socketio.server - INFO - server.py:164 - emitting event "connected" to B63ZuFkXe2btHbkbAAAf [/]
+2025-06-09 14:21:18,929 - engineio.server - INFO - socket.py:78 - ZQWTm86U4deL8hh6AAAe: Sending packet MESSAGE data 2["connected",{"sid":"B63ZuFkXe2btHbkbAAAf"}]
+2025-06-09 14:21:18,929 - engineio.server - INFO - socket.py:78 - ZQWTm86U4deL8hh6AAAe: Sending packet MESSAGE data 0{"sid":"B63ZuFkXe2btHbkbAAAf"}
+2025-06-09 14:21:43,915 - engineio.server - INFO - socket.py:78 - ZQWTm86U4deL8hh6AAAe: Sending packet PING data None
+2025-06-09 14:21:43,917 - engineio.server - INFO - socket.py:39 - ZQWTm86U4deL8hh6AAAe: Received packet PONG data 
+2025-06-09 14:22:08,921 - engineio.server - INFO - socket.py:78 - ZQWTm86U4deL8hh6AAAe: Sending packet PING data None
+2025-06-09 14:22:08,923 - engineio.server - INFO - socket.py:39 - ZQWTm86U4deL8hh6AAAe: Received packet PONG data 
+2025-06-09 14:22:33,925 - engineio.server - INFO - socket.py:78 - ZQWTm86U4deL8hh6AAAe: Sending packet PING data None
+2025-06-09 14:22:33,928 - engineio.server - INFO - socket.py:39 - ZQWTm86U4deL8hh6AAAe: Received packet PONG data 
+2025-06-09 14:22:37,314 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 14:22:37,338 - engineio.server - INFO - socket.py:78 - CQZ1b111tEKUhuTRAAAg: Sending packet OPEN data {'sid': 'CQZ1b111tEKUhuTRAAAg', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 14:22:37,338 - engineio.server - INFO - socket.py:90 - CQZ1b111tEKUhuTRAAAg: Received request to upgrade to websocket
+2025-06-09 14:22:37,338 - engineio.server - INFO - socket.py:219 - CQZ1b111tEKUhuTRAAAg: Upgrade to websocket successful
+2025-06-09 14:22:37,345 - engineio.server - INFO - socket.py:39 - CQZ1b111tEKUhuTRAAAg: Received packet MESSAGE data 0
+2025-06-09 14:22:37,345 - root - INFO - app.py:146 - [socketio] Client connected: Z6_I5eN2ZO0T-qH_AAAh
+2025-06-09 14:22:37,345 - socketio.server - INFO - server.py:164 - emitting event "connected" to Z6_I5eN2ZO0T-qH_AAAh [/]
+2025-06-09 14:22:37,345 - engineio.server - INFO - socket.py:78 - CQZ1b111tEKUhuTRAAAg: Sending packet MESSAGE data 2["connected",{"sid":"Z6_I5eN2ZO0T-qH_AAAh"}]
+2025-06-09 14:22:37,346 - engineio.server - INFO - socket.py:78 - CQZ1b111tEKUhuTRAAAg: Sending packet MESSAGE data 0{"sid":"Z6_I5eN2ZO0T-qH_AAAh"}
+2025-06-09 14:22:38,364 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 14:22:38,398 - engineio.server - INFO - socket.py:78 - MJL8UM26lSFC6Li0AAAi: Sending packet OPEN data {'sid': 'MJL8UM26lSFC6Li0AAAi', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 14:22:38,398 - engineio.server - INFO - socket.py:90 - MJL8UM26lSFC6Li0AAAi: Received request to upgrade to websocket
+2025-06-09 14:22:38,398 - engineio.server - INFO - socket.py:219 - MJL8UM26lSFC6Li0AAAi: Upgrade to websocket successful
+2025-06-09 14:22:38,407 - engineio.server - INFO - socket.py:39 - MJL8UM26lSFC6Li0AAAi: Received packet MESSAGE data 0
+2025-06-09 14:22:38,408 - root - INFO - app.py:146 - [socketio] Client connected: PrZWKciPaT5G7_ybAAAj
+2025-06-09 14:22:38,408 - socketio.server - INFO - server.py:164 - emitting event "connected" to PrZWKciPaT5G7_ybAAAj [/]
+2025-06-09 14:22:38,409 - engineio.server - INFO - socket.py:78 - MJL8UM26lSFC6Li0AAAi: Sending packet MESSAGE data 2["connected",{"sid":"PrZWKciPaT5G7_ybAAAj"}]
+2025-06-09 14:22:38,409 - engineio.server - INFO - socket.py:78 - MJL8UM26lSFC6Li0AAAi: Sending packet MESSAGE data 0{"sid":"PrZWKciPaT5G7_ybAAAj"}
+2025-06-09 14:23:03,399 - engineio.server - INFO - socket.py:78 - MJL8UM26lSFC6Li0AAAi: Sending packet PING data None
+2025-06-09 14:23:03,402 - engineio.server - INFO - socket.py:39 - MJL8UM26lSFC6Li0AAAi: Received packet PONG data 
+2025-06-09 14:23:28,403 - engineio.server - INFO - socket.py:78 - MJL8UM26lSFC6Li0AAAi: Sending packet PING data None
+2025-06-09 14:23:28,405 - engineio.server - INFO - socket.py:39 - MJL8UM26lSFC6Li0AAAi: Received packet PONG data 
+2025-06-09 14:23:53,408 - engineio.server - INFO - socket.py:78 - MJL8UM26lSFC6Li0AAAi: Sending packet PING data None
+2025-06-09 14:23:53,410 - engineio.server - INFO - socket.py:39 - MJL8UM26lSFC6Li0AAAi: Received packet PONG data 
+2025-06-09 14:24:18,415 - engineio.server - INFO - socket.py:78 - MJL8UM26lSFC6Li0AAAi: Sending packet PING data None
+2025-06-09 14:24:18,418 - engineio.server - INFO - socket.py:39 - MJL8UM26lSFC6Li0AAAi: Received packet PONG data 
+2025-06-09 14:24:43,421 - engineio.server - INFO - socket.py:78 - MJL8UM26lSFC6Li0AAAi: Sending packet PING data None
+2025-06-09 14:24:43,423 - engineio.server - INFO - socket.py:39 - MJL8UM26lSFC6Li0AAAi: Received packet PONG data 
+2025-06-09 14:25:08,425 - engineio.server - INFO - socket.py:78 - MJL8UM26lSFC6Li0AAAi: Sending packet PING data None
+2025-06-09 14:25:08,428 - engineio.server - INFO - socket.py:39 - MJL8UM26lSFC6Li0AAAi: Received packet PONG data 
+2025-06-09 14:25:23,724 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 14:25:23,760 - engineio.server - INFO - socket.py:78 - lkMD7_U5MAMWPKr7AAAk: Sending packet OPEN data {'sid': 'lkMD7_U5MAMWPKr7AAAk', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 14:25:23,760 - engineio.server - INFO - socket.py:90 - lkMD7_U5MAMWPKr7AAAk: Received request to upgrade to websocket
+2025-06-09 14:25:23,760 - engineio.server - INFO - socket.py:219 - lkMD7_U5MAMWPKr7AAAk: Upgrade to websocket successful
+2025-06-09 14:25:23,770 - engineio.server - INFO - socket.py:39 - lkMD7_U5MAMWPKr7AAAk: Received packet MESSAGE data 0
+2025-06-09 14:25:23,770 - root - INFO - app.py:146 - [socketio] Client connected: -oLBaZOgRQCH8nQuAAAl
+2025-06-09 14:25:23,770 - socketio.server - INFO - server.py:164 - emitting event "connected" to -oLBaZOgRQCH8nQuAAAl [/]
+2025-06-09 14:25:23,771 - engineio.server - INFO - socket.py:78 - lkMD7_U5MAMWPKr7AAAk: Sending packet MESSAGE data 2["connected",{"sid":"-oLBaZOgRQCH8nQuAAAl"}]
+2025-06-09 14:25:23,771 - engineio.server - INFO - socket.py:78 - lkMD7_U5MAMWPKr7AAAk: Sending packet MESSAGE data 0{"sid":"-oLBaZOgRQCH8nQuAAAl"}
+2025-06-09 14:25:29,940 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 14:25:29,971 - engineio.server - INFO - socket.py:78 - kmI_nZm9YZylG4BAAAAm: Sending packet OPEN data {'sid': 'kmI_nZm9YZylG4BAAAAm', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 14:25:29,971 - engineio.server - INFO - socket.py:90 - kmI_nZm9YZylG4BAAAAm: Received request to upgrade to websocket
+2025-06-09 14:25:29,972 - engineio.server - INFO - socket.py:219 - kmI_nZm9YZylG4BAAAAm: Upgrade to websocket successful
+2025-06-09 14:25:29,978 - engineio.server - INFO - socket.py:39 - kmI_nZm9YZylG4BAAAAm: Received packet MESSAGE data 0
+2025-06-09 14:25:29,980 - root - INFO - app.py:146 - [socketio] Client connected: pRM5RqeDY5PnmJLmAAAn
+2025-06-09 14:25:29,980 - socketio.server - INFO - server.py:164 - emitting event "connected" to pRM5RqeDY5PnmJLmAAAn [/]
+2025-06-09 14:25:29,980 - engineio.server - INFO - socket.py:78 - kmI_nZm9YZylG4BAAAAm: Sending packet MESSAGE data 2["connected",{"sid":"pRM5RqeDY5PnmJLmAAAn"}]
+2025-06-09 14:25:29,981 - engineio.server - INFO - socket.py:78 - kmI_nZm9YZylG4BAAAAm: Sending packet MESSAGE data 0{"sid":"pRM5RqeDY5PnmJLmAAAn"}
+2025-06-09 14:25:32,765 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 14:25:32,798 - engineio.server - INFO - socket.py:78 - YvK8By385vP7G9J3AAAo: Sending packet OPEN data {'sid': 'YvK8By385vP7G9J3AAAo', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 14:25:32,799 - engineio.server - INFO - socket.py:90 - YvK8By385vP7G9J3AAAo: Received request to upgrade to websocket
+2025-06-09 14:25:32,799 - engineio.server - INFO - socket.py:219 - YvK8By385vP7G9J3AAAo: Upgrade to websocket successful
+2025-06-09 14:25:32,806 - engineio.server - INFO - socket.py:39 - YvK8By385vP7G9J3AAAo: Received packet MESSAGE data 0
+2025-06-09 14:25:32,807 - root - INFO - app.py:146 - [socketio] Client connected: yW4Z9l_7QZuArU1uAAAp
+2025-06-09 14:25:32,807 - socketio.server - INFO - server.py:164 - emitting event "connected" to yW4Z9l_7QZuArU1uAAAp [/]
+2025-06-09 14:25:32,807 - engineio.server - INFO - socket.py:78 - YvK8By385vP7G9J3AAAo: Sending packet MESSAGE data 2["connected",{"sid":"yW4Z9l_7QZuArU1uAAAp"}]
+2025-06-09 14:25:32,807 - engineio.server - INFO - socket.py:78 - YvK8By385vP7G9J3AAAo: Sending packet MESSAGE data 0{"sid":"yW4Z9l_7QZuArU1uAAAp"}
+2025-06-09 14:25:57,801 - engineio.server - INFO - socket.py:78 - YvK8By385vP7G9J3AAAo: Sending packet PING data None
+2025-06-09 14:25:57,804 - engineio.server - INFO - socket.py:39 - YvK8By385vP7G9J3AAAo: Received packet PONG data 
+2025-06-09 14:26:22,820 - engineio.server - INFO - socket.py:78 - YvK8By385vP7G9J3AAAo: Sending packet PING data None
+2025-06-09 14:26:22,822 - engineio.server - INFO - socket.py:39 - YvK8By385vP7G9J3AAAo: Received packet PONG data 
+2025-06-09 14:26:47,825 - engineio.server - INFO - socket.py:78 - YvK8By385vP7G9J3AAAo: Sending packet PING data None
+2025-06-09 14:26:47,828 - engineio.server - INFO - socket.py:39 - YvK8By385vP7G9J3AAAo: Received packet PONG data 
+2025-06-09 14:27:12,841 - engineio.server - INFO - socket.py:78 - YvK8By385vP7G9J3AAAo: Sending packet PING data None
+2025-06-09 14:27:12,842 - engineio.server - INFO - socket.py:39 - YvK8By385vP7G9J3AAAo: Received packet PONG data 
+2025-06-09 14:27:37,846 - engineio.server - INFO - socket.py:78 - YvK8By385vP7G9J3AAAo: Sending packet PING data None
+2025-06-09 14:27:37,848 - engineio.server - INFO - socket.py:39 - YvK8By385vP7G9J3AAAo: Received packet PONG data 
+2025-06-09 14:28:02,850 - engineio.server - INFO - socket.py:78 - YvK8By385vP7G9J3AAAo: Sending packet PING data None
+2025-06-09 14:28:02,853 - engineio.server - INFO - socket.py:39 - YvK8By385vP7G9J3AAAo: Received packet PONG data 
+2025-06-09 14:28:27,868 - engineio.server - INFO - socket.py:78 - YvK8By385vP7G9J3AAAo: Sending packet PING data None
+2025-06-09 14:28:27,870 - engineio.server - INFO - socket.py:39 - YvK8By385vP7G9J3AAAo: Received packet PONG data 
+2025-06-09 14:28:49,337 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 14:28:49,366 - engineio.server - INFO - socket.py:78 - JzzIF2TuKk8oQkVHAAAq: Sending packet OPEN data {'sid': 'JzzIF2TuKk8oQkVHAAAq', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 14:28:49,366 - engineio.server - INFO - socket.py:90 - JzzIF2TuKk8oQkVHAAAq: Received request to upgrade to websocket
+2025-06-09 14:28:49,366 - engineio.server - INFO - socket.py:219 - JzzIF2TuKk8oQkVHAAAq: Upgrade to websocket successful
+2025-06-09 14:28:49,371 - engineio.server - INFO - socket.py:39 - JzzIF2TuKk8oQkVHAAAq: Received packet MESSAGE data 0
+2025-06-09 14:28:49,371 - root - INFO - app.py:146 - [socketio] Client connected: vNoNI94lce4kLk-hAAAr
+2025-06-09 14:28:49,371 - socketio.server - INFO - server.py:164 - emitting event "connected" to vNoNI94lce4kLk-hAAAr [/]
+2025-06-09 14:28:49,371 - engineio.server - INFO - socket.py:78 - JzzIF2TuKk8oQkVHAAAq: Sending packet MESSAGE data 2["connected",{"sid":"vNoNI94lce4kLk-hAAAr"}]
+2025-06-09 14:28:49,372 - engineio.server - INFO - socket.py:78 - JzzIF2TuKk8oQkVHAAAq: Sending packet MESSAGE data 0{"sid":"vNoNI94lce4kLk-hAAAr"}
+2025-06-09 14:29:14,369 - engineio.server - INFO - socket.py:78 - JzzIF2TuKk8oQkVHAAAq: Sending packet PING data None
+2025-06-09 14:29:14,372 - engineio.server - INFO - socket.py:39 - JzzIF2TuKk8oQkVHAAAq: Received packet PONG data 
+2025-06-09 14:29:39,377 - engineio.server - INFO - socket.py:78 - JzzIF2TuKk8oQkVHAAAq: Sending packet PING data None
+2025-06-09 14:29:39,379 - engineio.server - INFO - socket.py:39 - JzzIF2TuKk8oQkVHAAAq: Received packet PONG data 
+2025-06-09 14:30:04,383 - engineio.server - INFO - socket.py:78 - JzzIF2TuKk8oQkVHAAAq: Sending packet PING data None
+2025-06-09 14:30:04,385 - engineio.server - INFO - socket.py:39 - JzzIF2TuKk8oQkVHAAAq: Received packet PONG data 
+2025-06-09 14:30:08,426 - root - INFO - message.py:67 - Retrieved 3 messages for task_id=77
+2025-06-09 14:30:08,427 - root - INFO - file.py:84 - DB ENV (get_files): PGHOST=localhost, PGPORT=5433, PGDATABASE=toxindex, PGUSER=postgres, PGPASSWORD=devpassword
+2025-06-09 14:30:08,427 - root - INFO - file.py:85 - Calling get_files with task_id=77 (type: <class 'int'>)
+2025-06-09 14:30:08,430 - root - INFO - file.py:90 - Raw rows returned from DB for task_id=77: [[53, 77, UUID('078a38e9-c1b8-421e-b797-59ee3ae69df4'), 'probra_result_1f12a6f899554f33ab1149d80ec128bb.md', '77/probra_result_1f12a6f899554f33ab1149d80ec128bb.md', 'https://toxindex-environments-2.s3.amazonaws.com/77/probra_result_1f12a6f899554f33ab1149d80ec128bb.md?AWSAccessKeyId=ASIAQ72ED6HZEJGH3WVP&Signature=01JS4PQUWuiMCGKnQA6LOmVdh4M%3D&x-amz-security-token=IQoJb3JpZ2luX2VjENL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLWVhc3QtMSJIMEYCIQDOwWZ92rHuRduG0HlIr0ZJh5Z3246uxnkjP6Z3AOm3awIhAI2%2F%2FJZM5%2BR5bhrXR6iig0rd3blySQA3yrlUu1Ajx7lWKv4CCKv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEQABoMMDY4MzI1NDcwNzA2Igz73xQshCLCKsTI%2BJkq0gKuTd%2FD5VQL7pxhkvqiIelUvbuFjD91f7BqiqMhQQC89kjCNcd21Vup2gksuaOnhc7yEG%2B0Pt3Yg1z7y5HotHruO3erLdPO7DfQy%2FwECR%2F8RAqMpxLAl9PN2Om%2BJg2NQsjXWx%2BeoDHTqEMaVYNbX3466Ksu84TnSUcfpGAXbRP6MmxQR0rMnBT3%2FkyK3UJ9jZ2BOw9QPgRfLEC%2BU4g5y3e6Intt2HhFCagSH2gZ%2FeOkPZr82MNRPbQRARs2e063q17dPXYUQRD%2FsQAFpok%2BBqPoxnVxFdZanQzsP3Gi%2FhY6DnjyotEluVOE0n%2B%2BXiyNhxLV1G3BbURIHPZY5r1c3pGtl02VRS0n%2BAGMTtNt31Lj2mw9l456irbaGdchMTaUy06t6Vtm9fG3XV9JZO8R%2FfB98LK2hQM9CmnWR3sTUYs7iHAQNdnOlVKnghjd4gxH0Yp9yDC8uJzCBjqmAYdQ3F96uXXXXwcbR1jmbmd4fK5SckFBYjZkCvucBHyYkpDtU3PD2EGSmSA%2BbnUEFictfiIHpQUE8suSTEAIW%2FiTy7l30hUdl80aFffOLP9%2BroMydiJ2qQqY9USQ2Lsz2Nz%2BcqhpRqd4jhuyICgN60PfTS%2BKv3fGhT5oksGOR2juO7CW%2B%2BZiQnkqJy3mThXip04Zl4hY2ydOevXqtdTm7jN0HkcudPE%3D&Expires=1749494348', datetime.datetime(2025, 6, 9, 13, 39, 8, 573100)], [54, 77, UUID('078a38e9-c1b8-421e-b797-59ee3ae69df4'), 'probra_result_1f12a6f899554f33ab1149d80ec128bb.md', '77/probra_result_1f12a6f899554f33ab1149d80ec128bb.md', 'https://toxindex-environments-2.s3.amazonaws.com/77/probra_result_1f12a6f899554f33ab1149d80ec128bb.md?AWSAccessKeyId=ASIAQ72ED6HZEJGH3WVP&Signature=01JS4PQUWuiMCGKnQA6LOmVdh4M%3D&x-amz-security-token=IQoJb3JpZ2luX2VjENL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLWVhc3QtMSJIMEYCIQDOwWZ92rHuRduG0HlIr0ZJh5Z3246uxnkjP6Z3AOm3awIhAI2%2F%2FJZM5%2BR5bhrXR6iig0rd3blySQA3yrlUu1Ajx7lWKv4CCKv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEQABoMMDY4MzI1NDcwNzA2Igz73xQshCLCKsTI%2BJkq0gKuTd%2FD5VQL7pxhkvqiIelUvbuFjD91f7BqiqMhQQC89kjCNcd21Vup2gksuaOnhc7yEG%2B0Pt3Yg1z7y5HotHruO3erLdPO7DfQy%2FwECR%2F8RAqMpxLAl9PN2Om%2BJg2NQsjXWx%2BeoDHTqEMaVYNbX3466Ksu84TnSUcfpGAXbRP6MmxQR0rMnBT3%2FkyK3UJ9jZ2BOw9QPgRfLEC%2BU4g5y3e6Intt2HhFCagSH2gZ%2FeOkPZr82MNRPbQRARs2e063q17dPXYUQRD%2FsQAFpok%2BBqPoxnVxFdZanQzsP3Gi%2FhY6DnjyotEluVOE0n%2B%2BXiyNhxLV1G3BbURIHPZY5r1c3pGtl02VRS0n%2BAGMTtNt31Lj2mw9l456irbaGdchMTaUy06t6Vtm9fG3XV9JZO8R%2FfB98LK2hQM9CmnWR3sTUYs7iHAQNdnOlVKnghjd4gxH0Yp9yDC8uJzCBjqmAYdQ3F96uXXXXwcbR1jmbmd4fK5SckFBYjZkCvucBHyYkpDtU3PD2EGSmSA%2BbnUEFictfiIHpQUE8suSTEAIW%2FiTy7l30hUdl80aFffOLP9%2BroMydiJ2qQqY9USQ2Lsz2Nz%2BcqhpRqd4jhuyICgN60PfTS%2BKv3fGhT5oksGOR2juO7CW%2B%2BZiQnkqJy3mThXip04Zl4hY2ydOevXqtdTm7jN0HkcudPE%3D&Expires=1749494348', datetime.datetime(2025, 6, 9, 13, 39, 8, 573571)]]
+2025-06-09 14:30:08,430 - root - INFO - file.py:94 - Found 2 files in DB for task_id=77
+2025-06-09 14:30:08,430 - root - WARNING - file.py:130 - Could not read file 77/probra_result_1f12a6f899554f33ab1149d80ec128bb.md: [Errno 2] No such file or directory: '77/probra_result_1f12a6f899554f33ab1149d80ec128bb.md'
+2025-06-09 14:30:08,430 - root - WARNING - file.py:130 - Could not read file 77/probra_result_1f12a6f899554f33ab1149d80ec128bb.md: [Errno 2] No such file or directory: '77/probra_result_1f12a6f899554f33ab1149d80ec128bb.md'
+2025-06-09 14:30:08,430 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.fenced_code.FencedCodeExtension".
+2025-06-09 14:30:08,430 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.footnotes.FootnoteExtension".
+2025-06-09 14:30:08,430 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.attr_list.AttrListExtension".
+2025-06-09 14:30:08,430 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.def_list.DefListExtension".
+2025-06-09 14:30:08,430 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.tables.TableExtension".
+2025-06-09 14:30:08,430 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.abbr.AbbrExtension".
+2025-06-09 14:30:08,430 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.md_in_html.MarkdownInHtmlExtension".
+2025-06-09 14:30:08,430 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.extra.ExtraExtension".
+2025-06-09 14:30:08,430 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.tables.TableExtension".
+2025-06-09 14:30:08,481 - engineio.server - INFO - socket.py:78 - ryfAc2NNrzEGlL7oAAAs: Sending packet OPEN data {'sid': 'ryfAc2NNrzEGlL7oAAAs', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 14:30:08,481 - engineio.server - INFO - socket.py:90 - ryfAc2NNrzEGlL7oAAAs: Received request to upgrade to websocket
+2025-06-09 14:30:08,481 - engineio.server - INFO - socket.py:219 - ryfAc2NNrzEGlL7oAAAs: Upgrade to websocket successful
+2025-06-09 14:30:08,510 - engineio.server - INFO - socket.py:39 - ryfAc2NNrzEGlL7oAAAs: Received packet MESSAGE data 0
+2025-06-09 14:30:08,510 - root - INFO - app.py:146 - [socketio] Client connected: VU8str2qDD13nFbhAAAt
+2025-06-09 14:30:08,511 - socketio.server - INFO - server.py:164 - emitting event "connected" to VU8str2qDD13nFbhAAAt [/]
+2025-06-09 14:30:08,511 - engineio.server - INFO - socket.py:78 - ryfAc2NNrzEGlL7oAAAs: Sending packet MESSAGE data 2["connected",{"sid":"VU8str2qDD13nFbhAAAt"}]
+2025-06-09 14:30:08,511 - engineio.server - INFO - socket.py:78 - ryfAc2NNrzEGlL7oAAAs: Sending packet MESSAGE data 0{"sid":"VU8str2qDD13nFbhAAAt"}
+2025-06-09 14:30:08,553 - engineio.server - INFO - socket.py:39 - ryfAc2NNrzEGlL7oAAAs: Received packet MESSAGE data 2["join_task_room",{"task_id":"77"}]
+2025-06-09 14:30:08,553 - socketio.server - INFO - server.py:576 - received event "join_task_room" from VU8str2qDD13nFbhAAAt [/]
+2025-06-09 14:30:08,554 - root - INFO - app.py:155 - [socketio] VU8str2qDD13nFbhAAAt joining room: task_77
+2025-06-09 14:30:08,554 - socketio.server - INFO - server.py:284 - VU8str2qDD13nFbhAAAt is entering room task_77 [/]
+2025-06-09 14:30:08,554 - root - INFO - app.py:157 - [socketio] VU8str2qDD13nFbhAAAt joined room: task_77
+2025-06-09 14:30:08,554 - socketio.server - INFO - server.py:164 - emitting event "joined_task_room" to VU8str2qDD13nFbhAAAt [/]
+2025-06-09 14:30:08,554 - engineio.server - INFO - socket.py:78 - ryfAc2NNrzEGlL7oAAAs: Sending packet MESSAGE data 2["joined_task_room",{"task_id":"77"}]
+2025-06-09 14:30:12,448 - engineio.server - INFO - socket.py:78 - mS9WPcSwmJg4byJuAAAu: Sending packet OPEN data {'sid': 'mS9WPcSwmJg4byJuAAAu', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 14:30:12,448 - engineio.server - INFO - socket.py:90 - mS9WPcSwmJg4byJuAAAu: Received request to upgrade to websocket
+2025-06-09 14:30:12,448 - engineio.server - INFO - socket.py:219 - mS9WPcSwmJg4byJuAAAu: Upgrade to websocket successful
+2025-06-09 14:30:12,451 - engineio.server - INFO - socket.py:39 - mS9WPcSwmJg4byJuAAAu: Received packet MESSAGE data 0
+2025-06-09 14:30:12,452 - root - INFO - app.py:146 - [socketio] Client connected: 00HWOJ2_JhGvRpzbAAAv
+2025-06-09 14:30:12,452 - socketio.server - INFO - server.py:164 - emitting event "connected" to 00HWOJ2_JhGvRpzbAAAv [/]
+2025-06-09 14:30:12,452 - engineio.server - INFO - socket.py:78 - mS9WPcSwmJg4byJuAAAu: Sending packet MESSAGE data 2["connected",{"sid":"00HWOJ2_JhGvRpzbAAAv"}]
+2025-06-09 14:30:12,453 - engineio.server - INFO - socket.py:78 - mS9WPcSwmJg4byJuAAAu: Sending packet MESSAGE data 0{"sid":"00HWOJ2_JhGvRpzbAAAv"}
+2025-06-09 14:30:37,452 - engineio.server - INFO - socket.py:78 - mS9WPcSwmJg4byJuAAAu: Sending packet PING data None
+2025-06-09 14:30:37,455 - engineio.server - INFO - socket.py:39 - mS9WPcSwmJg4byJuAAAu: Received packet PONG data 
+2025-06-09 14:30:41,452 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 14:30:41,477 - engineio.server - INFO - socket.py:78 - i_Ury1QQ5VBEZYCgAAAw: Sending packet OPEN data {'sid': 'i_Ury1QQ5VBEZYCgAAAw', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 14:30:41,477 - engineio.server - INFO - socket.py:90 - i_Ury1QQ5VBEZYCgAAAw: Received request to upgrade to websocket
+2025-06-09 14:30:41,478 - engineio.server - INFO - socket.py:219 - i_Ury1QQ5VBEZYCgAAAw: Upgrade to websocket successful
+2025-06-09 14:30:41,480 - engineio.server - INFO - socket.py:39 - i_Ury1QQ5VBEZYCgAAAw: Received packet MESSAGE data 0
+2025-06-09 14:30:41,481 - root - INFO - app.py:146 - [socketio] Client connected: rtAeeOWlUBukJIIHAAAx
+2025-06-09 14:30:41,481 - socketio.server - INFO - server.py:164 - emitting event "connected" to rtAeeOWlUBukJIIHAAAx [/]
+2025-06-09 14:30:41,481 - engineio.server - INFO - socket.py:78 - i_Ury1QQ5VBEZYCgAAAw: Sending packet MESSAGE data 2["connected",{"sid":"rtAeeOWlUBukJIIHAAAx"}]
+2025-06-09 14:30:41,482 - engineio.server - INFO - socket.py:78 - i_Ury1QQ5VBEZYCgAAAw: Sending packet MESSAGE data 0{"sid":"rtAeeOWlUBukJIIHAAAx"}
+2025-06-09 14:31:06,480 - engineio.server - INFO - socket.py:78 - i_Ury1QQ5VBEZYCgAAAw: Sending packet PING data None
+2025-06-09 14:31:06,483 - engineio.server - INFO - socket.py:39 - i_Ury1QQ5VBEZYCgAAAw: Received packet PONG data 
+2025-06-09 14:31:31,489 - engineio.server - INFO - socket.py:78 - i_Ury1QQ5VBEZYCgAAAw: Sending packet PING data None
+2025-06-09 14:31:31,491 - engineio.server - INFO - socket.py:39 - i_Ury1QQ5VBEZYCgAAAw: Received packet PONG data 
+2025-06-09 14:31:56,495 - engineio.server - INFO - socket.py:78 - i_Ury1QQ5VBEZYCgAAAw: Sending packet PING data None
+2025-06-09 14:31:56,496 - engineio.server - INFO - socket.py:39 - i_Ury1QQ5VBEZYCgAAAw: Received packet PONG data 
+2025-06-09 14:32:01,452 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 14:32:01,472 - engineio.server - INFO - socket.py:78 - baxpwD2OvatzjJqHAAAy: Sending packet OPEN data {'sid': 'baxpwD2OvatzjJqHAAAy', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 14:32:01,472 - engineio.server - INFO - socket.py:90 - baxpwD2OvatzjJqHAAAy: Received request to upgrade to websocket
+2025-06-09 14:32:01,472 - engineio.server - INFO - socket.py:219 - baxpwD2OvatzjJqHAAAy: Upgrade to websocket successful
+2025-06-09 14:32:01,478 - engineio.server - INFO - socket.py:39 - baxpwD2OvatzjJqHAAAy: Received packet MESSAGE data 0
+2025-06-09 14:32:01,479 - root - INFO - app.py:146 - [socketio] Client connected: VY8-twi0ZKrPBkqhAAAz
+2025-06-09 14:32:01,479 - socketio.server - INFO - server.py:164 - emitting event "connected" to VY8-twi0ZKrPBkqhAAAz [/]
+2025-06-09 14:32:01,479 - engineio.server - INFO - socket.py:78 - baxpwD2OvatzjJqHAAAy: Sending packet MESSAGE data 2["connected",{"sid":"VY8-twi0ZKrPBkqhAAAz"}]
+2025-06-09 14:32:01,480 - engineio.server - INFO - socket.py:78 - baxpwD2OvatzjJqHAAAy: Sending packet MESSAGE data 0{"sid":"VY8-twi0ZKrPBkqhAAAz"}
+2025-06-09 14:32:26,479 - engineio.server - INFO - socket.py:78 - baxpwD2OvatzjJqHAAAy: Sending packet PING data None
+2025-06-09 14:32:26,482 - engineio.server - INFO - socket.py:39 - baxpwD2OvatzjJqHAAAy: Received packet PONG data 
+2025-06-09 14:32:45,751 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 14:32:45,772 - engineio.server - INFO - socket.py:78 - z7aglxWLEhMXrjIHAAA0: Sending packet OPEN data {'sid': 'z7aglxWLEhMXrjIHAAA0', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 14:32:45,772 - engineio.server - INFO - socket.py:90 - z7aglxWLEhMXrjIHAAA0: Received request to upgrade to websocket
+2025-06-09 14:32:45,773 - engineio.server - INFO - socket.py:219 - z7aglxWLEhMXrjIHAAA0: Upgrade to websocket successful
+2025-06-09 14:32:45,777 - engineio.server - INFO - socket.py:39 - z7aglxWLEhMXrjIHAAA0: Received packet MESSAGE data 0
+2025-06-09 14:32:45,778 - root - INFO - app.py:146 - [socketio] Client connected: ZvitJ7zRqHbNJpeKAAA1
+2025-06-09 14:32:45,778 - socketio.server - INFO - server.py:164 - emitting event "connected" to ZvitJ7zRqHbNJpeKAAA1 [/]
+2025-06-09 14:32:45,778 - engineio.server - INFO - socket.py:78 - z7aglxWLEhMXrjIHAAA0: Sending packet MESSAGE data 2["connected",{"sid":"ZvitJ7zRqHbNJpeKAAA1"}]
+2025-06-09 14:32:45,778 - engineio.server - INFO - socket.py:78 - z7aglxWLEhMXrjIHAAA0: Sending packet MESSAGE data 0{"sid":"ZvitJ7zRqHbNJpeKAAA1"}
+2025-06-09 14:33:10,775 - engineio.server - INFO - socket.py:78 - z7aglxWLEhMXrjIHAAA0: Sending packet PING data None
+2025-06-09 14:33:10,778 - engineio.server - INFO - socket.py:39 - z7aglxWLEhMXrjIHAAA0: Received packet PONG data 
+2025-06-09 14:33:35,782 - engineio.server - INFO - socket.py:78 - z7aglxWLEhMXrjIHAAA0: Sending packet PING data None
+2025-06-09 14:33:35,784 - engineio.server - INFO - socket.py:39 - z7aglxWLEhMXrjIHAAA0: Received packet PONG data 
+2025-06-09 14:34:00,787 - engineio.server - INFO - socket.py:78 - z7aglxWLEhMXrjIHAAA0: Sending packet PING data None
+2025-06-09 14:34:00,790 - engineio.server - INFO - socket.py:39 - z7aglxWLEhMXrjIHAAA0: Received packet PONG data 
+2025-06-09 14:34:25,796 - engineio.server - INFO - socket.py:78 - z7aglxWLEhMXrjIHAAA0: Sending packet PING data None
+2025-06-09 14:34:25,799 - engineio.server - INFO - socket.py:39 - z7aglxWLEhMXrjIHAAA0: Received packet PONG data 
+2025-06-09 14:34:50,059 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 14:34:50,099 - engineio.server - INFO - socket.py:78 - wEEbfkA9Cdkr9GWqAAA2: Sending packet OPEN data {'sid': 'wEEbfkA9Cdkr9GWqAAA2', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 14:34:50,100 - engineio.server - INFO - socket.py:90 - wEEbfkA9Cdkr9GWqAAA2: Received request to upgrade to websocket
+2025-06-09 14:34:50,100 - engineio.server - INFO - socket.py:219 - wEEbfkA9Cdkr9GWqAAA2: Upgrade to websocket successful
+2025-06-09 14:34:50,107 - engineio.server - INFO - socket.py:39 - wEEbfkA9Cdkr9GWqAAA2: Received packet MESSAGE data 0
+2025-06-09 14:34:50,108 - root - INFO - app.py:146 - [socketio] Client connected: YRQ8ynp7gyxpVlBbAAA3
+2025-06-09 14:34:50,108 - socketio.server - INFO - server.py:164 - emitting event "connected" to YRQ8ynp7gyxpVlBbAAA3 [/]
+2025-06-09 14:34:50,108 - engineio.server - INFO - socket.py:78 - wEEbfkA9Cdkr9GWqAAA2: Sending packet MESSAGE data 2["connected",{"sid":"YRQ8ynp7gyxpVlBbAAA3"}]
+2025-06-09 14:34:50,110 - engineio.server - INFO - socket.py:78 - wEEbfkA9Cdkr9GWqAAA2: Sending packet MESSAGE data 0{"sid":"YRQ8ynp7gyxpVlBbAAA3"}
+2025-06-09 14:35:08,543 - root - INFO - app.py:132 - current user: <webserver.model.user.User object at 0x7fffee8fde10>
+2025-06-09 14:35:11,496 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 14:35:11,526 - engineio.server - INFO - socket.py:78 - _ruZakC30wiK1ERDAAA4: Sending packet OPEN data {'sid': '_ruZakC30wiK1ERDAAA4', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 14:35:11,526 - engineio.server - INFO - socket.py:90 - _ruZakC30wiK1ERDAAA4: Received request to upgrade to websocket
+2025-06-09 14:35:11,526 - engineio.server - INFO - socket.py:219 - _ruZakC30wiK1ERDAAA4: Upgrade to websocket successful
+2025-06-09 14:35:11,527 - engineio.server - INFO - socket.py:39 - _ruZakC30wiK1ERDAAA4: Received packet MESSAGE data 0
+2025-06-09 14:35:11,527 - root - INFO - app.py:146 - [socketio] Client connected: SmoNlOcqZ1EXdC5eAAA5
+2025-06-09 14:35:11,527 - socketio.server - INFO - server.py:164 - emitting event "connected" to SmoNlOcqZ1EXdC5eAAA5 [/]
+2025-06-09 14:35:11,527 - engineio.server - INFO - socket.py:78 - _ruZakC30wiK1ERDAAA4: Sending packet MESSAGE data 2["connected",{"sid":"SmoNlOcqZ1EXdC5eAAA5"}]
+2025-06-09 14:35:11,528 - engineio.server - INFO - socket.py:78 - _ruZakC30wiK1ERDAAA4: Sending packet MESSAGE data 0{"sid":"SmoNlOcqZ1EXdC5eAAA5"}
+2025-06-09 14:35:12,102 - root - INFO - app.py:132 - current user: <webserver.model.user.User object at 0x7fffee986830>
+2025-06-09 14:35:15,549 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 14:35:15,601 - engineio.server - INFO - socket.py:78 - HAas6gngtbZHXSscAAA6: Sending packet OPEN data {'sid': 'HAas6gngtbZHXSscAAA6', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 14:35:15,601 - engineio.server - INFO - socket.py:90 - HAas6gngtbZHXSscAAA6: Received request to upgrade to websocket
+2025-06-09 14:35:15,602 - engineio.server - INFO - socket.py:219 - HAas6gngtbZHXSscAAA6: Upgrade to websocket successful
+2025-06-09 14:35:15,605 - engineio.server - INFO - socket.py:39 - HAas6gngtbZHXSscAAA6: Received packet MESSAGE data 0
+2025-06-09 14:35:15,606 - root - INFO - app.py:146 - [socketio] Client connected: wIvTN5UJ_ETr7lZMAAA7
+2025-06-09 14:35:15,606 - socketio.server - INFO - server.py:164 - emitting event "connected" to wIvTN5UJ_ETr7lZMAAA7 [/]
+2025-06-09 14:35:15,606 - engineio.server - INFO - socket.py:78 - HAas6gngtbZHXSscAAA6: Sending packet MESSAGE data 2["connected",{"sid":"wIvTN5UJ_ETr7lZMAAA7"}]
+2025-06-09 14:35:15,607 - engineio.server - INFO - socket.py:78 - HAas6gngtbZHXSscAAA6: Sending packet MESSAGE data 0{"sid":"wIvTN5UJ_ETr7lZMAAA7"}
+2025-06-09 14:35:27,050 - root - INFO - app.py:132 - current user: <webserver.model.user.User object at 0x7fffee8fcc10>
+2025-06-09 14:38:35,603 - root - INFO - probra.py:28 - probra.py module loaded
+2025-06-09 14:38:35,667 - root - INFO - app.py:37 - DB ENV (Flask startup): PGHOST=localhost, PGPORT=5433, PGDATABASE=toxindex, PGUSER=postgres, PGPASSWORD=devpassword
+2025-06-09 14:38:35,667 - root - INFO - app.py:47 - SECRET_KEY: spain
+2025-06-09 14:38:35,667 - root - INFO - app.py:48 - WTF_CSRF_ENABLED: not set
+2025-06-09 14:38:35,670 - engineio.server - INFO - base_server.py:112 - Server initialized for eventlet.
+2025-06-09 14:38:35,679 - root - DEBUG - datastore.py:56 - done
+2025-06-09 14:38:35,679 - root - INFO - workflow.py:48 - updated workflow 1
+2025-06-09 14:38:35,691 - root - DEBUG - datastore.py:56 - done
+2025-06-09 14:38:35,691 - root - INFO - workflow.py:48 - updated workflow 2
+2025-06-09 14:38:35,703 - root - DEBUG - datastore.py:56 - done
+2025-06-09 14:38:35,703 - root - INFO - workflow.py:48 - updated workflow 3
+2025-06-09 14:38:35,720 - root - DEBUG - datastore.py:56 - done
+2025-06-09 14:38:35,720 - root - INFO - workflow.py:48 - updated workflow 4
+2025-06-09 14:38:35,731 - werkzeug - INFO - _internal.py:97 -  * Restarting with stat
+2025-06-09 14:38:35,731 - root - INFO - app.py:89 - [redis_listener] (0be26252) Started Redis listener thread: RedisListenerThread-df400158
+2025-06-09 14:38:35,732 - root - DEBUG - app.py:91 - [redis_listener] (0be26252) Raw redis_message: {'type': 'subscribe', 'pattern': None, 'channel': b'celery_updates', 'data': 1}
+2025-06-09 14:38:36,656 - root - INFO - probra.py:28 - probra.py module loaded
+2025-06-09 14:38:36,713 - root - INFO - app.py:37 - DB ENV (Flask startup): PGHOST=localhost, PGPORT=5433, PGDATABASE=toxindex, PGUSER=postgres, PGPASSWORD=devpassword
+2025-06-09 14:38:36,713 - root - INFO - app.py:47 - SECRET_KEY: spain
+2025-06-09 14:38:36,713 - root - INFO - app.py:48 - WTF_CSRF_ENABLED: not set
+2025-06-09 14:38:36,716 - engineio.server - INFO - base_server.py:112 - Server initialized for eventlet.
+2025-06-09 14:38:36,726 - root - DEBUG - datastore.py:56 - done
+2025-06-09 14:38:36,726 - root - INFO - workflow.py:48 - updated workflow 1
+2025-06-09 14:38:36,736 - root - DEBUG - datastore.py:56 - done
+2025-06-09 14:38:36,736 - root - INFO - workflow.py:48 - updated workflow 2
+2025-06-09 14:38:36,748 - root - DEBUG - datastore.py:56 - done
+2025-06-09 14:38:36,748 - root - INFO - workflow.py:48 - updated workflow 3
+2025-06-09 14:38:36,767 - root - DEBUG - datastore.py:56 - done
+2025-06-09 14:38:36,767 - root - INFO - workflow.py:48 - updated workflow 4
+2025-06-09 14:38:36,785 - werkzeug - WARNING - _internal.py:97 -  * Debugger is active!
+2025-06-09 14:38:36,786 - root - INFO - app.py:89 - [redis_listener] (b5196616) Started Redis listener thread: RedisListenerThread-71032114
+2025-06-09 14:38:36,786 - root - DEBUG - app.py:91 - [redis_listener] (b5196616) Raw redis_message: {'type': 'subscribe', 'pattern': None, 'channel': b'celery_updates', 'data': 1}
+2025-06-09 14:38:36,788 - werkzeug - INFO - _internal.py:97 -  * Debugger PIN: 842-788-610
+2025-06-09 14:38:38,219 - root - INFO - probra.py:28 - probra.py module loaded
+2025-06-09 14:38:38,226 - celery.utils.functional - DEBUG - functional.py:335 - 
+def chain(*args, **kwargs):
+    return 1
+
+2025-06-09 14:38:38,226 - celery.utils.functional - DEBUG - functional.py:335 - 
+def backend_cleanup():
+    return 1
+
+2025-06-09 14:38:38,226 - celery.utils.functional - DEBUG - functional.py:335 - 
+def interactive_echo_task(self, payload):
+    return 1
+
+2025-06-09 14:38:38,226 - celery.utils.functional - DEBUG - functional.py:335 - 
+def xstarmap(task, it):
+    return 1
+
+2025-06-09 14:38:38,227 - celery.utils.functional - DEBUG - functional.py:335 - 
+def plain_openai_task(self, payload):
+    return 1
+
+2025-06-09 14:38:38,227 - celery.utils.functional - DEBUG - functional.py:335 - 
+def chord(self, header, body, partial_args=0, interval=1, countdown=2, max_retries=3, eager=4, **kwargs):
+    return 1
+
+2025-06-09 14:38:38,227 - celery.utils.functional - DEBUG - functional.py:335 - 
+def accumulate(self, *args, **kwargs):
+    return 1
+
+2025-06-09 14:38:38,227 - celery.utils.functional - DEBUG - functional.py:335 - 
+def chunks(task, it, n):
+    return 1
+
+2025-06-09 14:38:38,227 - celery.utils.functional - DEBUG - functional.py:335 - 
+def probra_task(self, payload):
+    return 1
+
+2025-06-09 14:38:38,227 - celery.utils.functional - DEBUG - functional.py:335 - 
+def unlock_chord(self, group_id, callback, interval=0, max_retries=1, result=2, Result=3, GroupResult=4, result_from_tuple=5, **kwargs):
+    return 1
+
+2025-06-09 14:38:38,227 - celery.utils.functional - DEBUG - functional.py:335 - 
+def group(self, tasks, result, group_id, partial_args, add_to_parent=0):
+    return 1
+
+2025-06-09 14:38:38,227 - celery.utils.functional - DEBUG - functional.py:335 - 
+def openai_json_schema_task(self, payload):
+    return 1
+
+2025-06-09 14:38:38,227 - celery.utils.functional - DEBUG - functional.py:335 - 
+def xmap(task, it):
+    return 1
+
+2025-06-09 14:38:38,228 - celery.utils.functional - DEBUG - functional.py:335 - 
+def chat_response_task(self, payload):
+    return 1
+
+2025-06-09 14:38:39,817 - celery.worker.consumer.connection - INFO - connection.py:22 - Connected to redis://localhost:6379/0
+2025-06-09 14:38:39,819 - celery.worker.consumer.mingle - INFO - mingle.py:40 - mingle: searching for neighbors
+2025-06-09 14:38:40,828 - celery.worker.consumer.mingle - INFO - mingle.py:49 - mingle: all alone
+2025-06-09 14:38:40,841 - celery.apps.worker - INFO - worker.py:176 - celery@pop-os ready.
+2025-06-09 14:38:41,797 - root - INFO - app.py:132 - current user: <flask_login.mixins.AnonymousUserMixin object at 0x7fffeeb57d90>
+2025-06-09 14:38:55,947 - root - INFO - app.py:132 - current user: <webserver.model.user.User object at 0x7fffee9ba350>
+2025-06-09 14:38:58,870 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 14:38:58,913 - engineio.server - INFO - socket.py:78 - N1gpJlQjyVHCt3SDAAAA: Sending packet OPEN data {'sid': 'N1gpJlQjyVHCt3SDAAAA', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 14:38:58,913 - socketio.server - INFO - pubsub_manager.py:37 - redis backend initialized.
+2025-06-09 14:38:58,913 - engineio.server - INFO - socket.py:90 - N1gpJlQjyVHCt3SDAAAA: Received request to upgrade to websocket
+2025-06-09 14:38:58,913 - engineio.server - INFO - socket.py:219 - N1gpJlQjyVHCt3SDAAAA: Upgrade to websocket successful
+2025-06-09 14:38:58,924 - engineio.server - INFO - socket.py:39 - N1gpJlQjyVHCt3SDAAAA: Received packet MESSAGE data 0
+2025-06-09 14:38:58,924 - root - INFO - app.py:146 - [socketio] Client connected: lRKWI_-5scFHoWwgAAAB
+2025-06-09 14:38:58,924 - socketio.server - INFO - server.py:164 - emitting event "connected" to lRKWI_-5scFHoWwgAAAB [/]
+2025-06-09 14:38:58,966 - engineio.server - INFO - socket.py:78 - N1gpJlQjyVHCt3SDAAAA: Sending packet MESSAGE data 2["connected",{"sid":"lRKWI_-5scFHoWwgAAAB"}]
+2025-06-09 14:38:58,966 - engineio.server - INFO - socket.py:78 - N1gpJlQjyVHCt3SDAAAA: Sending packet MESSAGE data 0{"sid":"lRKWI_-5scFHoWwgAAAB"}
+2025-06-09 14:39:23,916 - engineio.server - INFO - socket.py:78 - N1gpJlQjyVHCt3SDAAAA: Sending packet PING data None
+2025-06-09 14:39:23,918 - engineio.server - INFO - socket.py:39 - N1gpJlQjyVHCt3SDAAAA: Received packet PONG data 
+2025-06-09 14:39:48,923 - engineio.server - INFO - socket.py:78 - N1gpJlQjyVHCt3SDAAAA: Sending packet PING data None
+2025-06-09 14:39:48,925 - engineio.server - INFO - socket.py:39 - N1gpJlQjyVHCt3SDAAAA: Received packet PONG data 
+2025-06-09 14:40:13,928 - engineio.server - INFO - socket.py:78 - N1gpJlQjyVHCt3SDAAAA: Sending packet PING data None
+2025-06-09 14:40:13,930 - engineio.server - INFO - socket.py:39 - N1gpJlQjyVHCt3SDAAAA: Received packet PONG data 
+2025-06-09 14:40:38,931 - engineio.server - INFO - socket.py:78 - N1gpJlQjyVHCt3SDAAAA: Sending packet PING data None
+2025-06-09 14:40:38,933 - engineio.server - INFO - socket.py:39 - N1gpJlQjyVHCt3SDAAAA: Received packet PONG data 
+2025-06-09 14:41:03,934 - engineio.server - INFO - socket.py:78 - N1gpJlQjyVHCt3SDAAAA: Sending packet PING data None
+2025-06-09 14:41:03,937 - engineio.server - INFO - socket.py:39 - N1gpJlQjyVHCt3SDAAAA: Received packet PONG data 
+2025-06-09 14:41:28,943 - engineio.server - INFO - socket.py:78 - N1gpJlQjyVHCt3SDAAAA: Sending packet PING data None
+2025-06-09 14:41:28,945 - engineio.server - INFO - socket.py:39 - N1gpJlQjyVHCt3SDAAAA: Received packet PONG data 
+2025-06-09 14:41:40,154 - werkzeug - INFO - _internal.py:97 -  * Detected change in '/home/kyu/Documents/toxindex/webserver/model/user.py', reloading
+2025-06-09 14:41:40,321 - werkzeug - INFO - _internal.py:97 -  * Restarting with stat
+2025-06-09 14:44:58,342 - root - INFO - probra.py:28 - probra.py module loaded
+2025-06-09 14:44:58,397 - root - INFO - app.py:37 - DB ENV (Flask startup): PGHOST=localhost, PGPORT=5433, PGDATABASE=toxindex, PGUSER=postgres, PGPASSWORD=devpassword
+2025-06-09 14:44:58,397 - root - INFO - app.py:47 - SECRET_KEY: spain
+2025-06-09 14:44:58,397 - root - INFO - app.py:48 - WTF_CSRF_ENABLED: not set
+2025-06-09 14:44:58,400 - engineio.server - INFO - base_server.py:112 - Server initialized for eventlet.
+2025-06-09 14:44:58,408 - root - DEBUG - datastore.py:56 - done
+2025-06-09 14:44:58,408 - root - INFO - workflow.py:48 - updated workflow 1
+2025-06-09 14:44:58,417 - root - DEBUG - datastore.py:56 - done
+2025-06-09 14:44:58,417 - root - INFO - workflow.py:48 - updated workflow 2
+2025-06-09 14:44:58,429 - root - DEBUG - datastore.py:56 - done
+2025-06-09 14:44:58,429 - root - INFO - workflow.py:48 - updated workflow 3
+2025-06-09 14:44:58,444 - root - DEBUG - datastore.py:56 - done
+2025-06-09 14:44:58,444 - root - INFO - workflow.py:48 - updated workflow 4
+2025-06-09 14:44:58,465 - werkzeug - INFO - _internal.py:97 -  * Restarting with stat
+2025-06-09 14:44:58,466 - root - INFO - app.py:89 - [redis_listener] (ceb795df) Started Redis listener thread: RedisListenerThread-350c6f44
+2025-06-09 14:44:58,466 - root - DEBUG - app.py:91 - [redis_listener] (ceb795df) Raw redis_message: {'type': 'subscribe', 'pattern': None, 'channel': b'celery_updates', 'data': 1}
+2025-06-09 14:44:59,361 - root - INFO - probra.py:28 - probra.py module loaded
+2025-06-09 14:44:59,416 - root - INFO - app.py:37 - DB ENV (Flask startup): PGHOST=localhost, PGPORT=5433, PGDATABASE=toxindex, PGUSER=postgres, PGPASSWORD=devpassword
+2025-06-09 14:44:59,416 - root - INFO - app.py:47 - SECRET_KEY: spain
+2025-06-09 14:44:59,416 - root - INFO - app.py:48 - WTF_CSRF_ENABLED: not set
+2025-06-09 14:44:59,418 - engineio.server - INFO - base_server.py:112 - Server initialized for eventlet.
+2025-06-09 14:44:59,427 - root - DEBUG - datastore.py:56 - done
+2025-06-09 14:44:59,427 - root - INFO - workflow.py:48 - updated workflow 1
+2025-06-09 14:44:59,436 - root - DEBUG - datastore.py:56 - done
+2025-06-09 14:44:59,436 - root - INFO - workflow.py:48 - updated workflow 2
+2025-06-09 14:44:59,446 - root - DEBUG - datastore.py:56 - done
+2025-06-09 14:44:59,446 - root - INFO - workflow.py:48 - updated workflow 3
+2025-06-09 14:44:59,456 - root - DEBUG - datastore.py:56 - done
+2025-06-09 14:44:59,456 - root - INFO - workflow.py:48 - updated workflow 4
+2025-06-09 14:44:59,471 - werkzeug - WARNING - _internal.py:97 -  * Debugger is active!
+2025-06-09 14:44:59,472 - root - INFO - app.py:89 - [redis_listener] (eb3561fd) Started Redis listener thread: RedisListenerThread-5fc4a170
+2025-06-09 14:44:59,472 - root - DEBUG - app.py:91 - [redis_listener] (eb3561fd) Raw redis_message: {'type': 'subscribe', 'pattern': None, 'channel': b'celery_updates', 'data': 1}
+2025-06-09 14:44:59,476 - werkzeug - INFO - _internal.py:97 -  * Debugger PIN: 842-788-610
+2025-06-09 14:45:01,556 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 14:45:01,585 - engineio.server - INFO - socket.py:78 - tnYilI0e5fXJNwLVAAAA: Sending packet OPEN data {'sid': 'tnYilI0e5fXJNwLVAAAA', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 14:45:01,585 - socketio.server - INFO - pubsub_manager.py:37 - redis backend initialized.
+2025-06-09 14:45:01,585 - engineio.server - INFO - socket.py:90 - tnYilI0e5fXJNwLVAAAA: Received request to upgrade to websocket
+2025-06-09 14:45:01,585 - engineio.server - INFO - socket.py:219 - tnYilI0e5fXJNwLVAAAA: Upgrade to websocket successful
+2025-06-09 14:45:01,589 - engineio.server - INFO - socket.py:39 - tnYilI0e5fXJNwLVAAAA: Received packet MESSAGE data 0
+2025-06-09 14:45:01,589 - root - INFO - app.py:146 - [socketio] Client connected: ZvGAvfZMIsvVWqitAAAB
+2025-06-09 14:45:01,589 - socketio.server - INFO - server.py:164 - emitting event "connected" to ZvGAvfZMIsvVWqitAAAB [/]
+2025-06-09 14:45:01,589 - engineio.server - INFO - socket.py:78 - tnYilI0e5fXJNwLVAAAA: Sending packet MESSAGE data 2["connected",{"sid":"ZvGAvfZMIsvVWqitAAAB"}]
+2025-06-09 14:45:01,591 - engineio.server - INFO - socket.py:78 - tnYilI0e5fXJNwLVAAAA: Sending packet MESSAGE data 0{"sid":"ZvGAvfZMIsvVWqitAAAB"}
+2025-06-09 14:45:26,588 - engineio.server - INFO - socket.py:78 - tnYilI0e5fXJNwLVAAAA: Sending packet PING data None
+2025-06-09 14:45:26,589 - engineio.server - INFO - socket.py:39 - tnYilI0e5fXJNwLVAAAA: Received packet PONG data 
+2025-06-09 14:45:51,591 - engineio.server - INFO - socket.py:78 - tnYilI0e5fXJNwLVAAAA: Sending packet PING data None
+2025-06-09 14:45:51,594 - engineio.server - INFO - socket.py:39 - tnYilI0e5fXJNwLVAAAA: Received packet PONG data 
+2025-06-09 14:46:16,598 - engineio.server - INFO - socket.py:78 - tnYilI0e5fXJNwLVAAAA: Sending packet PING data None
+2025-06-09 14:46:16,600 - engineio.server - INFO - socket.py:39 - tnYilI0e5fXJNwLVAAAA: Received packet PONG data 
+2025-06-09 14:46:41,601 - engineio.server - INFO - socket.py:78 - tnYilI0e5fXJNwLVAAAA: Sending packet PING data None
+2025-06-09 14:46:41,603 - engineio.server - INFO - socket.py:39 - tnYilI0e5fXJNwLVAAAA: Received packet PONG data 
+2025-06-09 14:47:06,608 - engineio.server - INFO - socket.py:78 - tnYilI0e5fXJNwLVAAAA: Sending packet PING data None
+2025-06-09 14:47:06,611 - engineio.server - INFO - socket.py:39 - tnYilI0e5fXJNwLVAAAA: Received packet PONG data 
+2025-06-09 14:47:10,912 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 14:47:10,946 - engineio.server - INFO - socket.py:78 - zXWrGX4LWVp5FfUqAAAC: Sending packet OPEN data {'sid': 'zXWrGX4LWVp5FfUqAAAC', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 14:47:10,946 - engineio.server - INFO - socket.py:90 - zXWrGX4LWVp5FfUqAAAC: Received request to upgrade to websocket
+2025-06-09 14:47:10,946 - engineio.server - INFO - socket.py:219 - zXWrGX4LWVp5FfUqAAAC: Upgrade to websocket successful
+2025-06-09 14:47:10,953 - engineio.server - INFO - socket.py:39 - zXWrGX4LWVp5FfUqAAAC: Received packet MESSAGE data 0
+2025-06-09 14:47:10,994 - root - INFO - app.py:146 - [socketio] Client connected: x6zq2sMsA5s8Cx22AAAD
+2025-06-09 14:47:10,994 - socketio.server - INFO - server.py:164 - emitting event "connected" to x6zq2sMsA5s8Cx22AAAD [/]
+2025-06-09 14:47:10,994 - engineio.server - INFO - socket.py:78 - zXWrGX4LWVp5FfUqAAAC: Sending packet MESSAGE data 2["connected",{"sid":"x6zq2sMsA5s8Cx22AAAD"}]
+2025-06-09 14:47:11,002 - engineio.server - INFO - socket.py:78 - zXWrGX4LWVp5FfUqAAAC: Sending packet MESSAGE data 0{"sid":"x6zq2sMsA5s8Cx22AAAD"}
+2025-06-09 14:47:14,770 - root - INFO - app.py:132 - current user: <webserver.model.user.User object at 0x7fffee9bbdc0>
+2025-06-09 14:47:16,234 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 14:47:16,252 - engineio.server - INFO - socket.py:78 - uFMwUoDodKOv2ArxAAAE: Sending packet OPEN data {'sid': 'uFMwUoDodKOv2ArxAAAE', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 14:47:16,252 - engineio.server - INFO - socket.py:90 - uFMwUoDodKOv2ArxAAAE: Received request to upgrade to websocket
+2025-06-09 14:47:16,252 - engineio.server - INFO - socket.py:219 - uFMwUoDodKOv2ArxAAAE: Upgrade to websocket successful
+2025-06-09 14:47:16,257 - engineio.server - INFO - socket.py:39 - uFMwUoDodKOv2ArxAAAE: Received packet MESSAGE data 0
+2025-06-09 14:47:16,257 - root - INFO - app.py:146 - [socketio] Client connected: GxXJP8JVFYMj0CAWAAAF
+2025-06-09 14:47:16,257 - socketio.server - INFO - server.py:164 - emitting event "connected" to GxXJP8JVFYMj0CAWAAAF [/]
+2025-06-09 14:47:16,257 - engineio.server - INFO - socket.py:78 - uFMwUoDodKOv2ArxAAAE: Sending packet MESSAGE data 2["connected",{"sid":"GxXJP8JVFYMj0CAWAAAF"}]
+2025-06-09 14:47:16,258 - engineio.server - INFO - socket.py:78 - uFMwUoDodKOv2ArxAAAE: Sending packet MESSAGE data 0{"sid":"GxXJP8JVFYMj0CAWAAAF"}
+2025-06-09 14:47:17,313 - root - INFO - app.py:132 - current user: <webserver.model.user.User object at 0x7fffeeb56380>
+2025-06-09 14:47:19,364 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 14:47:19,395 - engineio.server - INFO - socket.py:78 - 0g8R_AFziDZZYYj-AAAG: Sending packet OPEN data {'sid': '0g8R_AFziDZZYYj-AAAG', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 14:47:19,395 - engineio.server - INFO - socket.py:90 - 0g8R_AFziDZZYYj-AAAG: Received request to upgrade to websocket
+2025-06-09 14:47:19,395 - engineio.server - INFO - socket.py:219 - 0g8R_AFziDZZYYj-AAAG: Upgrade to websocket successful
+2025-06-09 14:47:19,398 - engineio.server - INFO - socket.py:39 - 0g8R_AFziDZZYYj-AAAG: Received packet MESSAGE data 0
+2025-06-09 14:47:19,399 - root - INFO - app.py:146 - [socketio] Client connected: t8DuplWmfRUZrezVAAAH
+2025-06-09 14:47:19,399 - socketio.server - INFO - server.py:164 - emitting event "connected" to t8DuplWmfRUZrezVAAAH [/]
+2025-06-09 14:47:19,399 - engineio.server - INFO - socket.py:78 - 0g8R_AFziDZZYYj-AAAG: Sending packet MESSAGE data 2["connected",{"sid":"t8DuplWmfRUZrezVAAAH"}]
+2025-06-09 14:47:19,400 - engineio.server - INFO - socket.py:78 - 0g8R_AFziDZZYYj-AAAG: Sending packet MESSAGE data 0{"sid":"t8DuplWmfRUZrezVAAAH"}
+2025-06-09 14:47:22,517 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 14:47:22,546 - engineio.server - INFO - socket.py:78 - mZ-nzS3_JyLDNuVhAAAI: Sending packet OPEN data {'sid': 'mZ-nzS3_JyLDNuVhAAAI', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 14:47:22,546 - engineio.server - INFO - socket.py:90 - mZ-nzS3_JyLDNuVhAAAI: Received request to upgrade to websocket
+2025-06-09 14:47:22,546 - engineio.server - INFO - socket.py:219 - mZ-nzS3_JyLDNuVhAAAI: Upgrade to websocket successful
+2025-06-09 14:47:22,553 - engineio.server - INFO - socket.py:39 - mZ-nzS3_JyLDNuVhAAAI: Received packet MESSAGE data 0
+2025-06-09 14:47:22,553 - root - INFO - app.py:146 - [socketio] Client connected: ARoNGnzVE2LLzAPCAAAJ
+2025-06-09 14:47:22,554 - socketio.server - INFO - server.py:164 - emitting event "connected" to ARoNGnzVE2LLzAPCAAAJ [/]
+2025-06-09 14:47:22,554 - engineio.server - INFO - socket.py:78 - mZ-nzS3_JyLDNuVhAAAI: Sending packet MESSAGE data 2["connected",{"sid":"ARoNGnzVE2LLzAPCAAAJ"}]
+2025-06-09 14:47:22,554 - engineio.server - INFO - socket.py:78 - mZ-nzS3_JyLDNuVhAAAI: Sending packet MESSAGE data 0{"sid":"ARoNGnzVE2LLzAPCAAAJ"}
+2025-06-09 14:47:47,552 - engineio.server - INFO - socket.py:78 - mZ-nzS3_JyLDNuVhAAAI: Sending packet PING data None
+2025-06-09 14:47:47,554 - engineio.server - INFO - socket.py:39 - mZ-nzS3_JyLDNuVhAAAI: Received packet PONG data 
+2025-06-09 14:48:12,557 - engineio.server - INFO - socket.py:78 - mZ-nzS3_JyLDNuVhAAAI: Sending packet PING data None
+2025-06-09 14:48:12,559 - engineio.server - INFO - socket.py:39 - mZ-nzS3_JyLDNuVhAAAI: Received packet PONG data 
+2025-06-09 14:48:37,565 - engineio.server - INFO - socket.py:78 - mZ-nzS3_JyLDNuVhAAAI: Sending packet PING data None
+2025-06-09 14:48:37,567 - engineio.server - INFO - socket.py:39 - mZ-nzS3_JyLDNuVhAAAI: Received packet PONG data 
+2025-06-09 14:48:39,934 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 14:48:40,000 - engineio.server - INFO - socket.py:78 - LKTgsxCBgf0TxReeAAAK: Sending packet OPEN data {'sid': 'LKTgsxCBgf0TxReeAAAK', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 14:48:40,001 - engineio.server - INFO - socket.py:90 - LKTgsxCBgf0TxReeAAAK: Received request to upgrade to websocket
+2025-06-09 14:48:40,001 - engineio.server - INFO - socket.py:219 - LKTgsxCBgf0TxReeAAAK: Upgrade to websocket successful
+2025-06-09 14:48:40,010 - engineio.server - INFO - socket.py:39 - LKTgsxCBgf0TxReeAAAK: Received packet MESSAGE data 0
+2025-06-09 14:48:40,011 - root - INFO - app.py:146 - [socketio] Client connected: 0jnHZv9tXdp_YtNyAAAL
+2025-06-09 14:48:40,011 - socketio.server - INFO - server.py:164 - emitting event "connected" to 0jnHZv9tXdp_YtNyAAAL [/]
+2025-06-09 14:48:40,011 - engineio.server - INFO - socket.py:78 - LKTgsxCBgf0TxReeAAAK: Sending packet MESSAGE data 2["connected",{"sid":"0jnHZv9tXdp_YtNyAAAL"}]
+2025-06-09 14:48:40,013 - engineio.server - INFO - socket.py:78 - LKTgsxCBgf0TxReeAAAK: Sending packet MESSAGE data 0{"sid":"0jnHZv9tXdp_YtNyAAAL"}
+2025-06-09 14:48:42,889 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 14:48:42,924 - engineio.server - INFO - socket.py:78 - Yg36GREuKIAcv-kDAAAM: Sending packet OPEN data {'sid': 'Yg36GREuKIAcv-kDAAAM', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 14:48:42,924 - engineio.server - INFO - socket.py:90 - Yg36GREuKIAcv-kDAAAM: Received request to upgrade to websocket
+2025-06-09 14:48:42,925 - engineio.server - INFO - socket.py:219 - Yg36GREuKIAcv-kDAAAM: Upgrade to websocket successful
+2025-06-09 14:48:42,929 - engineio.server - INFO - socket.py:39 - Yg36GREuKIAcv-kDAAAM: Received packet MESSAGE data 0
+2025-06-09 14:48:42,930 - root - INFO - app.py:146 - [socketio] Client connected: _Sk38uAvPC1xqI8-AAAN
+2025-06-09 14:48:42,930 - socketio.server - INFO - server.py:164 - emitting event "connected" to _Sk38uAvPC1xqI8-AAAN [/]
+2025-06-09 14:48:42,930 - engineio.server - INFO - socket.py:78 - Yg36GREuKIAcv-kDAAAM: Sending packet MESSAGE data 2["connected",{"sid":"_Sk38uAvPC1xqI8-AAAN"}]
+2025-06-09 14:48:42,931 - engineio.server - INFO - socket.py:78 - Yg36GREuKIAcv-kDAAAM: Sending packet MESSAGE data 0{"sid":"_Sk38uAvPC1xqI8-AAAN"}
+2025-06-09 14:48:43,880 - root - INFO - app.py:132 - current user: <webserver.model.user.User object at 0x7fffee9b9b70>
+2025-06-09 14:48:47,051 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 14:48:47,092 - engineio.server - INFO - socket.py:78 - 619RiqJU9hPIRylDAAAO: Sending packet OPEN data {'sid': '619RiqJU9hPIRylDAAAO', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 14:48:47,093 - engineio.server - INFO - socket.py:90 - 619RiqJU9hPIRylDAAAO: Received request to upgrade to websocket
+2025-06-09 14:48:47,093 - engineio.server - INFO - socket.py:219 - 619RiqJU9hPIRylDAAAO: Upgrade to websocket successful
+2025-06-09 14:48:47,098 - engineio.server - INFO - socket.py:39 - 619RiqJU9hPIRylDAAAO: Received packet MESSAGE data 0
+2025-06-09 14:48:47,099 - root - INFO - app.py:146 - [socketio] Client connected: cvA84icJj2oZ7jEyAAAP
+2025-06-09 14:48:47,099 - socketio.server - INFO - server.py:164 - emitting event "connected" to cvA84icJj2oZ7jEyAAAP [/]
+2025-06-09 14:48:47,099 - engineio.server - INFO - socket.py:78 - 619RiqJU9hPIRylDAAAO: Sending packet MESSAGE data 2["connected",{"sid":"cvA84icJj2oZ7jEyAAAP"}]
+2025-06-09 14:48:47,100 - engineio.server - INFO - socket.py:78 - 619RiqJU9hPIRylDAAAO: Sending packet MESSAGE data 0{"sid":"cvA84icJj2oZ7jEyAAAP"}
+2025-06-09 14:49:12,098 - engineio.server - INFO - socket.py:78 - 619RiqJU9hPIRylDAAAO: Sending packet PING data None
+2025-06-09 14:49:12,100 - engineio.server - INFO - socket.py:39 - 619RiqJU9hPIRylDAAAO: Received packet PONG data 
+2025-06-09 14:49:13,859 - root - INFO - app.py:132 - current user: <webserver.model.user.User object at 0x7fffee9da110>
+2025-06-09 14:49:17,522 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 14:49:17,563 - engineio.server - INFO - socket.py:78 - s7Ukrsxt1mcIJxtVAAAQ: Sending packet OPEN data {'sid': 's7Ukrsxt1mcIJxtVAAAQ', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 14:49:17,563 - engineio.server - INFO - socket.py:90 - s7Ukrsxt1mcIJxtVAAAQ: Received request to upgrade to websocket
+2025-06-09 14:49:17,564 - engineio.server - INFO - socket.py:219 - s7Ukrsxt1mcIJxtVAAAQ: Upgrade to websocket successful
+2025-06-09 14:49:17,573 - engineio.server - INFO - socket.py:39 - s7Ukrsxt1mcIJxtVAAAQ: Received packet MESSAGE data 0
+2025-06-09 14:49:17,574 - root - INFO - app.py:146 - [socketio] Client connected: 1cdljDGqyXb6HzbgAAAR
+2025-06-09 14:49:17,574 - socketio.server - INFO - server.py:164 - emitting event "connected" to 1cdljDGqyXb6HzbgAAAR [/]
+2025-06-09 14:49:17,574 - engineio.server - INFO - socket.py:78 - s7Ukrsxt1mcIJxtVAAAQ: Sending packet MESSAGE data 2["connected",{"sid":"1cdljDGqyXb6HzbgAAAR"}]
+2025-06-09 14:49:17,575 - engineio.server - INFO - socket.py:78 - s7Ukrsxt1mcIJxtVAAAQ: Sending packet MESSAGE data 0{"sid":"1cdljDGqyXb6HzbgAAAR"}
+2025-06-09 14:49:29,396 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 14:49:29,466 - engineio.server - INFO - socket.py:78 - 4smc5DkYXShSHPB6AAAS: Sending packet OPEN data {'sid': '4smc5DkYXShSHPB6AAAS', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 14:49:29,467 - engineio.server - INFO - socket.py:90 - 4smc5DkYXShSHPB6AAAS: Received request to upgrade to websocket
+2025-06-09 14:49:29,467 - engineio.server - INFO - socket.py:219 - 4smc5DkYXShSHPB6AAAS: Upgrade to websocket successful
+2025-06-09 14:49:29,473 - engineio.server - INFO - socket.py:39 - 4smc5DkYXShSHPB6AAAS: Received packet MESSAGE data 0
+2025-06-09 14:49:29,474 - root - INFO - app.py:146 - [socketio] Client connected: UvwoupIqK6rnVLbtAAAT
+2025-06-09 14:49:29,474 - socketio.server - INFO - server.py:164 - emitting event "connected" to UvwoupIqK6rnVLbtAAAT [/]
+2025-06-09 14:49:29,474 - engineio.server - INFO - socket.py:78 - 4smc5DkYXShSHPB6AAAS: Sending packet MESSAGE data 2["connected",{"sid":"UvwoupIqK6rnVLbtAAAT"}]
+2025-06-09 14:49:29,475 - engineio.server - INFO - socket.py:78 - 4smc5DkYXShSHPB6AAAS: Sending packet MESSAGE data 0{"sid":"UvwoupIqK6rnVLbtAAAT"}
+2025-06-09 14:49:49,109 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 14:49:49,141 - engineio.server - INFO - socket.py:78 - 4HYWNZZG4bP8PMAyAAAU: Sending packet OPEN data {'sid': '4HYWNZZG4bP8PMAyAAAU', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 14:49:49,141 - engineio.server - INFO - socket.py:90 - 4HYWNZZG4bP8PMAyAAAU: Received request to upgrade to websocket
+2025-06-09 14:49:49,141 - engineio.server - INFO - socket.py:219 - 4HYWNZZG4bP8PMAyAAAU: Upgrade to websocket successful
+2025-06-09 14:49:49,147 - engineio.server - INFO - socket.py:39 - 4HYWNZZG4bP8PMAyAAAU: Received packet MESSAGE data 0
+2025-06-09 14:49:49,147 - root - INFO - app.py:146 - [socketio] Client connected: e_pXxDWwX8YjzGNlAAAV
+2025-06-09 14:49:49,148 - socketio.server - INFO - server.py:164 - emitting event "connected" to e_pXxDWwX8YjzGNlAAAV [/]
+2025-06-09 14:49:49,148 - engineio.server - INFO - socket.py:78 - 4HYWNZZG4bP8PMAyAAAU: Sending packet MESSAGE data 2["connected",{"sid":"e_pXxDWwX8YjzGNlAAAV"}]
+2025-06-09 14:49:49,148 - engineio.server - INFO - socket.py:78 - 4HYWNZZG4bP8PMAyAAAU: Sending packet MESSAGE data 0{"sid":"e_pXxDWwX8YjzGNlAAAV"}
+2025-06-09 14:49:51,243 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 14:49:51,276 - engineio.server - INFO - socket.py:78 - 8uHdTTLOYkCZLB7RAAAW: Sending packet OPEN data {'sid': '8uHdTTLOYkCZLB7RAAAW', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 14:49:51,277 - engineio.server - INFO - socket.py:90 - 8uHdTTLOYkCZLB7RAAAW: Received request to upgrade to websocket
+2025-06-09 14:49:51,277 - engineio.server - INFO - socket.py:219 - 8uHdTTLOYkCZLB7RAAAW: Upgrade to websocket successful
+2025-06-09 14:49:51,285 - engineio.server - INFO - socket.py:39 - 8uHdTTLOYkCZLB7RAAAW: Received packet MESSAGE data 0
+2025-06-09 14:49:51,285 - root - INFO - app.py:146 - [socketio] Client connected: G0Uyxw08JjBS66pRAAAX
+2025-06-09 14:49:51,285 - socketio.server - INFO - server.py:164 - emitting event "connected" to G0Uyxw08JjBS66pRAAAX [/]
+2025-06-09 14:49:51,285 - engineio.server - INFO - socket.py:78 - 8uHdTTLOYkCZLB7RAAAW: Sending packet MESSAGE data 2["connected",{"sid":"G0Uyxw08JjBS66pRAAAX"}]
+2025-06-09 14:49:51,285 - engineio.server - INFO - socket.py:78 - 8uHdTTLOYkCZLB7RAAAW: Sending packet MESSAGE data 0{"sid":"G0Uyxw08JjBS66pRAAAX"}
+2025-06-09 14:49:54,216 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 14:49:54,258 - engineio.server - INFO - socket.py:78 - lNdjmx-STctS6QtUAAAY: Sending packet OPEN data {'sid': 'lNdjmx-STctS6QtUAAAY', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 14:49:54,258 - engineio.server - INFO - socket.py:90 - lNdjmx-STctS6QtUAAAY: Received request to upgrade to websocket
+2025-06-09 14:49:54,258 - engineio.server - INFO - socket.py:219 - lNdjmx-STctS6QtUAAAY: Upgrade to websocket successful
+2025-06-09 14:49:54,265 - engineio.server - INFO - socket.py:39 - lNdjmx-STctS6QtUAAAY: Received packet MESSAGE data 0
+2025-06-09 14:49:54,266 - root - INFO - app.py:146 - [socketio] Client connected: lQhwx5oNlDuaI8v7AAAZ
+2025-06-09 14:49:54,266 - socketio.server - INFO - server.py:164 - emitting event "connected" to lQhwx5oNlDuaI8v7AAAZ [/]
+2025-06-09 14:49:54,266 - engineio.server - INFO - socket.py:78 - lNdjmx-STctS6QtUAAAY: Sending packet MESSAGE data 2["connected",{"sid":"lQhwx5oNlDuaI8v7AAAZ"}]
+2025-06-09 14:49:54,267 - engineio.server - INFO - socket.py:78 - lNdjmx-STctS6QtUAAAY: Sending packet MESSAGE data 0{"sid":"lQhwx5oNlDuaI8v7AAAZ"}
+2025-06-09 14:50:07,169 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 14:50:07,196 - engineio.server - INFO - socket.py:78 - _cMLxUmcLFA-824UAAAa: Sending packet OPEN data {'sid': '_cMLxUmcLFA-824UAAAa', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 14:50:07,197 - engineio.server - INFO - socket.py:90 - _cMLxUmcLFA-824UAAAa: Received request to upgrade to websocket
+2025-06-09 14:50:07,197 - engineio.server - INFO - socket.py:219 - _cMLxUmcLFA-824UAAAa: Upgrade to websocket successful
+2025-06-09 14:50:07,200 - engineio.server - INFO - socket.py:39 - _cMLxUmcLFA-824UAAAa: Received packet MESSAGE data 0
+2025-06-09 14:50:07,200 - root - INFO - app.py:146 - [socketio] Client connected: llO6SQD4wpttu89CAAAb
+2025-06-09 14:50:07,201 - socketio.server - INFO - server.py:164 - emitting event "connected" to llO6SQD4wpttu89CAAAb [/]
+2025-06-09 14:50:07,201 - engineio.server - INFO - socket.py:78 - _cMLxUmcLFA-824UAAAa: Sending packet MESSAGE data 2["connected",{"sid":"llO6SQD4wpttu89CAAAb"}]
+2025-06-09 14:50:07,201 - engineio.server - INFO - socket.py:78 - _cMLxUmcLFA-824UAAAa: Sending packet MESSAGE data 0{"sid":"llO6SQD4wpttu89CAAAb"}
+2025-06-09 14:50:24,377 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 14:50:24,430 - engineio.server - INFO - socket.py:78 - 6LIBdfwLQn2__7uHAAAc: Sending packet OPEN data {'sid': '6LIBdfwLQn2__7uHAAAc', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 14:50:24,430 - engineio.server - INFO - socket.py:90 - 6LIBdfwLQn2__7uHAAAc: Received request to upgrade to websocket
+2025-06-09 14:50:24,430 - engineio.server - INFO - socket.py:219 - 6LIBdfwLQn2__7uHAAAc: Upgrade to websocket successful
+2025-06-09 14:50:24,433 - engineio.server - INFO - socket.py:39 - 6LIBdfwLQn2__7uHAAAc: Received packet MESSAGE data 0
+2025-06-09 14:50:24,433 - root - INFO - app.py:146 - [socketio] Client connected: lWzHfFne9FOlkfSkAAAd
+2025-06-09 14:50:24,433 - socketio.server - INFO - server.py:164 - emitting event "connected" to lWzHfFne9FOlkfSkAAAd [/]
+2025-06-09 14:50:24,433 - engineio.server - INFO - socket.py:78 - 6LIBdfwLQn2__7uHAAAc: Sending packet MESSAGE data 2["connected",{"sid":"lWzHfFne9FOlkfSkAAAd"}]
+2025-06-09 14:50:24,434 - engineio.server - INFO - socket.py:78 - 6LIBdfwLQn2__7uHAAAc: Sending packet MESSAGE data 0{"sid":"lWzHfFne9FOlkfSkAAAd"}
+2025-06-09 14:50:29,973 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 14:50:29,993 - engineio.server - INFO - socket.py:78 - I_v6aL4V4VixMU_TAAAe: Sending packet OPEN data {'sid': 'I_v6aL4V4VixMU_TAAAe', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 14:50:29,993 - engineio.server - INFO - socket.py:90 - I_v6aL4V4VixMU_TAAAe: Received request to upgrade to websocket
+2025-06-09 14:50:29,993 - engineio.server - INFO - socket.py:219 - I_v6aL4V4VixMU_TAAAe: Upgrade to websocket successful
+2025-06-09 14:50:29,995 - engineio.server - INFO - socket.py:39 - I_v6aL4V4VixMU_TAAAe: Received packet MESSAGE data 0
+2025-06-09 14:50:29,996 - root - INFO - app.py:146 - [socketio] Client connected: imYvqju_ncVNAABIAAAf
+2025-06-09 14:50:29,996 - socketio.server - INFO - server.py:164 - emitting event "connected" to imYvqju_ncVNAABIAAAf [/]
+2025-06-09 14:50:29,996 - engineio.server - INFO - socket.py:78 - I_v6aL4V4VixMU_TAAAe: Sending packet MESSAGE data 2["connected",{"sid":"imYvqju_ncVNAABIAAAf"}]
+2025-06-09 14:50:29,996 - engineio.server - INFO - socket.py:78 - I_v6aL4V4VixMU_TAAAe: Sending packet MESSAGE data 0{"sid":"imYvqju_ncVNAABIAAAf"}
+2025-06-09 14:50:54,997 - engineio.server - INFO - socket.py:78 - I_v6aL4V4VixMU_TAAAe: Sending packet PING data None
+2025-06-09 14:50:55,000 - engineio.server - INFO - socket.py:39 - I_v6aL4V4VixMU_TAAAe: Received packet PONG data 
+2025-06-09 14:51:20,003 - engineio.server - INFO - socket.py:78 - I_v6aL4V4VixMU_TAAAe: Sending packet PING data None
+2025-06-09 14:51:20,005 - engineio.server - INFO - socket.py:39 - I_v6aL4V4VixMU_TAAAe: Received packet PONG data 
+2025-06-09 14:51:45,019 - engineio.server - INFO - socket.py:78 - I_v6aL4V4VixMU_TAAAe: Sending packet PING data None
+2025-06-09 14:51:45,021 - engineio.server - INFO - socket.py:39 - I_v6aL4V4VixMU_TAAAe: Received packet PONG data 
+2025-06-09 14:51:50,842 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 14:51:50,911 - engineio.server - INFO - socket.py:78 - aoN7lRkWOWINZrHdAAAg: Sending packet OPEN data {'sid': 'aoN7lRkWOWINZrHdAAAg', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 14:51:50,911 - engineio.server - INFO - socket.py:90 - aoN7lRkWOWINZrHdAAAg: Received request to upgrade to websocket
+2025-06-09 14:51:50,911 - engineio.server - INFO - socket.py:219 - aoN7lRkWOWINZrHdAAAg: Upgrade to websocket successful
+2025-06-09 14:51:50,920 - engineio.server - INFO - socket.py:39 - aoN7lRkWOWINZrHdAAAg: Received packet MESSAGE data 0
+2025-06-09 14:51:50,921 - root - INFO - app.py:146 - [socketio] Client connected: ppqZ1_MzR2zerCoGAAAh
+2025-06-09 14:51:50,921 - socketio.server - INFO - server.py:164 - emitting event "connected" to ppqZ1_MzR2zerCoGAAAh [/]
+2025-06-09 14:51:50,921 - engineio.server - INFO - socket.py:78 - aoN7lRkWOWINZrHdAAAg: Sending packet MESSAGE data 2["connected",{"sid":"ppqZ1_MzR2zerCoGAAAh"}]
+2025-06-09 14:51:50,922 - engineio.server - INFO - socket.py:78 - aoN7lRkWOWINZrHdAAAg: Sending packet MESSAGE data 0{"sid":"ppqZ1_MzR2zerCoGAAAh"}
+2025-06-09 14:51:53,425 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 14:51:53,449 - engineio.server - INFO - socket.py:78 - Dk8ZqWC2nOobr5ZTAAAi: Sending packet OPEN data {'sid': 'Dk8ZqWC2nOobr5ZTAAAi', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 14:51:53,449 - engineio.server - INFO - socket.py:90 - Dk8ZqWC2nOobr5ZTAAAi: Received request to upgrade to websocket
+2025-06-09 14:51:53,450 - engineio.server - INFO - socket.py:219 - Dk8ZqWC2nOobr5ZTAAAi: Upgrade to websocket successful
+2025-06-09 14:51:53,456 - engineio.server - INFO - socket.py:39 - Dk8ZqWC2nOobr5ZTAAAi: Received packet MESSAGE data 0
+2025-06-09 14:51:53,457 - root - INFO - app.py:146 - [socketio] Client connected: 8zez3bbmMHvn3p2FAAAj
+2025-06-09 14:51:53,457 - socketio.server - INFO - server.py:164 - emitting event "connected" to 8zez3bbmMHvn3p2FAAAj [/]
+2025-06-09 14:51:53,457 - engineio.server - INFO - socket.py:78 - Dk8ZqWC2nOobr5ZTAAAi: Sending packet MESSAGE data 2["connected",{"sid":"8zez3bbmMHvn3p2FAAAj"}]
+2025-06-09 14:51:53,457 - engineio.server - INFO - socket.py:78 - Dk8ZqWC2nOobr5ZTAAAi: Sending packet MESSAGE data 0{"sid":"8zez3bbmMHvn3p2FAAAj"}
+2025-06-09 14:51:56,309 - root - INFO - app.py:132 - current user: <webserver.model.user.User object at 0x7fffeeb56020>
+2025-06-09 14:51:59,079 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 14:51:59,116 - engineio.server - INFO - socket.py:78 - BP3YjffcZFS56FUrAAAk: Sending packet OPEN data {'sid': 'BP3YjffcZFS56FUrAAAk', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 14:51:59,117 - engineio.server - INFO - socket.py:90 - BP3YjffcZFS56FUrAAAk: Received request to upgrade to websocket
+2025-06-09 14:51:59,117 - engineio.server - INFO - socket.py:219 - BP3YjffcZFS56FUrAAAk: Upgrade to websocket successful
+2025-06-09 14:51:59,125 - engineio.server - INFO - socket.py:39 - BP3YjffcZFS56FUrAAAk: Received packet MESSAGE data 0
+2025-06-09 14:51:59,126 - root - INFO - app.py:146 - [socketio] Client connected: 7GCF0zSaHGXa_1eXAAAl
+2025-06-09 14:51:59,126 - socketio.server - INFO - server.py:164 - emitting event "connected" to 7GCF0zSaHGXa_1eXAAAl [/]
+2025-06-09 14:51:59,126 - engineio.server - INFO - socket.py:78 - BP3YjffcZFS56FUrAAAk: Sending packet MESSAGE data 2["connected",{"sid":"7GCF0zSaHGXa_1eXAAAl"}]
+2025-06-09 14:51:59,127 - engineio.server - INFO - socket.py:78 - BP3YjffcZFS56FUrAAAk: Sending packet MESSAGE data 0{"sid":"7GCF0zSaHGXa_1eXAAAl"}
+2025-06-09 14:52:24,119 - engineio.server - INFO - socket.py:78 - BP3YjffcZFS56FUrAAAk: Sending packet PING data None
+2025-06-09 14:52:24,121 - engineio.server - INFO - socket.py:39 - BP3YjffcZFS56FUrAAAk: Received packet PONG data 
+2025-06-09 14:52:49,127 - engineio.server - INFO - socket.py:78 - BP3YjffcZFS56FUrAAAk: Sending packet PING data None
+2025-06-09 14:52:49,130 - engineio.server - INFO - socket.py:39 - BP3YjffcZFS56FUrAAAk: Received packet PONG data 
+2025-06-09 14:53:14,133 - engineio.server - INFO - socket.py:78 - BP3YjffcZFS56FUrAAAk: Sending packet PING data None
+2025-06-09 14:53:14,135 - engineio.server - INFO - socket.py:39 - BP3YjffcZFS56FUrAAAk: Received packet PONG data 
+2025-06-09 14:53:31,899 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 14:53:31,929 - engineio.server - INFO - socket.py:78 - 9FV6_lw80OX4TqJlAAAm: Sending packet OPEN data {'sid': '9FV6_lw80OX4TqJlAAAm', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 14:53:31,929 - engineio.server - INFO - socket.py:90 - 9FV6_lw80OX4TqJlAAAm: Received request to upgrade to websocket
+2025-06-09 14:53:31,929 - engineio.server - INFO - socket.py:219 - 9FV6_lw80OX4TqJlAAAm: Upgrade to websocket successful
+2025-06-09 14:53:31,932 - engineio.server - INFO - socket.py:39 - 9FV6_lw80OX4TqJlAAAm: Received packet MESSAGE data 0
+2025-06-09 14:53:31,932 - root - INFO - app.py:146 - [socketio] Client connected: x74UbEaz2jAZvvbSAAAn
+2025-06-09 14:53:31,932 - socketio.server - INFO - server.py:164 - emitting event "connected" to x74UbEaz2jAZvvbSAAAn [/]
+2025-06-09 14:53:31,932 - engineio.server - INFO - socket.py:78 - 9FV6_lw80OX4TqJlAAAm: Sending packet MESSAGE data 2["connected",{"sid":"x74UbEaz2jAZvvbSAAAn"}]
+2025-06-09 14:53:31,933 - engineio.server - INFO - socket.py:78 - 9FV6_lw80OX4TqJlAAAm: Sending packet MESSAGE data 0{"sid":"x74UbEaz2jAZvvbSAAAn"}
+2025-06-09 14:53:34,477 - root - INFO - app.py:132 - current user: <webserver.model.user.User object at 0x7fffeea7b490>
+2025-06-09 14:53:41,428 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 14:53:41,460 - engineio.server - INFO - socket.py:78 - sJMEdmjp0eLTnF_xAAAo: Sending packet OPEN data {'sid': 'sJMEdmjp0eLTnF_xAAAo', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 14:53:41,460 - engineio.server - INFO - socket.py:90 - sJMEdmjp0eLTnF_xAAAo: Received request to upgrade to websocket
+2025-06-09 14:53:41,460 - engineio.server - INFO - socket.py:219 - sJMEdmjp0eLTnF_xAAAo: Upgrade to websocket successful
+2025-06-09 14:53:41,465 - engineio.server - INFO - socket.py:39 - sJMEdmjp0eLTnF_xAAAo: Received packet MESSAGE data 0
+2025-06-09 14:53:41,465 - root - INFO - app.py:146 - [socketio] Client connected: nA4VKalFPePEyC9JAAAp
+2025-06-09 14:53:41,465 - socketio.server - INFO - server.py:164 - emitting event "connected" to nA4VKalFPePEyC9JAAAp [/]
+2025-06-09 14:53:41,465 - engineio.server - INFO - socket.py:78 - sJMEdmjp0eLTnF_xAAAo: Sending packet MESSAGE data 2["connected",{"sid":"nA4VKalFPePEyC9JAAAp"}]
+2025-06-09 14:53:41,466 - engineio.server - INFO - socket.py:78 - sJMEdmjp0eLTnF_xAAAo: Sending packet MESSAGE data 0{"sid":"nA4VKalFPePEyC9JAAAp"}
+2025-06-09 14:54:06,465 - engineio.server - INFO - socket.py:78 - sJMEdmjp0eLTnF_xAAAo: Sending packet PING data None
+2025-06-09 14:54:06,467 - engineio.server - INFO - socket.py:39 - sJMEdmjp0eLTnF_xAAAo: Received packet PONG data 
+2025-06-09 14:54:31,469 - engineio.server - INFO - socket.py:78 - sJMEdmjp0eLTnF_xAAAo: Sending packet PING data None
+2025-06-09 14:54:31,472 - engineio.server - INFO - socket.py:39 - sJMEdmjp0eLTnF_xAAAo: Received packet PONG data 
+2025-06-09 14:54:56,477 - engineio.server - INFO - socket.py:78 - sJMEdmjp0eLTnF_xAAAo: Sending packet PING data None
+2025-06-09 14:54:56,479 - engineio.server - INFO - socket.py:39 - sJMEdmjp0eLTnF_xAAAo: Received packet PONG data 
+2025-06-09 14:55:21,481 - engineio.server - INFO - socket.py:78 - sJMEdmjp0eLTnF_xAAAo: Sending packet PING data None
+2025-06-09 14:55:21,484 - engineio.server - INFO - socket.py:39 - sJMEdmjp0eLTnF_xAAAo: Received packet PONG data 
+2025-06-09 14:55:22,667 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 14:55:32,028 - root - INFO - app.py:132 - current user: <webserver.model.user.User object at 0x7fffeea7aef0>
+2025-06-09 14:55:33,574 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 14:56:05,925 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 14:56:05,966 - engineio.server - INFO - socket.py:78 - HDlSaDcj5MBwCwNyAAAq: Sending packet OPEN data {'sid': 'HDlSaDcj5MBwCwNyAAAq', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 14:56:05,966 - engineio.server - INFO - socket.py:90 - HDlSaDcj5MBwCwNyAAAq: Received request to upgrade to websocket
+2025-06-09 14:56:05,967 - engineio.server - INFO - socket.py:219 - HDlSaDcj5MBwCwNyAAAq: Upgrade to websocket successful
+2025-06-09 14:56:05,976 - engineio.server - INFO - socket.py:39 - HDlSaDcj5MBwCwNyAAAq: Received packet MESSAGE data 0
+2025-06-09 14:56:05,977 - root - INFO - app.py:146 - [socketio] Client connected: q7gIY7d5rIiooKu_AAAr
+2025-06-09 14:56:05,977 - socketio.server - INFO - server.py:164 - emitting event "connected" to q7gIY7d5rIiooKu_AAAr [/]
+2025-06-09 14:56:05,977 - engineio.server - INFO - socket.py:78 - HDlSaDcj5MBwCwNyAAAq: Sending packet MESSAGE data 2["connected",{"sid":"q7gIY7d5rIiooKu_AAAr"}]
+2025-06-09 14:56:05,977 - engineio.server - INFO - socket.py:78 - HDlSaDcj5MBwCwNyAAAq: Sending packet MESSAGE data 0{"sid":"q7gIY7d5rIiooKu_AAAr"}
+2025-06-09 14:56:30,970 - engineio.server - INFO - socket.py:78 - HDlSaDcj5MBwCwNyAAAq: Sending packet PING data None
+2025-06-09 14:56:30,972 - engineio.server - INFO - socket.py:39 - HDlSaDcj5MBwCwNyAAAq: Received packet PONG data 
+2025-06-09 14:56:46,206 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 14:56:46,270 - engineio.server - INFO - socket.py:78 - wdrVivTZMjuGooQIAAAs: Sending packet OPEN data {'sid': 'wdrVivTZMjuGooQIAAAs', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 14:56:46,270 - engineio.server - INFO - socket.py:90 - wdrVivTZMjuGooQIAAAs: Received request to upgrade to websocket
+2025-06-09 14:56:46,270 - engineio.server - INFO - socket.py:219 - wdrVivTZMjuGooQIAAAs: Upgrade to websocket successful
+2025-06-09 14:56:46,274 - engineio.server - INFO - socket.py:39 - wdrVivTZMjuGooQIAAAs: Received packet MESSAGE data 0
+2025-06-09 14:56:46,275 - root - INFO - app.py:146 - [socketio] Client connected: m84XlHfac0Luc-avAAAt
+2025-06-09 14:56:46,275 - socketio.server - INFO - server.py:164 - emitting event "connected" to m84XlHfac0Luc-avAAAt [/]
+2025-06-09 14:56:46,275 - engineio.server - INFO - socket.py:78 - wdrVivTZMjuGooQIAAAs: Sending packet MESSAGE data 2["connected",{"sid":"m84XlHfac0Luc-avAAAt"}]
+2025-06-09 14:56:46,276 - engineio.server - INFO - socket.py:78 - wdrVivTZMjuGooQIAAAs: Sending packet MESSAGE data 0{"sid":"m84XlHfac0Luc-avAAAt"}
+2025-06-09 14:57:11,277 - engineio.server - INFO - socket.py:78 - wdrVivTZMjuGooQIAAAs: Sending packet PING data None
+2025-06-09 14:57:11,279 - engineio.server - INFO - socket.py:39 - wdrVivTZMjuGooQIAAAs: Received packet PONG data 
+2025-06-09 14:57:14,819 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 14:57:14,842 - engineio.server - INFO - socket.py:78 - uH_Gu8MEof_xDTSTAAAu: Sending packet OPEN data {'sid': 'uH_Gu8MEof_xDTSTAAAu', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 14:57:14,842 - engineio.server - INFO - socket.py:90 - uH_Gu8MEof_xDTSTAAAu: Received request to upgrade to websocket
+2025-06-09 14:57:14,842 - engineio.server - INFO - socket.py:219 - uH_Gu8MEof_xDTSTAAAu: Upgrade to websocket successful
+2025-06-09 14:57:14,847 - engineio.server - INFO - socket.py:39 - uH_Gu8MEof_xDTSTAAAu: Received packet MESSAGE data 0
+2025-06-09 14:57:14,848 - root - INFO - app.py:146 - [socketio] Client connected: 9-wxAlZXT8_8LSU5AAAv
+2025-06-09 14:57:14,848 - socketio.server - INFO - server.py:164 - emitting event "connected" to 9-wxAlZXT8_8LSU5AAAv [/]
+2025-06-09 14:57:14,848 - engineio.server - INFO - socket.py:78 - uH_Gu8MEof_xDTSTAAAu: Sending packet MESSAGE data 2["connected",{"sid":"9-wxAlZXT8_8LSU5AAAv"}]
+2025-06-09 14:57:14,848 - engineio.server - INFO - socket.py:78 - uH_Gu8MEof_xDTSTAAAu: Sending packet MESSAGE data 0{"sid":"9-wxAlZXT8_8LSU5AAAv"}
+2025-06-09 14:57:15,879 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 14:57:15,900 - engineio.server - INFO - socket.py:78 - wgYguqi2EoStYKvfAAAw: Sending packet OPEN data {'sid': 'wgYguqi2EoStYKvfAAAw', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 14:57:15,900 - engineio.server - INFO - socket.py:90 - wgYguqi2EoStYKvfAAAw: Received request to upgrade to websocket
+2025-06-09 14:57:15,901 - engineio.server - INFO - socket.py:219 - wgYguqi2EoStYKvfAAAw: Upgrade to websocket successful
+2025-06-09 14:57:15,904 - engineio.server - INFO - socket.py:39 - wgYguqi2EoStYKvfAAAw: Received packet MESSAGE data 0
+2025-06-09 14:57:15,905 - root - INFO - app.py:146 - [socketio] Client connected: ohRgpVWZOmV3QJBLAAAx
+2025-06-09 14:57:15,905 - socketio.server - INFO - server.py:164 - emitting event "connected" to ohRgpVWZOmV3QJBLAAAx [/]
+2025-06-09 14:57:15,906 - engineio.server - INFO - socket.py:78 - wgYguqi2EoStYKvfAAAw: Sending packet MESSAGE data 2["connected",{"sid":"ohRgpVWZOmV3QJBLAAAx"}]
+2025-06-09 14:57:15,907 - engineio.server - INFO - socket.py:78 - wgYguqi2EoStYKvfAAAw: Sending packet MESSAGE data 0{"sid":"ohRgpVWZOmV3QJBLAAAx"}
+2025-06-09 14:57:16,952 - root - INFO - message.py:67 - Retrieved 3 messages for task_id=77
+2025-06-09 14:57:16,953 - root - INFO - file.py:84 - DB ENV (get_files): PGHOST=localhost, PGPORT=5433, PGDATABASE=toxindex, PGUSER=postgres, PGPASSWORD=devpassword
+2025-06-09 14:57:16,953 - root - INFO - file.py:85 - Calling get_files with task_id=77 (type: <class 'int'>)
+2025-06-09 14:57:16,956 - root - INFO - file.py:90 - Raw rows returned from DB for task_id=77: [[53, 77, UUID('078a38e9-c1b8-421e-b797-59ee3ae69df4'), 'probra_result_1f12a6f899554f33ab1149d80ec128bb.md', '77/probra_result_1f12a6f899554f33ab1149d80ec128bb.md', 'https://toxindex-environments-2.s3.amazonaws.com/77/probra_result_1f12a6f899554f33ab1149d80ec128bb.md?AWSAccessKeyId=ASIAQ72ED6HZEJGH3WVP&Signature=01JS4PQUWuiMCGKnQA6LOmVdh4M%3D&x-amz-security-token=IQoJb3JpZ2luX2VjENL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLWVhc3QtMSJIMEYCIQDOwWZ92rHuRduG0HlIr0ZJh5Z3246uxnkjP6Z3AOm3awIhAI2%2F%2FJZM5%2BR5bhrXR6iig0rd3blySQA3yrlUu1Ajx7lWKv4CCKv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEQABoMMDY4MzI1NDcwNzA2Igz73xQshCLCKsTI%2BJkq0gKuTd%2FD5VQL7pxhkvqiIelUvbuFjD91f7BqiqMhQQC89kjCNcd21Vup2gksuaOnhc7yEG%2B0Pt3Yg1z7y5HotHruO3erLdPO7DfQy%2FwECR%2F8RAqMpxLAl9PN2Om%2BJg2NQsjXWx%2BeoDHTqEMaVYNbX3466Ksu84TnSUcfpGAXbRP6MmxQR0rMnBT3%2FkyK3UJ9jZ2BOw9QPgRfLEC%2BU4g5y3e6Intt2HhFCagSH2gZ%2FeOkPZr82MNRPbQRARs2e063q17dPXYUQRD%2FsQAFpok%2BBqPoxnVxFdZanQzsP3Gi%2FhY6DnjyotEluVOE0n%2B%2BXiyNhxLV1G3BbURIHPZY5r1c3pGtl02VRS0n%2BAGMTtNt31Lj2mw9l456irbaGdchMTaUy06t6Vtm9fG3XV9JZO8R%2FfB98LK2hQM9CmnWR3sTUYs7iHAQNdnOlVKnghjd4gxH0Yp9yDC8uJzCBjqmAYdQ3F96uXXXXwcbR1jmbmd4fK5SckFBYjZkCvucBHyYkpDtU3PD2EGSmSA%2BbnUEFictfiIHpQUE8suSTEAIW%2FiTy7l30hUdl80aFffOLP9%2BroMydiJ2qQqY9USQ2Lsz2Nz%2BcqhpRqd4jhuyICgN60PfTS%2BKv3fGhT5oksGOR2juO7CW%2B%2BZiQnkqJy3mThXip04Zl4hY2ydOevXqtdTm7jN0HkcudPE%3D&Expires=1749494348', datetime.datetime(2025, 6, 9, 13, 39, 8, 573100)], [54, 77, UUID('078a38e9-c1b8-421e-b797-59ee3ae69df4'), 'probra_result_1f12a6f899554f33ab1149d80ec128bb.md', '77/probra_result_1f12a6f899554f33ab1149d80ec128bb.md', 'https://toxindex-environments-2.s3.amazonaws.com/77/probra_result_1f12a6f899554f33ab1149d80ec128bb.md?AWSAccessKeyId=ASIAQ72ED6HZEJGH3WVP&Signature=01JS4PQUWuiMCGKnQA6LOmVdh4M%3D&x-amz-security-token=IQoJb3JpZ2luX2VjENL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLWVhc3QtMSJIMEYCIQDOwWZ92rHuRduG0HlIr0ZJh5Z3246uxnkjP6Z3AOm3awIhAI2%2F%2FJZM5%2BR5bhrXR6iig0rd3blySQA3yrlUu1Ajx7lWKv4CCKv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEQABoMMDY4MzI1NDcwNzA2Igz73xQshCLCKsTI%2BJkq0gKuTd%2FD5VQL7pxhkvqiIelUvbuFjD91f7BqiqMhQQC89kjCNcd21Vup2gksuaOnhc7yEG%2B0Pt3Yg1z7y5HotHruO3erLdPO7DfQy%2FwECR%2F8RAqMpxLAl9PN2Om%2BJg2NQsjXWx%2BeoDHTqEMaVYNbX3466Ksu84TnSUcfpGAXbRP6MmxQR0rMnBT3%2FkyK3UJ9jZ2BOw9QPgRfLEC%2BU4g5y3e6Intt2HhFCagSH2gZ%2FeOkPZr82MNRPbQRARs2e063q17dPXYUQRD%2FsQAFpok%2BBqPoxnVxFdZanQzsP3Gi%2FhY6DnjyotEluVOE0n%2B%2BXiyNhxLV1G3BbURIHPZY5r1c3pGtl02VRS0n%2BAGMTtNt31Lj2mw9l456irbaGdchMTaUy06t6Vtm9fG3XV9JZO8R%2FfB98LK2hQM9CmnWR3sTUYs7iHAQNdnOlVKnghjd4gxH0Yp9yDC8uJzCBjqmAYdQ3F96uXXXXwcbR1jmbmd4fK5SckFBYjZkCvucBHyYkpDtU3PD2EGSmSA%2BbnUEFictfiIHpQUE8suSTEAIW%2FiTy7l30hUdl80aFffOLP9%2BroMydiJ2qQqY9USQ2Lsz2Nz%2BcqhpRqd4jhuyICgN60PfTS%2BKv3fGhT5oksGOR2juO7CW%2B%2BZiQnkqJy3mThXip04Zl4hY2ydOevXqtdTm7jN0HkcudPE%3D&Expires=1749494348', datetime.datetime(2025, 6, 9, 13, 39, 8, 573571)]]
+2025-06-09 14:57:16,956 - root - INFO - file.py:94 - Found 2 files in DB for task_id=77
+2025-06-09 14:57:16,957 - root - WARNING - file.py:130 - Could not read file 77/probra_result_1f12a6f899554f33ab1149d80ec128bb.md: [Errno 2] No such file or directory: '77/probra_result_1f12a6f899554f33ab1149d80ec128bb.md'
+2025-06-09 14:57:16,957 - root - WARNING - file.py:130 - Could not read file 77/probra_result_1f12a6f899554f33ab1149d80ec128bb.md: [Errno 2] No such file or directory: '77/probra_result_1f12a6f899554f33ab1149d80ec128bb.md'
+2025-06-09 14:57:16,969 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.fenced_code.FencedCodeExtension".
+2025-06-09 14:57:16,971 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.footnotes.FootnoteExtension".
+2025-06-09 14:57:16,971 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.attr_list.AttrListExtension".
+2025-06-09 14:57:16,971 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.def_list.DefListExtension".
+2025-06-09 14:57:16,971 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.tables.TableExtension".
+2025-06-09 14:57:16,972 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.abbr.AbbrExtension".
+2025-06-09 14:57:16,972 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.md_in_html.MarkdownInHtmlExtension".
+2025-06-09 14:57:16,972 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.extra.ExtraExtension".
+2025-06-09 14:57:16,972 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.tables.TableExtension".
+2025-06-09 14:57:17,012 - engineio.server - INFO - socket.py:78 - rLzqQN6obuCQnE3TAAAy: Sending packet OPEN data {'sid': 'rLzqQN6obuCQnE3TAAAy', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 14:57:17,012 - engineio.server - INFO - socket.py:90 - rLzqQN6obuCQnE3TAAAy: Received request to upgrade to websocket
+2025-06-09 14:57:17,012 - engineio.server - INFO - socket.py:219 - rLzqQN6obuCQnE3TAAAy: Upgrade to websocket successful
+2025-06-09 14:57:17,037 - engineio.server - INFO - socket.py:39 - rLzqQN6obuCQnE3TAAAy: Received packet MESSAGE data 0
+2025-06-09 14:57:17,038 - root - INFO - app.py:146 - [socketio] Client connected: Z06t97kJXrb6Ym1JAAAz
+2025-06-09 14:57:17,038 - socketio.server - INFO - server.py:164 - emitting event "connected" to Z06t97kJXrb6Ym1JAAAz [/]
+2025-06-09 14:57:17,038 - engineio.server - INFO - socket.py:78 - rLzqQN6obuCQnE3TAAAy: Sending packet MESSAGE data 2["connected",{"sid":"Z06t97kJXrb6Ym1JAAAz"}]
+2025-06-09 14:57:17,038 - engineio.server - INFO - socket.py:78 - rLzqQN6obuCQnE3TAAAy: Sending packet MESSAGE data 0{"sid":"Z06t97kJXrb6Ym1JAAAz"}
+2025-06-09 14:57:17,080 - engineio.server - INFO - socket.py:39 - rLzqQN6obuCQnE3TAAAy: Received packet MESSAGE data 2["join_task_room",{"task_id":"77"}]
+2025-06-09 14:57:17,080 - socketio.server - INFO - server.py:576 - received event "join_task_room" from Z06t97kJXrb6Ym1JAAAz [/]
+2025-06-09 14:57:17,081 - root - INFO - app.py:155 - [socketio] Z06t97kJXrb6Ym1JAAAz joining room: task_77
+2025-06-09 14:57:17,081 - socketio.server - INFO - server.py:284 - Z06t97kJXrb6Ym1JAAAz is entering room task_77 [/]
+2025-06-09 14:57:17,082 - root - INFO - app.py:157 - [socketio] Z06t97kJXrb6Ym1JAAAz joined room: task_77
+2025-06-09 14:57:17,082 - socketio.server - INFO - server.py:164 - emitting event "joined_task_room" to Z06t97kJXrb6Ym1JAAAz [/]
+2025-06-09 14:57:17,082 - engineio.server - INFO - socket.py:78 - rLzqQN6obuCQnE3TAAAy: Sending packet MESSAGE data 2["joined_task_room",{"task_id":"77"}]
+2025-06-09 14:57:19,136 - engineio.server - INFO - socket.py:78 - hvfEdemAU18G--57AAA0: Sending packet OPEN data {'sid': 'hvfEdemAU18G--57AAA0', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 14:57:19,136 - engineio.server - INFO - socket.py:90 - hvfEdemAU18G--57AAA0: Received request to upgrade to websocket
+2025-06-09 14:57:19,137 - engineio.server - INFO - socket.py:219 - hvfEdemAU18G--57AAA0: Upgrade to websocket successful
+2025-06-09 14:57:19,143 - engineio.server - INFO - socket.py:39 - hvfEdemAU18G--57AAA0: Received packet MESSAGE data 0
+2025-06-09 14:57:19,144 - root - INFO - app.py:146 - [socketio] Client connected: dRrBu7TsXG1yAfhXAAA1
+2025-06-09 14:57:19,144 - socketio.server - INFO - server.py:164 - emitting event "connected" to dRrBu7TsXG1yAfhXAAA1 [/]
+2025-06-09 14:57:19,144 - engineio.server - INFO - socket.py:78 - hvfEdemAU18G--57AAA0: Sending packet MESSAGE data 2["connected",{"sid":"dRrBu7TsXG1yAfhXAAA1"}]
+2025-06-09 14:57:19,145 - engineio.server - INFO - socket.py:78 - hvfEdemAU18G--57AAA0: Sending packet MESSAGE data 0{"sid":"dRrBu7TsXG1yAfhXAAA1"}
+2025-06-09 14:57:44,138 - engineio.server - INFO - socket.py:78 - hvfEdemAU18G--57AAA0: Sending packet PING data None
+2025-06-09 14:57:44,141 - engineio.server - INFO - socket.py:39 - hvfEdemAU18G--57AAA0: Received packet PONG data 
+2025-06-09 14:58:09,142 - engineio.server - INFO - socket.py:78 - hvfEdemAU18G--57AAA0: Sending packet PING data None
+2025-06-09 14:58:09,145 - engineio.server - INFO - socket.py:39 - hvfEdemAU18G--57AAA0: Received packet PONG data 
+2025-06-09 14:58:34,146 - engineio.server - INFO - socket.py:78 - hvfEdemAU18G--57AAA0: Sending packet PING data None
+2025-06-09 14:58:34,148 - engineio.server - INFO - socket.py:39 - hvfEdemAU18G--57AAA0: Received packet PONG data 
+2025-06-09 14:58:59,153 - engineio.server - INFO - socket.py:78 - hvfEdemAU18G--57AAA0: Sending packet PING data None
+2025-06-09 14:58:59,155 - engineio.server - INFO - socket.py:39 - hvfEdemAU18G--57AAA0: Received packet PONG data 
+2025-06-09 14:59:18,727 - werkzeug - INFO - _internal.py:97 -  * Detected change in '/home/kyu/Documents/toxindex/webserver/ai_service.py', reloading
+2025-06-09 14:59:18,902 - werkzeug - INFO - _internal.py:97 -  * Restarting with stat
+2025-06-09 14:59:19,817 - root - INFO - probra.py:28 - probra.py module loaded
+2025-06-09 14:59:19,875 - root - INFO - app.py:37 - DB ENV (Flask startup): PGHOST=localhost, PGPORT=5433, PGDATABASE=toxindex, PGUSER=postgres, PGPASSWORD=devpassword
+2025-06-09 14:59:19,875 - root - INFO - app.py:47 - SECRET_KEY: spain
+2025-06-09 14:59:19,875 - root - INFO - app.py:48 - WTF_CSRF_ENABLED: not set
+2025-06-09 14:59:19,878 - engineio.server - INFO - base_server.py:112 - Server initialized for eventlet.
+2025-06-09 14:59:19,886 - root - DEBUG - datastore.py:56 - done
+2025-06-09 14:59:19,887 - root - INFO - workflow.py:48 - updated workflow 1
+2025-06-09 14:59:19,896 - root - DEBUG - datastore.py:56 - done
+2025-06-09 14:59:19,896 - root - INFO - workflow.py:48 - updated workflow 2
+2025-06-09 14:59:19,906 - root - DEBUG - datastore.py:56 - done
+2025-06-09 14:59:19,906 - root - INFO - workflow.py:48 - updated workflow 3
+2025-06-09 14:59:19,924 - root - DEBUG - datastore.py:56 - done
+2025-06-09 14:59:19,925 - root - INFO - workflow.py:48 - updated workflow 4
+2025-06-09 14:59:19,941 - werkzeug - WARNING - _internal.py:97 -  * Debugger is active!
+2025-06-09 14:59:19,942 - root - INFO - app.py:89 - [redis_listener] (3ac5b32c) Started Redis listener thread: RedisListenerThread-e69cfd4c
+2025-06-09 14:59:19,942 - root - DEBUG - app.py:91 - [redis_listener] (3ac5b32c) Raw redis_message: {'type': 'subscribe', 'pattern': None, 'channel': b'celery_updates', 'data': 1}
+2025-06-09 14:59:19,945 - werkzeug - INFO - _internal.py:97 -  * Debugger PIN: 842-788-610
+2025-06-09 14:59:20,059 - engineio.server - INFO - socket.py:78 - mwS8WQAFbUwRHZyPAAAA: Sending packet OPEN data {'sid': 'mwS8WQAFbUwRHZyPAAAA', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 14:59:20,059 - socketio.server - INFO - pubsub_manager.py:37 - redis backend initialized.
+2025-06-09 14:59:20,059 - engineio.server - INFO - socket.py:90 - mwS8WQAFbUwRHZyPAAAA: Received request to upgrade to websocket
+2025-06-09 14:59:20,059 - engineio.server - INFO - socket.py:219 - mwS8WQAFbUwRHZyPAAAA: Upgrade to websocket successful
+2025-06-09 14:59:20,062 - engineio.server - INFO - socket.py:39 - mwS8WQAFbUwRHZyPAAAA: Received packet MESSAGE data 0
+2025-06-09 14:59:20,064 - root - INFO - app.py:146 - [socketio] Client connected: EmzNEPkLvq67BoZGAAAB
+2025-06-09 14:59:20,064 - socketio.server - INFO - server.py:164 - emitting event "connected" to EmzNEPkLvq67BoZGAAAB [/]
+2025-06-09 14:59:20,064 - engineio.server - INFO - socket.py:78 - mwS8WQAFbUwRHZyPAAAA: Sending packet MESSAGE data 2["connected",{"sid":"EmzNEPkLvq67BoZGAAAB"}]
+2025-06-09 14:59:20,066 - engineio.server - INFO - socket.py:78 - mwS8WQAFbUwRHZyPAAAA: Sending packet MESSAGE data 0{"sid":"EmzNEPkLvq67BoZGAAAB"}
+2025-06-09 14:59:27,988 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 14:59:28,028 - engineio.server - INFO - socket.py:78 - zoyygF1xvXAVTyrJAAAC: Sending packet OPEN data {'sid': 'zoyygF1xvXAVTyrJAAAC', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 14:59:28,029 - engineio.server - INFO - socket.py:90 - zoyygF1xvXAVTyrJAAAC: Received request to upgrade to websocket
+2025-06-09 14:59:28,029 - engineio.server - INFO - socket.py:219 - zoyygF1xvXAVTyrJAAAC: Upgrade to websocket successful
+2025-06-09 14:59:28,035 - engineio.server - INFO - socket.py:39 - zoyygF1xvXAVTyrJAAAC: Received packet MESSAGE data 0
+2025-06-09 14:59:28,036 - root - INFO - app.py:146 - [socketio] Client connected: Iq2SwZI_yMQJJeiLAAAD
+2025-06-09 14:59:28,036 - socketio.server - INFO - server.py:164 - emitting event "connected" to Iq2SwZI_yMQJJeiLAAAD [/]
+2025-06-09 14:59:28,036 - engineio.server - INFO - socket.py:78 - zoyygF1xvXAVTyrJAAAC: Sending packet MESSAGE data 2["connected",{"sid":"Iq2SwZI_yMQJJeiLAAAD"}]
+2025-06-09 14:59:28,038 - engineio.server - INFO - socket.py:78 - zoyygF1xvXAVTyrJAAAC: Sending packet MESSAGE data 0{"sid":"Iq2SwZI_yMQJJeiLAAAD"}
+2025-06-09 14:59:39,418 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 14:59:39,456 - engineio.server - INFO - socket.py:78 - WWyXlx9RtTvPvOHbAAAE: Sending packet OPEN data {'sid': 'WWyXlx9RtTvPvOHbAAAE', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 14:59:39,456 - engineio.server - INFO - socket.py:90 - WWyXlx9RtTvPvOHbAAAE: Received request to upgrade to websocket
+2025-06-09 14:59:39,456 - engineio.server - INFO - socket.py:219 - WWyXlx9RtTvPvOHbAAAE: Upgrade to websocket successful
+2025-06-09 14:59:39,502 - engineio.server - INFO - socket.py:39 - WWyXlx9RtTvPvOHbAAAE: Received packet MESSAGE data 0
+2025-06-09 14:59:39,503 - root - INFO - app.py:146 - [socketio] Client connected: PtQJTUhlN4cdaTkAAAAF
+2025-06-09 14:59:39,503 - socketio.server - INFO - server.py:164 - emitting event "connected" to PtQJTUhlN4cdaTkAAAAF [/]
+2025-06-09 14:59:39,503 - engineio.server - INFO - socket.py:78 - WWyXlx9RtTvPvOHbAAAE: Sending packet MESSAGE data 2["connected",{"sid":"PtQJTUhlN4cdaTkAAAAF"}]
+2025-06-09 14:59:39,503 - engineio.server - INFO - socket.py:78 - WWyXlx9RtTvPvOHbAAAE: Sending packet MESSAGE data 0{"sid":"PtQJTUhlN4cdaTkAAAAF"}
+2025-06-09 14:59:39,919 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 14:59:39,950 - engineio.server - INFO - socket.py:78 - HLgJ0u4icZJ8tWN-AAAG: Sending packet OPEN data {'sid': 'HLgJ0u4icZJ8tWN-AAAG', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 14:59:39,951 - engineio.server - INFO - socket.py:90 - HLgJ0u4icZJ8tWN-AAAG: Received request to upgrade to websocket
+2025-06-09 14:59:39,951 - engineio.server - INFO - socket.py:219 - HLgJ0u4icZJ8tWN-AAAG: Upgrade to websocket successful
+2025-06-09 14:59:39,959 - engineio.server - INFO - socket.py:39 - HLgJ0u4icZJ8tWN-AAAG: Received packet MESSAGE data 0
+2025-06-09 14:59:39,960 - root - INFO - app.py:146 - [socketio] Client connected: q8CBBJZseNVQb2ymAAAH
+2025-06-09 14:59:39,960 - socketio.server - INFO - server.py:164 - emitting event "connected" to q8CBBJZseNVQb2ymAAAH [/]
+2025-06-09 14:59:39,960 - engineio.server - INFO - socket.py:78 - HLgJ0u4icZJ8tWN-AAAG: Sending packet MESSAGE data 2["connected",{"sid":"q8CBBJZseNVQb2ymAAAH"}]
+2025-06-09 14:59:39,961 - engineio.server - INFO - socket.py:78 - HLgJ0u4icZJ8tWN-AAAG: Sending packet MESSAGE data 0{"sid":"q8CBBJZseNVQb2ymAAAH"}
+2025-06-09 14:59:47,071 - root - INFO - app.py:164 - [task_create] Called with POST
+2025-06-09 14:59:47,071 - root - INFO - app.py:167 - [task_create] Received message: is aspirin hepatotoxic?
+2025-06-09 14:59:47,076 - root - INFO - app.py:173 - [task_create] Creating task for user_id=078a38e9-c1b8-421e-b797-59ee3ae69df4, workflow_id=2, environment_id=20, sid=q8CBBJZseNVQb2ymAAAH
+2025-06-09 14:59:47,076 - root - INFO - task.py:65 - Creating new task with title='is aspirin hepatotoxic?' for user_id=078a38e9-c1b8-421e-b797-59ee3ae69df4
+2025-06-09 14:59:47,084 - root - DEBUG - datastore.py:56 - done
+2025-06-09 14:59:47,089 - root - INFO - task.py:85 - Successfully created task with id=78
+2025-06-09 14:59:47,089 - root - INFO - app.py:180 - [task_create] Created task: {'task_id': 78, 'title': 'is aspirin hepatotoxic?', 'user_id': UUID('078a38e9-c1b8-421e-b797-59ee3ae69df4'), 'workflow_id': 2, 'environment_id': 20, 'description': None, 'created_at': '2025-06-09 14:59:47'}
+2025-06-09 14:59:47,095 - root - DEBUG - datastore.py:56 - done
+2025-06-09 14:59:47,095 - root - INFO - app.py:195 - [task_create] Executing ToxDirect (plain_openai_task) for task_id=78
+2025-06-09 14:59:47,097 - celery.utils.functional - DEBUG - functional.py:335 - 
+def plain_openai_task(self, payload):
+    return 1
+
+2025-06-09 14:59:47,116 - celery.worker.strategy - INFO - strategy.py:161 - Task workflows.plain_openai_tasks.plain_openai_task[75b81c38-24cb-4e53-9220-e7a4e7375e56] received
+2025-06-09 14:59:47,117 - workflows.plain_openai_tasks - INFO - plain_openai_tasks.py:19 - [ToxDirect] Running plain_openai_task for task_id=78, user_id=078a38e9-c1b8-421e-b797-59ee3ae69df4, payload={'payload': 'is aspirin hepatotoxic?', 'sid': 'q8CBBJZseNVQb2ymAAAH', 'task_id': 78, 'user_id': '078a38e9-c1b8-421e-b797-59ee3ae69df4'}
+2025-06-09 14:59:47,119 - root - DEBUG - datastore.py:56 - done
+2025-06-09 14:59:47,128 - root - INFO - message.py:67 - Retrieved 1 messages for task_id=78
+2025-06-09 14:59:47,128 - root - INFO - file.py:84 - DB ENV (get_files): PGHOST=localhost, PGPORT=5433, PGDATABASE=toxindex, PGUSER=postgres, PGPASSWORD=devpassword
+2025-06-09 14:59:47,128 - root - INFO - file.py:85 - Calling get_files with task_id=78 (type: <class 'int'>)
+2025-06-09 14:59:47,131 - root - INFO - file.py:90 - Raw rows returned from DB for task_id=78: []
+2025-06-09 14:59:47,131 - root - WARNING - file.py:92 - No files found in DB for task_id=78
+2025-06-09 14:59:47,218 - engineio.server - INFO - socket.py:78 - mC3WwR3NHn1u7Ca4AAAI: Sending packet OPEN data {'sid': 'mC3WwR3NHn1u7Ca4AAAI', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 14:59:47,218 - engineio.server - INFO - socket.py:90 - mC3WwR3NHn1u7Ca4AAAI: Received request to upgrade to websocket
+2025-06-09 14:59:47,219 - engineio.server - INFO - socket.py:219 - mC3WwR3NHn1u7Ca4AAAI: Upgrade to websocket successful
+2025-06-09 14:59:47,225 - engineio.server - INFO - socket.py:39 - mC3WwR3NHn1u7Ca4AAAI: Received packet MESSAGE data 0
+2025-06-09 14:59:47,226 - root - INFO - app.py:146 - [socketio] Client connected: qaMWDog0QuotugWpAAAJ
+2025-06-09 14:59:47,226 - socketio.server - INFO - server.py:164 - emitting event "connected" to qaMWDog0QuotugWpAAAJ [/]
+2025-06-09 14:59:47,226 - engineio.server - INFO - socket.py:78 - mC3WwR3NHn1u7Ca4AAAI: Sending packet MESSAGE data 2["connected",{"sid":"qaMWDog0QuotugWpAAAJ"}]
+2025-06-09 14:59:47,227 - engineio.server - INFO - socket.py:78 - mC3WwR3NHn1u7Ca4AAAI: Sending packet MESSAGE data 0{"sid":"qaMWDog0QuotugWpAAAJ"}
+2025-06-09 14:59:47,268 - engineio.server - INFO - socket.py:39 - mC3WwR3NHn1u7Ca4AAAI: Received packet MESSAGE data 2["join_task_room",{"task_id":"78"}]
+2025-06-09 14:59:47,268 - socketio.server - INFO - server.py:576 - received event "join_task_room" from qaMWDog0QuotugWpAAAJ [/]
+2025-06-09 14:59:47,268 - root - INFO - app.py:155 - [socketio] qaMWDog0QuotugWpAAAJ joining room: task_78
+2025-06-09 14:59:47,268 - socketio.server - INFO - server.py:284 - qaMWDog0QuotugWpAAAJ is entering room task_78 [/]
+2025-06-09 14:59:47,269 - root - INFO - app.py:157 - [socketio] qaMWDog0QuotugWpAAAJ joined room: task_78
+2025-06-09 14:59:47,269 - socketio.server - INFO - server.py:164 - emitting event "joined_task_room" to qaMWDog0QuotugWpAAAJ [/]
+2025-06-09 14:59:47,269 - engineio.server - INFO - socket.py:78 - mC3WwR3NHn1u7Ca4AAAI: Sending packet MESSAGE data 2["joined_task_room",{"task_id":"78"}]
+2025-06-09 14:59:49,812 - httpx - INFO - _client.py:1025 - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-09 14:59:49,818 - workflows.plain_openai_tasks - INFO - plain_openai_tasks.py:47 - [plain_openai_task] Publishing message event: {'type': 'task_message', 'data': {'role': 'assistant', 'content': 'No, aspirin is not typically considered hepatotoxic, which means toxic to the liver. However, high doses or prolonged use can potentially cause liver damage. It is always important to use medication as directed by a healthcare professional.'}, 'task_id': 78}
+2025-06-09 14:59:49,819 - root - DEBUG - app.py:91 - [redis_listener] (ceb795df) Raw redis_message: {'type': 'message', 'pattern': None, 'channel': b'celery_updates', 'data': b'{"type": "task_message", "data": {"role": "assistant", "content": "No, aspirin is not typically considered hepatotoxic, which means toxic to the liver. However, high doses or prolonged use can potentially cause liver damage. It is always important to use medication as directed by a healthcare professional."}, "task_id": 78}'}
+2025-06-09 14:59:49,819 - root - DEBUG - app.py:91 - [redis_listener] (3ac5b32c) Raw redis_message: {'type': 'message', 'pattern': None, 'channel': b'celery_updates', 'data': b'{"type": "task_message", "data": {"role": "assistant", "content": "No, aspirin is not typically considered hepatotoxic, which means toxic to the liver. However, high doses or prolonged use can potentially cause liver damage. It is always important to use medication as directed by a healthcare professional."}, "task_id": 78}'}
+2025-06-09 14:59:49,819 - root - INFO - app.py:99 - [redis_listener] (ceb795df) Redis event: {'type': 'task_message', 'data': {'role': 'assistant', 'content': 'No, aspirin is not typically considered hepatotoxic, which means toxic to the liver. However, high doses or prolonged use can potentially cause liver damage. It is always important to use medication as directed by a healthcare professional.'}, 'task_id': 78}
+2025-06-09 14:59:49,819 - root - INFO - app.py:99 - [redis_listener] (3ac5b32c) Redis event: {'type': 'task_message', 'data': {'role': 'assistant', 'content': 'No, aspirin is not typically considered hepatotoxic, which means toxic to the liver. However, high doses or prolonged use can potentially cause liver damage. It is always important to use medication as directed by a healthcare professional.'}, 'task_id': 78}
+2025-06-09 14:59:49,823 - root - INFO - app.py:114 - [redis_listener] (ceb795df) Processing task_message for task_id=78
+2025-06-09 14:59:49,823 - root - INFO - message.py:72 - [Message.process_event] Processing event for task_id=78, role=assistant, content=No, aspirin is not typically considered hepatotoxic, which means toxic to the liver. However, high doses or prolonged use can potentially cause liver damage. It is always important to use medication as directed by a healthcare professional.
+2025-06-09 14:59:49,823 - root - INFO - app.py:114 - [redis_listener] (3ac5b32c) Processing task_message for task_id=78
+2025-06-09 14:59:49,823 - root - INFO - message.py:72 - [Message.process_event] Processing event for task_id=78, role=assistant, content=No, aspirin is not typically considered hepatotoxic, which means toxic to the liver. However, high doses or prolonged use can potentially cause liver damage. It is always important to use medication as directed by a healthcare professional.
+2025-06-09 14:59:49,828 - root - INFO - message.py:53 - [Message.create_message] Storing message for task_id=78, user_id=None, role=assistant, content=No, aspirin is not typically considered hepatotoxic, which means toxic to the liver. However, high doses or prolonged use can potentially cause liver damage. It is always important to use medication as directed by a healthcare professional.
+2025-06-09 14:59:49,828 - root - INFO - message.py:53 - [Message.create_message] Storing message for task_id=78, user_id=None, role=assistant, content=No, aspirin is not typically considered hepatotoxic, which means toxic to the liver. However, high doses or prolonged use can potentially cause liver damage. It is always important to use medication as directed by a healthcare professional.
+2025-06-09 14:59:49,832 - root - DEBUG - datastore.py:56 - done
+2025-06-09 14:59:49,832 - root - INFO - message.py:59 - [Message.create_message] Message stored for task_id=78
+2025-06-09 14:59:49,832 - root - INFO - message.py:77 - [Message.process_event] Stored message for task_id=78 from role=assistant
+2025-06-09 14:59:49,832 - root - INFO - app.py:120 - [redis_listener] (ceb795df) Emitting task_message to room task_78 with data: {'role': 'assistant', 'content': 'No, aspirin is not typically considered hepatotoxic, which means toxic to the liver. However, high doses or prolonged use can potentially cause liver damage. It is always important to use medication as directed by a healthcare professional.'}
+2025-06-09 14:59:49,832 - socketio.server - INFO - server.py:164 - emitting event "task_message" to task_78 [/]
+2025-06-09 14:59:49,833 - root - INFO - app.py:122 - [redis_listener] (ceb795df) task_message sent to task_78
+2025-06-09 14:59:49,833 - engineio.server - INFO - socket.py:78 - mC3WwR3NHn1u7Ca4AAAI: Sending packet MESSAGE data 2["task_message",{"role":"assistant","content":"No, aspirin is not typically considered hepatotoxic, which means toxic to the liver. However, high doses or prolonged use can potentially cause liver damage. It is always important to use medication as directed by a healthcare professional."}]
+2025-06-09 14:59:49,833 - root - DEBUG - datastore.py:56 - done
+2025-06-09 14:59:49,834 - root - INFO - message.py:59 - [Message.create_message] Message stored for task_id=78
+2025-06-09 14:59:49,834 - root - INFO - message.py:77 - [Message.process_event] Stored message for task_id=78 from role=assistant
+2025-06-09 14:59:49,834 - root - INFO - app.py:120 - [redis_listener] (3ac5b32c) Emitting task_message to room task_78 with data: {'role': 'assistant', 'content': 'No, aspirin is not typically considered hepatotoxic, which means toxic to the liver. However, high doses or prolonged use can potentially cause liver damage. It is always important to use medication as directed by a healthcare professional.'}
+2025-06-09 14:59:49,834 - socketio.server - INFO - server.py:164 - emitting event "task_message" to task_78 [/]
+2025-06-09 14:59:49,834 - engineio.server - INFO - socket.py:78 - mC3WwR3NHn1u7Ca4AAAI: Sending packet MESSAGE data 2["task_message",{"role":"assistant","content":"No, aspirin is not typically considered hepatotoxic, which means toxic to the liver. However, high doses or prolonged use can potentially cause liver damage. It is always important to use medication as directed by a healthcare professional."}]
+2025-06-09 14:59:49,834 - root - INFO - app.py:122 - [redis_listener] (3ac5b32c) task_message sent to task_78
+2025-06-09 14:59:49,873 - botocore.tokens - INFO - tokens.py:305 - Loading cached SSO token for toxindex_dev
+2025-06-09 14:59:50,278 - botocore.tokens - INFO - tokens.py:275 - SSO Token refresh succeeded
+2025-06-09 14:59:51,067 - workflows.plain_openai_tasks - INFO - plain_openai_tasks.py:69 - [plain_openai_task] Publishing file event: {'type': 'task_file', 'task_id': 78, 'data': {'user_id': '078a38e9-c1b8-421e-b797-59ee3ae69df4', 'filename': 'plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md', 'filepath': '78/plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md', 's3_url': 'https://toxindex-environments-2.s3.amazonaws.com/78/plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md?AWSAccessKeyId=ASIAQ72ED6HZGGZYS3VZ&Signature=KCgW3j4jieO8scDPJMyLTT9JuJo%3D&x-amz-security-token=IQoJb3JpZ2luX2VjENP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLWVhc3QtMSJHMEUCIH90l7GwJ1HitWoT084TTTAlMWXm%2FlSIJb0OBZhgH69YAiEA9zueFcK1MrsrQxQs3Ym5S6%2BH6HY6P87QDwzHjGSQIvYq%2FgIIrP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgwwNjgzMjU0NzA3MDYiDMp1mKKjdiaXXjVOJyrSAv1TGC4w31J5bH7yZYpq1sJ8K7tnh48NfqZIsKbgpln6epGeU0NqHk7NeQu3WCJVyp50OtcBwLjzfb2zUIE%2FxUsuHOKt0Mk8ilVMPYEXmpZPe3WsZDs1sZAltzEc03vyYe%2BpDg1oTsu1ExbzoIpzG2YUm6zg5g4Rst%2FhgtAXBLqAezF9IJsWusCcOY%2F0xA6PcjdbIUMkzGeeXQcVc4uWSGHxmVhI0fUiWdT%2BsSNAseUrhrybR27kj8WcYJI2wzpRpOcjQlSmzGjObFBLGw0zpM0SiGfNr3Gb78%2B%2B1sU18hjjahFpRW%2B%2FL5P0QRBNBQjPLgRM%2FPXgiT1VsdlLK7VyZRpwYwBkCnlCkSCzWDCCeLOPag5jNWByLOZ2JEKXSYMO%2FIjgCELm%2F%2BnitE3B6k8lnjeSUf3FOH37sDDTfMMXyt726lY6CV2MU90kV1XE06vMsVc0MKbenMIGOqcBeO%2BiqTE6mPTTb6R%2F%2BxxEdI1s%2B3kPPx9G1rI%2FZNQqr5BKGqfXhoevJnupj%2BxqdYUEkmDTFlDPYtgMltiDDyuD69IU93%2FBrGWGllI3SEYnpreaaPjmmjw%2FI5EaoPCxtEnAEFPAHjKpavfn6rr8nYNkKrTxWGfL3ByBT%2BOxBznZCngyfvdUJwxltKoudIu9ql5abaIK%2FrIezU3oKDSiXcAotCOJICJG%2FYA%3D&Expires=1749499191'}}
+2025-06-09 14:59:51,068 - workflows.plain_openai_tasks - INFO - plain_openai_tasks.py:71 - plain_openai_task completed successfully
+2025-06-09 14:59:51,068 - root - DEBUG - app.py:91 - [redis_listener] (ceb795df) Raw redis_message: {'type': 'message', 'pattern': None, 'channel': b'celery_updates', 'data': b'{"type": "task_file", "task_id": 78, "data": {"user_id": "078a38e9-c1b8-421e-b797-59ee3ae69df4", "filename": "plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md", "filepath": "78/plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md", "s3_url": "https://toxindex-environments-2.s3.amazonaws.com/78/plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md?AWSAccessKeyId=ASIAQ72ED6HZGGZYS3VZ&Signature=KCgW3j4jieO8scDPJMyLTT9JuJo%3D&x-amz-security-token=IQoJb3JpZ2luX2VjENP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLWVhc3QtMSJHMEUCIH90l7GwJ1HitWoT084TTTAlMWXm%2FlSIJb0OBZhgH69YAiEA9zueFcK1MrsrQxQs3Ym5S6%2BH6HY6P87QDwzHjGSQIvYq%2FgIIrP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgwwNjgzMjU0NzA3MDYiDMp1mKKjdiaXXjVOJyrSAv1TGC4w31J5bH7yZYpq1sJ8K7tnh48NfqZIsKbgpln6epGeU0NqHk7NeQu3WCJVyp50OtcBwLjzfb2zUIE%2FxUsuHOKt0Mk8ilVMPYEXmpZPe3WsZDs1sZAltzEc03vyYe%2BpDg1oTsu1ExbzoIpzG2YUm6zg5g4Rst%2FhgtAXBLqAezF9IJsWusCcOY%2F0xA6PcjdbIUMkzGeeXQcVc4uWSGHxmVhI0fUiWdT%2BsSNAseUrhrybR27kj8WcYJI2wzpRpOcjQlSmzGjObFBLGw0zpM0SiGfNr3Gb78%2B%2B1sU18hjjahFpRW%2B%2FL5P0QRBNBQjPLgRM%2FPXgiT1VsdlLK7VyZRpwYwBkCnlCkSCzWDCCeLOPag5jNWByLOZ2JEKXSYMO%2FIjgCELm%2F%2BnitE3B6k8lnjeSUf3FOH37sDDTfMMXyt726lY6CV2MU90kV1XE06vMsVc0MKbenMIGOqcBeO%2BiqTE6mPTTb6R%2F%2BxxEdI1s%2B3kPPx9G1rI%2FZNQqr5BKGqfXhoevJnupj%2BxqdYUEkmDTFlDPYtgMltiDDyuD69IU93%2FBrGWGllI3SEYnpreaaPjmmjw%2FI5EaoPCxtEnAEFPAHjKpavfn6rr8nYNkKrTxWGfL3ByBT%2BOxBznZCngyfvdUJwxltKoudIu9ql5abaIK%2FrIezU3oKDSiXcAotCOJICJG%2FYA%3D&Expires=1749499191"}}'}
+2025-06-09 14:59:51,068 - root - DEBUG - app.py:91 - [redis_listener] (3ac5b32c) Raw redis_message: {'type': 'message', 'pattern': None, 'channel': b'celery_updates', 'data': b'{"type": "task_file", "task_id": 78, "data": {"user_id": "078a38e9-c1b8-421e-b797-59ee3ae69df4", "filename": "plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md", "filepath": "78/plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md", "s3_url": "https://toxindex-environments-2.s3.amazonaws.com/78/plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md?AWSAccessKeyId=ASIAQ72ED6HZGGZYS3VZ&Signature=KCgW3j4jieO8scDPJMyLTT9JuJo%3D&x-amz-security-token=IQoJb3JpZ2luX2VjENP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLWVhc3QtMSJHMEUCIH90l7GwJ1HitWoT084TTTAlMWXm%2FlSIJb0OBZhgH69YAiEA9zueFcK1MrsrQxQs3Ym5S6%2BH6HY6P87QDwzHjGSQIvYq%2FgIIrP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgwwNjgzMjU0NzA3MDYiDMp1mKKjdiaXXjVOJyrSAv1TGC4w31J5bH7yZYpq1sJ8K7tnh48NfqZIsKbgpln6epGeU0NqHk7NeQu3WCJVyp50OtcBwLjzfb2zUIE%2FxUsuHOKt0Mk8ilVMPYEXmpZPe3WsZDs1sZAltzEc03vyYe%2BpDg1oTsu1ExbzoIpzG2YUm6zg5g4Rst%2FhgtAXBLqAezF9IJsWusCcOY%2F0xA6PcjdbIUMkzGeeXQcVc4uWSGHxmVhI0fUiWdT%2BsSNAseUrhrybR27kj8WcYJI2wzpRpOcjQlSmzGjObFBLGw0zpM0SiGfNr3Gb78%2B%2B1sU18hjjahFpRW%2B%2FL5P0QRBNBQjPLgRM%2FPXgiT1VsdlLK7VyZRpwYwBkCnlCkSCzWDCCeLOPag5jNWByLOZ2JEKXSYMO%2FIjgCELm%2F%2BnitE3B6k8lnjeSUf3FOH37sDDTfMMXyt726lY6CV2MU90kV1XE06vMsVc0MKbenMIGOqcBeO%2BiqTE6mPTTb6R%2F%2BxxEdI1s%2B3kPPx9G1rI%2FZNQqr5BKGqfXhoevJnupj%2BxqdYUEkmDTFlDPYtgMltiDDyuD69IU93%2FBrGWGllI3SEYnpreaaPjmmjw%2FI5EaoPCxtEnAEFPAHjKpavfn6rr8nYNkKrTxWGfL3ByBT%2BOxBznZCngyfvdUJwxltKoudIu9ql5abaIK%2FrIezU3oKDSiXcAotCOJICJG%2FYA%3D&Expires=1749499191"}}'}
+2025-06-09 14:59:51,068 - root - INFO - app.py:99 - [redis_listener] (ceb795df) Redis event: {'type': 'task_file', 'task_id': 78, 'data': {'user_id': '078a38e9-c1b8-421e-b797-59ee3ae69df4', 'filename': 'plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md', 'filepath': '78/plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md', 's3_url': 'https://toxindex-environments-2.s3.amazonaws.com/78/plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md?AWSAccessKeyId=ASIAQ72ED6HZGGZYS3VZ&Signature=KCgW3j4jieO8scDPJMyLTT9JuJo%3D&x-amz-security-token=IQoJb3JpZ2luX2VjENP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLWVhc3QtMSJHMEUCIH90l7GwJ1HitWoT084TTTAlMWXm%2FlSIJb0OBZhgH69YAiEA9zueFcK1MrsrQxQs3Ym5S6%2BH6HY6P87QDwzHjGSQIvYq%2FgIIrP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgwwNjgzMjU0NzA3MDYiDMp1mKKjdiaXXjVOJyrSAv1TGC4w31J5bH7yZYpq1sJ8K7tnh48NfqZIsKbgpln6epGeU0NqHk7NeQu3WCJVyp50OtcBwLjzfb2zUIE%2FxUsuHOKt0Mk8ilVMPYEXmpZPe3WsZDs1sZAltzEc03vyYe%2BpDg1oTsu1ExbzoIpzG2YUm6zg5g4Rst%2FhgtAXBLqAezF9IJsWusCcOY%2F0xA6PcjdbIUMkzGeeXQcVc4uWSGHxmVhI0fUiWdT%2BsSNAseUrhrybR27kj8WcYJI2wzpRpOcjQlSmzGjObFBLGw0zpM0SiGfNr3Gb78%2B%2B1sU18hjjahFpRW%2B%2FL5P0QRBNBQjPLgRM%2FPXgiT1VsdlLK7VyZRpwYwBkCnlCkSCzWDCCeLOPag5jNWByLOZ2JEKXSYMO%2FIjgCELm%2F%2BnitE3B6k8lnjeSUf3FOH37sDDTfMMXyt726lY6CV2MU90kV1XE06vMsVc0MKbenMIGOqcBeO%2BiqTE6mPTTb6R%2F%2BxxEdI1s%2B3kPPx9G1rI%2FZNQqr5BKGqfXhoevJnupj%2BxqdYUEkmDTFlDPYtgMltiDDyuD69IU93%2FBrGWGllI3SEYnpreaaPjmmjw%2FI5EaoPCxtEnAEFPAHjKpavfn6rr8nYNkKrTxWGfL3ByBT%2BOxBznZCngyfvdUJwxltKoudIu9ql5abaIK%2FrIezU3oKDSiXcAotCOJICJG%2FYA%3D&Expires=1749499191'}}
+2025-06-09 14:59:51,068 - root - INFO - app.py:99 - [redis_listener] (3ac5b32c) Redis event: {'type': 'task_file', 'task_id': 78, 'data': {'user_id': '078a38e9-c1b8-421e-b797-59ee3ae69df4', 'filename': 'plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md', 'filepath': '78/plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md', 's3_url': 'https://toxindex-environments-2.s3.amazonaws.com/78/plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md?AWSAccessKeyId=ASIAQ72ED6HZGGZYS3VZ&Signature=KCgW3j4jieO8scDPJMyLTT9JuJo%3D&x-amz-security-token=IQoJb3JpZ2luX2VjENP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLWVhc3QtMSJHMEUCIH90l7GwJ1HitWoT084TTTAlMWXm%2FlSIJb0OBZhgH69YAiEA9zueFcK1MrsrQxQs3Ym5S6%2BH6HY6P87QDwzHjGSQIvYq%2FgIIrP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgwwNjgzMjU0NzA3MDYiDMp1mKKjdiaXXjVOJyrSAv1TGC4w31J5bH7yZYpq1sJ8K7tnh48NfqZIsKbgpln6epGeU0NqHk7NeQu3WCJVyp50OtcBwLjzfb2zUIE%2FxUsuHOKt0Mk8ilVMPYEXmpZPe3WsZDs1sZAltzEc03vyYe%2BpDg1oTsu1ExbzoIpzG2YUm6zg5g4Rst%2FhgtAXBLqAezF9IJsWusCcOY%2F0xA6PcjdbIUMkzGeeXQcVc4uWSGHxmVhI0fUiWdT%2BsSNAseUrhrybR27kj8WcYJI2wzpRpOcjQlSmzGjObFBLGw0zpM0SiGfNr3Gb78%2B%2B1sU18hjjahFpRW%2B%2FL5P0QRBNBQjPLgRM%2FPXgiT1VsdlLK7VyZRpwYwBkCnlCkSCzWDCCeLOPag5jNWByLOZ2JEKXSYMO%2FIjgCELm%2F%2BnitE3B6k8lnjeSUf3FOH37sDDTfMMXyt726lY6CV2MU90kV1XE06vMsVc0MKbenMIGOqcBeO%2BiqTE6mPTTb6R%2F%2BxxEdI1s%2B3kPPx9G1rI%2FZNQqr5BKGqfXhoevJnupj%2BxqdYUEkmDTFlDPYtgMltiDDyuD69IU93%2FBrGWGllI3SEYnpreaaPjmmjw%2FI5EaoPCxtEnAEFPAHjKpavfn6rr8nYNkKrTxWGfL3ByBT%2BOxBznZCngyfvdUJwxltKoudIu9ql5abaIK%2FrIezU3oKDSiXcAotCOJICJG%2FYA%3D&Expires=1749499191'}}
+2025-06-09 14:59:51,071 - celery.app.trace - INFO - trace.py:128 - Task workflows.plain_openai_tasks.plain_openai_task[75b81c38-24cb-4e53-9220-e7a4e7375e56] succeeded in 3.954627481999978s: {'done': True}
+2025-06-09 14:59:51,073 - root - INFO - app.py:117 - [redis_listener] (ceb795df) Processing task_file for task_id=78
+2025-06-09 14:59:51,073 - root - INFO - file.py:106 - [File.process_event] Processing event for task_id=78, filename=plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md, filepath=78/plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md, s3_url=SUPPRESSED
+2025-06-09 14:59:51,073 - root - INFO - app.py:117 - [redis_listener] (3ac5b32c) Processing task_file for task_id=78
+2025-06-09 14:59:51,073 - root - INFO - file.py:46 - [File.create_file] Storing file for task_id=78, filename=plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md, filepath=78/plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md, s3_url=SUPPRESSED
+2025-06-09 14:59:51,073 - root - INFO - file.py:106 - [File.process_event] Processing event for task_id=78, filename=plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md, filepath=78/plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md, s3_url=SUPPRESSED
+2025-06-09 14:59:51,073 - root - INFO - file.py:46 - [File.create_file] Storing file for task_id=78, filename=plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md, filepath=78/plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md, s3_url=SUPPRESSED
+2025-06-09 14:59:51,088 - root - DEBUG - datastore.py:56 - done
+2025-06-09 14:59:51,088 - root - INFO - file.py:58 - [File.create_file] Successfully inserted file for task_id=78, filename=plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md
+2025-06-09 14:59:51,089 - root - INFO - file.py:109 - [File.process_event] Stored file plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md for task_id=78
+2025-06-09 14:59:51,089 - root - INFO - app.py:120 - [redis_listener] (3ac5b32c) Emitting task_file to room task_78 with data: {'user_id': '078a38e9-c1b8-421e-b797-59ee3ae69df4', 'filename': 'plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md', 'filepath': '78/plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md', 's3_url': 'https://toxindex-environments-2.s3.amazonaws.com/78/plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md?AWSAccessKeyId=ASIAQ72ED6HZGGZYS3VZ&Signature=KCgW3j4jieO8scDPJMyLTT9JuJo%3D&x-amz-security-token=IQoJb3JpZ2luX2VjENP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLWVhc3QtMSJHMEUCIH90l7GwJ1HitWoT084TTTAlMWXm%2FlSIJb0OBZhgH69YAiEA9zueFcK1MrsrQxQs3Ym5S6%2BH6HY6P87QDwzHjGSQIvYq%2FgIIrP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgwwNjgzMjU0NzA3MDYiDMp1mKKjdiaXXjVOJyrSAv1TGC4w31J5bH7yZYpq1sJ8K7tnh48NfqZIsKbgpln6epGeU0NqHk7NeQu3WCJVyp50OtcBwLjzfb2zUIE%2FxUsuHOKt0Mk8ilVMPYEXmpZPe3WsZDs1sZAltzEc03vyYe%2BpDg1oTsu1ExbzoIpzG2YUm6zg5g4Rst%2FhgtAXBLqAezF9IJsWusCcOY%2F0xA6PcjdbIUMkzGeeXQcVc4uWSGHxmVhI0fUiWdT%2BsSNAseUrhrybR27kj8WcYJI2wzpRpOcjQlSmzGjObFBLGw0zpM0SiGfNr3Gb78%2B%2B1sU18hjjahFpRW%2B%2FL5P0QRBNBQjPLgRM%2FPXgiT1VsdlLK7VyZRpwYwBkCnlCkSCzWDCCeLOPag5jNWByLOZ2JEKXSYMO%2FIjgCELm%2F%2BnitE3B6k8lnjeSUf3FOH37sDDTfMMXyt726lY6CV2MU90kV1XE06vMsVc0MKbenMIGOqcBeO%2BiqTE6mPTTb6R%2F%2BxxEdI1s%2B3kPPx9G1rI%2FZNQqr5BKGqfXhoevJnupj%2BxqdYUEkmDTFlDPYtgMltiDDyuD69IU93%2FBrGWGllI3SEYnpreaaPjmmjw%2FI5EaoPCxtEnAEFPAHjKpavfn6rr8nYNkKrTxWGfL3ByBT%2BOxBznZCngyfvdUJwxltKoudIu9ql5abaIK%2FrIezU3oKDSiXcAotCOJICJG%2FYA%3D&Expires=1749499191'}
+2025-06-09 14:59:51,089 - socketio.server - INFO - server.py:164 - emitting event "task_file" to task_78 [/]
+2025-06-09 14:59:51,089 - engineio.server - INFO - socket.py:78 - mC3WwR3NHn1u7Ca4AAAI: Sending packet MESSAGE data 2["task_file",{"user_id":"078a38e9-c1b8-421e-b797-59ee3ae69df4","filename":"plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md","filepath":"78/plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md","s3_url":"https://toxindex-environments-2.s3.amazonaws.com/78/plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md?AWSAccessKeyId=ASIAQ72ED6HZGGZYS3VZ&Signature=KCgW3j4jieO8scDPJMyLTT9JuJo%3D&x-amz-security-token=IQoJb3JpZ2luX2VjENP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLWVhc3QtMSJHMEUCIH90l7GwJ1HitWoT084TTTAlMWXm%2FlSIJb0OBZhgH69YAiEA9zueFcK1MrsrQxQs3Ym5S6%2BH6HY6P87QDwzHjGSQIvYq%2FgIIrP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgwwNjgzMjU0NzA3MDYiDMp1mKKjdiaXXjVOJyrSAv1TGC4w31J5bH7yZYpq1sJ8K7tnh48NfqZIsKbgpln6epGeU0NqHk7NeQu3WCJVyp50OtcBwLjzfb2zUIE%2FxUsuHOKt0Mk8ilVMPYEXmpZPe3WsZDs1sZAltzEc03vyYe%2BpDg1oTsu1ExbzoIpzG2YUm6zg5g4Rst%2FhgtAXBLqAezF9IJsWusCcOY%2F0xA6PcjdbIUMkzGeeXQcVc4uWSGHxmVhI0fUiWdT%2BsSNAseUrhrybR27kj8WcYJI2wzpRpOcjQlSmzGjObFBLGw0zpM0SiGfNr3Gb78%2B%2B1sU18hjjahFpRW%2B%2FL5P0QRBNBQjPLgRM%2FPXgiT1VsdlLK7VyZRpwYwBkCnlCkSCzWDCCeLOPag5jNWByLOZ2JEKXSYMO%2FIjgCELm%2F%2BnitE3B6k8lnjeSUf3FOH37sDDTfMMXyt726lY6CV2MU90kV1XE06vMsVc0MKbenMIGOqcBeO%2BiqTE6mPTTb6R%2F%2BxxEdI1s%2B3kPPx9G1rI%2FZNQqr5BKGqfXhoevJnupj%2BxqdYUEkmDTFlDPYtgMltiDDyuD69IU93%2FBrGWGllI3SEYnpreaaPjmmjw%2FI5EaoPCxtEnAEFPAHjKpavfn6rr8nYNkKrTxWGfL3ByBT%2BOxBznZCngyfvdUJwxltKoudIu9ql5abaIK%2FrIezU3oKDSiXcAotCOJICJG%2FYA%3D&Expires=1749499191"}]
+2025-06-09 14:59:51,089 - root - DEBUG - datastore.py:56 - done
+2025-06-09 14:59:51,090 - root - INFO - file.py:58 - [File.create_file] Successfully inserted file for task_id=78, filename=plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md
+2025-06-09 14:59:51,090 - root - INFO - file.py:109 - [File.process_event] Stored file plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md for task_id=78
+2025-06-09 14:59:51,090 - root - INFO - app.py:122 - [redis_listener] (3ac5b32c) task_file sent to task_78
+2025-06-09 14:59:51,090 - root - INFO - app.py:120 - [redis_listener] (ceb795df) Emitting task_file to room task_78 with data: {'user_id': '078a38e9-c1b8-421e-b797-59ee3ae69df4', 'filename': 'plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md', 'filepath': '78/plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md', 's3_url': 'https://toxindex-environments-2.s3.amazonaws.com/78/plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md?AWSAccessKeyId=ASIAQ72ED6HZGGZYS3VZ&Signature=KCgW3j4jieO8scDPJMyLTT9JuJo%3D&x-amz-security-token=IQoJb3JpZ2luX2VjENP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLWVhc3QtMSJHMEUCIH90l7GwJ1HitWoT084TTTAlMWXm%2FlSIJb0OBZhgH69YAiEA9zueFcK1MrsrQxQs3Ym5S6%2BH6HY6P87QDwzHjGSQIvYq%2FgIIrP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgwwNjgzMjU0NzA3MDYiDMp1mKKjdiaXXjVOJyrSAv1TGC4w31J5bH7yZYpq1sJ8K7tnh48NfqZIsKbgpln6epGeU0NqHk7NeQu3WCJVyp50OtcBwLjzfb2zUIE%2FxUsuHOKt0Mk8ilVMPYEXmpZPe3WsZDs1sZAltzEc03vyYe%2BpDg1oTsu1ExbzoIpzG2YUm6zg5g4Rst%2FhgtAXBLqAezF9IJsWusCcOY%2F0xA6PcjdbIUMkzGeeXQcVc4uWSGHxmVhI0fUiWdT%2BsSNAseUrhrybR27kj8WcYJI2wzpRpOcjQlSmzGjObFBLGw0zpM0SiGfNr3Gb78%2B%2B1sU18hjjahFpRW%2B%2FL5P0QRBNBQjPLgRM%2FPXgiT1VsdlLK7VyZRpwYwBkCnlCkSCzWDCCeLOPag5jNWByLOZ2JEKXSYMO%2FIjgCELm%2F%2BnitE3B6k8lnjeSUf3FOH37sDDTfMMXyt726lY6CV2MU90kV1XE06vMsVc0MKbenMIGOqcBeO%2BiqTE6mPTTb6R%2F%2BxxEdI1s%2B3kPPx9G1rI%2FZNQqr5BKGqfXhoevJnupj%2BxqdYUEkmDTFlDPYtgMltiDDyuD69IU93%2FBrGWGllI3SEYnpreaaPjmmjw%2FI5EaoPCxtEnAEFPAHjKpavfn6rr8nYNkKrTxWGfL3ByBT%2BOxBznZCngyfvdUJwxltKoudIu9ql5abaIK%2FrIezU3oKDSiXcAotCOJICJG%2FYA%3D&Expires=1749499191'}
+2025-06-09 14:59:51,090 - socketio.server - INFO - server.py:164 - emitting event "task_file" to task_78 [/]
+2025-06-09 14:59:51,090 - root - INFO - app.py:122 - [redis_listener] (ceb795df) task_file sent to task_78
+2025-06-09 14:59:51,091 - engineio.server - INFO - socket.py:78 - mC3WwR3NHn1u7Ca4AAAI: Sending packet MESSAGE data 2["task_file",{"user_id":"078a38e9-c1b8-421e-b797-59ee3ae69df4","filename":"plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md","filepath":"78/plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md","s3_url":"https://toxindex-environments-2.s3.amazonaws.com/78/plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md?AWSAccessKeyId=ASIAQ72ED6HZGGZYS3VZ&Signature=KCgW3j4jieO8scDPJMyLTT9JuJo%3D&x-amz-security-token=IQoJb3JpZ2luX2VjENP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLWVhc3QtMSJHMEUCIH90l7GwJ1HitWoT084TTTAlMWXm%2FlSIJb0OBZhgH69YAiEA9zueFcK1MrsrQxQs3Ym5S6%2BH6HY6P87QDwzHjGSQIvYq%2FgIIrP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgwwNjgzMjU0NzA3MDYiDMp1mKKjdiaXXjVOJyrSAv1TGC4w31J5bH7yZYpq1sJ8K7tnh48NfqZIsKbgpln6epGeU0NqHk7NeQu3WCJVyp50OtcBwLjzfb2zUIE%2FxUsuHOKt0Mk8ilVMPYEXmpZPe3WsZDs1sZAltzEc03vyYe%2BpDg1oTsu1ExbzoIpzG2YUm6zg5g4Rst%2FhgtAXBLqAezF9IJsWusCcOY%2F0xA6PcjdbIUMkzGeeXQcVc4uWSGHxmVhI0fUiWdT%2BsSNAseUrhrybR27kj8WcYJI2wzpRpOcjQlSmzGjObFBLGw0zpM0SiGfNr3Gb78%2B%2B1sU18hjjahFpRW%2B%2FL5P0QRBNBQjPLgRM%2FPXgiT1VsdlLK7VyZRpwYwBkCnlCkSCzWDCCeLOPag5jNWByLOZ2JEKXSYMO%2FIjgCELm%2F%2BnitE3B6k8lnjeSUf3FOH37sDDTfMMXyt726lY6CV2MU90kV1XE06vMsVc0MKbenMIGOqcBeO%2BiqTE6mPTTb6R%2F%2BxxEdI1s%2B3kPPx9G1rI%2FZNQqr5BKGqfXhoevJnupj%2BxqdYUEkmDTFlDPYtgMltiDDyuD69IU93%2FBrGWGllI3SEYnpreaaPjmmjw%2FI5EaoPCxtEnAEFPAHjKpavfn6rr8nYNkKrTxWGfL3ByBT%2BOxBznZCngyfvdUJwxltKoudIu9ql5abaIK%2FrIezU3oKDSiXcAotCOJICJG%2FYA%3D&Expires=1749499191"}]
+2025-06-09 15:00:00,985 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 15:00:01,017 - engineio.server - INFO - socket.py:78 - gpbLX6NTPN08xFwIAAAK: Sending packet OPEN data {'sid': 'gpbLX6NTPN08xFwIAAAK', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 15:00:01,017 - engineio.server - INFO - socket.py:90 - gpbLX6NTPN08xFwIAAAK: Received request to upgrade to websocket
+2025-06-09 15:00:01,017 - engineio.server - INFO - socket.py:219 - gpbLX6NTPN08xFwIAAAK: Upgrade to websocket successful
+2025-06-09 15:00:01,021 - engineio.server - INFO - socket.py:39 - gpbLX6NTPN08xFwIAAAK: Received packet MESSAGE data 0
+2025-06-09 15:00:01,022 - root - INFO - app.py:146 - [socketio] Client connected: SfRvFgfZcZCrsZpBAAAL
+2025-06-09 15:00:01,022 - socketio.server - INFO - server.py:164 - emitting event "connected" to SfRvFgfZcZCrsZpBAAAL [/]
+2025-06-09 15:00:01,022 - engineio.server - INFO - socket.py:78 - gpbLX6NTPN08xFwIAAAK: Sending packet MESSAGE data 2["connected",{"sid":"SfRvFgfZcZCrsZpBAAAL"}]
+2025-06-09 15:00:01,022 - engineio.server - INFO - socket.py:78 - gpbLX6NTPN08xFwIAAAK: Sending packet MESSAGE data 0{"sid":"SfRvFgfZcZCrsZpBAAAL"}
+2025-06-09 15:00:02,774 - root - INFO - message.py:67 - Retrieved 3 messages for task_id=78
+2025-06-09 15:00:02,774 - root - INFO - file.py:84 - DB ENV (get_files): PGHOST=localhost, PGPORT=5433, PGDATABASE=toxindex, PGUSER=postgres, PGPASSWORD=devpassword
+2025-06-09 15:00:02,774 - root - INFO - file.py:85 - Calling get_files with task_id=78 (type: <class 'int'>)
+2025-06-09 15:00:02,776 - root - INFO - file.py:90 - Raw rows returned from DB for task_id=78: [[55, 78, UUID('078a38e9-c1b8-421e-b797-59ee3ae69df4'), 'plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md', '78/plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md', 'https://toxindex-environments-2.s3.amazonaws.com/78/plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md?AWSAccessKeyId=ASIAQ72ED6HZGGZYS3VZ&Signature=KCgW3j4jieO8scDPJMyLTT9JuJo%3D&x-amz-security-token=IQoJb3JpZ2luX2VjENP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLWVhc3QtMSJHMEUCIH90l7GwJ1HitWoT084TTTAlMWXm%2FlSIJb0OBZhgH69YAiEA9zueFcK1MrsrQxQs3Ym5S6%2BH6HY6P87QDwzHjGSQIvYq%2FgIIrP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgwwNjgzMjU0NzA3MDYiDMp1mKKjdiaXXjVOJyrSAv1TGC4w31J5bH7yZYpq1sJ8K7tnh48NfqZIsKbgpln6epGeU0NqHk7NeQu3WCJVyp50OtcBwLjzfb2zUIE%2FxUsuHOKt0Mk8ilVMPYEXmpZPe3WsZDs1sZAltzEc03vyYe%2BpDg1oTsu1ExbzoIpzG2YUm6zg5g4Rst%2FhgtAXBLqAezF9IJsWusCcOY%2F0xA6PcjdbIUMkzGeeXQcVc4uWSGHxmVhI0fUiWdT%2BsSNAseUrhrybR27kj8WcYJI2wzpRpOcjQlSmzGjObFBLGw0zpM0SiGfNr3Gb78%2B%2B1sU18hjjahFpRW%2B%2FL5P0QRBNBQjPLgRM%2FPXgiT1VsdlLK7VyZRpwYwBkCnlCkSCzWDCCeLOPag5jNWByLOZ2JEKXSYMO%2FIjgCELm%2F%2BnitE3B6k8lnjeSUf3FOH37sDDTfMMXyt726lY6CV2MU90kV1XE06vMsVc0MKbenMIGOqcBeO%2BiqTE6mPTTb6R%2F%2BxxEdI1s%2B3kPPx9G1rI%2FZNQqr5BKGqfXhoevJnupj%2BxqdYUEkmDTFlDPYtgMltiDDyuD69IU93%2FBrGWGllI3SEYnpreaaPjmmjw%2FI5EaoPCxtEnAEFPAHjKpavfn6rr8nYNkKrTxWGfL3ByBT%2BOxBznZCngyfvdUJwxltKoudIu9ql5abaIK%2FrIezU3oKDSiXcAotCOJICJG%2FYA%3D&Expires=1749499191', datetime.datetime(2025, 6, 9, 14, 59, 51, 82752)], [56, 78, UUID('078a38e9-c1b8-421e-b797-59ee3ae69df4'), 'plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md', '78/plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md', 'https://toxindex-environments-2.s3.amazonaws.com/78/plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md?AWSAccessKeyId=ASIAQ72ED6HZGGZYS3VZ&Signature=KCgW3j4jieO8scDPJMyLTT9JuJo%3D&x-amz-security-token=IQoJb3JpZ2luX2VjENP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLWVhc3QtMSJHMEUCIH90l7GwJ1HitWoT084TTTAlMWXm%2FlSIJb0OBZhgH69YAiEA9zueFcK1MrsrQxQs3Ym5S6%2BH6HY6P87QDwzHjGSQIvYq%2FgIIrP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgwwNjgzMjU0NzA3MDYiDMp1mKKjdiaXXjVOJyrSAv1TGC4w31J5bH7yZYpq1sJ8K7tnh48NfqZIsKbgpln6epGeU0NqHk7NeQu3WCJVyp50OtcBwLjzfb2zUIE%2FxUsuHOKt0Mk8ilVMPYEXmpZPe3WsZDs1sZAltzEc03vyYe%2BpDg1oTsu1ExbzoIpzG2YUm6zg5g4Rst%2FhgtAXBLqAezF9IJsWusCcOY%2F0xA6PcjdbIUMkzGeeXQcVc4uWSGHxmVhI0fUiWdT%2BsSNAseUrhrybR27kj8WcYJI2wzpRpOcjQlSmzGjObFBLGw0zpM0SiGfNr3Gb78%2B%2B1sU18hjjahFpRW%2B%2FL5P0QRBNBQjPLgRM%2FPXgiT1VsdlLK7VyZRpwYwBkCnlCkSCzWDCCeLOPag5jNWByLOZ2JEKXSYMO%2FIjgCELm%2F%2BnitE3B6k8lnjeSUf3FOH37sDDTfMMXyt726lY6CV2MU90kV1XE06vMsVc0MKbenMIGOqcBeO%2BiqTE6mPTTb6R%2F%2BxxEdI1s%2B3kPPx9G1rI%2FZNQqr5BKGqfXhoevJnupj%2BxqdYUEkmDTFlDPYtgMltiDDyuD69IU93%2FBrGWGllI3SEYnpreaaPjmmjw%2FI5EaoPCxtEnAEFPAHjKpavfn6rr8nYNkKrTxWGfL3ByBT%2BOxBznZCngyfvdUJwxltKoudIu9ql5abaIK%2FrIezU3oKDSiXcAotCOJICJG%2FYA%3D&Expires=1749499191', datetime.datetime(2025, 6, 9, 14, 59, 51, 83205)]]
+2025-06-09 15:00:02,776 - root - INFO - file.py:94 - Found 2 files in DB for task_id=78
+2025-06-09 15:00:02,776 - root - WARNING - file.py:130 - Could not read file 78/plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md: [Errno 2] No such file or directory: '78/plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md'
+2025-06-09 15:00:02,776 - root - WARNING - file.py:130 - Could not read file 78/plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md: [Errno 2] No such file or directory: '78/plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md'
+2025-06-09 15:00:02,790 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.fenced_code.FencedCodeExtension".
+2025-06-09 15:00:02,791 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.footnotes.FootnoteExtension".
+2025-06-09 15:00:02,791 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.attr_list.AttrListExtension".
+2025-06-09 15:00:02,791 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.def_list.DefListExtension".
+2025-06-09 15:00:02,791 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.tables.TableExtension".
+2025-06-09 15:00:02,791 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.abbr.AbbrExtension".
+2025-06-09 15:00:02,792 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.md_in_html.MarkdownInHtmlExtension".
+2025-06-09 15:00:02,792 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.extra.ExtraExtension".
+2025-06-09 15:00:02,792 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.tables.TableExtension".
+2025-06-09 15:00:02,821 - engineio.server - INFO - socket.py:78 - Hkx6coQeLoriSh9XAAAM: Sending packet OPEN data {'sid': 'Hkx6coQeLoriSh9XAAAM', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 15:00:02,821 - engineio.server - INFO - socket.py:90 - Hkx6coQeLoriSh9XAAAM: Received request to upgrade to websocket
+2025-06-09 15:00:02,821 - engineio.server - INFO - socket.py:219 - Hkx6coQeLoriSh9XAAAM: Upgrade to websocket successful
+2025-06-09 15:00:02,832 - engineio.server - INFO - socket.py:39 - Hkx6coQeLoriSh9XAAAM: Received packet MESSAGE data 0
+2025-06-09 15:00:02,833 - root - INFO - app.py:146 - [socketio] Client connected: ecImlZJGlXSfUCLJAAAN
+2025-06-09 15:00:02,833 - socketio.server - INFO - server.py:164 - emitting event "connected" to ecImlZJGlXSfUCLJAAAN [/]
+2025-06-09 15:00:02,833 - engineio.server - INFO - socket.py:78 - Hkx6coQeLoriSh9XAAAM: Sending packet MESSAGE data 2["connected",{"sid":"ecImlZJGlXSfUCLJAAAN"}]
+2025-06-09 15:00:02,833 - engineio.server - INFO - socket.py:78 - Hkx6coQeLoriSh9XAAAM: Sending packet MESSAGE data 0{"sid":"ecImlZJGlXSfUCLJAAAN"}
+2025-06-09 15:00:02,875 - engineio.server - INFO - socket.py:39 - Hkx6coQeLoriSh9XAAAM: Received packet MESSAGE data 2["join_task_room",{"task_id":"78"}]
+2025-06-09 15:00:02,876 - socketio.server - INFO - server.py:576 - received event "join_task_room" from ecImlZJGlXSfUCLJAAAN [/]
+2025-06-09 15:00:02,876 - root - INFO - app.py:155 - [socketio] ecImlZJGlXSfUCLJAAAN joining room: task_78
+2025-06-09 15:00:02,876 - socketio.server - INFO - server.py:284 - ecImlZJGlXSfUCLJAAAN is entering room task_78 [/]
+2025-06-09 15:00:02,876 - root - INFO - app.py:157 - [socketio] ecImlZJGlXSfUCLJAAAN joined room: task_78
+2025-06-09 15:00:02,876 - socketio.server - INFO - server.py:164 - emitting event "joined_task_room" to ecImlZJGlXSfUCLJAAAN [/]
+2025-06-09 15:00:02,876 - engineio.server - INFO - socket.py:78 - Hkx6coQeLoriSh9XAAAM: Sending packet MESSAGE data 2["joined_task_room",{"task_id":"78"}]
+2025-06-09 15:00:07,211 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 15:00:07,239 - engineio.server - INFO - socket.py:78 - z9TocQ5DD5lRLsX8AAAO: Sending packet OPEN data {'sid': 'z9TocQ5DD5lRLsX8AAAO', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 15:00:07,239 - engineio.server - INFO - socket.py:90 - z9TocQ5DD5lRLsX8AAAO: Received request to upgrade to websocket
+2025-06-09 15:00:07,239 - engineio.server - INFO - socket.py:219 - z9TocQ5DD5lRLsX8AAAO: Upgrade to websocket successful
+2025-06-09 15:00:07,242 - engineio.server - INFO - socket.py:39 - z9TocQ5DD5lRLsX8AAAO: Received packet MESSAGE data 0
+2025-06-09 15:00:07,242 - root - INFO - app.py:146 - [socketio] Client connected: o2rV2b9vt_3gUtxuAAAP
+2025-06-09 15:00:07,242 - socketio.server - INFO - server.py:164 - emitting event "connected" to o2rV2b9vt_3gUtxuAAAP [/]
+2025-06-09 15:00:07,243 - engineio.server - INFO - socket.py:78 - z9TocQ5DD5lRLsX8AAAO: Sending packet MESSAGE data 2["connected",{"sid":"o2rV2b9vt_3gUtxuAAAP"}]
+2025-06-09 15:00:07,243 - engineio.server - INFO - socket.py:78 - z9TocQ5DD5lRLsX8AAAO: Sending packet MESSAGE data 0{"sid":"o2rV2b9vt_3gUtxuAAAP"}
+2025-06-09 15:00:30,933 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 15:00:30,963 - engineio.server - INFO - socket.py:78 - n0qDCiutPe-tpgsAAAAQ: Sending packet OPEN data {'sid': 'n0qDCiutPe-tpgsAAAAQ', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 15:00:30,963 - engineio.server - INFO - socket.py:90 - n0qDCiutPe-tpgsAAAAQ: Received request to upgrade to websocket
+2025-06-09 15:00:30,963 - engineio.server - INFO - socket.py:219 - n0qDCiutPe-tpgsAAAAQ: Upgrade to websocket successful
+2025-06-09 15:00:30,967 - engineio.server - INFO - socket.py:39 - n0qDCiutPe-tpgsAAAAQ: Received packet MESSAGE data 0
+2025-06-09 15:00:30,967 - root - INFO - app.py:146 - [socketio] Client connected: hdDasIJcKxpEnVp6AAAR
+2025-06-09 15:00:30,967 - socketio.server - INFO - server.py:164 - emitting event "connected" to hdDasIJcKxpEnVp6AAAR [/]
+2025-06-09 15:00:30,967 - engineio.server - INFO - socket.py:78 - n0qDCiutPe-tpgsAAAAQ: Sending packet MESSAGE data 2["connected",{"sid":"hdDasIJcKxpEnVp6AAAR"}]
+2025-06-09 15:00:30,968 - engineio.server - INFO - socket.py:78 - n0qDCiutPe-tpgsAAAAQ: Sending packet MESSAGE data 0{"sid":"hdDasIJcKxpEnVp6AAAR"}
+2025-06-09 15:00:31,378 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 15:00:31,412 - engineio.server - INFO - socket.py:78 - ChfLFas5uj-ICG_zAAAS: Sending packet OPEN data {'sid': 'ChfLFas5uj-ICG_zAAAS', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 15:00:31,413 - engineio.server - INFO - socket.py:90 - ChfLFas5uj-ICG_zAAAS: Received request to upgrade to websocket
+2025-06-09 15:00:31,413 - engineio.server - INFO - socket.py:219 - ChfLFas5uj-ICG_zAAAS: Upgrade to websocket successful
+2025-06-09 15:00:31,422 - engineio.server - INFO - socket.py:39 - ChfLFas5uj-ICG_zAAAS: Received packet MESSAGE data 0
+2025-06-09 15:00:31,423 - root - INFO - app.py:146 - [socketio] Client connected: Q5RGrazFG70OhpDDAAAT
+2025-06-09 15:00:31,423 - socketio.server - INFO - server.py:164 - emitting event "connected" to Q5RGrazFG70OhpDDAAAT [/]
+2025-06-09 15:00:31,423 - engineio.server - INFO - socket.py:78 - ChfLFas5uj-ICG_zAAAS: Sending packet MESSAGE data 2["connected",{"sid":"Q5RGrazFG70OhpDDAAAT"}]
+2025-06-09 15:00:31,425 - engineio.server - INFO - socket.py:78 - ChfLFas5uj-ICG_zAAAS: Sending packet MESSAGE data 0{"sid":"Q5RGrazFG70OhpDDAAAT"}
+2025-06-09 15:00:31,992 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 15:00:32,019 - engineio.server - INFO - socket.py:78 - 0T4EO1dPHy-U908IAAAU: Sending packet OPEN data {'sid': '0T4EO1dPHy-U908IAAAU', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 15:00:32,019 - engineio.server - INFO - socket.py:90 - 0T4EO1dPHy-U908IAAAU: Received request to upgrade to websocket
+2025-06-09 15:00:32,019 - engineio.server - INFO - socket.py:219 - 0T4EO1dPHy-U908IAAAU: Upgrade to websocket successful
+2025-06-09 15:00:32,021 - engineio.server - INFO - socket.py:39 - 0T4EO1dPHy-U908IAAAU: Received packet MESSAGE data 0
+2025-06-09 15:00:32,022 - root - INFO - app.py:146 - [socketio] Client connected: mSJxV9LUUljglVTFAAAV
+2025-06-09 15:00:32,022 - socketio.server - INFO - server.py:164 - emitting event "connected" to mSJxV9LUUljglVTFAAAV [/]
+2025-06-09 15:00:32,022 - engineio.server - INFO - socket.py:78 - 0T4EO1dPHy-U908IAAAU: Sending packet MESSAGE data 2["connected",{"sid":"mSJxV9LUUljglVTFAAAV"}]
+2025-06-09 15:00:32,022 - engineio.server - INFO - socket.py:78 - 0T4EO1dPHy-U908IAAAU: Sending packet MESSAGE data 0{"sid":"mSJxV9LUUljglVTFAAAV"}
+2025-06-09 15:00:32,837 - root - INFO - message.py:67 - Retrieved 3 messages for task_id=78
+2025-06-09 15:00:32,838 - root - INFO - file.py:84 - DB ENV (get_files): PGHOST=localhost, PGPORT=5433, PGDATABASE=toxindex, PGUSER=postgres, PGPASSWORD=devpassword
+2025-06-09 15:00:32,838 - root - INFO - file.py:85 - Calling get_files with task_id=78 (type: <class 'int'>)
+2025-06-09 15:00:32,842 - root - INFO - file.py:90 - Raw rows returned from DB for task_id=78: [[55, 78, UUID('078a38e9-c1b8-421e-b797-59ee3ae69df4'), 'plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md', '78/plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md', 'https://toxindex-environments-2.s3.amazonaws.com/78/plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md?AWSAccessKeyId=ASIAQ72ED6HZGGZYS3VZ&Signature=KCgW3j4jieO8scDPJMyLTT9JuJo%3D&x-amz-security-token=IQoJb3JpZ2luX2VjENP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLWVhc3QtMSJHMEUCIH90l7GwJ1HitWoT084TTTAlMWXm%2FlSIJb0OBZhgH69YAiEA9zueFcK1MrsrQxQs3Ym5S6%2BH6HY6P87QDwzHjGSQIvYq%2FgIIrP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgwwNjgzMjU0NzA3MDYiDMp1mKKjdiaXXjVOJyrSAv1TGC4w31J5bH7yZYpq1sJ8K7tnh48NfqZIsKbgpln6epGeU0NqHk7NeQu3WCJVyp50OtcBwLjzfb2zUIE%2FxUsuHOKt0Mk8ilVMPYEXmpZPe3WsZDs1sZAltzEc03vyYe%2BpDg1oTsu1ExbzoIpzG2YUm6zg5g4Rst%2FhgtAXBLqAezF9IJsWusCcOY%2F0xA6PcjdbIUMkzGeeXQcVc4uWSGHxmVhI0fUiWdT%2BsSNAseUrhrybR27kj8WcYJI2wzpRpOcjQlSmzGjObFBLGw0zpM0SiGfNr3Gb78%2B%2B1sU18hjjahFpRW%2B%2FL5P0QRBNBQjPLgRM%2FPXgiT1VsdlLK7VyZRpwYwBkCnlCkSCzWDCCeLOPag5jNWByLOZ2JEKXSYMO%2FIjgCELm%2F%2BnitE3B6k8lnjeSUf3FOH37sDDTfMMXyt726lY6CV2MU90kV1XE06vMsVc0MKbenMIGOqcBeO%2BiqTE6mPTTb6R%2F%2BxxEdI1s%2B3kPPx9G1rI%2FZNQqr5BKGqfXhoevJnupj%2BxqdYUEkmDTFlDPYtgMltiDDyuD69IU93%2FBrGWGllI3SEYnpreaaPjmmjw%2FI5EaoPCxtEnAEFPAHjKpavfn6rr8nYNkKrTxWGfL3ByBT%2BOxBznZCngyfvdUJwxltKoudIu9ql5abaIK%2FrIezU3oKDSiXcAotCOJICJG%2FYA%3D&Expires=1749499191', datetime.datetime(2025, 6, 9, 14, 59, 51, 82752)], [56, 78, UUID('078a38e9-c1b8-421e-b797-59ee3ae69df4'), 'plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md', '78/plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md', 'https://toxindex-environments-2.s3.amazonaws.com/78/plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md?AWSAccessKeyId=ASIAQ72ED6HZGGZYS3VZ&Signature=KCgW3j4jieO8scDPJMyLTT9JuJo%3D&x-amz-security-token=IQoJb3JpZ2luX2VjENP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLWVhc3QtMSJHMEUCIH90l7GwJ1HitWoT084TTTAlMWXm%2FlSIJb0OBZhgH69YAiEA9zueFcK1MrsrQxQs3Ym5S6%2BH6HY6P87QDwzHjGSQIvYq%2FgIIrP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgwwNjgzMjU0NzA3MDYiDMp1mKKjdiaXXjVOJyrSAv1TGC4w31J5bH7yZYpq1sJ8K7tnh48NfqZIsKbgpln6epGeU0NqHk7NeQu3WCJVyp50OtcBwLjzfb2zUIE%2FxUsuHOKt0Mk8ilVMPYEXmpZPe3WsZDs1sZAltzEc03vyYe%2BpDg1oTsu1ExbzoIpzG2YUm6zg5g4Rst%2FhgtAXBLqAezF9IJsWusCcOY%2F0xA6PcjdbIUMkzGeeXQcVc4uWSGHxmVhI0fUiWdT%2BsSNAseUrhrybR27kj8WcYJI2wzpRpOcjQlSmzGjObFBLGw0zpM0SiGfNr3Gb78%2B%2B1sU18hjjahFpRW%2B%2FL5P0QRBNBQjPLgRM%2FPXgiT1VsdlLK7VyZRpwYwBkCnlCkSCzWDCCeLOPag5jNWByLOZ2JEKXSYMO%2FIjgCELm%2F%2BnitE3B6k8lnjeSUf3FOH37sDDTfMMXyt726lY6CV2MU90kV1XE06vMsVc0MKbenMIGOqcBeO%2BiqTE6mPTTb6R%2F%2BxxEdI1s%2B3kPPx9G1rI%2FZNQqr5BKGqfXhoevJnupj%2BxqdYUEkmDTFlDPYtgMltiDDyuD69IU93%2FBrGWGllI3SEYnpreaaPjmmjw%2FI5EaoPCxtEnAEFPAHjKpavfn6rr8nYNkKrTxWGfL3ByBT%2BOxBznZCngyfvdUJwxltKoudIu9ql5abaIK%2FrIezU3oKDSiXcAotCOJICJG%2FYA%3D&Expires=1749499191', datetime.datetime(2025, 6, 9, 14, 59, 51, 83205)]]
+2025-06-09 15:00:32,842 - root - INFO - file.py:94 - Found 2 files in DB for task_id=78
+2025-06-09 15:00:32,842 - root - WARNING - file.py:130 - Could not read file 78/plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md: [Errno 2] No such file or directory: '78/plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md'
+2025-06-09 15:00:32,843 - root - WARNING - file.py:130 - Could not read file 78/plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md: [Errno 2] No such file or directory: '78/plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md'
+2025-06-09 15:00:32,843 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.fenced_code.FencedCodeExtension".
+2025-06-09 15:00:32,843 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.footnotes.FootnoteExtension".
+2025-06-09 15:00:32,843 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.attr_list.AttrListExtension".
+2025-06-09 15:00:32,843 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.def_list.DefListExtension".
+2025-06-09 15:00:32,844 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.tables.TableExtension".
+2025-06-09 15:00:32,844 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.abbr.AbbrExtension".
+2025-06-09 15:00:32,844 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.md_in_html.MarkdownInHtmlExtension".
+2025-06-09 15:00:32,844 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.extra.ExtraExtension".
+2025-06-09 15:00:32,844 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.tables.TableExtension".
+2025-06-09 15:00:32,885 - engineio.server - INFO - socket.py:78 - SPQz69uD_DnZyObnAAAW: Sending packet OPEN data {'sid': 'SPQz69uD_DnZyObnAAAW', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 15:00:32,885 - engineio.server - INFO - socket.py:90 - SPQz69uD_DnZyObnAAAW: Received request to upgrade to websocket
+2025-06-09 15:00:32,885 - engineio.server - INFO - socket.py:219 - SPQz69uD_DnZyObnAAAW: Upgrade to websocket successful
+2025-06-09 15:00:32,898 - engineio.server - INFO - socket.py:39 - SPQz69uD_DnZyObnAAAW: Received packet MESSAGE data 0
+2025-06-09 15:00:32,899 - root - INFO - app.py:146 - [socketio] Client connected: fZBSQZL8DDynmMw8AAAX
+2025-06-09 15:00:32,899 - socketio.server - INFO - server.py:164 - emitting event "connected" to fZBSQZL8DDynmMw8AAAX [/]
+2025-06-09 15:00:32,899 - engineio.server - INFO - socket.py:78 - SPQz69uD_DnZyObnAAAW: Sending packet MESSAGE data 2["connected",{"sid":"fZBSQZL8DDynmMw8AAAX"}]
+2025-06-09 15:00:32,899 - engineio.server - INFO - socket.py:78 - SPQz69uD_DnZyObnAAAW: Sending packet MESSAGE data 0{"sid":"fZBSQZL8DDynmMw8AAAX"}
+2025-06-09 15:00:32,940 - engineio.server - INFO - socket.py:39 - SPQz69uD_DnZyObnAAAW: Received packet MESSAGE data 2["join_task_room",{"task_id":"78"}]
+2025-06-09 15:00:32,941 - socketio.server - INFO - server.py:576 - received event "join_task_room" from fZBSQZL8DDynmMw8AAAX [/]
+2025-06-09 15:00:32,941 - root - INFO - app.py:155 - [socketio] fZBSQZL8DDynmMw8AAAX joining room: task_78
+2025-06-09 15:00:32,941 - socketio.server - INFO - server.py:284 - fZBSQZL8DDynmMw8AAAX is entering room task_78 [/]
+2025-06-09 15:00:32,942 - root - INFO - app.py:157 - [socketio] fZBSQZL8DDynmMw8AAAX joined room: task_78
+2025-06-09 15:00:32,942 - socketio.server - INFO - server.py:164 - emitting event "joined_task_room" to fZBSQZL8DDynmMw8AAAX [/]
+2025-06-09 15:00:32,942 - engineio.server - INFO - socket.py:78 - SPQz69uD_DnZyObnAAAW: Sending packet MESSAGE data 2["joined_task_room",{"task_id":"78"}]
+2025-06-09 15:00:34,498 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 15:00:34,531 - engineio.server - INFO - socket.py:78 - AS1yjKqbonZKndwfAAAY: Sending packet OPEN data {'sid': 'AS1yjKqbonZKndwfAAAY', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 15:00:34,531 - engineio.server - INFO - socket.py:90 - AS1yjKqbonZKndwfAAAY: Received request to upgrade to websocket
+2025-06-09 15:00:34,532 - engineio.server - INFO - socket.py:219 - AS1yjKqbonZKndwfAAAY: Upgrade to websocket successful
+2025-06-09 15:00:34,534 - engineio.server - INFO - socket.py:39 - AS1yjKqbonZKndwfAAAY: Received packet MESSAGE data 0
+2025-06-09 15:00:34,535 - root - INFO - app.py:146 - [socketio] Client connected: tPBwPzGWKupqFectAAAZ
+2025-06-09 15:00:34,535 - socketio.server - INFO - server.py:164 - emitting event "connected" to tPBwPzGWKupqFectAAAZ [/]
+2025-06-09 15:00:34,535 - engineio.server - INFO - socket.py:78 - AS1yjKqbonZKndwfAAAY: Sending packet MESSAGE data 2["connected",{"sid":"tPBwPzGWKupqFectAAAZ"}]
+2025-06-09 15:00:34,536 - engineio.server - INFO - socket.py:78 - AS1yjKqbonZKndwfAAAY: Sending packet MESSAGE data 0{"sid":"tPBwPzGWKupqFectAAAZ"}
+2025-06-09 15:00:35,275 - root - INFO - message.py:67 - Retrieved 3 messages for task_id=77
+2025-06-09 15:00:35,275 - root - INFO - file.py:84 - DB ENV (get_files): PGHOST=localhost, PGPORT=5433, PGDATABASE=toxindex, PGUSER=postgres, PGPASSWORD=devpassword
+2025-06-09 15:00:35,275 - root - INFO - file.py:85 - Calling get_files with task_id=77 (type: <class 'int'>)
+2025-06-09 15:00:35,282 - root - INFO - file.py:90 - Raw rows returned from DB for task_id=77: [[53, 77, UUID('078a38e9-c1b8-421e-b797-59ee3ae69df4'), 'probra_result_1f12a6f899554f33ab1149d80ec128bb.md', '77/probra_result_1f12a6f899554f33ab1149d80ec128bb.md', 'https://toxindex-environments-2.s3.amazonaws.com/77/probra_result_1f12a6f899554f33ab1149d80ec128bb.md?AWSAccessKeyId=ASIAQ72ED6HZEJGH3WVP&Signature=01JS4PQUWuiMCGKnQA6LOmVdh4M%3D&x-amz-security-token=IQoJb3JpZ2luX2VjENL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLWVhc3QtMSJIMEYCIQDOwWZ92rHuRduG0HlIr0ZJh5Z3246uxnkjP6Z3AOm3awIhAI2%2F%2FJZM5%2BR5bhrXR6iig0rd3blySQA3yrlUu1Ajx7lWKv4CCKv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEQABoMMDY4MzI1NDcwNzA2Igz73xQshCLCKsTI%2BJkq0gKuTd%2FD5VQL7pxhkvqiIelUvbuFjD91f7BqiqMhQQC89kjCNcd21Vup2gksuaOnhc7yEG%2B0Pt3Yg1z7y5HotHruO3erLdPO7DfQy%2FwECR%2F8RAqMpxLAl9PN2Om%2BJg2NQsjXWx%2BeoDHTqEMaVYNbX3466Ksu84TnSUcfpGAXbRP6MmxQR0rMnBT3%2FkyK3UJ9jZ2BOw9QPgRfLEC%2BU4g5y3e6Intt2HhFCagSH2gZ%2FeOkPZr82MNRPbQRARs2e063q17dPXYUQRD%2FsQAFpok%2BBqPoxnVxFdZanQzsP3Gi%2FhY6DnjyotEluVOE0n%2B%2BXiyNhxLV1G3BbURIHPZY5r1c3pGtl02VRS0n%2BAGMTtNt31Lj2mw9l456irbaGdchMTaUy06t6Vtm9fG3XV9JZO8R%2FfB98LK2hQM9CmnWR3sTUYs7iHAQNdnOlVKnghjd4gxH0Yp9yDC8uJzCBjqmAYdQ3F96uXXXXwcbR1jmbmd4fK5SckFBYjZkCvucBHyYkpDtU3PD2EGSmSA%2BbnUEFictfiIHpQUE8suSTEAIW%2FiTy7l30hUdl80aFffOLP9%2BroMydiJ2qQqY9USQ2Lsz2Nz%2BcqhpRqd4jhuyICgN60PfTS%2BKv3fGhT5oksGOR2juO7CW%2B%2BZiQnkqJy3mThXip04Zl4hY2ydOevXqtdTm7jN0HkcudPE%3D&Expires=1749494348', datetime.datetime(2025, 6, 9, 13, 39, 8, 573100)], [54, 77, UUID('078a38e9-c1b8-421e-b797-59ee3ae69df4'), 'probra_result_1f12a6f899554f33ab1149d80ec128bb.md', '77/probra_result_1f12a6f899554f33ab1149d80ec128bb.md', 'https://toxindex-environments-2.s3.amazonaws.com/77/probra_result_1f12a6f899554f33ab1149d80ec128bb.md?AWSAccessKeyId=ASIAQ72ED6HZEJGH3WVP&Signature=01JS4PQUWuiMCGKnQA6LOmVdh4M%3D&x-amz-security-token=IQoJb3JpZ2luX2VjENL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLWVhc3QtMSJIMEYCIQDOwWZ92rHuRduG0HlIr0ZJh5Z3246uxnkjP6Z3AOm3awIhAI2%2F%2FJZM5%2BR5bhrXR6iig0rd3blySQA3yrlUu1Ajx7lWKv4CCKv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEQABoMMDY4MzI1NDcwNzA2Igz73xQshCLCKsTI%2BJkq0gKuTd%2FD5VQL7pxhkvqiIelUvbuFjD91f7BqiqMhQQC89kjCNcd21Vup2gksuaOnhc7yEG%2B0Pt3Yg1z7y5HotHruO3erLdPO7DfQy%2FwECR%2F8RAqMpxLAl9PN2Om%2BJg2NQsjXWx%2BeoDHTqEMaVYNbX3466Ksu84TnSUcfpGAXbRP6MmxQR0rMnBT3%2FkyK3UJ9jZ2BOw9QPgRfLEC%2BU4g5y3e6Intt2HhFCagSH2gZ%2FeOkPZr82MNRPbQRARs2e063q17dPXYUQRD%2FsQAFpok%2BBqPoxnVxFdZanQzsP3Gi%2FhY6DnjyotEluVOE0n%2B%2BXiyNhxLV1G3BbURIHPZY5r1c3pGtl02VRS0n%2BAGMTtNt31Lj2mw9l456irbaGdchMTaUy06t6Vtm9fG3XV9JZO8R%2FfB98LK2hQM9CmnWR3sTUYs7iHAQNdnOlVKnghjd4gxH0Yp9yDC8uJzCBjqmAYdQ3F96uXXXXwcbR1jmbmd4fK5SckFBYjZkCvucBHyYkpDtU3PD2EGSmSA%2BbnUEFictfiIHpQUE8suSTEAIW%2FiTy7l30hUdl80aFffOLP9%2BroMydiJ2qQqY9USQ2Lsz2Nz%2BcqhpRqd4jhuyICgN60PfTS%2BKv3fGhT5oksGOR2juO7CW%2B%2BZiQnkqJy3mThXip04Zl4hY2ydOevXqtdTm7jN0HkcudPE%3D&Expires=1749494348', datetime.datetime(2025, 6, 9, 13, 39, 8, 573571)]]
+2025-06-09 15:00:35,282 - root - INFO - file.py:94 - Found 2 files in DB for task_id=77
+2025-06-09 15:00:35,283 - root - WARNING - file.py:130 - Could not read file 77/probra_result_1f12a6f899554f33ab1149d80ec128bb.md: [Errno 2] No such file or directory: '77/probra_result_1f12a6f899554f33ab1149d80ec128bb.md'
+2025-06-09 15:00:35,283 - root - WARNING - file.py:130 - Could not read file 77/probra_result_1f12a6f899554f33ab1149d80ec128bb.md: [Errno 2] No such file or directory: '77/probra_result_1f12a6f899554f33ab1149d80ec128bb.md'
+2025-06-09 15:00:35,284 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.fenced_code.FencedCodeExtension".
+2025-06-09 15:00:35,285 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.footnotes.FootnoteExtension".
+2025-06-09 15:00:35,285 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.attr_list.AttrListExtension".
+2025-06-09 15:00:35,285 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.def_list.DefListExtension".
+2025-06-09 15:00:35,285 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.tables.TableExtension".
+2025-06-09 15:00:35,285 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.abbr.AbbrExtension".
+2025-06-09 15:00:35,285 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.md_in_html.MarkdownInHtmlExtension".
+2025-06-09 15:00:35,286 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.extra.ExtraExtension".
+2025-06-09 15:00:35,286 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.tables.TableExtension".
+2025-06-09 15:00:35,330 - engineio.server - INFO - socket.py:78 - QrQCuJz7ZMIP76lOAAAa: Sending packet OPEN data {'sid': 'QrQCuJz7ZMIP76lOAAAa', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 15:00:35,330 - engineio.server - INFO - socket.py:90 - QrQCuJz7ZMIP76lOAAAa: Received request to upgrade to websocket
+2025-06-09 15:00:35,330 - engineio.server - INFO - socket.py:219 - QrQCuJz7ZMIP76lOAAAa: Upgrade to websocket successful
+2025-06-09 15:00:35,355 - engineio.server - INFO - socket.py:39 - QrQCuJz7ZMIP76lOAAAa: Received packet MESSAGE data 0
+2025-06-09 15:00:35,355 - root - INFO - app.py:146 - [socketio] Client connected: W9NGWBpubO2op2gqAAAb
+2025-06-09 15:00:35,355 - socketio.server - INFO - server.py:164 - emitting event "connected" to W9NGWBpubO2op2gqAAAb [/]
+2025-06-09 15:00:35,355 - engineio.server - INFO - socket.py:78 - QrQCuJz7ZMIP76lOAAAa: Sending packet MESSAGE data 2["connected",{"sid":"W9NGWBpubO2op2gqAAAb"}]
+2025-06-09 15:00:35,356 - engineio.server - INFO - socket.py:78 - QrQCuJz7ZMIP76lOAAAa: Sending packet MESSAGE data 0{"sid":"W9NGWBpubO2op2gqAAAb"}
+2025-06-09 15:00:35,396 - engineio.server - INFO - socket.py:39 - QrQCuJz7ZMIP76lOAAAa: Received packet MESSAGE data 2["join_task_room",{"task_id":"77"}]
+2025-06-09 15:00:35,397 - socketio.server - INFO - server.py:576 - received event "join_task_room" from W9NGWBpubO2op2gqAAAb [/]
+2025-06-09 15:00:35,397 - root - INFO - app.py:155 - [socketio] W9NGWBpubO2op2gqAAAb joining room: task_77
+2025-06-09 15:00:35,397 - socketio.server - INFO - server.py:284 - W9NGWBpubO2op2gqAAAb is entering room task_77 [/]
+2025-06-09 15:00:35,397 - root - INFO - app.py:157 - [socketio] W9NGWBpubO2op2gqAAAb joined room: task_77
+2025-06-09 15:00:35,397 - socketio.server - INFO - server.py:164 - emitting event "joined_task_room" to W9NGWBpubO2op2gqAAAb [/]
+2025-06-09 15:00:35,397 - engineio.server - INFO - socket.py:78 - QrQCuJz7ZMIP76lOAAAa: Sending packet MESSAGE data 2["joined_task_room",{"task_id":"77"}]
+2025-06-09 15:00:39,067 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 15:00:39,101 - engineio.server - INFO - socket.py:78 - idH97czS2X_Agm7gAAAc: Sending packet OPEN data {'sid': 'idH97czS2X_Agm7gAAAc', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 15:00:39,102 - engineio.server - INFO - socket.py:90 - idH97czS2X_Agm7gAAAc: Received request to upgrade to websocket
+2025-06-09 15:00:39,102 - engineio.server - INFO - socket.py:219 - idH97czS2X_Agm7gAAAc: Upgrade to websocket successful
+2025-06-09 15:00:39,109 - engineio.server - INFO - socket.py:39 - idH97czS2X_Agm7gAAAc: Received packet MESSAGE data 0
+2025-06-09 15:00:39,110 - root - INFO - app.py:146 - [socketio] Client connected: 7BGPhZHXidAO8ws9AAAd
+2025-06-09 15:00:39,110 - socketio.server - INFO - server.py:164 - emitting event "connected" to 7BGPhZHXidAO8ws9AAAd [/]
+2025-06-09 15:00:39,110 - engineio.server - INFO - socket.py:78 - idH97czS2X_Agm7gAAAc: Sending packet MESSAGE data 2["connected",{"sid":"7BGPhZHXidAO8ws9AAAd"}]
+2025-06-09 15:00:39,111 - engineio.server - INFO - socket.py:78 - idH97czS2X_Agm7gAAAc: Sending packet MESSAGE data 0{"sid":"7BGPhZHXidAO8ws9AAAd"}
+2025-06-09 15:00:40,203 - root - INFO - message.py:67 - Retrieved 3 messages for task_id=78
+2025-06-09 15:00:40,203 - root - INFO - file.py:84 - DB ENV (get_files): PGHOST=localhost, PGPORT=5433, PGDATABASE=toxindex, PGUSER=postgres, PGPASSWORD=devpassword
+2025-06-09 15:00:40,203 - root - INFO - file.py:85 - Calling get_files with task_id=78 (type: <class 'int'>)
+2025-06-09 15:00:40,209 - root - INFO - file.py:90 - Raw rows returned from DB for task_id=78: [[55, 78, UUID('078a38e9-c1b8-421e-b797-59ee3ae69df4'), 'plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md', '78/plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md', 'https://toxindex-environments-2.s3.amazonaws.com/78/plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md?AWSAccessKeyId=ASIAQ72ED6HZGGZYS3VZ&Signature=KCgW3j4jieO8scDPJMyLTT9JuJo%3D&x-amz-security-token=IQoJb3JpZ2luX2VjENP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLWVhc3QtMSJHMEUCIH90l7GwJ1HitWoT084TTTAlMWXm%2FlSIJb0OBZhgH69YAiEA9zueFcK1MrsrQxQs3Ym5S6%2BH6HY6P87QDwzHjGSQIvYq%2FgIIrP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgwwNjgzMjU0NzA3MDYiDMp1mKKjdiaXXjVOJyrSAv1TGC4w31J5bH7yZYpq1sJ8K7tnh48NfqZIsKbgpln6epGeU0NqHk7NeQu3WCJVyp50OtcBwLjzfb2zUIE%2FxUsuHOKt0Mk8ilVMPYEXmpZPe3WsZDs1sZAltzEc03vyYe%2BpDg1oTsu1ExbzoIpzG2YUm6zg5g4Rst%2FhgtAXBLqAezF9IJsWusCcOY%2F0xA6PcjdbIUMkzGeeXQcVc4uWSGHxmVhI0fUiWdT%2BsSNAseUrhrybR27kj8WcYJI2wzpRpOcjQlSmzGjObFBLGw0zpM0SiGfNr3Gb78%2B%2B1sU18hjjahFpRW%2B%2FL5P0QRBNBQjPLgRM%2FPXgiT1VsdlLK7VyZRpwYwBkCnlCkSCzWDCCeLOPag5jNWByLOZ2JEKXSYMO%2FIjgCELm%2F%2BnitE3B6k8lnjeSUf3FOH37sDDTfMMXyt726lY6CV2MU90kV1XE06vMsVc0MKbenMIGOqcBeO%2BiqTE6mPTTb6R%2F%2BxxEdI1s%2B3kPPx9G1rI%2FZNQqr5BKGqfXhoevJnupj%2BxqdYUEkmDTFlDPYtgMltiDDyuD69IU93%2FBrGWGllI3SEYnpreaaPjmmjw%2FI5EaoPCxtEnAEFPAHjKpavfn6rr8nYNkKrTxWGfL3ByBT%2BOxBznZCngyfvdUJwxltKoudIu9ql5abaIK%2FrIezU3oKDSiXcAotCOJICJG%2FYA%3D&Expires=1749499191', datetime.datetime(2025, 6, 9, 14, 59, 51, 82752)], [56, 78, UUID('078a38e9-c1b8-421e-b797-59ee3ae69df4'), 'plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md', '78/plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md', 'https://toxindex-environments-2.s3.amazonaws.com/78/plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md?AWSAccessKeyId=ASIAQ72ED6HZGGZYS3VZ&Signature=KCgW3j4jieO8scDPJMyLTT9JuJo%3D&x-amz-security-token=IQoJb3JpZ2luX2VjENP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLWVhc3QtMSJHMEUCIH90l7GwJ1HitWoT084TTTAlMWXm%2FlSIJb0OBZhgH69YAiEA9zueFcK1MrsrQxQs3Ym5S6%2BH6HY6P87QDwzHjGSQIvYq%2FgIIrP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgwwNjgzMjU0NzA3MDYiDMp1mKKjdiaXXjVOJyrSAv1TGC4w31J5bH7yZYpq1sJ8K7tnh48NfqZIsKbgpln6epGeU0NqHk7NeQu3WCJVyp50OtcBwLjzfb2zUIE%2FxUsuHOKt0Mk8ilVMPYEXmpZPe3WsZDs1sZAltzEc03vyYe%2BpDg1oTsu1ExbzoIpzG2YUm6zg5g4Rst%2FhgtAXBLqAezF9IJsWusCcOY%2F0xA6PcjdbIUMkzGeeXQcVc4uWSGHxmVhI0fUiWdT%2BsSNAseUrhrybR27kj8WcYJI2wzpRpOcjQlSmzGjObFBLGw0zpM0SiGfNr3Gb78%2B%2B1sU18hjjahFpRW%2B%2FL5P0QRBNBQjPLgRM%2FPXgiT1VsdlLK7VyZRpwYwBkCnlCkSCzWDCCeLOPag5jNWByLOZ2JEKXSYMO%2FIjgCELm%2F%2BnitE3B6k8lnjeSUf3FOH37sDDTfMMXyt726lY6CV2MU90kV1XE06vMsVc0MKbenMIGOqcBeO%2BiqTE6mPTTb6R%2F%2BxxEdI1s%2B3kPPx9G1rI%2FZNQqr5BKGqfXhoevJnupj%2BxqdYUEkmDTFlDPYtgMltiDDyuD69IU93%2FBrGWGllI3SEYnpreaaPjmmjw%2FI5EaoPCxtEnAEFPAHjKpavfn6rr8nYNkKrTxWGfL3ByBT%2BOxBznZCngyfvdUJwxltKoudIu9ql5abaIK%2FrIezU3oKDSiXcAotCOJICJG%2FYA%3D&Expires=1749499191', datetime.datetime(2025, 6, 9, 14, 59, 51, 83205)]]
+2025-06-09 15:00:40,209 - root - INFO - file.py:94 - Found 2 files in DB for task_id=78
+2025-06-09 15:00:40,209 - root - WARNING - file.py:130 - Could not read file 78/plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md: [Errno 2] No such file or directory: '78/plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md'
+2025-06-09 15:00:40,209 - root - WARNING - file.py:130 - Could not read file 78/plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md: [Errno 2] No such file or directory: '78/plain_openai_result_89e9c1366e5e4b7ba73fcc52860d8057.md'
+2025-06-09 15:00:40,210 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.fenced_code.FencedCodeExtension".
+2025-06-09 15:00:40,210 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.footnotes.FootnoteExtension".
+2025-06-09 15:00:40,210 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.attr_list.AttrListExtension".
+2025-06-09 15:00:40,210 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.def_list.DefListExtension".
+2025-06-09 15:00:40,210 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.tables.TableExtension".
+2025-06-09 15:00:40,210 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.abbr.AbbrExtension".
+2025-06-09 15:00:40,210 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.md_in_html.MarkdownInHtmlExtension".
+2025-06-09 15:00:40,210 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.extra.ExtraExtension".
+2025-06-09 15:00:40,211 - MARKDOWN - DEBUG - core.py:182 - Successfully loaded extension "markdown.extensions.tables.TableExtension".
+2025-06-09 15:00:40,262 - engineio.server - INFO - socket.py:78 - P66nE3UGik9lubZSAAAe: Sending packet OPEN data {'sid': 'P66nE3UGik9lubZSAAAe', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 15:00:40,262 - engineio.server - INFO - socket.py:90 - P66nE3UGik9lubZSAAAe: Received request to upgrade to websocket
+2025-06-09 15:00:40,262 - engineio.server - INFO - socket.py:219 - P66nE3UGik9lubZSAAAe: Upgrade to websocket successful
+2025-06-09 15:00:40,272 - engineio.server - INFO - socket.py:39 - P66nE3UGik9lubZSAAAe: Received packet MESSAGE data 0
+2025-06-09 15:00:40,272 - root - INFO - app.py:146 - [socketio] Client connected: VW5xEoZR5NUSuMd7AAAf
+2025-06-09 15:00:40,272 - socketio.server - INFO - server.py:164 - emitting event "connected" to VW5xEoZR5NUSuMd7AAAf [/]
+2025-06-09 15:00:40,272 - engineio.server - INFO - socket.py:78 - P66nE3UGik9lubZSAAAe: Sending packet MESSAGE data 2["connected",{"sid":"VW5xEoZR5NUSuMd7AAAf"}]
+2025-06-09 15:00:40,273 - engineio.server - INFO - socket.py:78 - P66nE3UGik9lubZSAAAe: Sending packet MESSAGE data 0{"sid":"VW5xEoZR5NUSuMd7AAAf"}
+2025-06-09 15:00:40,314 - engineio.server - INFO - socket.py:39 - P66nE3UGik9lubZSAAAe: Received packet MESSAGE data 2["join_task_room",{"task_id":"78"}]
+2025-06-09 15:00:40,314 - socketio.server - INFO - server.py:576 - received event "join_task_room" from VW5xEoZR5NUSuMd7AAAf [/]
+2025-06-09 15:00:40,314 - root - INFO - app.py:155 - [socketio] VW5xEoZR5NUSuMd7AAAf joining room: task_78
+2025-06-09 15:00:40,315 - socketio.server - INFO - server.py:284 - VW5xEoZR5NUSuMd7AAAf is entering room task_78 [/]
+2025-06-09 15:00:40,315 - root - INFO - app.py:157 - [socketio] VW5xEoZR5NUSuMd7AAAf joined room: task_78
+2025-06-09 15:00:40,315 - socketio.server - INFO - server.py:164 - emitting event "joined_task_room" to VW5xEoZR5NUSuMd7AAAf [/]
+2025-06-09 15:00:40,315 - engineio.server - INFO - socket.py:78 - P66nE3UGik9lubZSAAAe: Sending packet MESSAGE data 2["joined_task_room",{"task_id":"78"}]
+2025-06-09 15:00:46,113 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 15:00:46,148 - engineio.server - INFO - socket.py:78 - SV5tI3HaEiRz4wcjAAAg: Sending packet OPEN data {'sid': 'SV5tI3HaEiRz4wcjAAAg', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 15:00:46,148 - engineio.server - INFO - socket.py:90 - SV5tI3HaEiRz4wcjAAAg: Received request to upgrade to websocket
+2025-06-09 15:00:46,148 - engineio.server - INFO - socket.py:219 - SV5tI3HaEiRz4wcjAAAg: Upgrade to websocket successful
+2025-06-09 15:00:46,155 - engineio.server - INFO - socket.py:39 - SV5tI3HaEiRz4wcjAAAg: Received packet MESSAGE data 0
+2025-06-09 15:00:46,156 - root - INFO - app.py:146 - [socketio] Client connected: 3YhR6ae_xTY5eIRgAAAh
+2025-06-09 15:00:46,156 - socketio.server - INFO - server.py:164 - emitting event "connected" to 3YhR6ae_xTY5eIRgAAAh [/]
+2025-06-09 15:00:46,157 - engineio.server - INFO - socket.py:78 - SV5tI3HaEiRz4wcjAAAg: Sending packet MESSAGE data 2["connected",{"sid":"3YhR6ae_xTY5eIRgAAAh"}]
+2025-06-09 15:00:46,157 - engineio.server - INFO - socket.py:78 - SV5tI3HaEiRz4wcjAAAg: Sending packet MESSAGE data 0{"sid":"3YhR6ae_xTY5eIRgAAAh"}
+2025-06-09 15:01:11,150 - engineio.server - INFO - socket.py:78 - SV5tI3HaEiRz4wcjAAAg: Sending packet PING data None
+2025-06-09 15:01:11,153 - engineio.server - INFO - socket.py:39 - SV5tI3HaEiRz4wcjAAAg: Received packet PONG data 
+2025-06-09 15:01:34,007 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 15:01:34,039 - engineio.server - INFO - socket.py:78 - UZ3bmumweRaH-hoFAAAi: Sending packet OPEN data {'sid': 'UZ3bmumweRaH-hoFAAAi', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 15:01:34,039 - engineio.server - INFO - socket.py:90 - UZ3bmumweRaH-hoFAAAi: Received request to upgrade to websocket
+2025-06-09 15:01:34,039 - engineio.server - INFO - socket.py:219 - UZ3bmumweRaH-hoFAAAi: Upgrade to websocket successful
+2025-06-09 15:01:34,046 - engineio.server - INFO - socket.py:39 - UZ3bmumweRaH-hoFAAAi: Received packet MESSAGE data 0
+2025-06-09 15:01:34,046 - root - INFO - app.py:146 - [socketio] Client connected: bGTQIZiKFZoSnqfhAAAj
+2025-06-09 15:01:34,046 - socketio.server - INFO - server.py:164 - emitting event "connected" to bGTQIZiKFZoSnqfhAAAj [/]
+2025-06-09 15:01:34,046 - engineio.server - INFO - socket.py:78 - UZ3bmumweRaH-hoFAAAi: Sending packet MESSAGE data 2["connected",{"sid":"bGTQIZiKFZoSnqfhAAAj"}]
+2025-06-09 15:01:34,047 - engineio.server - INFO - socket.py:78 - UZ3bmumweRaH-hoFAAAi: Sending packet MESSAGE data 0{"sid":"bGTQIZiKFZoSnqfhAAAj"}
+2025-06-09 15:01:52,028 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 15:01:52,058 - engineio.server - INFO - socket.py:78 - UMpRASHYjYUUyltQAAAk: Sending packet OPEN data {'sid': 'UMpRASHYjYUUyltQAAAk', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 15:01:52,058 - engineio.server - INFO - socket.py:90 - UMpRASHYjYUUyltQAAAk: Received request to upgrade to websocket
+2025-06-09 15:01:52,058 - engineio.server - INFO - socket.py:219 - UMpRASHYjYUUyltQAAAk: Upgrade to websocket successful
+2025-06-09 15:01:52,062 - engineio.server - INFO - socket.py:39 - UMpRASHYjYUUyltQAAAk: Received packet MESSAGE data 0
+2025-06-09 15:01:52,063 - root - INFO - app.py:146 - [socketio] Client connected: gxPYOfShHEpc2rjNAAAl
+2025-06-09 15:01:52,063 - socketio.server - INFO - server.py:164 - emitting event "connected" to gxPYOfShHEpc2rjNAAAl [/]
+2025-06-09 15:01:52,063 - engineio.server - INFO - socket.py:78 - UMpRASHYjYUUyltQAAAk: Sending packet MESSAGE data 2["connected",{"sid":"gxPYOfShHEpc2rjNAAAl"}]
+2025-06-09 15:01:52,064 - engineio.server - INFO - socket.py:78 - UMpRASHYjYUUyltQAAAk: Sending packet MESSAGE data 0{"sid":"gxPYOfShHEpc2rjNAAAl"}
+2025-06-09 15:02:17,063 - engineio.server - INFO - socket.py:78 - UMpRASHYjYUUyltQAAAk: Sending packet PING data None
+2025-06-09 15:02:17,064 - engineio.server - INFO - socket.py:39 - UMpRASHYjYUUyltQAAAk: Received packet PONG data 
