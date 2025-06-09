@@ -9,6 +9,7 @@ from workflows.celery_worker import celery
 from webserver.model.message import MessageSchema
 from webserver.model.file import File
 from webserver.storage import S3FileStorage
+import hashlib
 
 from RAP.tool_deeptox import deeptox_agent
 from RAP.toxicity_schema import TOXICITY_SCHEMA
@@ -49,18 +50,18 @@ def probra_task(self, payload):
         chemprop_query = payload.get("payload", "Is Gentamicin nephrotoxic?")
         logger.info(f"User query for deeptox_agent: {chemprop_query}")
 
-        # async for chunk in await deeptox_agent.arun(chemprop_query, stream=True):
-        #     message = MessageSchema(role="assistant", content=chunk)
-        #     event = {
-        #         "type": "task_message",
-        #         "data": message.model_dump(),
-        #         "task_id": task_id,
-        #     }
-        #     r.publish("celery_updates", json.dumps(event))
+        # Caching: use hash of query as key
+        cache_key = f"probra_cache:{hashlib.sha256(chemprop_query.encode()).hexdigest()}"
+        cached = r.get(cache_key)
+        if cached:
+            response_content = cached.decode()
+        else:
+            response = deeptox_agent.run(chemprop_query, history=True)
+            response_content = response.content
+            r.set(cache_key, response_content, ex=60*60*24)
 
-        response = deeptox_agent.run(chemprop_query, history=True)
         # display raw markdown content directly to user
-        message = MessageSchema(role="assistant", content=response.content)
+        message = MessageSchema(role="assistant", content=response_content)
         event = {
             "type": "task_message",
             "data": message.model_dump(),
@@ -68,24 +69,15 @@ def probra_task(self, payload):
         }
         r.publish("celery_updates", json.dumps(event))
 
-        
-        # the tmp path is within nix environment, not local project folder.
         tmp_filename = f"probra_result_{uuid.uuid4().hex}.md"
         project_tmp_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'tmp'))
         os.makedirs(project_tmp_dir, exist_ok=True)
         tmp_path = os.path.join(project_tmp_dir, tmp_filename)
 
         logger.info(f"File creating in tmp: {tmp_path} for task {task_id}")
-        # Save the response based on its type
         with open(tmp_path, 'w', encoding='utf-8') as f:
-            f.write(response.content)
+            f.write(response_content)
         logger.info(f"File created in tmp: {tmp_path} for task {task_id}")
-        
-
-        # Create a simple result file and save it to local
-        # logger.info(f"File creating in DB: {tmp_path} for task {task_id}")
-        # File.create_file(task_id=task_id, user_id=user_id, filename=tmp_filename, filepath=tmp_path, s3_url=None)
-        # logger.info(f"File registered in DB: {tmp_path} for task {task_id}")
 
         storage = S3FileStorage()
         s3_key = storage.upload_file(tmp_path, f"{task_id}/{tmp_filename}", "text/plain")
