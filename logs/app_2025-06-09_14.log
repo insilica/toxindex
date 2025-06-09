@@ -1880,3 +1880,422 @@ def plain_openai_task(self, payload):
 2025-06-09 15:20:47,786 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
 2025-06-09 15:21:12,791 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
 2025-06-09 15:21:12,793 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:21:37,796 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:21:37,799 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:22:02,804 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:22:02,806 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:22:27,810 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:22:27,813 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:22:52,819 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:22:52,821 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:23:17,823 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:23:17,825 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:23:42,826 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:23:42,828 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:24:07,831 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:24:07,832 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:24:32,834 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:24:32,836 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:24:57,840 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:24:57,842 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:25:22,844 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:25:22,846 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:25:47,852 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:25:47,854 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:26:12,868 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:26:12,870 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:26:37,876 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:26:37,878 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:27:02,881 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:27:02,883 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:27:27,890 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:27:27,892 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:27:52,895 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:27:52,897 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:28:17,898 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:28:17,899 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:28:42,903 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:28:42,905 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:29:07,907 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:29:07,909 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:29:32,913 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:29:32,915 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:29:57,917 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:29:57,919 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:30:22,924 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:30:22,926 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:30:47,929 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:30:47,931 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:31:12,935 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:31:12,938 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:31:37,951 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:31:37,953 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:32:02,955 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:32:02,957 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:32:27,960 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:32:27,962 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:32:52,964 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:32:52,965 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:33:17,980 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:33:17,981 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:33:42,984 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:33:42,986 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:34:07,988 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:34:07,990 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:34:32,992 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:34:32,994 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:34:57,998 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:34:58,000 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:35:23,001 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:35:23,003 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:35:48,009 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:35:48,011 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:36:13,013 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:36:13,014 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:36:38,019 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:36:38,021 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:37:03,024 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:37:03,027 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:37:28,033 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:37:28,035 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:37:53,039 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:37:53,041 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:38:18,043 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:38:18,045 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:38:43,050 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:38:43,052 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:39:08,054 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:39:08,057 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:39:33,061 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:39:33,064 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:39:58,067 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:39:58,069 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:40:23,076 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:40:23,078 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:40:48,099 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:40:48,101 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:41:13,104 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:41:13,106 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:41:38,111 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:41:38,114 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:42:03,116 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:42:03,118 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:42:28,122 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:42:28,124 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:42:53,127 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:42:53,128 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:43:18,133 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:43:18,135 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:43:43,138 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:43:43,140 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:44:08,144 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:44:08,145 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:44:33,149 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:44:33,151 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:44:58,152 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:44:58,154 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:45:23,157 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:45:23,159 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:45:48,160 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:45:48,162 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:46:13,166 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:46:13,169 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:46:38,170 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:46:38,173 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:47:03,178 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:47:03,180 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:47:28,193 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:47:28,194 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:47:53,196 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:47:53,198 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:48:18,202 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:48:18,205 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:48:43,206 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:48:43,208 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:49:08,213 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:49:08,215 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:49:33,218 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:49:33,220 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:49:58,225 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:49:58,228 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:50:23,229 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:50:23,231 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:50:48,232 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:50:48,234 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:51:13,239 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:51:13,241 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:51:38,244 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:51:38,246 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:52:03,247 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:52:03,250 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:52:28,252 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:52:28,254 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:52:53,260 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:52:53,262 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:53:18,265 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:53:18,267 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:53:43,269 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:53:43,271 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:54:08,276 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:54:08,278 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:54:33,292 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:54:33,294 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:54:58,300 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:54:58,302 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:55:23,303 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:55:23,305 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:55:48,308 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:55:48,310 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:56:13,315 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:56:13,317 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:56:38,320 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:56:38,322 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:57:03,326 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:57:03,328 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:57:28,332 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:57:28,334 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:57:53,335 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:57:53,337 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:58:18,342 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:58:18,344 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:58:43,347 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:58:43,348 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:59:08,354 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:59:08,356 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:59:33,368 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:59:33,370 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 15:59:58,376 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 15:59:58,378 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 16:00:23,381 - engineio.server - INFO - socket.py:78 - E8a9zTzbJ2nf6svQAABk: Sending packet PING data None
+2025-06-09 16:00:23,383 - engineio.server - INFO - socket.py:39 - E8a9zTzbJ2nf6svQAABk: Received packet PONG data 
+2025-06-09 16:00:43,685 - root - INFO - app.py:132 - current user: <webserver.model.user.User object at 0x7fffee7b8af0>
+2025-06-09 16:46:20,381 - root - INFO - app.py:132 - current user: <webserver.model.user.User object at 0x7fffee7bcee0>
+2025-06-09 16:46:39,698 - root - INFO - app.py:132 - current user: <webserver.model.user.User object at 0x7fffee953a30>
+2025-06-09 16:47:21,236 - root - INFO - app.py:132 - current user: <webserver.model.user.User object at 0x7fffee993c70>
+2025-06-09 16:48:11,696 - root - INFO - app.py:132 - current user: <webserver.model.user.User object at 0x7fffee871120>
+2025-06-09 16:48:14,798 - root - INFO - app.py:132 - current user: <webserver.model.user.User object at 0x7fffee9915a0>
+2025-06-09 16:48:46,498 - root - INFO - app.py:132 - current user: <webserver.model.user.User object at 0x7fffee953a00>
+2025-06-09 16:49:37,117 - root - INFO - app.py:132 - current user: <webserver.model.user.User object at 0x7fffee7bdea0>
+2025-06-09 16:49:49,196 - root - DEBUG - datastore.py:56 - done
+2025-06-09 16:49:49,197 - root - INFO - environment.py:45 - created environment envE for user 078a38e9-c1b8-421e-b797-59ee3ae69df4
+2025-06-09 16:49:54,188 - root - INFO - app.py:132 - current user: <webserver.model.user.User object at 0x7fffee871c30>
+2025-06-09 16:49:57,803 - root - DEBUG - datastore.py:56 - done
+2025-06-09 16:49:57,803 - root - INFO - environment.py:45 - created environment envF for user 078a38e9-c1b8-421e-b797-59ee3ae69df4
+2025-06-09 16:50:51,503 - root - INFO - app.py:132 - current user: <webserver.model.user.User object at 0x7fffee7bd990>
+2025-06-09 16:50:55,141 - root - DEBUG - datastore.py:56 - done
+2025-06-09 16:50:55,141 - root - INFO - environment.py:45 - created environment envG for user 078a38e9-c1b8-421e-b797-59ee3ae69df4
+2025-06-09 16:51:18,483 - root - INFO - app.py:132 - current user: <webserver.model.user.User object at 0x7fffee993f10>
+2025-06-09 16:51:20,831 - root - DEBUG - datastore.py:56 - done
+2025-06-09 16:51:20,832 - root - INFO - environment.py:45 - created environment a for user 078a38e9-c1b8-421e-b797-59ee3ae69df4
+2025-06-09 16:51:46,032 - root - INFO - app.py:132 - current user: <webserver.model.user.User object at 0x7fffee8716c0>
+2025-06-09 16:51:48,218 - root - DEBUG - datastore.py:56 - done
+2025-06-09 16:51:48,218 - root - INFO - environment.py:45 - created environment b for user 078a38e9-c1b8-421e-b797-59ee3ae69df4
+2025-06-09 16:51:56,375 - root - DEBUG - datastore.py:56 - done
+2025-06-09 16:51:56,375 - root - INFO - environment.py:45 - created environment c for user 078a38e9-c1b8-421e-b797-59ee3ae69df4
+2025-06-09 16:52:14,859 - root - INFO - app.py:132 - current user: <webserver.model.user.User object at 0x7fffee953310>
+2025-06-09 16:52:16,557 - root - DEBUG - datastore.py:56 - done
+2025-06-09 16:52:16,557 - root - INFO - environment.py:45 - created environment d for user 078a38e9-c1b8-421e-b797-59ee3ae69df4
+2025-06-09 16:52:47,616 - root - INFO - app.py:132 - current user: <webserver.model.user.User object at 0x7fffee7be620>
+2025-06-09 16:52:50,464 - root - INFO - app.py:132 - current user: <webserver.model.user.User object at 0x7fffee7b8280>
+2025-06-09 16:52:52,216 - root - DEBUG - datastore.py:56 - done
+2025-06-09 16:52:52,216 - root - INFO - environment.py:45 - created environment e for user 078a38e9-c1b8-421e-b797-59ee3ae69df4
+2025-06-09 16:52:54,793 - root - DEBUG - datastore.py:56 - done
+2025-06-09 16:52:54,793 - root - INFO - environment.py:45 - created environment f for user 078a38e9-c1b8-421e-b797-59ee3ae69df4
+2025-06-09 16:52:57,785 - root - DEBUG - datastore.py:56 - done
+2025-06-09 16:52:57,785 - root - INFO - environment.py:75 - Deleted environment 30 for user 078a38e9-c1b8-421e-b797-59ee3ae69df4
+2025-06-09 16:52:58,913 - root - DEBUG - datastore.py:56 - done
+2025-06-09 16:52:58,913 - root - INFO - environment.py:75 - Deleted environment 29 for user 078a38e9-c1b8-421e-b797-59ee3ae69df4
+2025-06-09 16:52:59,495 - root - DEBUG - datastore.py:56 - done
+2025-06-09 16:52:59,495 - root - INFO - environment.py:75 - Deleted environment 28 for user 078a38e9-c1b8-421e-b797-59ee3ae69df4
+2025-06-09 16:52:59,867 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 16:52:59,899 - engineio.server - INFO - socket.py:78 - RrI4wlyB_3r5mXm1AABm: Sending packet OPEN data {'sid': 'RrI4wlyB_3r5mXm1AABm', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 16:52:59,899 - engineio.server - INFO - socket.py:90 - RrI4wlyB_3r5mXm1AABm: Received request to upgrade to websocket
+2025-06-09 16:52:59,900 - engineio.server - INFO - socket.py:219 - RrI4wlyB_3r5mXm1AABm: Upgrade to websocket successful
+2025-06-09 16:52:59,905 - engineio.server - INFO - socket.py:39 - RrI4wlyB_3r5mXm1AABm: Received packet MESSAGE data 0
+2025-06-09 16:52:59,906 - root - INFO - app.py:146 - [socketio] Client connected: QMYSOIYxQ6SBKOZBAABn
+2025-06-09 16:52:59,906 - socketio.server - INFO - server.py:164 - emitting event "connected" to QMYSOIYxQ6SBKOZBAABn [/]
+2025-06-09 16:52:59,906 - engineio.server - INFO - socket.py:78 - RrI4wlyB_3r5mXm1AABm: Sending packet MESSAGE data 2["connected",{"sid":"QMYSOIYxQ6SBKOZBAABn"}]
+2025-06-09 16:52:59,907 - engineio.server - INFO - socket.py:78 - RrI4wlyB_3r5mXm1AABm: Sending packet MESSAGE data 0{"sid":"QMYSOIYxQ6SBKOZBAABn"}
+2025-06-09 16:53:01,149 - root - DEBUG - datastore.py:56 - done
+2025-06-09 16:53:01,149 - root - INFO - environment.py:75 - Deleted environment 27 for user 078a38e9-c1b8-421e-b797-59ee3ae69df4
+2025-06-09 16:53:01,874 - root - DEBUG - datastore.py:56 - done
+2025-06-09 16:53:01,874 - root - INFO - environment.py:75 - Deleted environment 26 for user 078a38e9-c1b8-421e-b797-59ee3ae69df4
+2025-06-09 16:53:02,297 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 16:53:02,333 - engineio.server - INFO - socket.py:78 - Ac5jWeU7r98GoPemAABo: Sending packet OPEN data {'sid': 'Ac5jWeU7r98GoPemAABo', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 16:53:02,333 - engineio.server - INFO - socket.py:90 - Ac5jWeU7r98GoPemAABo: Received request to upgrade to websocket
+2025-06-09 16:53:02,333 - engineio.server - INFO - socket.py:219 - Ac5jWeU7r98GoPemAABo: Upgrade to websocket successful
+2025-06-09 16:53:02,337 - engineio.server - INFO - socket.py:39 - Ac5jWeU7r98GoPemAABo: Received packet MESSAGE data 0
+2025-06-09 16:53:02,338 - root - INFO - app.py:146 - [socketio] Client connected: FGrigLMRYrpWgAVIAABp
+2025-06-09 16:53:02,338 - socketio.server - INFO - server.py:164 - emitting event "connected" to FGrigLMRYrpWgAVIAABp [/]
+2025-06-09 16:53:02,338 - engineio.server - INFO - socket.py:78 - Ac5jWeU7r98GoPemAABo: Sending packet MESSAGE data 2["connected",{"sid":"FGrigLMRYrpWgAVIAABp"}]
+2025-06-09 16:53:02,339 - engineio.server - INFO - socket.py:78 - Ac5jWeU7r98GoPemAABo: Sending packet MESSAGE data 0{"sid":"FGrigLMRYrpWgAVIAABp"}
+2025-06-09 16:53:03,360 - root - DEBUG - datastore.py:56 - done
+2025-06-09 16:53:03,360 - root - INFO - environment.py:75 - Deleted environment 25 for user 078a38e9-c1b8-421e-b797-59ee3ae69df4
+2025-06-09 16:53:04,020 - root - DEBUG - datastore.py:56 - done
+2025-06-09 16:53:04,021 - root - INFO - environment.py:75 - Deleted environment 24 for user 078a38e9-c1b8-421e-b797-59ee3ae69df4
+2025-06-09 16:53:04,450 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 16:53:04,523 - engineio.server - INFO - socket.py:78 - GnV9cYQC9UOgd3IwAABq: Sending packet OPEN data {'sid': 'GnV9cYQC9UOgd3IwAABq', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 16:53:04,524 - engineio.server - INFO - socket.py:90 - GnV9cYQC9UOgd3IwAABq: Received request to upgrade to websocket
+2025-06-09 16:53:04,524 - engineio.server - INFO - socket.py:219 - GnV9cYQC9UOgd3IwAABq: Upgrade to websocket successful
+2025-06-09 16:53:04,536 - engineio.server - INFO - socket.py:39 - GnV9cYQC9UOgd3IwAABq: Received packet MESSAGE data 0
+2025-06-09 16:53:04,537 - root - INFO - app.py:146 - [socketio] Client connected: nxV8ZEkYdURIHDnyAABr
+2025-06-09 16:53:04,537 - socketio.server - INFO - server.py:164 - emitting event "connected" to nxV8ZEkYdURIHDnyAABr [/]
+2025-06-09 16:53:04,537 - engineio.server - INFO - socket.py:78 - GnV9cYQC9UOgd3IwAABq: Sending packet MESSAGE data 2["connected",{"sid":"nxV8ZEkYdURIHDnyAABr"}]
+2025-06-09 16:53:04,539 - engineio.server - INFO - socket.py:78 - GnV9cYQC9UOgd3IwAABq: Sending packet MESSAGE data 0{"sid":"nxV8ZEkYdURIHDnyAABr"}
+2025-06-09 16:53:05,407 - root - DEBUG - datastore.py:56 - done
+2025-06-09 16:53:05,408 - root - INFO - environment.py:75 - Deleted environment 23 for user 078a38e9-c1b8-421e-b797-59ee3ae69df4
+2025-06-09 16:53:05,934 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 16:53:05,978 - engineio.server - INFO - socket.py:78 - RXsnf2-VTzHjbAw6AABs: Sending packet OPEN data {'sid': 'RXsnf2-VTzHjbAw6AABs', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 16:53:05,978 - engineio.server - INFO - socket.py:90 - RXsnf2-VTzHjbAw6AABs: Received request to upgrade to websocket
+2025-06-09 16:53:05,979 - engineio.server - INFO - socket.py:219 - RXsnf2-VTzHjbAw6AABs: Upgrade to websocket successful
+2025-06-09 16:53:05,985 - engineio.server - INFO - socket.py:39 - RXsnf2-VTzHjbAw6AABs: Received packet MESSAGE data 0
+2025-06-09 16:53:05,985 - root - INFO - app.py:146 - [socketio] Client connected: hWeiYDm8pnn5cPlfAABt
+2025-06-09 16:53:05,985 - socketio.server - INFO - server.py:164 - emitting event "connected" to hWeiYDm8pnn5cPlfAABt [/]
+2025-06-09 16:53:05,986 - engineio.server - INFO - socket.py:78 - RXsnf2-VTzHjbAw6AABs: Sending packet MESSAGE data 2["connected",{"sid":"hWeiYDm8pnn5cPlfAABt"}]
+2025-06-09 16:53:05,986 - engineio.server - INFO - socket.py:78 - RXsnf2-VTzHjbAw6AABs: Sending packet MESSAGE data 0{"sid":"hWeiYDm8pnn5cPlfAABt"}
+2025-06-09 16:53:06,972 - root - DEBUG - datastore.py:56 - done
+2025-06-09 16:53:06,972 - root - INFO - environment.py:75 - Deleted environment 22 for user 078a38e9-c1b8-421e-b797-59ee3ae69df4
+2025-06-09 16:53:07,731 - root - DEBUG - datastore.py:56 - done
+2025-06-09 16:53:07,731 - root - INFO - environment.py:75 - Deleted environment 21 for user 078a38e9-c1b8-421e-b797-59ee3ae69df4
+2025-06-09 16:53:08,552 - root - DEBUG - datastore.py:56 - done
+2025-06-09 16:53:08,552 - root - INFO - environment.py:75 - Deleted environment 20 for user 078a38e9-c1b8-421e-b797-59ee3ae69df4
+2025-06-09 16:53:09,333 - root - DEBUG - datastore.py:56 - done
+2025-06-09 16:53:09,333 - root - INFO - environment.py:75 - Deleted environment 19 for user 078a38e9-c1b8-421e-b797-59ee3ae69df4
+2025-06-09 16:53:11,448 - root - DEBUG - datastore.py:56 - done
+2025-06-09 16:53:11,448 - root - INFO - environment.py:45 - created environment a for user 078a38e9-c1b8-421e-b797-59ee3ae69df4
+2025-06-09 16:53:13,384 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 16:53:13,423 - engineio.server - INFO - socket.py:78 - _u6tyDJJSIIVPecsAABu: Sending packet OPEN data {'sid': '_u6tyDJJSIIVPecsAABu', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 16:53:13,424 - engineio.server - INFO - socket.py:90 - _u6tyDJJSIIVPecsAABu: Received request to upgrade to websocket
+2025-06-09 16:53:13,424 - engineio.server - INFO - socket.py:219 - _u6tyDJJSIIVPecsAABu: Upgrade to websocket successful
+2025-06-09 16:53:13,428 - engineio.server - INFO - socket.py:39 - _u6tyDJJSIIVPecsAABu: Received packet MESSAGE data 0
+2025-06-09 16:53:13,428 - root - INFO - app.py:146 - [socketio] Client connected: YfwJoHOwoNOiDqAHAABv
+2025-06-09 16:53:13,428 - socketio.server - INFO - server.py:164 - emitting event "connected" to YfwJoHOwoNOiDqAHAABv [/]
+2025-06-09 16:53:13,428 - engineio.server - INFO - socket.py:78 - _u6tyDJJSIIVPecsAABu: Sending packet MESSAGE data 2["connected",{"sid":"YfwJoHOwoNOiDqAHAABv"}]
+2025-06-09 16:53:13,429 - engineio.server - INFO - socket.py:78 - _u6tyDJJSIIVPecsAABu: Sending packet MESSAGE data 0{"sid":"YfwJoHOwoNOiDqAHAABv"}
+2025-06-09 16:53:38,427 - engineio.server - INFO - socket.py:78 - _u6tyDJJSIIVPecsAABu: Sending packet PING data None
+2025-06-09 16:53:38,429 - engineio.server - INFO - socket.py:39 - _u6tyDJJSIIVPecsAABu: Received packet PONG data 
+2025-06-09 16:54:03,445 - engineio.server - INFO - socket.py:78 - _u6tyDJJSIIVPecsAABu: Sending packet PING data None
+2025-06-09 16:54:03,447 - engineio.server - INFO - socket.py:39 - _u6tyDJJSIIVPecsAABu: Received packet PONG data 
+2025-06-09 16:54:28,108 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 16:54:28,135 - engineio.server - INFO - socket.py:78 - OJXxmwlc24gBhMWMAABw: Sending packet OPEN data {'sid': 'OJXxmwlc24gBhMWMAABw', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 16:54:28,136 - engineio.server - INFO - socket.py:90 - OJXxmwlc24gBhMWMAABw: Received request to upgrade to websocket
+2025-06-09 16:54:28,136 - engineio.server - INFO - socket.py:219 - OJXxmwlc24gBhMWMAABw: Upgrade to websocket successful
+2025-06-09 16:54:28,139 - engineio.server - INFO - socket.py:39 - OJXxmwlc24gBhMWMAABw: Received packet MESSAGE data 0
+2025-06-09 16:54:28,139 - root - INFO - app.py:146 - [socketio] Client connected: jN8xw5EBAreR6kjQAABx
+2025-06-09 16:54:28,139 - socketio.server - INFO - server.py:164 - emitting event "connected" to jN8xw5EBAreR6kjQAABx [/]
+2025-06-09 16:54:28,139 - engineio.server - INFO - socket.py:78 - OJXxmwlc24gBhMWMAABw: Sending packet MESSAGE data 2["connected",{"sid":"jN8xw5EBAreR6kjQAABx"}]
+2025-06-09 16:54:28,139 - engineio.server - INFO - socket.py:78 - OJXxmwlc24gBhMWMAABw: Sending packet MESSAGE data 0{"sid":"jN8xw5EBAreR6kjQAABx"}
+2025-06-09 16:54:30,053 - root - DEBUG - datastore.py:56 - done
+2025-06-09 16:54:30,053 - root - INFO - environment.py:45 - created environment b for user 078a38e9-c1b8-421e-b797-59ee3ae69df4
+2025-06-09 16:54:32,450 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 16:54:32,487 - engineio.server - INFO - socket.py:78 - jKxVB_2aUxEq6D-4AABy: Sending packet OPEN data {'sid': 'jKxVB_2aUxEq6D-4AABy', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 16:54:32,487 - engineio.server - INFO - socket.py:90 - jKxVB_2aUxEq6D-4AABy: Received request to upgrade to websocket
+2025-06-09 16:54:32,487 - engineio.server - INFO - socket.py:219 - jKxVB_2aUxEq6D-4AABy: Upgrade to websocket successful
+2025-06-09 16:54:32,495 - engineio.server - INFO - socket.py:39 - jKxVB_2aUxEq6D-4AABy: Received packet MESSAGE data 0
+2025-06-09 16:54:32,495 - root - INFO - app.py:146 - [socketio] Client connected: FKGeXHcuLdV7Sy0OAABz
+2025-06-09 16:54:32,495 - socketio.server - INFO - server.py:164 - emitting event "connected" to FKGeXHcuLdV7Sy0OAABz [/]
+2025-06-09 16:54:32,496 - engineio.server - INFO - socket.py:78 - jKxVB_2aUxEq6D-4AABy: Sending packet MESSAGE data 2["connected",{"sid":"FKGeXHcuLdV7Sy0OAABz"}]
+2025-06-09 16:54:32,497 - engineio.server - INFO - socket.py:78 - jKxVB_2aUxEq6D-4AABy: Sending packet MESSAGE data 0{"sid":"FKGeXHcuLdV7Sy0OAABz"}
+2025-06-09 16:54:38,225 - root - DEBUG - datastore.py:56 - done
+2025-06-09 16:54:38,226 - root - INFO - environment.py:45 - created environment c for user 078a38e9-c1b8-421e-b797-59ee3ae69df4
+2025-06-09 16:54:42,961 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 16:54:42,979 - engineio.server - INFO - socket.py:78 - mYa_bN7krLCzqXWbAAB0: Sending packet OPEN data {'sid': 'mYa_bN7krLCzqXWbAAB0', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 16:54:42,979 - engineio.server - INFO - socket.py:90 - mYa_bN7krLCzqXWbAAB0: Received request to upgrade to websocket
+2025-06-09 16:54:42,979 - engineio.server - INFO - socket.py:219 - mYa_bN7krLCzqXWbAAB0: Upgrade to websocket successful
+2025-06-09 16:54:42,982 - engineio.server - INFO - socket.py:39 - mYa_bN7krLCzqXWbAAB0: Received packet MESSAGE data 0
+2025-06-09 16:54:42,982 - root - INFO - app.py:146 - [socketio] Client connected: ayofCTblmPt2EefJAAB1
+2025-06-09 16:54:42,982 - socketio.server - INFO - server.py:164 - emitting event "connected" to ayofCTblmPt2EefJAAB1 [/]
+2025-06-09 16:54:42,982 - engineio.server - INFO - socket.py:78 - mYa_bN7krLCzqXWbAAB0: Sending packet MESSAGE data 2["connected",{"sid":"ayofCTblmPt2EefJAAB1"}]
+2025-06-09 16:54:42,983 - engineio.server - INFO - socket.py:78 - mYa_bN7krLCzqXWbAAB0: Sending packet MESSAGE data 0{"sid":"ayofCTblmPt2EefJAAB1"}
+2025-06-09 16:55:07,981 - engineio.server - INFO - socket.py:78 - mYa_bN7krLCzqXWbAAB0: Sending packet PING data None
+2025-06-09 16:55:07,983 - engineio.server - INFO - socket.py:39 - mYa_bN7krLCzqXWbAAB0: Received packet PONG data 
+2025-06-09 16:55:32,988 - engineio.server - INFO - socket.py:78 - mYa_bN7krLCzqXWbAAB0: Sending packet PING data None
+2025-06-09 16:55:32,990 - engineio.server - INFO - socket.py:39 - mYa_bN7krLCzqXWbAAB0: Received packet PONG data 
+2025-06-09 16:55:57,992 - engineio.server - INFO - socket.py:78 - mYa_bN7krLCzqXWbAAB0: Sending packet PING data None
+2025-06-09 16:55:57,995 - engineio.server - INFO - socket.py:39 - mYa_bN7krLCzqXWbAAB0: Received packet PONG data 
+2025-06-09 16:56:19,631 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 16:56:19,651 - engineio.server - INFO - socket.py:78 - 3KMlMDJ2EHLJ8CNLAAB2: Sending packet OPEN data {'sid': '3KMlMDJ2EHLJ8CNLAAB2', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 16:56:19,651 - engineio.server - INFO - socket.py:90 - 3KMlMDJ2EHLJ8CNLAAB2: Received request to upgrade to websocket
+2025-06-09 16:56:19,651 - engineio.server - INFO - socket.py:219 - 3KMlMDJ2EHLJ8CNLAAB2: Upgrade to websocket successful
+2025-06-09 16:56:19,657 - engineio.server - INFO - socket.py:39 - 3KMlMDJ2EHLJ8CNLAAB2: Received packet MESSAGE data 0
+2025-06-09 16:56:19,658 - root - INFO - app.py:146 - [socketio] Client connected: fEFCB04m8mD660K3AAB3
+2025-06-09 16:56:19,658 - socketio.server - INFO - server.py:164 - emitting event "connected" to fEFCB04m8mD660K3AAB3 [/]
+2025-06-09 16:56:19,659 - engineio.server - INFO - socket.py:78 - 3KMlMDJ2EHLJ8CNLAAB2: Sending packet MESSAGE data 2["connected",{"sid":"fEFCB04m8mD660K3AAB3"}]
+2025-06-09 16:56:19,659 - engineio.server - INFO - socket.py:78 - 3KMlMDJ2EHLJ8CNLAAB2: Sending packet MESSAGE data 0{"sid":"fEFCB04m8mD660K3AAB3"}
+2025-06-09 16:56:21,268 - root - DEBUG - datastore.py:56 - done
+2025-06-09 16:56:21,268 - root - INFO - environment.py:45 - created environment d for user 078a38e9-c1b8-421e-b797-59ee3ae69df4
+2025-06-09 16:56:23,710 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 16:56:23,732 - engineio.server - INFO - socket.py:78 - PbabhfRbDlJgsIM9AAB4: Sending packet OPEN data {'sid': 'PbabhfRbDlJgsIM9AAB4', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 16:56:23,732 - engineio.server - INFO - socket.py:90 - PbabhfRbDlJgsIM9AAB4: Received request to upgrade to websocket
+2025-06-09 16:56:23,732 - engineio.server - INFO - socket.py:219 - PbabhfRbDlJgsIM9AAB4: Upgrade to websocket successful
+2025-06-09 16:56:23,734 - engineio.server - INFO - socket.py:39 - PbabhfRbDlJgsIM9AAB4: Received packet MESSAGE data 0
+2025-06-09 16:56:23,735 - root - INFO - app.py:146 - [socketio] Client connected: WdFNUe91uv37EjGGAAB5
+2025-06-09 16:56:23,735 - socketio.server - INFO - server.py:164 - emitting event "connected" to WdFNUe91uv37EjGGAAB5 [/]
+2025-06-09 16:56:23,735 - engineio.server - INFO - socket.py:78 - PbabhfRbDlJgsIM9AAB4: Sending packet MESSAGE data 2["connected",{"sid":"WdFNUe91uv37EjGGAAB5"}]
+2025-06-09 16:56:23,735 - engineio.server - INFO - socket.py:78 - PbabhfRbDlJgsIM9AAB4: Sending packet MESSAGE data 0{"sid":"WdFNUe91uv37EjGGAAB5"}
+2025-06-09 16:56:48,754 - engineio.server - INFO - socket.py:78 - PbabhfRbDlJgsIM9AAB4: Sending packet PING data None
+2025-06-09 16:56:48,755 - engineio.server - INFO - socket.py:39 - PbabhfRbDlJgsIM9AAB4: Received packet PONG data 
+2025-06-09 16:56:52,157 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 16:56:52,185 - engineio.server - INFO - socket.py:78 - --DM-hqTJ_xcW_iQAAB6: Sending packet OPEN data {'sid': '--DM-hqTJ_xcW_iQAAB6', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 16:56:52,185 - engineio.server - INFO - socket.py:90 - --DM-hqTJ_xcW_iQAAB6: Received request to upgrade to websocket
+2025-06-09 16:56:52,185 - engineio.server - INFO - socket.py:219 - --DM-hqTJ_xcW_iQAAB6: Upgrade to websocket successful
+2025-06-09 16:56:52,189 - engineio.server - INFO - socket.py:39 - --DM-hqTJ_xcW_iQAAB6: Received packet MESSAGE data 0
+2025-06-09 16:56:52,189 - root - INFO - app.py:146 - [socketio] Client connected: f1uQohkfS6KBsflnAAB7
+2025-06-09 16:56:52,189 - socketio.server - INFO - server.py:164 - emitting event "connected" to f1uQohkfS6KBsflnAAB7 [/]
+2025-06-09 16:56:52,190 - engineio.server - INFO - socket.py:78 - --DM-hqTJ_xcW_iQAAB6: Sending packet MESSAGE data 2["connected",{"sid":"f1uQohkfS6KBsflnAAB7"}]
+2025-06-09 16:56:52,190 - engineio.server - INFO - socket.py:78 - --DM-hqTJ_xcW_iQAAB6: Sending packet MESSAGE data 0{"sid":"f1uQohkfS6KBsflnAAB7"}
+2025-06-09 16:57:17,192 - engineio.server - INFO - socket.py:78 - --DM-hqTJ_xcW_iQAAB6: Sending packet PING data None
+2025-06-09 16:57:17,195 - engineio.server - INFO - socket.py:39 - --DM-hqTJ_xcW_iQAAB6: Received packet PONG data 
+2025-06-09 16:57:33,649 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 16:57:33,665 - engineio.server - INFO - socket.py:78 - 6EslveaPt3AvspcwAAB8: Sending packet OPEN data {'sid': '6EslveaPt3AvspcwAAB8', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 16:57:33,665 - engineio.server - INFO - socket.py:90 - 6EslveaPt3AvspcwAAB8: Received request to upgrade to websocket
+2025-06-09 16:57:33,665 - engineio.server - INFO - socket.py:219 - 6EslveaPt3AvspcwAAB8: Upgrade to websocket successful
+2025-06-09 16:57:33,667 - engineio.server - INFO - socket.py:39 - 6EslveaPt3AvspcwAAB8: Received packet MESSAGE data 0
+2025-06-09 16:57:33,668 - root - INFO - app.py:146 - [socketio] Client connected: Sr-zK9-oVlA7upWTAAB9
+2025-06-09 16:57:33,668 - socketio.server - INFO - server.py:164 - emitting event "connected" to Sr-zK9-oVlA7upWTAAB9 [/]
+2025-06-09 16:57:33,668 - engineio.server - INFO - socket.py:78 - 6EslveaPt3AvspcwAAB8: Sending packet MESSAGE data 2["connected",{"sid":"Sr-zK9-oVlA7upWTAAB9"}]
+2025-06-09 16:57:33,668 - engineio.server - INFO - socket.py:78 - 6EslveaPt3AvspcwAAB8: Sending packet MESSAGE data 0{"sid":"Sr-zK9-oVlA7upWTAAB9"}
+2025-06-09 16:57:58,668 - engineio.server - INFO - socket.py:78 - 6EslveaPt3AvspcwAAB8: Sending packet PING data None
+2025-06-09 16:57:58,669 - engineio.server - INFO - socket.py:39 - 6EslveaPt3AvspcwAAB8: Received packet PONG data 
+2025-06-09 16:58:17,287 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 16:58:17,320 - engineio.server - INFO - socket.py:78 - XSG1QYEPI2YANawxAAB-: Sending packet OPEN data {'sid': 'XSG1QYEPI2YANawxAAB-', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 16:58:17,320 - engineio.server - INFO - socket.py:90 - XSG1QYEPI2YANawxAAB-: Received request to upgrade to websocket
+2025-06-09 16:58:17,321 - engineio.server - INFO - socket.py:219 - XSG1QYEPI2YANawxAAB-: Upgrade to websocket successful
+2025-06-09 16:58:17,324 - engineio.server - INFO - socket.py:39 - XSG1QYEPI2YANawxAAB-: Received packet MESSAGE data 0
+2025-06-09 16:58:17,325 - root - INFO - app.py:146 - [socketio] Client connected: -xisZ7b90-jR0obTAAB_
+2025-06-09 16:58:17,325 - socketio.server - INFO - server.py:164 - emitting event "connected" to -xisZ7b90-jR0obTAAB_ [/]
+2025-06-09 16:58:17,325 - engineio.server - INFO - socket.py:78 - XSG1QYEPI2YANawxAAB-: Sending packet MESSAGE data 2["connected",{"sid":"-xisZ7b90-jR0obTAAB_"}]
+2025-06-09 16:58:17,326 - engineio.server - INFO - socket.py:78 - XSG1QYEPI2YANawxAAB-: Sending packet MESSAGE data 0{"sid":"-xisZ7b90-jR0obTAAB_"}
+2025-06-09 16:58:42,325 - engineio.server - INFO - socket.py:78 - XSG1QYEPI2YANawxAAB-: Sending packet PING data None
+2025-06-09 16:58:42,328 - engineio.server - INFO - socket.py:39 - XSG1QYEPI2YANawxAAB-: Received packet PONG data 
+2025-06-09 16:58:48,234 - root - INFO - app.py:393 - [environment_view] workflow_titles mapping: {'4': 'orchestrate', '3': 'ToxJson', '2': 'ToxDirect', '1': 'ToxRAP'}
+2025-06-09 16:58:48,304 - engineio.server - INFO - socket.py:78 - 9B3Ds01x2Mc2b48YAACA: Sending packet OPEN data {'sid': '9B3Ds01x2Mc2b48YAACA', 'upgrades': [], 'pingTimeout': 20000, 'pingInterval': 25000, 'maxPayload': 1000000}
+2025-06-09 16:58:48,304 - engineio.server - INFO - socket.py:90 - 9B3Ds01x2Mc2b48YAACA: Received request to upgrade to websocket
+2025-06-09 16:58:48,304 - engineio.server - INFO - socket.py:219 - 9B3Ds01x2Mc2b48YAACA: Upgrade to websocket successful
+2025-06-09 16:58:48,312 - engineio.server - INFO - socket.py:39 - 9B3Ds01x2Mc2b48YAACA: Received packet MESSAGE data 0
+2025-06-09 16:58:48,313 - root - INFO - app.py:146 - [socketio] Client connected: PoLL0haseUE54jW0AACB
+2025-06-09 16:58:48,313 - socketio.server - INFO - server.py:164 - emitting event "connected" to PoLL0haseUE54jW0AACB [/]
+2025-06-09 16:58:48,313 - engineio.server - INFO - socket.py:78 - 9B3Ds01x2Mc2b48YAACA: Sending packet MESSAGE data 2["connected",{"sid":"PoLL0haseUE54jW0AACB"}]
+2025-06-09 16:58:48,313 - engineio.server - INFO - socket.py:78 - 9B3Ds01x2Mc2b48YAACA: Sending packet MESSAGE data 0{"sid":"PoLL0haseUE54jW0AACB"}
+2025-06-09 16:59:13,311 - engineio.server - INFO - socket.py:78 - 9B3Ds01x2Mc2b48YAACA: Sending packet PING data None
+2025-06-09 16:59:13,314 - engineio.server - INFO - socket.py:39 - 9B3Ds01x2Mc2b48YAACA: Received packet PONG data 
+2025-06-09 16:59:38,316 - engineio.server - INFO - socket.py:78 - 9B3Ds01x2Mc2b48YAACA: Sending packet PING data None
+2025-06-09 16:59:38,318 - engineio.server - INFO - socket.py:39 - 9B3Ds01x2Mc2b48YAACA: Received packet PONG data 
+2025-06-09 17:00:03,323 - engineio.server - INFO - socket.py:78 - 9B3Ds01x2Mc2b48YAACA: Sending packet PING data None
+2025-06-09 17:00:03,326 - engineio.server - INFO - socket.py:39 - 9B3Ds01x2Mc2b48YAACA: Received packet PONG data 
+2025-06-09 17:00:28,328 - engineio.server - INFO - socket.py:78 - 9B3Ds01x2Mc2b48YAACA: Sending packet PING data None
+2025-06-09 17:00:28,329 - engineio.server - INFO - socket.py:39 - 9B3Ds01x2Mc2b48YAACA: Received packet PONG data 
+2025-06-09 17:00:53,334 - engineio.server - INFO - socket.py:78 - 9B3Ds01x2Mc2b48YAACA: Sending packet PING data None
+2025-06-09 17:00:53,336 - engineio.server - INFO - socket.py:39 - 9B3Ds01x2Mc2b48YAACA: Received packet PONG data 
+2025-06-09 17:01:18,337 - engineio.server - INFO - socket.py:78 - 9B3Ds01x2Mc2b48YAACA: Sending packet PING data None
+2025-06-09 17:01:18,340 - engineio.server - INFO - socket.py:39 - 9B3Ds01x2Mc2b48YAACA: Received packet PONG data 
+2025-06-09 17:01:43,346 - engineio.server - INFO - socket.py:78 - 9B3Ds01x2Mc2b48YAACA: Sending packet PING data None
+2025-06-09 17:01:43,347 - engineio.server - INFO - socket.py:39 - 9B3Ds01x2Mc2b48YAACA: Received packet PONG data 
+2025-06-09 17:02:08,349 - engineio.server - INFO - socket.py:78 - 9B3Ds01x2Mc2b48YAACA: Sending packet PING data None
+2025-06-09 17:02:08,351 - engineio.server - INFO - socket.py:39 - 9B3Ds01x2Mc2b48YAACA: Received packet PONG data 
+2025-06-09 17:02:33,355 - engineio.server - INFO - socket.py:78 - 9B3Ds01x2Mc2b48YAACA: Sending packet PING data None
+2025-06-09 17:02:33,356 - engineio.server - INFO - socket.py:39 - 9B3Ds01x2Mc2b48YAACA: Received packet PONG data 
+2025-06-09 17:02:33,625 - werkzeug - INFO - _internal.py:97 -  * Detected change in '/home/kyu/Documents/toxindex/webserver/model/task.py', reloading
+2025-06-09 17:02:33,860 - werkzeug - INFO - _internal.py:97 -  * Restarting with stat
+2025-06-09 17:02:58,697 - werkzeug - INFO - _internal.py:97 -  * Restarting with stat
+2025-06-09 17:03:07,129 - werkzeug - INFO - _internal.py:97 -  * Restarting with stat
