@@ -15,8 +15,14 @@ nix flake update
 nix develop
 
 1. nix develop
+
+2-1 (production) gunicorn webserver.app:app --bind 0.0.0.0:8000 --worker-class eventlet
+2-2 (production) .venv/bin/python redis_listener_service.py
 2. python -m webserver.app
 3. celery -A workflows.celery_worker worker --loglevel=info
+
+lsof -i :8000
+kill PID
 
 ## Roadmap
 The basic idea is that: 

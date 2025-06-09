@@ -122,9 +122,9 @@
     <div class="main">
       <div class="chat-wrapper">
         <div class="button-bar">
-          <button class="action-button active" data-workflow="1">ProbRA</button>
-          <button class="action-button" data-workflow="2">Metabolise</button>
-          <button class="action-button" data-workflow="3">Pathways</button>
+          <button class="action-button active" data-workflow="1">ToxRAP</button>
+          <button class="action-button" data-workflow="2">ToxDirect</button>
+          <button class="action-button" data-workflow="3">ToxJson</button>
           <button class="action-button" data-workflow="4">Predict</button>
         </div>
         <div id="task-input">
@@ -133,7 +133,11 @@
         </div>
         <div id="env-task-list">
           {% for task in tasks %}
-            <div class="task-item" data-id="{{ task.task_id }}">{{ task.title }}</div>
+            <div class="task-item" data-id="{{ task.task_id }}">
+              [{{ workflow_titles[task.workflow_id|string] if (task.workflow_id|string) in workflow_titles else task.workflow_id }}]
+              {{ task.title }}
+              {% if task.created_at %}<span style="color:#888;font-size:0.9em;">({{ task.created_at }})</span>{% endif %}
+            </div>
           {% endfor %}
         </div>
         <div id="progress-log"></div>
