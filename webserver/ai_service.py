@@ -63,5 +63,5 @@ def generate_title(message: str) -> str:
         )
         return resp.choices[0].message["content"].strip()
     except Exception:
-        # Fallback title
-        return message.strip()[:20]
+        # Fallback title, robust: limit to 255 chars
+        return message.strip()[:255]
