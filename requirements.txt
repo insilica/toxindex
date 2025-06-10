@@ -69,6 +69,7 @@ tqdm==4.67.1
 urllib3==2.4.0
 google-genai==1.18.0
 SPARQLWrapper==2.0.0
+ndex2==3.10.0
 git+ssh://git@github.com/toxindex/pathway_analysis_tool.git#egg=pathway_analysis_tool
 
 # SERVING
