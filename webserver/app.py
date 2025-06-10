@@ -507,6 +507,23 @@ def api_me():
 def test_alive():
     return "ALIVE"
 
+@app.route("/api/environments", methods=["GET"])
+@flask_login.login_required
+def api_environments():
+    envs = Environment.get_environments_by_user(flask_login.current_user.user_id)
+    # For admin, you might want to return all environments. For now, just user's.
+    return flask.jsonify({
+        "environments": [
+            {
+                "environment_id": e.environment_id,
+                "title": e.title,
+                "user_id": flask_login.current_user.email,  # Use email for creator
+                "created_at": e.created_at.strftime("%Y-%m-%dT%H:%M:%S") if e.created_at else ""
+            }
+            for e in envs
+        ]
+    })
+
 print("Registered routes:")
 for rule in app.url_map.iter_rules():
     print(rule)
