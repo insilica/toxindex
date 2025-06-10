@@ -6,21 +6,30 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import CreateEnvironment from "./components/CreateEnvironment";
 import Dashboard from "./components/Dashboard";
 import SettingsEnvironments from "./components/SettingsEnvironments";
+import TermsPrivacy from "./components/TermsPrivacy";
+import Settings from "./components/Settings";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 function App() {
   return (
-    <Router>
-      <Layout>
+    <div className="w-screen h-screen min-h-screen min-w-full">
+      <Router>
         <Routes>
+          {/* Public routes: no Layout */}
           <Route path="/login" element={<LoginForm />} />
           <Route path="/register" element={<RegisterForm />} />
           <Route path="/verify" element={<VerifyPage />} />
+          <Route path="/policies/terms-of-use/" element={<TermsPrivacy />} />
+          <Route path="/policies/privacy-policy/" element={<TermsPrivacy />} />
+
+          {/* Protected routes: with Layout */}
           <Route
             path="/"
             element={
               <ProtectedRoute>
-                <Dashboard />
+                <Layout>
+                  <Dashboard />
+                </Layout>
               </ProtectedRoute>
             }
           />
@@ -28,7 +37,19 @@ function App() {
             path="/environments/new"
             element={
               <ProtectedRoute>
-                <CreateEnvironment />
+                <Layout>
+                  <CreateEnvironment />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <Settings />
+                </Layout>
               </ProtectedRoute>
             }
           />
@@ -36,13 +57,15 @@ function App() {
             path="/settings/environments"
             element={
               <ProtectedRoute>
-                <SettingsEnvironments />
+                <Layout>
+                  <SettingsEnvironments />
+                </Layout>
               </ProtectedRoute>
             }
           />
         </Routes>
-      </Layout>
-    </Router>
+      </Router>
+    </div>
   );
 }
 
