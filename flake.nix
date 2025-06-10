@@ -55,6 +55,19 @@
             export EVENTLET_NO_GREENDNS=yes 
             echo "Python packages in uv venv:"
             uv pip list
+
+            # Start Blazegraph container
+            docker run --name blazegraph \
+              -d -p 8889:8080 \
+              lyrasis/blazegraph:2.1.5
+
+            # add data from WikiPathways/AOP-Wiki
+            for data_source in wikipathways AOPWikiRDF; do
+              curl -X POST \
+                -H "Content-Type: text/turtle" \
+                --data-binary @pathway_data/${data_source}.ttl \
+                http://localhost:8889/bigdata/namespace/kb/sparql
+            done
           '';
         };
       }
