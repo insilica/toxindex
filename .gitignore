@@ -42,3 +42,20 @@ result
 
 # Uncomment to ignore VSCode settings (if user-specific)
 # .vscode/
+
+# Node and Python
+node_modules/
+logs/
+*.log
+.env
+.env.*
+*.pyc
+__pycache__/
+# OS
+.DS_Store
+Thumbs.db
+# Editor
+.vscode/
+.idea/
+# Test scripts
+/test_api_me.sh

@@ -48,3 +48,18 @@ To do this we can:
 To get this working we can:
 
 1. create a docker container that 
+
+
+
+
+
+Frontend
+React, Tainwind CSS with Vite, TypeScript
+
+Backend
+Flask, Eventlet, Celery
+
+Data
+Langchain
+
+Gunicorn on EC2
