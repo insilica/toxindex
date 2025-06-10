@@ -56,12 +56,22 @@
             echo "Python packages in uv venv:"
             uv pip list
 
-            # Start Blazegraph container
-            docker run --name blazegraph \
-              -d -p 8889:8080 \
-              lyrasis/blazegraph:2.1.5
+            # Run or reuse the Blazegraph container
+            if ! docker ps -a --format '{{.Names}}' | grep -q '^blazegraph$'; then
+              docker run --name blazegraph \
+                -d -p 8889:8080 \
+                lyrasis/blazegraph:2.1.5
+            else
+              docker start blazegraph 2>/dev/null || true
+            fi
 
-            # add data from WikiPathways/AOP-Wiki
+            # Wait for Blazegraph to start listening
+            until curl -s http://localhost:8889/bigdata/namespace/kb/sparql -o /dev/null; do
+              printf '.'; sleep 1
+            done
+            echo "Blazegraph up—loading TTL files"
+
+            # Add data from WikiPathways/AOP-Wiki
             for data_source in wikipathways AOPWikiRDF; do
               curl -X POST \
                 -H "Content-Type: text/turtle" \
