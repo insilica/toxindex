@@ -1,3 +1,4 @@
+print("RUNNING WEBSERVER/APP.PY")
 # from gevent import monkey
 # monkey.patch_all()
 import eventlet
@@ -78,6 +79,9 @@ for handler in logging.getLogger().handlers:
 LM.init(app)
 Workflow.load_default_workflows()
 
+from flask_wtf.csrf import CSRFError
+from flask_wtf import CSRFProtect
+csrf = CSRFProtect(app)
 
 # REDIS PUB/SUB BACKGROUND LISTENER ==========================================
 def redis_listener(name):
@@ -376,10 +380,11 @@ def workflow(workflow_id):
 
 
 # ENVIRONMENT MANAGEMENT =====================================================
+@csrf.exempt
 @app.route("/environment/new", methods=["POST"])
 @flask_login.login_required
 def environment_new():
-    env_data = request.get_json()
+    env_data = flask.request.get_json()
     title = env_data.get("title", "New Environment")
     description = env_data.get("description")
     env = Environment.create_environment(
@@ -387,6 +392,17 @@ def environment_new():
     )
     return flask.jsonify({"environment_id": env.environment_id})
 
+@csrf.exempt
+@app.route("/api/environment/new", methods=["POST"])
+@flask_login.login_required
+def api_environment_new():
+    env_data = flask.request.get_json()
+    title = env_data.get("title", "New Environment")
+    description = env_data.get("description")
+    env = Environment.create_environment(
+        title, flask_login.current_user.user_id, description
+    )
+    return flask.jsonify({"environment_id": env.environment_id})
 
 @app.route("/environments", methods=["GET"])
 @flask_login.login_required
@@ -424,12 +440,19 @@ def environment_delete(env_id):
 
 # LOGIN MANAGEMENT ===========================================================
 app.route("/register", methods=["GET", "POST"])(login.register)
+app.route("/api/register", methods=["GET", "POST"])(csrf.exempt(login.register))
 app.route("/verify", methods=["GET"])(login.verify_message)
+app.route("/api/verify", methods=["GET"])(csrf.exempt(login.verify_message))
 app.route("/verification/<token>", methods=["GET", "POST"])(login.verification)
+app.route("/api/verification/<token>", methods=["GET", "POST"])(csrf.exempt(login.verification))
 app.route("/login", methods=["GET", "POST"])(login.login)
+app.route("/api/login", methods=["GET", "POST"])(csrf.exempt(login.login))
 app.route("/logout", methods=["GET"])(login.logout)
+app.route("/api/logout", methods=["GET"])(csrf.exempt(login.logout))
 app.route("/forgot_password", methods=["GET", "POST"])(login.forgot_password)
+app.route("/api/forgot_password", methods=["GET", "POST"])(csrf.exempt(login.forgot_password))
 app.route("/reset_password/<token>", methods=["GET", "POST"])(login.reset_password)
+app.route("/api/reset_password/<token>", methods=["GET", "POST"])(csrf.exempt(login.reset_password))
 
 
 # ICONS ======================================================================
@@ -443,6 +466,50 @@ def serve_icon(filename):
     icons_dir = os.path.join(os.path.dirname(__file__), "icons")
     return send_from_directory(icons_dir, filename)
 
+
+
+
+@app.route('/log_tab_switch', methods=['POST'])
+def log_tab_switch():
+    data = flask.request.get_json()
+    tab = data.get('tab')
+    task_id = data.get('task_id')
+    timestamp = data.get('timestamp')
+    logging.info(f"[Tab Switch] User switched to tab '{tab}' for task_id={task_id} at {timestamp}")
+    return flask.jsonify({'status': 'ok'})
+
+@app.errorhandler(CSRFError)
+def handle_csrf_error(e):
+    logging.error(f"[CSRF] {e.description}")
+    from webserver.forms.registration_form import RegistrationForm
+    return flask.render_template('register.html', form=RegistrationForm(), csrf_error=e.description), 400
+
+@app.route("/api/me", methods=["GET"])
+def api_me():
+    import flask_login
+    from flask import make_response, jsonify
+    logging.warning(f"current_user: {flask_login.current_user}")
+    logging.warning(f"is_authenticated: {flask_login.current_user.is_authenticated}")
+    if not flask_login.current_user.is_authenticated:
+        response = make_response(jsonify({"error": "Not authenticated"}), 401)
+    else:
+        response = make_response(jsonify({
+            "user_id": flask_login.current_user.user_id,
+            "email": flask_login.current_user.email,
+        }))
+    # Prevent caching
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
+
+@app.route("/test-alive")
+def test_alive():
+    return "ALIVE"
+
+print("Registered routes:")
+for rule in app.url_map.iter_rules():
+    print(rule)
 
 # LAUNCH =====================================================================
 # In development, start the Redis listener only in the reloader child process
@@ -460,19 +527,3 @@ if __name__ == "__main__":
 
 # In production (Gunicorn), run the Redis listener as a separate process using redis_listener_service.py
 # See redis_listener_service.py for details.
-
-@app.route('/log_tab_switch', methods=['POST'])
-def log_tab_switch():
-    data = flask.request.get_json()
-    tab = data.get('tab')
-    task_id = data.get('task_id')
-    timestamp = data.get('timestamp')
-    logging.info(f"[Tab Switch] User switched to tab '{tab}' for task_id={task_id} at {timestamp}")
-    return flask.jsonify({'status': 'ok'})
-
-from flask_wtf.csrf import CSRFError
-@app.errorhandler(CSRFError)
-def handle_csrf_error(e):
-    logging.error(f"[CSRF] {e.description}")
-    from webserver.forms.registration_form import RegistrationForm
-    return flask.render_template('register.html', form=RegistrationForm(), csrf_error=e.description), 400
