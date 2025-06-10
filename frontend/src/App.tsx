@@ -5,6 +5,7 @@ import VerifyPage from "./components/VerifyPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import CreateEnvironment from "./components/CreateEnvironment";
 import Dashboard from "./components/Dashboard";
+import SettingsEnvironments from "./components/SettingsEnvironments";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 function App() {
@@ -28,6 +29,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <CreateEnvironment />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings/environments"
+            element={
+              <ProtectedRoute>
+                <SettingsEnvironments />
               </ProtectedRoute>
             }
           />
