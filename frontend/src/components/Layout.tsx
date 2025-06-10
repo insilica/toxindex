@@ -143,10 +143,10 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               defaultValue="toxindex-rap"
             >
               <option value="toxindex-rap">ToxIndex RAP</option>
-              <option value="gpt-4">GPT-4</option>
-              <option value="gpt-3.5">GPT-3.5</option>
-              <option value="llama-2">Llama-2</option>
-              <option value="custom">Custom Model</option>
+              <option value="toxindex-pathway">ToxIndex Pathway</option>
+              <option value="toxindex-3rd">ToxIndex 3rd</option>
+              <option value="toxindex-4th">ToxIndex 4th</option>
+              <option value="toxindex-5th">ToxIndex 5th</option>
             </select>
             <span style={{ pointerEvents: 'none', position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center' }}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -157,32 +157,34 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         </div>
       </div>
       {/* User profile button at top right, aligned with others */}
-      <div style={{ position: 'absolute', top: '2rem', right: '2.5rem', zIndex: 40 }} ref={profileRef}>
-        <button
-          onClick={() => setProfileOpen(v => !v)}
-          className="w-11 h-11 flex items-center justify-center rounded-full bg-gray-900 bg-opacity-60 text-white hover:bg-gray-800 focus:outline-none shadow"
-          style={{ padding: 0 }}
-          title="User profile"
-        >
-          <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" className="text-gray-300">
-            <circle cx="12" cy="8" r="4" />
-            <path d="M4 20c0-2.5 3.5-4 8-4s8 1.5 8 4" />
-          </svg>
-        </button>
-        {profileOpen && (
-          <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-2 text-gray-900 border border-gray-200">
-            <div className="px-4 py-2 border-b border-gray-100 text-sm">
-              <div className="font-medium">{user?.email || "Logged in"}</div>
+      {auth && (
+        <div style={{ position: 'absolute', top: '2rem', right: '2.5rem', zIndex: 40 }} ref={profileRef}>
+          <button
+            onClick={() => setProfileOpen(v => !v)}
+            className="w-11 h-11 flex items-center justify-center rounded-full bg-gray-900 bg-opacity-60 text-white hover:bg-gray-800 focus:outline-none shadow"
+            style={{ padding: 0 }}
+            title="User profile"
+          >
+            <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" className="text-gray-300">
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 20c0-2.5 3.5-4 8-4s8 1.5 8 4" />
+            </svg>
+          </button>
+          {profileOpen && (
+            <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-2 text-gray-900 border border-gray-200">
+              <div className="px-4 py-2 border-b border-gray-100 text-sm">
+                <div className="font-medium">{user?.email || "Logged in"}</div>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600 text-sm"
+              >
+                Logout
+              </button>
             </div>
-            <button
-              onClick={handleLogout}
-              className="w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600 text-sm"
-            >
-              Logout
-            </button>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
       {/* Main Content */}
       <main className="flex-1 flex items-center justify-center h-screen">
         {children}

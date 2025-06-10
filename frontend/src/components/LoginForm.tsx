@@ -42,39 +42,46 @@ const LoginForm: React.FC = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-8 rounded shadow-md w-full max-w-sm mx-auto mt-12">
-      <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
-      {error && <div className="text-red-600 mb-4 text-center">{error}</div>}
-      <input
-        type="email"
-        className="block w-full mb-4 p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-        placeholder="Email"
-        value={email}
-        onChange={e => setEmail(e.target.value)}
-        required
-      />
-      <input
-        type="password"
-        className="block w-full mb-6 p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-        placeholder="Password"
-        value={password}
-        onChange={e => setPassword(e.target.value)}
-        required
-      />
-      <button
-        type="submit"
-        className="w-full bg-green-600 text-white py-3 rounded font-semibold hover:bg-green-700 transition"
-        disabled={loading}
-      >
-        {loading ? "Logging in..." : "Login"}
-      </button>
-      <div className="mt-4 text-center">
-        <a href="/forgot_password" className="text-blue-600 hover:underline text-sm">Forgot password?</a>
-      </div>
-      <div className="mt-2 text-center">
-        <a href="/register" className="text-blue-600 hover:underline text-sm">Need to create an account?</a>
-      </div>
-    </form>
+    <div className="flex items-center justify-center min-h-screen min-w-full w-full h-screen" style={{ background: 'linear-gradient(135deg, #101614 0%, #1a2a1a 60%, #1a2320 100%)' }}>
+      <form onSubmit={handleSubmit} className="p-8 rounded shadow-md w-full max-w-sm" style={{ background: 'rgba(16, 22, 20, 0.7)' }}>
+        <h2 className="text-2xl font-bold mb-6 text-center text-gray-100">Login</h2>
+        {error && <div className="text-red-400 mb-4 text-center">{error}</div>}
+        <input
+          type="email"
+          className="block w-full mb-4 p-3 border border-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-100 bg-transparent placeholder-gray-400"
+          placeholder="Email"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          required
+        />
+        <input
+          type="password"
+          className="block w-full mb-6 p-3 border border-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-100 bg-transparent placeholder-gray-400"
+          placeholder="Password"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+          required
+        />
+        <button
+          type="submit"
+          className="w-full bg-green-600 text-white py-3 rounded font-semibold hover:bg-green-700 transition"
+          disabled={loading}
+        >
+          {loading ? "Logging in..." : "Login"}
+        </button>
+        <div className="mt-4 text-center">
+          <a href="/forgot_password" className="text-blue-400 hover:underline text-sm">Forgot password?</a>
+        </div>
+        <div className="mt-2 text-center">
+          <a href="/register" className="text-blue-400 hover:underline text-sm">Need to create an account?</a>
+        </div>
+        <div className="mt-6 text-center text-xs text-gray-400">
+          <a href="/policies/terms-of-use/" className="hover:underline">Terms of Use</a>
+          <span className="mx-2">|</span>
+          <a href="/policies/privacy-policy/" className="hover:underline">Privacy Policy</a>
+        </div>
+      </form>
+    </div>
   );
 };
 
