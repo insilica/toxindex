@@ -8,7 +8,7 @@ from webserver.storage import S3FileStorage
 
 class File:
 
-    def __init__(self, file_id, task_id, user_id, filename, filepath, s3_url, created_at):
+    def __init__(self, file_id, task_id, user_id, filename, filepath, s3_url, created_at, environment_id=None):
         self.file_id = file_id
         self.task_id = task_id
         self.user_id = user_id
@@ -16,11 +16,13 @@ class File:
         self.filepath = filepath
         self.s3_url = s3_url
         self.created_at = created_at
+        self.environment_id = environment_id
 
     def to_dict(self):
         return {
             'file_id': self.file_id,
             'task_id': self.task_id,
+            'environment_id': self.environment_id,
             'user_id': self.user_id,
             'filename': self.filename,
             'filepath': self.filepath,
@@ -32,32 +34,38 @@ class File:
     def from_row(row):
         return File(
             file_id=row['file_id'],
-            task_id=row['task_id'],
+            task_id=row.get('task_id'),
             user_id=row['user_id'],
             filename=row['filename'],
             filepath=row['filepath'],
             s3_url=row['s3_url'],
-            created_at=row['created_at']
+            created_at=row['created_at'],
+            environment_id=row.get('environment_id'),
         )
 
     @staticmethod
-    def create_file(task_id, user_id, filename, filepath, s3_url):
+    def create_file(task_id, user_id, filename, filepath, s3_url, environment_id=None):
         # Suppress S3 URL in logs
-        logging.info(f"[File.create_file] Storing file for task_id={task_id}, filename={filename}, filepath={filepath}, s3_url=SUPPRESSED")
-        # Duplicate check: does a file with this task_id and filename already exist?
-        existing = ds.find("SELECT 1 FROM files WHERE task_id = %s AND filename = %s", (task_id, filename))
+        logging.info(f"[File.create_file] Storing file for task_id={task_id}, environment_id={environment_id}, filename={filename}, filepath={filepath}, s3_url=SUPPRESSED")
+        # Duplicate check: does a file with this task_id/environment_id and filename already exist?
+        if task_id:
+            existing = ds.find("SELECT 1 FROM files WHERE task_id = %s AND filename = %s", (task_id, filename))
+        elif environment_id:
+            existing = ds.find("SELECT 1 FROM files WHERE environment_id = %s AND filename = %s", (environment_id, filename))
+        else:
+            existing = None
         if existing:
-            logging.warning(f"[File.create_file] Duplicate file for task_id={task_id}, filename={filename} -- skipping insert.")
+            logging.warning(f"[File.create_file] Duplicate file for task_id={task_id}, environment_id={environment_id}, filename={filename} -- skipping insert.")
             return
-        params = (task_id, user_id, filename, filepath, s3_url)
+        params = (task_id, environment_id, user_id, filename, filepath, s3_url)
         try:
             ds.execute(
-                "INSERT INTO files (task_id, user_id, filename, filepath, s3_url) VALUES (%s, %s, %s, %s, %s)",
+                "INSERT INTO files (task_id, environment_id, user_id, filename, filepath, s3_url) VALUES (%s, %s, %s, %s, %s, %s)",
                 params
             )
-            logging.info(f"[File.create_file] Successfully inserted file for task_id={task_id}, filename={filename}")
+            logging.info(f"[File.create_file] Successfully inserted file for task_id={task_id}, environment_id={environment_id}, filename={filename}")
         except Exception as e:
-            logging.error(f"[File.create_file] Failed to insert file for task_id={task_id}, filename={filename}: {e}")
+            logging.error(f"[File.create_file] Failed to insert file for task_id={task_id}, environment_id={environment_id}, filename={filename}: {e}")
 
     @staticmethod
     def upload_and_create(
@@ -136,4 +144,17 @@ class File:
             return ""
         import markdown
         return markdown.markdown(text, extensions=["extra", "tables"])
+
+    @staticmethod
+    def get_files_by_environment(environment_id):
+        rows = ds.find_all(
+            "SELECT * FROM files WHERE environment_id = %s ORDER BY created_at DESC",
+            (environment_id,)
+        )
+        return [File.from_row(row) for row in rows]
+
+    @staticmethod
+    def get_file(file_id):
+        row = ds.find("SELECT * FROM files WHERE file_id = %s", (file_id,))
+        return File.from_row(row) if row else None
 

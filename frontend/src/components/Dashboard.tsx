@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaListAlt } from 'react-icons/fa';
+import { FaListAlt, FaPlus } from 'react-icons/fa';
 
 interface Environment {
   environment_id: string;
@@ -17,8 +17,6 @@ interface Task {
 const Dashboard: React.FC = () => {
   const [environments, setEnvironments] = useState<Environment[]>([]);
   const [selectedEnv, setSelectedEnv] = useState<string>("");
-  const [showAdd, setShowAdd] = useState(false);
-  const [newEnvTitle, setNewEnvTitle] = useState("");
   const [chatInput, setChatInput] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<{ email?: string } | null>(null);
@@ -26,15 +24,24 @@ const Dashboard: React.FC = () => {
   const [activeTasks, setActiveTasks] = useState<Task[]>([]);
   const [archivedTasks, setArchivedTasks] = useState<Task[]>([]);
   const [activeTab, setActiveTab] = useState<'tasks' | 'archive'>('tasks');
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [uploadEnvId, setUploadEnvId] = useState<string>("");
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/environments", { credentials: "include" })
       .then(res => res.json())
       .then(data => {
+        console.log("Fetched environments:", data.environments);
         setEnvironments(data.environments || []);
         if (data.environments && data.environments.length > 0) {
           setSelectedEnv(data.environments[0].environment_id);
+        } else {
+          setSelectedEnv("__add__");
         }
       });
   }, []);
@@ -56,33 +63,6 @@ const Dashboard: React.FC = () => {
       .finally(() => setTasksLoading(false));
   }, []);
 
-  const handleAddEnvironment = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    const res = await fetch("/api/environment/new", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ title: newEnvTitle }),
-    });
-    if (res.ok) {
-      const data = await res.json();
-      setShowAdd(false);
-      setNewEnvTitle("");
-      // Refresh environments
-      fetch("/environments", { credentials: "include" })
-        .then(res => res.json())
-        .then(data => {
-          setEnvironments(data.environments || []);
-          if (data.environments && data.environments.length > 0) {
-            setSelectedEnv(data.environments[data.environments.length - 1].environment_id);
-          }
-        });
-    } else {
-      setError("Failed to create environment.");
-    }
-  };
-
   const handleChatSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // You can handle chat input here (send to backend, etc.)
@@ -92,6 +72,8 @@ const Dashboard: React.FC = () => {
   const handleDropdownChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     if (e.target.value === "__manage__") {
       navigate("/settings/environments");
+    } else if (e.target.value === "__add__") {
+      navigate("/settings/environments/create");
     } else {
       setSelectedEnv(e.target.value);
     }
@@ -124,6 +106,38 @@ const Dashboard: React.FC = () => {
         const unarchived = archivedTasks.find(t => t.task_id === task_id);
         if (unarchived) setActiveTasks(tasks => [unarchived, ...tasks]);
       });
+  };
+
+  const handlePlusClick = () => {
+    setUploadEnvId(selectedEnv);
+    setShowUploadModal(true);
+    setUploadFile(null);
+    setUploadError(null);
+  };
+
+  const handleUploadConfirm = async () => {
+    if (!uploadFile) {
+      setUploadError("Please select a file.");
+      return;
+    }
+    setUploading(true);
+    setUploadError(null);
+    const formData = new FormData();
+    formData.append('file', uploadFile);
+    formData.append('environment_id', uploadEnvId);
+    try {
+      const res = await fetch('/api/upload-file', {
+        method: 'POST',
+        credentials: 'include',
+        body: formData,
+      });
+      if (!res.ok) throw new Error('Upload failed');
+      setShowUploadModal(false);
+    } catch (err) {
+      setUploadError('Failed to upload file.');
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
@@ -211,6 +225,28 @@ const Dashboard: React.FC = () => {
                 className="w-full pt-4 pb-4 pr-28 pl-8 text-lg rounded-2xl border border-gray-700 bg-gray-900 bg-opacity-70 text-white resize-none min-h-[80px] shadow-2xl focus:outline-none focus:ring-2 focus:ring-green-400 text-left placeholder:text-left"
                 style={{ minHeight: 80, fontFamily: 'inherit', width: '100%', boxShadow: '0 8px 32px 0 rgba(34,197,94,0.10)' }}
               />
+              <div className="absolute right-4 bottom-11 flex items-center space-x-2 z-30">
+                <button
+                  className="w-10 h-10 flex items-center justify-center rounded-full shadow-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-green-400"
+                  style={{ padding: 0, borderRadius: '50%', background: 'rgba(255,255,255,0.7)' }}
+                  title="Upload CSV file"
+                  onClick={handlePlusClick}
+                  disabled={uploading}
+                >
+                  <FaPlus className="w-5 h-5 text-black" />
+                </button>
+                <button
+                  type="submit"
+                  className="w-10 h-10 flex items-center justify-center rounded-full shadow-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-green-400"
+                  style={{ padding: 0, borderRadius: '50%', background: 'rgba(255,255,255,0.7)' }}
+                  title="Submit"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.2} stroke="black" className="w-5 h-5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                  </svg>
+                </button>
+
+              </div>
               <div className="absolute left-4 z-20 flex items-end" style={{ position: 'relative', width: '210px', overflow: 'visible', bottom: '3rem' }}>
                 <div style={{ position: 'relative', width: '100%' }}>
                   <select
@@ -219,12 +255,12 @@ const Dashboard: React.FC = () => {
                     value={selectedEnv}
                     onChange={handleDropdownChange}
                   >
-                    {environments.map(env => (
+                    {environments.length > 0 && environments.map(env => (
                       <option key={env.environment_id} value={env.environment_id}>
                         {env.title}
                       </option>
                     ))}
-                    <option value="__add__"><span style={{ fontSize: '1.3em', fontWeight: 'bold' }}>+ </span>Add environment</option>
+                    <option value="__add__">+ Add environment</option>
                     <option value="__manage__">&#9881; Manage environments</option>
                   </select>
                   <span style={{ pointerEvents: 'none', position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center', height: '100%', zIndex: 2, background: 'transparent', paddingRight: '2px' }}>
@@ -234,34 +270,53 @@ const Dashboard: React.FC = () => {
                   </span>
                 </div>
               </div>
-              <button type="submit" className="absolute right-8 text-black w-10 h-10 flex items-center justify-center rounded-full shadow-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-green-400" style={{ padding: 0, borderRadius: '50%', background: 'rgba(255,255,255,0.7)', bottom: '3rem' }}>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.2} stroke="black" className="w-5 h-5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                </svg>
-              </button>
             </div>
-            {selectedEnv === "__add__" && (
-              <form onSubmit={handleAddEnvironment} className="flex gap-2 mt-2">
-                <input
-                  type="text"
-                  placeholder="New environment name"
-                  value={newEnvTitle}
-                  onChange={e => setNewEnvTitle(e.target.value)}
-                  required
-                  className="flex-1 p-2 border rounded bg-white bg-opacity-70 text-black"
-                />
-                <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-                  Add
-                </button>
-                <button type="button" onClick={() => { setShowAdd(false); setSelectedEnv(environments[0]?.environment_id || ""); }} className="px-4 py-2 rounded border">
-                  Cancel
-                </button>
-              </form>
-            )}
             {error && <div className="text-red-500 mt-2">{error}</div>}
           </form>
         </div>
       </div>
+      {/* Upload Modal */}
+      {showUploadModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+          <div className="bg-gray-900 rounded-lg p-6 w-full max-w-md relative">
+            <button
+              className="absolute top-2 right-2 text-gray-400 hover:text-white"
+              onClick={() => setShowUploadModal(false)}
+              disabled={uploading}
+            >
+              ×
+            </button>
+            <h2 className="text-lg font-bold text-white mb-4">Upload CSV File</h2>
+            <label className="block text-white mb-2">Select Environment</label>
+            <select
+              className="w-full p-2 rounded border mb-4 text-white bg-gray-800"
+              value={uploadEnvId}
+              onChange={e => setUploadEnvId(e.target.value)}
+              disabled={uploading}
+            >
+              {environments.map(env => (
+                <option key={env.environment_id} value={env.environment_id}>{env.title}</option>
+              ))}
+            </select>
+            <label className="block text-white mb-2">CSV File</label>
+            <input
+              type="file"
+              accept=".csv"
+              className="w-full mb-4"
+              onChange={e => setUploadFile(e.target.files?.[0] || null)}
+              disabled={uploading}
+            />
+            {uploadError && <div className="text-red-500 mb-2">{uploadError}</div>}
+            <button
+              className="w-full bg-green-700 text-white py-2 rounded hover:bg-green-800 disabled:opacity-50"
+              onClick={handleUploadConfirm}
+              disabled={uploading}
+            >
+              {uploading ? 'Uploading...' : 'Upload'}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
