@@ -72,12 +72,14 @@
             echo "Blazegraph up—loading TTL files"
 
             # Add data from WikiPathways/AOP-Wiki
-            for data_source in wikipathways AOPWikiRDF; do
-              curl -X POST \
-                -H "Content-Type: text/turtle" \
-                --data-binary @pathway_data/${data_source}.ttl \
-                http://localhost:8889/bigdata/namespace/kb/sparql
-            done
+            curl -X POST \
+              -H "Content-Type: text/turtle" \
+              --data-binary @pathway_data/wikipathways.ttl \
+              http://localhost:8889/bigdata/namespace/kb/sparql
+            curl -X POST \
+              -H "Content-Type: text/turtle" \
+              --data-binary @pathway_data/AOPWikiRDF.ttl \
+              http://localhost:8889/bigdata/namespace/kb/sparql
           '';
         };
       }
