@@ -22,6 +22,7 @@ from flask import request, Response, send_from_directory
 import flask, flask_login
 import os, logging, requests, threading, redis, json
 from datetime import datetime
+from werkzeug.utils import secure_filename
 
 # CELERY ======================================================================
 from workflows.probra import probra_task
@@ -407,7 +408,9 @@ def api_environment_new():
 @app.route("/environments", methods=["GET"])
 @flask_login.login_required
 def environment_list():
-    envs = Environment.get_environments_by_user(flask_login.current_user.user_id)
+    user_id = flask_login.current_user.user_id
+    envs = Environment.get_environments_by_user(user_id)
+    logging.info(f"[environment_list] user_id={user_id}, envs={[e.to_dict() for e in envs]}")
     return flask.jsonify({"environments": [e.to_dict() for e in envs]})
 
 
@@ -523,6 +526,73 @@ def api_environments():
             for e in envs
         ]
     })
+
+# FILE UPLOAD ENDPOINT ======================================================
+@csrf.exempt
+@app.route('/api/upload-file', methods=['POST'])
+@flask_login.login_required
+def upload_file():
+    if 'file' not in flask.request.files:
+        return flask.jsonify({'error': 'No file part'}), 400
+    file = flask.request.files['file']
+    if file.filename == '':
+        return flask.jsonify({'error': 'No selected file'}), 400
+    if not file.filename.lower().endswith('.csv'):
+        return flask.jsonify({'error': 'Only CSV files are allowed'}), 400
+    filename = secure_filename(file.filename)
+    upload_dir = os.path.join(os.path.dirname(__file__), '..', 'uploads')
+    os.makedirs(upload_dir, exist_ok=True)
+    file_path = os.path.join(upload_dir, filename)
+    file.save(file_path)
+    # Store file metadata in the database
+    environment_id = flask.request.form.get('environment_id')
+    user_id = flask_login.current_user.user_id
+    File.create_file(
+        task_id=None,
+        user_id=user_id,
+        filename=filename,
+        filepath=file_path,
+        s3_url='',
+        environment_id=environment_id
+    )
+    return flask.jsonify({'success': True, 'filename': filename})
+
+# List files for an environment
+@app.route('/api/environment/<env_id>/files', methods=['GET'])
+@flask_login.login_required
+def environment_files(env_id):
+    files = File.get_files_by_environment(env_id)
+    return flask.jsonify({'files': [f.to_dict() for f in files]})
+
+@csrf.exempt
+@app.route('/api/file/<int:file_id>', methods=['DELETE'])
+@flask_login.login_required
+def delete_file(file_id):
+    try:
+        # Find the file
+        file = File.get_file(file_id)
+        if not file:
+            return flask.jsonify({'success': False, 'error': 'File not found'}), 404
+        # Remove from disk if present
+        try:
+            if file.filepath and os.path.exists(file.filepath):
+                os.remove(file.filepath)
+        except Exception as e:
+            logging.warning(f"Failed to remove file from disk: {e}")
+        # Remove from database
+        File.delete_file(file_id, flask_login.current_user.user_id)
+        return flask.jsonify({'success': True})
+    except Exception as e:
+        logging.error(f"Failed to delete file {file_id}: {e}")
+        return flask.jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/file/<int:file_id>/download', methods=['GET'])
+@flask_login.login_required
+def download_file(file_id):
+    file = File.get_file(file_id)
+    if not file or not file.filepath or not os.path.exists(file.filepath):
+        return flask.abort(404)
+    return flask.send_file(file.filepath, as_attachment=True, download_name=file.filename)
 
 print("Registered routes:")
 for rule in app.url_map.iter_rules():
