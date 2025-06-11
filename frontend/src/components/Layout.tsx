@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [auth, setAuth] = useState<null | boolean>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [sidebarClosing, setSidebarClosing] = useState(false);
@@ -44,6 +45,13 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     });
   };
 
+  // Settings sidebar logic
+  const isSettings = location.pathname.startsWith("/settings");
+  let settingsSection: 'general' | 'environments' | 'data-controls' = 'general';
+  if (location.pathname === "/settings/environments") settingsSection = 'environments';
+  else if (location.pathname === "/settings/data-controls") settingsSection = 'data-controls';
+  else if (location.pathname === "/settings/general") settingsSection = 'general';
+
   return (
     <div className="flex w-screen min-h-screen overflow-x-hidden" style={{ fontFamily: 'Inter, Arial, sans-serif', position: 'relative' }}>
       {/* Sidebar */}
@@ -82,30 +90,69 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               </svg>
             </button>
           )}
-          <div className="flex items-center mb-6" style={{ marginTop: '1.7rem', marginLeft: '1.2rem' }}>
-            <button
-              onClick={() => navigate('/')}
-              className="inline-flex items-center justify-center rounded-full focus:outline-none"
-              style={{ background: 'black', cursor: 'pointer', width: '44px', height: '44px', minWidth: '44px', minHeight: '44px', padding: 0, display: 'flex', alignSelf: 'flex-start' }}
-              title="Go to homepage"
-            >
-              <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect width="44" height="44" rx="10" fill="black"/>
-                <text x="22" y="32" textAnchor="middle" fontSize="28" fontWeight="bold" fill="#16a34a" fontFamily="Arial, sans-serif">T</text>
-              </svg>
-            </button>
-          </div>
-          {/* Settings button at the bottom above logout */}
-          <div className="flex flex-col items-center mt-auto mb-2">
-            <a href="/settings" className="flex items-center hover:text-green-400 text-white px-4 py-2 rounded transition">
-              <svg className="mr-2" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="3" />
-                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.09A1.65 1.65 0 0 0 9 3.09V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.09a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.09a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
-              </svg>
-              <span>Settings</span>
-            </a>
-          </div>
-          {/* Logout button removed from sidebar. User profile/logout will be in dashboard. */}
+          {/* Settings sidebar */}
+          {isSettings ? (
+            <>
+              <div style={{ marginTop: '1.7rem', marginLeft: '1.2rem', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                <button
+                  onClick={() => navigate('/')}
+                  className="inline-flex items-center justify-center rounded-full focus:outline-none"
+                  style={{ background: 'black', cursor: 'pointer', width: '44px', height: '44px', minWidth: '44px', minHeight: '44px', padding: 0, display: 'flex', alignSelf: 'flex-start', marginBottom: 0 }}
+                  title="Go to homepage"
+                >
+                  <span style={{ fontSize: '1.7rem', fontWeight: 900, color: '#22c55e' }}>T</span>
+                </button>
+                <span style={{ fontSize: '1.2rem', fontWeight: 600, color: '#fff', letterSpacing: '0.5px', marginLeft: 10, marginTop: 18, marginBottom: 16, display: 'block' }}>Settings</span>
+                <nav className="flex flex-col gap-2 w-full">
+                  <button
+                    className={`settings-link py-1 pl-2 pr-2 rounded transition text-left text-sm ${settingsSection === 'general' ? 'bg-green-700 text-white font-bold' : 'text-gray-200'}`}
+                    style={{ background: settingsSection === 'general' ? undefined : 'none', minHeight: '32px', fontSize: '0.95rem', paddingLeft: 14, width: '90%', maxWidth: 210, marginLeft: 2 }}
+                    onClick={() => navigate('/settings/general')}
+                  >General</button>
+                  <button
+                    className={`settings-link py-1 pl-2 pr-2 rounded transition text-left text-sm ${settingsSection === 'environments' ? 'bg-green-700 text-white font-bold' : 'text-gray-200'}`}
+                    style={{ background: settingsSection === 'environments' ? undefined : 'none', minHeight: '32px', fontSize: '0.95rem', paddingLeft: 14, width: '90%', maxWidth: 210, marginLeft: 2 }}
+                    onClick={() => navigate('/settings/environments')}
+                  >Environments</button>
+                  <button
+                    className={`settings-link py-1 pl-2 pr-2 rounded transition text-left text-sm ${settingsSection === 'data-controls' ? 'bg-green-700 text-white font-bold' : 'text-gray-200'}`}
+                    style={{ background: settingsSection === 'data-controls' ? undefined : 'none', minHeight: '32px', fontSize: '0.95rem', paddingLeft: 14, width: '90%', maxWidth: 210, marginLeft: 2 }}
+                    onClick={() => navigate('/settings/data-controls')}
+                  >Data controls</button>
+                </nav>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="flex items-center mb-6" style={{ marginTop: '1.7rem', marginLeft: '1.2rem' }}>
+                <button
+                  onClick={() => navigate('/')}
+                  className="inline-flex items-center justify-center rounded-full focus:outline-none"
+                  style={{ background: 'black', cursor: 'pointer', width: '44px', height: '44px', minWidth: '44px', minHeight: '44px', padding: 0, display: 'flex', alignSelf: 'flex-start' }}
+                  title="Go to homepage"
+                >
+                  <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="44" height="44" rx="10" fill="black"/>
+                    <text x="22" y="32" textAnchor="middle" fontSize="28" fontWeight="bold" fill="#16a34a" fontFamily="Arial, sans-serif">T</text>
+                  </svg>
+                </button>
+              </div>
+              {/* Settings button at the bottom above logout */}
+              <div className="flex flex-col items-center mt-auto mb-2">
+                <button
+                  onClick={() => navigate('/settings/general')}
+                  className="flex items-center hover:text-green-400 text-white px-4 py-2 rounded transition"
+                  style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+                >
+                  <svg className="mr-2" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="3" />
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.09A1.65 1.65 0 0 0 9 3.09V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.09a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.09a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                  </svg>
+                  <span>Settings</span>
+                </button>
+              </div>
+            </>
+          )}
         </aside>
         {/* Open sidebar button */}
         {!sidebarOpen && !sidebarClosing && (
