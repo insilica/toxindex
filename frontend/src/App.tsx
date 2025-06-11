@@ -7,8 +7,11 @@ import CreateEnvironment from "./components/CreateEnvironment";
 import Dashboard from "./components/Dashboard";
 import SettingsEnvironments from "./components/SettingsEnvironments";
 import TermsPrivacy from "./components/TermsPrivacy";
-import Settings from "./components/Settings";
+import { SettingsGeneral } from "./components/Settings";
+import SettingsDataControls from "./components/SettingsDataControls";
+import CreateEnvironmentSettings from "./components/CreateEnvironmentSettings";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { EnvironmentDetails } from "./components/CreateEnvironment";
 
 function App() {
   return (
@@ -44,11 +47,21 @@ function App() {
             }
           />
           <Route
-            path="/settings"
+            path="/settings/general"
             element={
               <ProtectedRoute>
                 <Layout>
-                  <Settings />
+                  <SettingsGeneral />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings/data-controls"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <SettingsDataControls />
                 </Layout>
               </ProtectedRoute>
             }
@@ -59,6 +72,26 @@ function App() {
               <ProtectedRoute>
                 <Layout>
                   <SettingsEnvironments />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings/environments/create"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <CreateEnvironmentSettings />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/environment/:env_id"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <EnvironmentDetails />
                 </Layout>
               </ProtectedRoute>
             }

@@ -24,9 +24,15 @@
             pkgs.awscli2
             pkgs.gcc
             pkgs.zlib 
+            pkgs.nodejs
           ];
 
           shellHook = ''
+            # Unset NVM to avoid conflicts with Nix-provided node
+            unset NVM_DIR
+            export PATH=$(echo $PATH | tr ':' '\n' | grep -v '\.nvm' | paste -sd: -)
+            hash -r
+
             # Source your fullstack environment setup (Postgres, Redis, AWS, etc.)
             source scripts/flake/shellhook.sh
 
