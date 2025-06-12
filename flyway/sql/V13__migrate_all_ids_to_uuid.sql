@@ -66,6 +66,7 @@ ALTER TABLE tasks DROP COLUMN environment_id;
 ALTER TABLE tasks DROP COLUMN task_id;
 ALTER TABLE tasks RENAME COLUMN environment_id_new TO environment_id;
 ALTER TABLE tasks RENAME COLUMN task_id_new TO task_id;
+ALTER TABLE tasks ADD PRIMARY KEY (task_id);
 ALTER TABLE files DROP COLUMN environment_id;
 ALTER TABLE files DROP COLUMN task_id;
 ALTER TABLE files DROP COLUMN file_id;
