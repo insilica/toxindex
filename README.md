@@ -33,12 +33,15 @@ deactivate
 rm -rf .venv
 rm -rf ~/.cache/uv
 unset LD_LIBRARY_PATH
-
+nix develop
 # Update dependencies
 nix flake update
 
 # Enter development environment
 nix develop
+
+# If c++ binaries not found
+unset LD_LIBRARY_PATH && nix develop
 
 # Install frontend dependencies
 cd frontend && npm install
@@ -61,7 +64,7 @@ cd frontend && npm install
   - Start Celery worker:  
     `celery -A workflows.celery_worker worker --loglevel=info`
   - Start frontend:  
-    `npm run dev`
+    `cd frontend && npm run dev`
 
 ---
 
@@ -109,7 +112,7 @@ See tasks in `pfoa_tasks.md` for more details.
 
 - **Frontend:** React, Tailwind CSS, Vite, TypeScript
 - **Backend:** Flask, Eventlet, Celery
-- **Data:** Langchain, Agno, Scikit-learn, etc.
+- **Data:** Langchain, Agno, Scikit-learn, Postgres, Flyway
 - **Deployment:** Gunicorn on EC2
 
 ---

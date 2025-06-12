@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import FilePreviewModal from './FilePreviewModal';
+import { FaEye, FaDownload, FaTrash } from 'react-icons/fa';
 
 const CreateEnvironment: React.FC = () => {
   const [title, setTitle] = useState("");
@@ -73,13 +75,19 @@ interface EnvDetails {
 export const EnvironmentDetails: React.FC = () => {
   const { env_id } = useParams<{ env_id: string }>();
   const [env, setEnv] = useState<EnvDetails | null>(null);
+  const [environments, setEnvironments] = useState<EnvDetails[]>([]);
   const [files, setFiles] = useState<FileMeta[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [tasks, setTasks] = useState<any[]>([]);
   const [fileDeleteError, setFileDeleteError] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
+  const [previewFileId, setPreviewFileId] = useState<number | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   useEffect(() => {
     if (!env_id) return;
@@ -87,6 +95,7 @@ export const EnvironmentDetails: React.FC = () => {
     fetch(`/api/environments`, { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
+        setEnvironments(data.environments || []);
         const found = (data.environments || []).find((e: any) => e.environment_id == env_id);
         setEnv(found || null);
       });
@@ -144,65 +153,189 @@ export const EnvironmentDetails: React.FC = () => {
     }
   };
 
+  const handleUploadClick = () => {
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    setUploadError(null);
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('environment_id', env_id!);
+    try {
+      const res = await fetch('/api/upload-file', {
+        method: 'POST',
+        credentials: 'include',
+        body: formData,
+      });
+      if (!res.ok) throw new Error('Upload failed');
+      // Refresh file list
+      fetch(`/api/environment/${env_id}/files`, { credentials: 'include' })
+        .then(res => res.json())
+        .then(data => setFiles(data.files || []));
+    } catch {
+      setUploadError('Failed to upload file.');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   if (loading) return <div className="text-white p-8">Loading...</div>;
   if (!env) return <div className="text-white p-8">Environment not found.</div>;
 
   return (
     <div className="w-full h-full min-h-screen pt-24 px-100 pb-12 text-white flex flex-col" style={{ background: 'linear-gradient(135deg, #1a1426 0%, #2a1a2a 60%, #231a23 100%)' }}>
       <div className="flex items-center justify-between mb-2">
-        <h1 className="font-bold text-white" style={{ fontSize: '1rem' }}>{env.title}</h1>
+        <div className="relative group" style={{ minWidth: 180, maxWidth: 340 }}>
+          <select
+            className="font-bold text-white text-lg px-0 py-2 rounded-full appearance-none bg-transparent border-none focus:outline-none transition-all duration-150 group-hover:bg-gray-900 group-hover:border group-hover:border-gray-700 group-hover:px-6 group-hover:pr-10 group-hover:cursor-pointer focus:bg-gray-900 focus:border focus:border-gray-700 focus:px-6 focus:pr-10"
+            style={{ fontSize: '1.2rem', minWidth: 180, maxWidth: 340, cursor: 'pointer' }}
+            value={env_id}
+            onChange={e => navigate(`/environment/${e.target.value}`)}
+          >
+            {environments.map(e => (
+              <option key={e.environment_id} value={e.environment_id}>{e.title}</option>
+            ))}
+          </select>
+          {/* Chevron icon, only visible on hover/focus */}
+          <span
+            className="pointer-events-none absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 group-hover:opacity-100 group-focus-within:opacity-100 opacity-0 transition-opacity duration-150"
+            style={{ right: '1.2rem' }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M7 10l5 5 5-5" />
+            </svg>
+          </span>
+        </div>
         <button
-          className="px-6 font-semibold transition"
+          className="px-6 font-semibold transition border border-red-500"
           style={{
             fontWeight: 600,
             fontSize: '.8rem',
             paddingTop: 0,
-            paddingBottom: 0,
+            paddingBottom: 2,
             lineHeight: 1.1,
-            boxShadow: '0 1px 4px 0 rgba(0,0,0,0.04)',
-            background: '#f3f4f6',
-            color: '#111',
+            background: 'rgba(220,38,38,0.08)',
+            color: '#ef4444',
             borderRadius: '9999px',
             width: 'auto',
             minWidth: 0,
+            boxShadow: '0 1px 4px 0 rgba(0,0,0,0.04)',
+            borderWidth: 1.5,
+            borderStyle: 'solid',
+            borderColor: '#ef4444',
+            cursor: deleting ? 'not-allowed' : 'pointer',
           }}
-          onMouseOver={e => (e.currentTarget.style.background = '#e5e7eb')}
-          onMouseOut={e => (e.currentTarget.style.background = '#f3f4f6')}
+          onMouseOver={e => (e.currentTarget.style.background = 'rgba(220,38,38,0.18)')}
+          onMouseOut={e => (e.currentTarget.style.background = 'rgba(220,38,38,0.08)')}
           onClick={handleDelete}
           disabled={deleting}
         >
-          {deleting ? 'Deleting...' : 'Delete Environment'}
+          {deleting ? 'Deleting...' : 
+          <span style={{display: 'flex', alignItems: 'center'}}>
+            <span style={{fontSize: '1.2rem', fontWeight:900, marginRight:10, lineHeight: 1}}>-</span>
+            <span style={{fontSize: '.8rem', fontWeight: 600}}>Delete Environment</span>
+          </span>}
         </button>
       </div>
       <div className="w-full border-b border-gray-400 mb-4"></div>
       {env.description && <div className="mb-4 text-gray-300">{env.description}</div>}
-      <div className="mb-6 text-sm text-gray-400">
+      <div className="mb-40 text-sm text-gray-400">
         Created at: {env.created_at && new Date(env.created_at).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
       </div>
       {deleteError && <div className="text-red-400 mb-4">{deleteError}</div>}
-      <h2 className="text-lg font-semibold mb-2">Uploaded Files</h2>
-      <div className="w-full border-b border-gray-700 mb-4"></div>
+      <div className="pl-8">
+        <div className="flex items-center justify-between mb-2 gap-4">
+          <h2 className="text-lg font-semibold">Uploaded Files</h2>
+          <div className="flex items-center">
+            <button
+              className="px-6 font-semibold transition border border-green-600"
+              style={{
+                fontWeight: 600,
+                fontSize: '.8rem',
+                paddingTop: 0,
+                paddingBottom: 2,
+                lineHeight: 1.1,
+                background: 'rgba(22,163,74,0.08)',
+                color: '#22c55e',
+                borderRadius: '9999px',
+                width: 'auto',
+                minWidth: 0,
+                boxShadow: '0 1px 4px 0 rgba(0,0,0,0.04)',
+                borderWidth: 1.5,
+                borderStyle: 'solid',
+                borderColor: '#22c55e',
+                cursor: uploading ? 'not-allowed' : 'pointer',
+              }}
+              onMouseOver={e => (e.currentTarget.style.background = 'rgba(22,163,74,0.18)')}
+              onMouseOut={e => (e.currentTarget.style.background = 'rgba(22,163,74,0.08)')}
+              onClick={handleUploadClick}
+              disabled={uploading}
+            >
+              {uploading ? 'Uploading...' : (
+                <span style={{display: 'flex', alignItems: 'center'}}>
+                  <span style={{fontSize: '1.2rem', fontWeight:900, marginRight:10, lineHeight: 1}}>+</span>
+                  <span style={{fontSize: '.8rem', fontWeight: 600}}>Upload CSV</span>
+                </span>
+              )}
+            </button>
+            <input
+              type="file"
+              accept=".csv"
+              ref={fileInputRef}
+              style={{ display: 'none' }}
+              onChange={handleFileChange}
+              disabled={uploading}
+            />
+          </div>
+        </div>
+        <div className="border-b border-gray-700 mb-4 w-full"></div>
+      </div>
       {files.length === 0 ? (
-        <div className="text-gray-400 mb-6">No files uploaded for this environment.</div>
+        <div className="text-gray-400 mb-6 pl-8">No files uploaded for this environment.</div>
       ) : (
-        <ul className="divide-y divide-gray-700 mb-6">
+        <ul className="divide-y divide-gray-700 mb-6 pl-8">
           {files.map(file => (
             <li key={file.file_id} className="py-2 flex items-center justify-between gap-4">
-              <span>{file.filename}</span>
-              <div className="flex gap-2">
+              <button
+                className="text-left font-medium text-gray-200 hover:text-purple-400 transition truncate max-w-[220px]"
+                style={{ background: 'none', border: 'none', padding: 0, margin: 0, cursor: 'pointer', fontSize: '1rem' }}
+                onClick={() => { setPreviewFileId(file.file_id); setPreviewOpen(true); }}
+                title="Preview file"
+              >
+                {file.filename}
+              </button>
+              <div className="flex gap-4 px-3 py-1 rounded-full shadow-sm"
+                style={{ background: 'rgba(139, 81, 196, 0.18)', minWidth: 140, justifyContent: 'flex-end' }}>
+                <button
+                  className="bg-purple-700 hover:bg-purple-600 active:bg-purple-800 text-white transition flex items-center justify-center"
+                  style={{ width: 36, height: 36, borderRadius: '50%', fontSize: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, border: 'none' }}
+                  onClick={() => { setPreviewFileId(file.file_id); setPreviewOpen(true); }}
+                  title="Preview"
+                >
+                  <FaEye />
+                </button>
                 <a
                   href={`/api/file/${file.file_id}/download`}
-                  className="text-blue-400 hover:underline px-3 py-1 rounded bg-gray-800 hover:bg-gray-700"
+                  className="bg-purple-700 hover:bg-purple-600 active:bg-purple-800 text-white transition flex items-center justify-center"
+                  style={{ width: 36, height: 36, borderRadius: '50%', fontSize: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, border: 'none' }}
                   target="_blank"
                   rel="noopener noreferrer"
+                  title="Download"
                 >
-                  Download
+                  <FaDownload />
                 </a>
                 <button
-                  className="px-3 py-1 rounded bg-red-700 hover:bg-red-800 text-white text-sm"
+                  className="bg-purple-700 hover:bg-purple-600 active:bg-purple-800 text-white transition flex items-center justify-center"
+                  style={{ width: 36, height: 36, borderRadius: '50%', fontSize: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, border: 'none' }}
                   onClick={() => handleFileDelete(file.file_id)}
+                  title="Delete"
                 >
-                  Delete
+                  <FaTrash />
                 </button>
               </div>
             </li>
@@ -210,12 +343,15 @@ export const EnvironmentDetails: React.FC = () => {
         </ul>
       )}
       {fileDeleteError && <div className="text-red-400 mb-4">{fileDeleteError}</div>}
-      <h2 className="text-lg font-semibold mb-2 mt-8">List of Tasks</h2>
-      <div className="w-full border-b border-gray-700 mb-4"></div>
+      {uploadError && <div className="text-red-400 mb-2">{uploadError}</div>}
+      <div className="pl-8">
+        <h2 className="text-lg font-semibold mb-2 mt-8">List of Tasks</h2>
+        <div className="border-b border-gray-700 mb-4 w-full"></div>
+      </div>
       {tasks.length === 0 ? (
-        <div className="text-gray-400">No tasks for this environment.</div>
+        <div className="text-gray-400 pl-8">No tasks for this environment.</div>
       ) : (
-        <ul className="divide-y divide-gray-700">
+        <ul className="divide-y divide-gray-700 pl-8">
           {tasks.map(task => (
             <li key={task.task_id} className="py-2 flex items-center justify-between">
               <span>{task.title}</span>
@@ -225,6 +361,11 @@ export const EnvironmentDetails: React.FC = () => {
           ))}
         </ul>
       )}
+      <FilePreviewModal
+        fileId={previewFileId}
+        isOpen={previewOpen}
+        onRequestClose={() => setPreviewOpen(false)}
+      />
     </div>
   );
 };

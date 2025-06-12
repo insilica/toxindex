@@ -7,12 +7,16 @@ eventlet.monkey_patch()
 import dotenv
 import uuid
 import os
+import base64
+import mimetypes
+import pandas as pd
+import webserver.datastore as ds
 
 dotenv.load_dotenv()
 
 from webserver import login_manager as LM
 from webserver.controller import login
-from webserver.model import Task, Workflow, Message, File, Environment
+from webserver.model import Task, Workflow, Message, File, Environment, ChatSession
 from webserver.ai_service import generate_title
 from workflows.chat_response_task import chat_response_task
 from workflows.interactive_echo_task import interactive_echo_task
@@ -586,13 +590,245 @@ def delete_file(file_id):
         logging.error(f"Failed to delete file {file_id}: {e}")
         return flask.jsonify({'success': False, 'error': str(e)}), 500
 
+@app.route('/api/file/<int:file_id>/inspect', methods=['GET'])
+@flask_login.login_required
+def inspect_file(file_id):
+    file = File.get_file(file_id)
+    print(f"INSPECT: file_id={file_id}, file={file}, filepath={getattr(file, 'filepath', None)}")
+    if not file or not file.filepath or not os.path.exists(file.filepath):
+        print("INSPECT: File not found or missing on disk")
+        return flask.jsonify({'error': 'File not found'}), 404
+    ext = os.path.splitext(file.filename)[1].lower()
+    mimetype, _ = mimetypes.guess_type(file.filename)
+    try:
+        if ext in ['.txt', '.csv', '.json', '.md', '.markdown']:
+            with open(file.filepath, 'r', encoding='utf-8') as f:
+                content = f.read()
+            if ext == '.json':
+                import json
+                try:
+                    parsed = json.loads(content)
+                    return flask.jsonify({'type': 'json', 'content': parsed, 'filename': file.filename, 'mimetype': mimetype})
+                except Exception as e:
+                    return flask.jsonify({'type': 'text', 'content': content, 'filename': file.filename, 'mimetype': mimetype, 'warning': f'Invalid JSON: {e}'})
+            elif ext in ['.md', '.markdown']:
+                import markdown
+                html = markdown.markdown(content, extensions=["extra", "tables"])
+                return flask.jsonify({'type': 'markdown', 'content': html, 'filename': file.filename, 'mimetype': mimetype})
+            elif ext == '.csv':
+                import csv
+                import io
+                reader = csv.reader(io.StringIO(content))
+                rows = list(reader)
+                return flask.jsonify({'type': 'csv', 'content': rows, 'filename': file.filename, 'mimetype': mimetype})
+            else:
+                return flask.jsonify({'type': 'text', 'content': content, 'filename': file.filename, 'mimetype': mimetype})
+        elif ext in ['.xlsx', '.xls']:
+            try:
+                import pandas as pd
+                df = pd.read_excel(file.filepath)
+                preview = df.head(100).to_dict(orient='records')
+                columns = list(df.columns)
+                return flask.jsonify({'type': 'xlsx', 'content': preview, 'columns': columns, 'filename': file.filename, 'mimetype': mimetype})
+            except Exception as e:
+                return flask.jsonify({'error': f'Failed to parse Excel: {e}', 'type': 'error', 'filename': file.filename, 'mimetype': mimetype}), 400
+        elif ext in ['.png', '.jpg', '.jpeg', '.gif']:
+            with open(file.filepath, 'rb') as f:
+                data = f.read()
+            b64 = base64.b64encode(data).decode('utf-8')
+            data_url = f"data:{mimetype};base64,{b64}"
+            return flask.jsonify({'type': 'image', 'content': data_url, 'filename': file.filename, 'mimetype': mimetype})
+        else:
+            return flask.jsonify({'error': 'Preview not supported for this file type', 'type': 'unsupported', 'filename': file.filename, 'mimetype': mimetype}), 415
+    except Exception as e:
+        return flask.jsonify({'error': str(e), 'type': 'error', 'filename': file.filename, 'mimetype': mimetype}), 500
+
 @app.route('/api/file/<int:file_id>/download', methods=['GET'])
 @flask_login.login_required
 def download_file(file_id):
     file = File.get_file(file_id)
+    print(f"DOWNLOAD: file_id={file_id}, file={file}, filepath={getattr(file, 'filepath', None)}")
     if not file or not file.filepath or not os.path.exists(file.filepath):
+        print("DOWNLOAD: File not found or missing on disk")
         return flask.abort(404)
     return flask.send_file(file.filepath, as_attachment=True, download_name=file.filename)
+
+# API endpoint to trigger probra_task from dashboard chatbox
+@csrf.exempt
+@app.route("/api/run-probra-task", methods=["POST"])
+@flask_login.login_required
+def api_run_probra_task():
+    data = flask.request.get_json()
+    prompt = data.get("prompt")
+    environment_id = data.get("environment_id")
+    user_id = flask_login.current_user.user_id
+    if not prompt:
+        return flask.jsonify({"error": "Missing prompt"}), 400
+    # Create a new Task (workflow_id=1 for ToxIndex RAP)
+    title = generate_title(prompt)
+    task = Task.create_task(
+        title=title,
+        user_id=user_id,
+        workflow_id=1,
+        environment_id=environment_id,
+    )
+    Task.add_message(task.task_id, user_id, "user", prompt)
+    celery_task = probra_task.delay({
+        "payload": prompt,
+        "task_id": task.task_id,
+        "user_id": str(user_id),
+    })
+    Task.update_celery_task_id(task.task_id, celery_task.id)
+    return flask.jsonify({"task_id": task.task_id, "celery_id": celery_task.id})
+
+@app.route("/api/tasks", methods=["GET"])
+@flask_login.login_required
+def api_get_user_tasks():
+    try:
+        user_id = flask_login.current_user.user_id
+        env_id = request.args.get("environment_id")
+        if env_id:
+            tasks = Task.get_tasks_by_environment(env_id, user_id)
+        else:
+            tasks = Task.get_tasks_by_user(user_id)
+        active_tasks = [t for t in tasks if not t.archived]
+        archived_tasks = [t for t in tasks if t.archived]
+        def sort_key(t):
+            return t.last_accessed or t.created_at or datetime.datetime.min
+        active_tasks = sorted(active_tasks, key=sort_key, reverse=True)
+        archived_tasks = sorted(archived_tasks, key=sort_key, reverse=True)
+        return flask.jsonify({
+            "active_tasks": [t.to_dict() for t in active_tasks],
+            "archived_tasks": [t.to_dict() for t in archived_tasks],
+        })
+    except Exception as e:
+        logging.error(f"Error retrieving tasks: {str(e)}")
+        return flask.jsonify({"error": "Failed to retrieve tasks"}), 500
+
+@app.route("/api/tasks/<int:task_id>", methods=["GET"])
+@flask_login.login_required
+def api_get_task(task_id):
+    task = Task.get_task(task_id)
+    if not task or task.user_id != flask_login.current_user.user_id:
+        return flask.jsonify({"error": "Task not found"}), 404
+    return flask.jsonify(task.to_dict())
+
+@csrf.exempt
+@app.route("/api/tasks/<int:task_id>/archive", methods=["POST"])
+@flask_login.login_required
+def api_archive_task(task_id):
+    user_id = flask_login.current_user.user_id
+    ds.execute("UPDATE tasks SET archived = TRUE WHERE task_id = %s AND user_id = %s", (task_id, user_id))
+    return flask.jsonify({"success": True})
+
+@csrf.exempt
+@app.route("/api/tasks/<int:task_id>/unarchive", methods=["POST"])
+@flask_login.login_required
+def api_unarchive_task(task_id):
+    user_id = flask_login.current_user.user_id
+    ds.execute("UPDATE tasks SET archived = FALSE WHERE task_id = %s AND user_id = %s", (task_id, user_id))
+    return flask.jsonify({"success": True})
+
+@csrf.exempt
+@app.route("/api/run-vanilla-task", methods=["POST"])
+@flask_login.login_required
+def api_run_vanilla_task():
+    data = flask.request.get_json()
+    prompt = data.get("prompt")
+    environment_id = data.get("environment_id")
+    user_id = flask_login.current_user.user_id
+    if not prompt:
+        return flask.jsonify({"error": "Missing prompt"}), 400
+    # Create a new Task (workflow_id=2 for ToxIndex Vanila)
+    title = generate_title(prompt)
+    task = Task.create_task(
+        title=title,
+        user_id=user_id,
+        workflow_id=2,
+        environment_id=environment_id,
+    )
+    Task.add_message(task.task_id, user_id, "user", prompt)
+    logging.info(f"[api_run_vanilla_task] Queuing plain_openai_task for task_id={task.task_id}, user_id={user_id}")
+    celery_task = plain_openai_task.delay({
+        "payload": prompt,
+        "task_id": task.task_id,
+        "user_id": str(user_id),
+    })
+    logging.info(f"[api_run_vanilla_task] Queued plain_openai_task with celery_id={celery_task.id}")
+    Task.update_celery_task_id(task.task_id, celery_task.id)
+    return flask.jsonify({"task_id": task.task_id, "celery_id": celery_task.id})
+
+# --- Chat Session Endpoints ---
+from flask import jsonify
+
+@csrf.exempt
+@app.route('/api/environment/<env_id>/chat_sessions', methods=['POST'])
+@flask_login.login_required
+def create_chat_session(env_id):
+    user_id = flask_login.current_user.user_id
+    d = flask.request.get_json(force=True)
+    title = d.get('title')
+    session = ChatSession.create_session(env_id, user_id, title)
+    return jsonify(session.to_dict())
+
+@app.route('/api/environment/<env_id>/chat_sessions', methods=['GET'])
+@flask_login.login_required
+def list_chat_sessions(env_id):
+    user_id = flask_login.current_user.user_id
+    sessions = ChatSession.get_sessions_by_environment(env_id, user_id)
+    return jsonify({'sessions': [s.to_dict() for s in sessions]})
+
+@app.route('/api/chat_session/<session_id>/messages', methods=['GET'])
+@flask_login.login_required
+def get_chat_session_messages(session_id):
+    messages = Message.get_messages_by_session(session_id)
+    return jsonify({'messages': [m.to_dict() for m in messages]})
+
+@csrf.exempt
+@app.route('/api/chat_session/<session_id>/message', methods=['POST'])
+@flask_login.login_required
+def send_message_in_session(session_id):
+    from webserver.model import Task
+    user_id = flask_login.current_user.user_id
+    data = request.get_json() or {}
+    prompt = data.get('prompt')
+    model = data.get('model')
+    environment_id = data.get('environment_id')
+    if not prompt:
+        return jsonify({'error': 'Missing prompt'}), 400
+    # Create a new task for this message
+    title = prompt[:60]  # Or use generate_title(prompt)
+    workflow_id = 1 if model == 'toxindex-rap' else 2 if model == 'toxindex-vanilla' else 1
+    task = Task.create_task(
+        title=title,
+        user_id=user_id,
+        workflow_id=workflow_id,
+        environment_id=environment_id,
+        session_id=session_id,
+    )
+    # Add user message to session
+    Message.create_message(task.task_id, user_id, 'user', prompt, session_id=session_id)
+    # Trigger the appropriate celery task
+    if model == 'toxindex-rap':
+        celery_task = probra_task.delay({
+            'payload': prompt,
+            'task_id': task.task_id,
+            'user_id': str(user_id),
+        })
+    elif model == 'toxindex-vanilla':
+        celery_task = plain_openai_task.delay({
+            'payload': prompt,
+            'task_id': task.task_id,
+            'user_id': str(user_id),
+        })
+    else:
+        celery_task = probra_task.delay({
+            'payload': prompt,
+            'task_id': task.task_id,
+            'user_id': str(user_id),
+        })
+    Task.update_celery_task_id(task.task_id, celery_task.id)
+    return jsonify({'task_id': task.task_id, 'celery_id': celery_task.id})
 
 print("Registered routes:")
 for rule in app.url_map.iter_rules():
