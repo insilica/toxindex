@@ -15,7 +15,7 @@ source scripts/flake/setup_postgres.sh \
   "/nix/store/3pzlrs5nddszkpgasnrcpf4ifrzm76lb-postgresql-15.13/bin"
 
 # Drop and recreate the public schema (dev only!)
-psql -U postgres -d toxindex -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
+# psql -U postgres -d toxindex -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
 
 source scripts/flake/aws_login.sh
 
