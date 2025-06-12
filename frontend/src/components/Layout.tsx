@@ -1,5 +1,8 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, isValidElement, cloneElement } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import Dashboard from "./Dashboard";
+import FilePreviewModal from './FilePreviewModal';
+import { FaComments, FaPlus, FaListAlt } from 'react-icons/fa';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const navigate = useNavigate();
@@ -10,6 +13,14 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
   const [user, setUser] = useState<{ email?: string } | null>(null);
+  const [selectedModel, setSelectedModel] = useState("toxindex-rap");
+  const [environments, setEnvironments] = useState<{ environment_id: string; title: string }[]>([]);
+  const [selectedEnv, setSelectedEnv] = useState<string>("");
+  const [envFiles, setEnvFiles] = useState<{ file_id: number; filename: string }[]>([]);
+  const [sidebarPreviewFileId, setSidebarPreviewFileId] = useState<number | null>(null);
+  const [sidebarPreviewOpen, setSidebarPreviewOpen] = useState(false);
+  const [chatSessions, setChatSessions] = useState<any[]>([]);
+  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/me", { credentials: "include", cache: "no-store" })
@@ -36,6 +47,43 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     return () => document.removeEventListener('mousedown', handleClick);
   }, [profileOpen]);
 
+  // Fetch files for selected environment
+  useEffect(() => {
+    if (!selectedEnv) return;
+    fetch(`/api/environment/${selectedEnv}/files`, { credentials: 'include' })
+      .then(res => res.json())
+      .then(data => setEnvFiles(data.files || []));
+  }, [selectedEnv]);
+
+  // Fetch environments and set default selectedEnv
+  useEffect(() => {
+    fetch("/api/environments", { credentials: "include" })
+      .then(res => res.json())
+      .then(data => {
+        setEnvironments(data.environments || []);
+        if (data.environments && data.environments.length > 0) {
+          setSelectedEnv(data.environments[0].environment_id);
+        } else {
+          setSelectedEnv("__add__");
+        }
+      });
+  }, []);
+
+  // Fetch chat sessions for environment
+  useEffect(() => {
+    if (!selectedEnv) return;
+    fetch(`/api/environment/${selectedEnv}/chat_sessions`, { credentials: 'include' })
+      .then(res => res.json())
+      .then(data => {
+        setChatSessions(data.sessions || []);
+        if (data.sessions && data.sessions.length > 0) {
+          setSelectedSessionId(data.sessions[0].session_id);
+        } else {
+          setSelectedSessionId(null);
+        }
+      });
+  }, [selectedEnv]);
+
   const handleLogout = () => {
     fetch("/api/logout", {
       method: "GET",
@@ -51,6 +99,23 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   if (location.pathname === "/settings/environments") settingsSection = 'environments';
   else if (location.pathname === "/settings/data-controls") settingsSection = 'data-controls';
   else if (location.pathname === "/settings/general") settingsSection = 'general';
+
+  // Create a new chat session
+  const handleNewChat = async () => {
+    if (!selectedEnv) return;
+    const res = await fetch(`/api/environment/${selectedEnv}/chat_sessions`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: null })
+    });
+    if (res.ok) {
+      const session = await res.json();
+      setChatSessions(sessions => [session, ...sessions]);
+      setSelectedSessionId(session.session_id);
+      navigate(`/chat/session/${session.session_id}`);
+    }
+  };
 
   return (
     <div className="flex w-screen min-h-screen overflow-x-hidden" style={{ fontFamily: 'Inter, Arial, sans-serif', position: 'relative' }}>
@@ -137,6 +202,57 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                   </svg>
                 </button>
               </div>
+              {/* Environment Files List - moved above settings button */}
+              {sidebarOpen && !isSettings && selectedEnv && envFiles.length > 0 && (
+                <div style={{ marginLeft: '1.2rem', marginTop: '1.5rem', maxHeight: '180px', overflowY: 'auto' }}>
+                  <div className="text-m text-gray-400 mb-2 font-semibold flex items-center"><FaListAlt className="mr-2" />Files in environment</div>
+                  <ul className="space-y-1">
+                    {envFiles.map(file => (
+                      <li key={file.file_id} className="flex items-center justify-between text-sm">
+                        <button
+                          className="truncate max-w-[140px] text-sm text-gray-400 hover:text-green-400 bg-transparent border-none p-0 m-0 text-left cursor-pointer"
+                          style={{ background: 'none' }}
+                          onClick={() => { setSidebarPreviewFileId(file.file_id); setSidebarPreviewOpen(true); }}
+                          title="Preview file"
+                        >
+                          {file.filename}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {/* Chat Sessions List */}
+              {sidebarOpen && !isSettings && selectedEnv && (
+                <div style={{ marginLeft: '1.2rem', marginTop: '2rem', maxHeight: '180px', overflowY: 'auto' }}>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-m text-gray-400 font-semibold flex items-center">
+                      <FaComments className="mr-2" />Chats
+                    </span>
+                    <button
+                      onClick={handleNewChat}
+                      className="ml-2 px-2 py-1 rounded-full text-[#4ade80] hover:text-[#22c55e] text-xs"
+                      style={{ background: 'none', border: 'none', boxShadow: 'none', padding: 0, minWidth: 0, minHeight: 0 }}
+                      title="New Chat"
+                    >
+                      <FaPlus />
+                    </button>
+                  </div>
+                  <ul className="space-y-1">
+                    {chatSessions.map(session => (
+                      <li key={session.session_id}>
+                        <button
+                          className={`truncate max-w-[180px] text-sm text-left ${selectedSessionId === session.session_id ? 'text-[#22c55e] font-bold' : 'text-[#4ade80] hover:text-[#22c55e]'}`}
+                          style={{ width: '100%', background: 'none', border: 'none', boxShadow: 'none', padding: '2px 4px', minHeight: 0, minWidth: 0, borderRadius: 0, textAlign: 'left' }}
+                          onClick={() => navigate(`/chat/session/${session.session_id}`)}
+                        >
+                          {session.title || `Chat ${session.session_id.slice(0, 6)}`}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
               {/* Settings button at the bottom above logout */}
               <div className="flex flex-col items-center mt-auto mb-2">
                 <button
@@ -187,11 +303,12 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <select
               className="text-white text-lg px-2 py-1 rounded-full border-none bg-transparent appearance-none transition hover:bg-gray-200 hover:bg-opacity-40 focus:bg-gray-200 focus:bg-opacity-40 focus:outline-none pr-8"
               style={{ minWidth: 120, boxShadow: 'none', background: 'none', cursor: 'pointer' }}
-              defaultValue="toxindex-rap"
+              value={selectedModel}
+              onChange={e => setSelectedModel(e.target.value)}
             >
               <option value="toxindex-rap">ToxIndex RAP</option>
               <option value="toxindex-pathway">ToxIndex Pathway</option>
-              <option value="toxindex-3rd">ToxIndex 3rd</option>
+              <option value="toxindex-vanilla">ToxIndex Vanilla</option>
               <option value="toxindex-4th">ToxIndex 4th</option>
               <option value="toxindex-5th">ToxIndex 5th</option>
             </select>
@@ -234,8 +351,55 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       )}
       {/* Main Content */}
       <main className="flex-1 flex items-center justify-center h-screen">
-        {children}
+        {React.Children.map(children, child => {
+          if (
+            React.isValidElement(child) &&
+            (child.type as any).name === 'Dashboard'
+          ) {
+            return React.cloneElement(
+              child as React.ReactElement<any>,
+              { 
+                selectedModel, 
+                setSelectedModel, 
+                selectedEnv, 
+                setSelectedEnv, 
+                environments, 
+                setEnvironments,
+                selectedSessionId,
+                setSelectedSessionId,
+                chatSessions,
+                handleNewChat
+              }
+            );
+          }
+          if (
+            React.isValidElement(child) &&
+            (child.type as any).name === 'ChatSession'
+          ) {
+            return React.cloneElement(
+              child as React.ReactElement<any>,
+              {
+                selectedModel,
+                setSelectedModel,
+                selectedEnv,
+                setSelectedEnv,
+                environments,
+                setEnvironments,
+                selectedSessionId,
+                setSelectedSessionId,
+                chatSessions,
+                handleNewChat
+              }
+            );
+          }
+          return child;
+        })}
       </main>
+      <FilePreviewModal
+        fileId={sidebarPreviewFileId}
+        isOpen={sidebarPreviewOpen}
+        onRequestClose={() => setSidebarPreviewOpen(false)}
+      />
     </div>
   );
 };

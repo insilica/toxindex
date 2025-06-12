@@ -14,6 +14,14 @@ if [ -z "${PGHOST:-}" ] || [ -z "${PGPORT:-}" ] || [ -z "${PGDATABASE:-}" ] || [
   exit 1
 fi
 
+echo "Running Flyway repair..."
+flyway \
+  -url="jdbc:postgresql://${PGHOST}:${PGPORT}/${PGDATABASE}" \
+  -user="${PGUSER}" \
+  -password="${PGPASSWORD}" \
+  -locations="filesystem:./flyway/sql" \
+  repair
+
 echo "Running Flyway migrations..."
 flyway \
   -url="jdbc:postgresql://${PGHOST}:${PGPORT}/${PGDATABASE}" \

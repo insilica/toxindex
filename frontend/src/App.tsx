@@ -12,8 +12,11 @@ import SettingsDataControls from "./components/SettingsDataControls";
 import CreateEnvironmentSettings from "./components/CreateEnvironmentSettings";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { EnvironmentDetails } from "./components/CreateEnvironment";
+import React, { useState } from "react";
+import ChatSession from "./components/ChatSession";
 
 function App() {
+  const [selectedModel, setSelectedModel] = useState<string>("vanilla");
   return (
     <div className="w-screen h-screen min-h-screen min-w-full">
       <Router>
@@ -31,7 +34,7 @@ function App() {
             element={
               <ProtectedRoute>
                 <Layout>
-                  <Dashboard />
+                  <Dashboard selectedModel={selectedModel} setSelectedModel={setSelectedModel} />
                 </Layout>
               </ProtectedRoute>
             }
@@ -92,6 +95,16 @@ function App() {
               <ProtectedRoute>
                 <Layout>
                   <EnvironmentDetails />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/chat/session/:sessionId"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <ChatSession />
                 </Layout>
               </ProtectedRoute>
             }
