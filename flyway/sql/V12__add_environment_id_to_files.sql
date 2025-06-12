@@ -1,1 +1,0 @@
-ALTER TABLE files ADD COLUMN IF NOT EXISTS environment_id INTEGER REFERENCES environments(environment_id); 
