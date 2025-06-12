@@ -17,6 +17,7 @@ class Task:
         created_at=None,
         archived=False,
         last_accessed=None,
+        session_id=None,
     ):
         self.task_id = task_id
         self.title = title
@@ -28,6 +29,7 @@ class Task:
         self.created_at = created_at
         self.archived = archived
         self.last_accessed = last_accessed
+        self.session_id = session_id
 
     def to_dict(self):
         return {
@@ -48,6 +50,7 @@ class Task:
                 if self.last_accessed
                 else None
             ),
+            "session_id": str(self.session_id) if self.session_id else None,
         }
 
     @staticmethod
@@ -63,6 +66,7 @@ class Task:
             created_at=row["created_at"],
             archived=row.get("archived", False),
             last_accessed=row.get("last_accessed"),
+            session_id=row.get("session_id"),
         )
 
     @staticmethod
@@ -73,8 +77,9 @@ class Task:
         environment_id=None,
         celery_task_id=None,
         description=None,
+        session_id=None,
     ):
-        logging.info(f"Creating new task with title='{title}' for user_id={user_id}")
+        logging.info(f"Creating new task with title='{title}' for user_id={user_id}, session_id={session_id}")
         params = (
             title,
             user_id,
@@ -82,9 +87,10 @@ class Task:
             workflow_id,
             environment_id,
             description,
+            session_id,
         )
         ds.execute(
-            "INSERT INTO tasks (title, user_id, celery_task_id, workflow_id, environment_id, description) VALUES (%s, %s, %s, %s, %s, %s)",
+            "INSERT INTO tasks (title, user_id, celery_task_id, workflow_id, environment_id, description, session_id) VALUES (%s, %s, %s, %s, %s, %s, %s)",
             params,
         )
 

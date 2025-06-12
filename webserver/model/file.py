@@ -158,3 +158,12 @@ class File:
         row = ds.find("SELECT * FROM files WHERE file_id = %s", (file_id,))
         return File.from_row(row) if row else None
 
+    @staticmethod
+    def delete_file(file_id, user_id=None):
+        params = (file_id,)
+        query = "DELETE FROM files WHERE file_id = %s"
+        if user_id is not None:
+            query += " AND user_id = %s"
+            params = (file_id, user_id)
+        ds.execute(query, params)
+
