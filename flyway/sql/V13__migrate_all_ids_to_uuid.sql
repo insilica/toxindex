@@ -1,4 +1,90 @@
--- UUID migration for all IDs and foreign keys (was V14, now V13)
+-- Robust UUID migration: drop and recreate all tables with UUID primary keys
+
+-- Drop all relevant tables (CASCADE to remove dependencies)
+DROP TABLE IF EXISTS messages CASCADE;
+DROP TABLE IF EXISTS files CASCADE;
+DROP TABLE IF EXISTS tasks CASCADE;
+DROP TABLE IF EXISTS chat_sessions CASCADE;
+DROP TABLE IF EXISTS environments CASCADE;
+DROP TABLE IF EXISTS workflows CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
+
+-- Recreate users table
+CREATE TABLE users (
+    user_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    email VARCHAR(255) NOT NULL UNIQUE,
+    hashpw VARCHAR(255) NOT NULL,
+    token VARCHAR(255),
+    stripe_customer_id VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Recreate workflows table
+CREATE TABLE workflows (
+    workflow_id SERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL UNIQUE,
+    description TEXT,
+    user_id UUID REFERENCES users(user_id) ON DELETE SET NULL,
+    initial_prompt TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Recreate environments table
+CREATE TABLE environments (
+    environment_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    user_id UUID REFERENCES users(user_id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Recreate chat_sessions table
+CREATE TABLE chat_sessions (
+    session_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    environment_id UUID REFERENCES environments(environment_id) ON DELETE CASCADE,
+    user_id UUID REFERENCES users(user_id) ON DELETE CASCADE,
+    title TEXT,
+    created_at TIMESTAMP DEFAULT now()
+);
+
+-- Recreate tasks table
+CREATE TABLE tasks (
+    task_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    user_id UUID REFERENCES users(user_id),
+    workflow_id INTEGER REFERENCES workflows(workflow_id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    modified_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    celery_task_id TEXT,
+    environment_id UUID REFERENCES environments(environment_id),
+    archived BOOLEAN DEFAULT FALSE,
+    last_accessed TIMESTAMP,
+    session_id UUID REFERENCES chat_sessions(session_id)
+);
+
+-- Recreate files table
+CREATE TABLE files (
+    file_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    task_id UUID REFERENCES tasks(task_id) ON DELETE CASCADE,
+    user_id UUID REFERENCES users(user_id),
+    filename TEXT NOT NULL,
+    filepath TEXT NOT NULL,
+    s3_url TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    environment_id UUID REFERENCES environments(environment_id)
+);
+
+-- Recreate messages table
+CREATE TABLE messages (
+    message_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    task_id UUID REFERENCES tasks(task_id) ON DELETE CASCADE,
+    user_id UUID REFERENCES users(user_id),
+    role VARCHAR(50) NOT NULL,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    session_id UUID REFERENCES chat_sessions(session_id) ON DELETE CASCADE
+);
 
 -- 0. Ensure chat_sessions table and session_id column exist
 CREATE TABLE IF NOT EXISTS chat_sessions (
