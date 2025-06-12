@@ -16,10 +16,9 @@ interface Environment {
 
 interface ChatSessionProps {
   selectedModel: string;
-  setSelectedModel: React.Dispatch<React.SetStateAction<string>>;
 }
 
-const ChatSession: React.FC<ChatSessionProps> = ({ selectedModel, setSelectedModel }) => {
+const ChatSession: React.FC<ChatSessionProps> = ({ selectedModel }) => {
   const { sessionId } = useParams<{ sessionId: string }>();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');

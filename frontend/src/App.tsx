@@ -12,7 +12,7 @@ import SettingsDataControls from "./components/SettingsDataControls";
 import CreateEnvironmentSettings from "./components/CreateEnvironmentSettings";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { EnvironmentDetails } from "./components/CreateEnvironment";
-import React, { useState } from "react";
+import { useState } from "react";
 import ChatSession from "./components/ChatSession";
 
 function App() {
@@ -104,7 +104,7 @@ function App() {
             element={
               <ProtectedRoute>
                 <Layout>
-                  <ChatSession />
+                  <ChatSession selectedModel={selectedModel} setSelectedModel={setSelectedModel} />
                 </Layout>
               </ProtectedRoute>
             }
