@@ -10,7 +10,6 @@ interface Environment {
 
 const SettingsEnvironments: React.FC = () => {
   const [environments, setEnvironments] = useState<Environment[]>([]);
-  const [hoveredRow, setHoveredRow] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [envToDelete, setEnvToDelete] = useState<Environment | null>(null);
   const navigate = useNavigate();
