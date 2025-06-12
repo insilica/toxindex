@@ -846,7 +846,7 @@ if __name__ == "__main__":
             daemon=True,
             name=thread_name,
         ).start()
-    socketio.run(app, host="0.0.0.0", port=6513, debug=True, use_reloader=True) # set to true if you want to reload while editing code.
+    socketio.run(app, host="0.0.0.0", port=6513, debug=True, use_reloader=False) # set to true if you want to reload while editing code.
 
 # In production (Gunicorn), run the Redis listener as a separate process using redis_listener_service.py
 # See redis_listener_service.py for details.
