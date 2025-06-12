@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaListAlt, FaPlus, FaArchive, FaComments } from 'react-icons/fa';
-import ReactMarkdown from 'react-markdown';
+import { FaListAlt, FaPlus, FaArchive } from 'react-icons/fa';
 
 interface Environment {
   environment_id: string;
@@ -20,17 +19,14 @@ interface Task {
 
 interface DashboardProps {
   selectedModel: string;
-  setSelectedModel: React.Dispatch<React.SetStateAction<string>>;
   selectedEnv?: string;
   setSelectedEnv?: (envId: string) => void;
   environments?: Environment[];
-  setEnvironments?: React.Dispatch<React.SetStateAction<Environment[]>>;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ selectedModel, setSelectedModel, selectedEnv, setSelectedEnv, environments, setEnvironments }) => {
+const Dashboard: React.FC<DashboardProps> = ({ selectedModel, selectedEnv, setSelectedEnv, environments }) => {
   const [chatInput, setChatInput] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [user, setUser] = useState<{ email?: string } | null>(null);
   const [tasksLoading, setTasksLoading] = useState(false);
   const [activeTasks, setActiveTasks] = useState<Task[]>([]);
   const [archivedTasks, setArchivedTasks] = useState<Task[]>([]);
@@ -46,14 +42,6 @@ const Dashboard: React.FC<DashboardProps> = ({ selectedModel, setSelectedModel, 
   const [selectWidth, setSelectWidth] = useState(120); // default min width
   const selectRef = useRef<HTMLSelectElement>(null);
   const spanRef = useRef<HTMLSpanElement>(null);
-  const [latestMarkdown, setLatestMarkdown] = useState<string | null>(null);
-  const [markdownLoading, setMarkdownLoading] = useState(false);
-
-  useEffect(() => {
-    fetch("/api/me", { credentials: "include", cache: "no-store" })
-      .then(res => res.ok ? res.json() : null)
-      .then(data => setUser(data));
-  }, []);
 
   useEffect(() => {
     setTasksLoading(true);
@@ -76,32 +64,6 @@ const Dashboard: React.FC<DashboardProps> = ({ selectedModel, setSelectedModel, 
     }
   }, [selectedEnv, environments]);
 
-  // Fetch latest assistant message for the most recent active task in selectedEnv
-  useEffect(() => {
-    async function fetchLatestMarkdown() {
-      setMarkdownLoading(true);
-      setLatestMarkdown(null);
-      if (!selectedEnv || !activeTasks.length) {
-        setMarkdownLoading(false);
-        return;
-      }
-      const task = activeTasks.length > 0 ? activeTasks[0] : null;
-      if (!task) {
-        setMarkdownLoading(false);
-        return;
-      }
-      try {
-        const res = await fetch(`/api/tasks/${task.task_id}`, { credentials: "include", cache: "no-store" });
-        const data = await res.json();
-        setLatestMarkdown(data.latest_assistant_message || data.title || null);
-      } catch {
-        setLatestMarkdown(null);
-      }
-      setMarkdownLoading(false);
-    }
-    fetchLatestMarkdown();
-  }, [selectedEnv, activeTasks]);
-
   const handleDropdownChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     if (e.target.value === "__manage__") {
       navigate("/settings/environments");
@@ -110,16 +72,6 @@ const Dashboard: React.FC<DashboardProps> = ({ selectedModel, setSelectedModel, 
     } else {
       setSelectedEnv && setSelectedEnv(String(e.target.value || ''));
     }
-  };
-
-  const handleLogout = () => {
-    fetch("/api/logout", {
-      method: "GET",
-      credentials: "include",
-      cache: "no-store",
-    }).then(() => {
-      window.location.href = "/login";
-    });
   };
 
   const archiveTask = (task_id: string) => {
