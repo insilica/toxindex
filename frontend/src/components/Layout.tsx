@@ -231,7 +231,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                     </span>
                     <button
                       onClick={handleNewChat}
-                      className="ml-2 px-2 py-1 rounded-full text-[#4ade80] hover:text-[#22c55e] text-xs"
+                      className="px-3 py-1 pr-2 rounded-full text-[#166534] hover:text-[#22c55e] text-xs -ml-1"
                       style={{ background: 'none', border: 'none', boxShadow: 'none', padding: 0, minWidth: 0, minHeight: 0 }}
                       title="New Chat"
                     >
