@@ -86,9 +86,14 @@ ALTER TABLE messages RENAME COLUMN message_id_new TO message_id;
 
 -- 6. Add new constraints
 ALTER TABLE environments ADD PRIMARY KEY (environment_id);
+ALTER TABLE tasks ADD PRIMARY KEY (task_id);
+ALTER TABLE chat_sessions ADD PRIMARY KEY (session_id);
 ALTER TABLE tasks ADD CONSTRAINT tasks_environment_id_fkey FOREIGN KEY (environment_id) REFERENCES environments(environment_id) ON DELETE CASCADE;
 ALTER TABLE files ADD CONSTRAINT files_environment_id_fkey FOREIGN KEY (environment_id) REFERENCES environments(environment_id) ON DELETE CASCADE;
 ALTER TABLE files ADD CONSTRAINT files_task_id_fkey FOREIGN KEY (task_id) REFERENCES tasks(task_id) ON DELETE CASCADE;
 ALTER TABLE chat_sessions ADD CONSTRAINT chat_sessions_environment_id_fkey FOREIGN KEY (environment_id) REFERENCES environments(environment_id) ON DELETE CASCADE;
 ALTER TABLE messages ADD CONSTRAINT messages_task_id_fkey FOREIGN KEY (task_id) REFERENCES tasks(task_id) ON DELETE CASCADE;
-ALTER TABLE messages ADD CONSTRAINT messages_session_id_fkey FOREIGN KEY (session_id) REFERENCES chat_sessions(session_id) ON DELETE CASCADE; 
+ALTER TABLE messages ADD CONSTRAINT messages_session_id_fkey FOREIGN KEY (session_id) REFERENCES chat_sessions(session_id) ON DELETE CASCADE;
+
+-- Add session_id to tasks table for chat session support
+ALTER TABLE tasks ADD COLUMN session_id UUID REFERENCES chat_sessions(session_id); 
