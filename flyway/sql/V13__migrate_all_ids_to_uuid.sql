@@ -64,18 +64,9 @@ ALTER TABLE environments DROP COLUMN environment_id;
 ALTER TABLE environments RENAME COLUMN environment_id_new TO environment_id;
 
 -- Drop the primary key constraint by name if it exists
-DO $$
-BEGIN
-    IF EXISTS (
-        SELECT 1 FROM information_schema.table_constraints
-        WHERE table_name = 'tasks' AND constraint_type = 'PRIMARY KEY'
-    ) THEN
-        ALTER TABLE tasks DROP CONSTRAINT tasks_pkey;
-    END IF;
-END$$;
-
-ALTER TABLE tasks DROP COLUMN environment_id;
+ALTER TABLE tasks DROP CONSTRAINT IF EXISTS tasks_pkey;
 ALTER TABLE tasks DROP COLUMN task_id;
+ALTER TABLE tasks DROP COLUMN environment_id;
 ALTER TABLE tasks RENAME COLUMN environment_id_new TO environment_id;
 ALTER TABLE tasks RENAME COLUMN task_id_new TO task_id;
 ALTER TABLE tasks ADD PRIMARY KEY (task_id);
