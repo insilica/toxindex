@@ -141,10 +141,10 @@ class Task:
         return Task.from_row(res) if res else None
 
     @staticmethod
-    def add_message(task_id, user_id, role, content):
-        params = (task_id, user_id, role, content)
+    def add_message(task_id, user_id, role, content, session_id=None):
+        params = (task_id, user_id, role, content, session_id)
         ds.execute(
-            "INSERT INTO messages (task_id, user_id, role, content) VALUES (%s, %s, %s, %s)",
+            "INSERT INTO messages (task_id, user_id, role, content, session_id) VALUES (%s, %s, %s, %s, %s)",
             params,
         )
         return True

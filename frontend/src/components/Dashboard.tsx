@@ -18,13 +18,18 @@ interface Task {
 }
 
 interface DashboardProps {
-  selectedModel: string;
+  selectedModel?: string;
   selectedEnv?: string;
   setSelectedEnv?: (envId: string) => void;
-  environments?: Environment[];
+  environments: Environment[];
+  refetchChatSessions?: () => void;
+  refetchEnvironments: () => void;
+  loadingEnvironments: boolean;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ selectedModel, selectedEnv, setSelectedEnv, environments }) => {
+const blinkStyle = `@keyframes blink { 0%{opacity:1;} 50%{opacity:0.2;} 100%{opacity:1;} } .blink { animation: blink 1s linear infinite; }`;
+
+const Dashboard: React.FC<DashboardProps> = ({ selectedModel, selectedEnv, setSelectedEnv, environments, refetchChatSessions, refetchEnvironments, loadingEnvironments }) => {
   const [chatInput, setChatInput] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [tasksLoading, setTasksLoading] = useState(false);
@@ -63,6 +68,23 @@ const Dashboard: React.FC<DashboardProps> = ({ selectedModel, selectedEnv, setSe
       setSelectWidth(spanRef.current.offsetWidth + 40); // add some padding
     }
   }, [selectedEnv, environments]);
+
+  // Auto-select first environment and restore from localStorage
+  useEffect(() => {
+    if (!setSelectedEnv) return;
+    const stored = localStorage.getItem('selectedEnv');
+    if (stored && environments.some(e => e.environment_id === stored)) {
+      setSelectedEnv(stored);
+    } else if (environments.length > 0) {
+      setSelectedEnv(environments[0].environment_id);
+    }
+  }, [environments, setSelectedEnv]);
+
+  useEffect(() => {
+    if (selectedEnv) {
+      localStorage.setItem('selectedEnv', selectedEnv);
+    }
+  }, [selectedEnv]);
 
   const handleDropdownChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     if (e.target.value === "__manage__") {
@@ -144,7 +166,6 @@ const Dashboard: React.FC<DashboardProps> = ({ selectedModel, selectedEnv, setSe
     } else if (selectedModel === "toxindex-vanilla") {
       endpoint = "/api/run-vanilla-task";
     } else if (selectedModel === "toxindex-pathway") {
-      // TODO: implement endpoint for pathway
       setError("ToxIndex Pathway is not yet supported.");
       return;
     } else if (selectedModel === "toxindex-4th") {
@@ -169,6 +190,7 @@ const Dashboard: React.FC<DashboardProps> = ({ selectedModel, selectedEnv, setSe
         }),
       });
       if (!res.ok) throw new Error("Failed to create task");
+      const data = await res.json();
       setChatInput("");
       // Optionally, you can refresh the tasks list here by refetching
       setTasksLoading(true);
@@ -176,9 +198,16 @@ const Dashboard: React.FC<DashboardProps> = ({ selectedModel, selectedEnv, setSe
       if (selectedEnv && selectedEnv !== "__add__" && selectedEnv !== "__manage__") {
         url += `?environment_id=${selectedEnv}`;
       }
-      const data = await fetch(url, { credentials: "include", cache: "no-store" }).then(r => r.json());
-      setActiveTasks(data.active_tasks || []);
-      setArchivedTasks(data.archived_tasks || []);
+      const tasksData = await fetch(url, { credentials: "include", cache: "no-store" }).then(r => r.json());
+      setActiveTasks(tasksData.active_tasks || []);
+      setArchivedTasks(tasksData.archived_tasks || []);
+      // --- NEW: Use session_id from backend response for redirect ---
+      if (data.session_id) {
+        navigate(`/chat/session/${data.session_id}`);
+        if (typeof refetchChatSessions === 'function') {
+          refetchChatSessions();
+        }
+      }
     } catch (err) {
       setError("Failed to create new chat session.");
     }
@@ -291,7 +320,11 @@ const Dashboard: React.FC<DashboardProps> = ({ selectedModel, selectedEnv, setSe
           <form
             className="flex flex-col items-center w-full"
             style={{ maxWidth: '800px' }}
-            onSubmit={handleFormSubmit}
+            onSubmit={e => {
+              e.preventDefault();
+              if (selectedEnv === "__add__" || selectedEnv === "__manage__") return;
+              handleFormSubmit(e);
+            }}
           >
             <div className="relative w-full" style={{ maxWidth: '800px', width: '100%' }}>
               <textarea
@@ -299,8 +332,17 @@ const Dashboard: React.FC<DashboardProps> = ({ selectedModel, selectedEnv, setSe
                 placeholder="Ask me your toxicology question [ Is green tea nephrotoxic? ]"
                 value={chatInput}
                 onChange={e => setChatInput(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    if (selectedEnv !== "__add__" && selectedEnv !== "__manage__") {
+                      handleFormSubmit(e as any);
+                    }
+                  }
+                }}
                 className="w-full pt-4 pb-4 pr-28 pl-8 text-lg rounded-2xl border border-gray-700 bg-gray-900 bg-opacity-70 text-white resize-none min-h-[80px] shadow-2xl focus:outline-none focus:ring-2 focus:ring-green-400 text-left placeholder:text-left"
                 style={{ minHeight: 80, fontFamily: 'inherit', width: '100%', boxShadow: '0 8px 32px 0 rgba(34,197,94,0.10)' }}
+                disabled={selectedEnv === "__add__" || selectedEnv === "__manage__"}
               />
               <div className="absolute right-4 bottom-11 flex items-center space-x-2 z-30">
                 <button
@@ -318,6 +360,7 @@ const Dashboard: React.FC<DashboardProps> = ({ selectedModel, selectedEnv, setSe
                   className="w-10 h-10 flex items-center justify-center rounded-full shadow-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-green-400"
                   style={{ padding: 0, borderRadius: '50%', background: 'rgba(255,255,255,0.7)' }}
                   title="Submit"
+                  disabled={selectedEnv === "__add__" || selectedEnv === "__manage__"}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.2} stroke="black" className="w-5 h-5">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
@@ -340,11 +383,17 @@ const Dashboard: React.FC<DashboardProps> = ({ selectedModel, selectedEnv, setSe
                         padding: "0 16px"
                       }}
                     >
-                      {(environments ?? []).find(e => e.environment_id === selectedEnv)?.title ? `env - ${(environments ?? []).find(e => e.environment_id === selectedEnv)?.title}` : ""}
+                      {selectedEnv === "__add__"
+                        ? "+ Add environment"
+                        : selectedEnv === "__manage__"
+                          ? "⚙ Manage environments"
+                          : (environments ?? []).find(e => e.environment_id === selectedEnv)
+                            ? `env - ${(environments ?? []).find(e => e.environment_id === selectedEnv)?.title}`
+                            : ""}
                     </span>
                     <select
                       ref={selectRef}
-                      className="font-bold text-white text-sm px-1 py-2 rounded-full appearance-none bg-transparent border-none focus:outline-none transition-all duration-150 group-hover:bg-black group-hover:bg-opacity-60 group-hover:border group-hover:border-gray-700 group-hover:px-4 group-hover:pr-10 group-hover:cursor-pointer focus:bg-black focus:bg-opacity-60 focus:border focus:border-gray-700 focus:px-4 focus:pr-10 w-full"
+                      className={`font-bold text-white text-sm px-1 py-2 rounded-full appearance-none bg-transparent border-none focus:outline-none transition-all duration-150 group-hover:bg-black group-hover:bg-opacity-60 group-hover:border group-hover:border-gray-700 group-hover:px-4 group-hover:pr-10 group-hover:cursor-pointer focus:bg-black focus:bg-opacity-60 focus:border focus:border-gray-700 focus:px-4 focus:pr-10 w-full ${loadingEnvironments ? 'opacity-50' : ''}`}
                       style={{
                         width: `${selectWidth}px`,
                         minWidth: "50px",
@@ -359,14 +408,17 @@ const Dashboard: React.FC<DashboardProps> = ({ selectedModel, selectedEnv, setSe
                       }}
                       value={selectedEnv}
                       onChange={handleDropdownChange}
+                      disabled={loadingEnvironments}
                     >
                       {(environments ?? []).length > 0 && (environments ?? []).map(env => (
                         <option key={env.environment_id} value={env.environment_id} style={{ paddingLeft: '1rem' }}>
                           {`env - ${env.title}`}
                         </option>
                       ))}
-                      <option value="__add__">+ Add environment</option>
-                      <option value="__manage__">&#9881; Manage environments</option>
+                      <option value="__add__" style={loadingEnvironments ? { opacity: 0.5 } : {}}>
+                        {loadingEnvironments ? '+ Add environment' : '+ Add environment'}
+                      </option>
+                      <option value="__manage__" style={loadingEnvironments ? { opacity: 0.5 } : {}}>&#9881; Manage environments</option>
                     </select>
                   </div>
                 </div>

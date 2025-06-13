@@ -54,10 +54,19 @@ cd frontend && npm install
 ### Start Services
 
 - **Production:**
+
+
+
+  - start React
+    `cd toxindex && nix develop && cd frontend && npm install && sudo sync; sudo echo 3 | sudo tee /proc/sys/vm/drop_caches && npm run build`
+
   - Start webserver:  
     `gunicorn webserver.app:app --bind 0.0.0.0:8000 --worker-class eventlet`
   - Start Redis listener:  
-    `.venv/bin/python redis_listener_service.py`
+    `cd toxindex && nix develop && python redis_listener_service.py`
+  - Start Celery worker:  
+    `cd toxindex && nix develop && celery -A workflows.celery_worker worker --loglevel=info`
+
 - **Development:**
   - Start Flask app:  
     `python -m webserver.app`

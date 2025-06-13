@@ -8,17 +8,15 @@ interface Environment {
   created_at: string;
 }
 
-const SettingsEnvironments: React.FC = () => {
-  const [environments, setEnvironments] = useState<Environment[]>([]);
+interface SettingsEnvironmentsProps {
+  environments: Environment[];
+  refetchEnvironments: () => void;
+}
+
+const SettingsEnvironments: React.FC<SettingsEnvironmentsProps> = ({ environments, refetchEnvironments }) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [envToDelete, setEnvToDelete] = useState<Environment | null>(null);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    fetch("/api/environments", { credentials: "include" })
-      .then(res => res.json())
-      .then(data => setEnvironments(data.environments || []));
-  }, []);
 
   const handleDelete = (envId: string) => {
     fetch(`/environment/${envId}`, {
@@ -28,7 +26,7 @@ const SettingsEnvironments: React.FC = () => {
       .then(res => res.json())
       .then(data => {
         if (data.success) {
-          setEnvironments(envs => envs.filter(e => e.environment_id !== envId));
+          refetchEnvironments();
         } else {
           alert('Failed to delete environment.');
         }

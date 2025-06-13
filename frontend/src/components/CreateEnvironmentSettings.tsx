@@ -6,7 +6,11 @@ interface User {
   email: string;
 }
 
-const CreateEnvironmentSettings: React.FC = () => {
+interface CreateEnvironmentSettingsProps {
+  refetchEnvironments: () => void;
+}
+
+const CreateEnvironmentSettings: React.FC<CreateEnvironmentSettingsProps> = ({ refetchEnvironments }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [users, setUsers] = useState<User[]>([]);
@@ -38,6 +42,7 @@ const CreateEnvironmentSettings: React.FC = () => {
     });
     if (res.ok) {
       setSuccess("Environment created successfully!");
+      refetchEnvironments();
       setTimeout(() => navigate("/settings/environments"), 1200);
     } else {
       setError("Failed to create environment.");

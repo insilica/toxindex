@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import FilePreviewModal from './FilePreviewModal';
-import { FaComments, FaPlus, FaListAlt } from 'react-icons/fa';
+import { FaComments, FaPlus, FaListAlt, FaFileCsv } from 'react-icons/fa';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const navigate = useNavigate();
@@ -99,6 +99,14 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   else if (location.pathname === "/settings/data-controls") settingsSection = 'data-controls';
   else if (location.pathname === "/settings/general") settingsSection = 'general';
 
+  // Helper to refetch chat sessions for the current environment
+  const refetchChatSessions = async () => {
+    if (!selectedEnv) return;
+    const res = await fetch(`/api/environment/${selectedEnv}/chat_sessions`, { credentials: 'include' });
+    const data = await res.json();
+    setChatSessions(data.sessions || []);
+  };
+
   // Create a new chat session
   const handleNewChat = async () => {
     if (!selectedEnv) return;
@@ -110,7 +118,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     });
     if (res.ok) {
       const session = await res.json();
-      setChatSessions(sessions => [session, ...sessions]);
+      await refetchChatSessions();
       setSelectedSessionId(session.session_id);
       navigate(`/chat/session/${session.session_id}`);
     }
@@ -209,11 +217,12 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                     {envFiles.map(file => (
                       <li key={file.file_id} className="flex items-center justify-between text-sm">
                         <button
-                          className="truncate max-w-[140px] text-sm text-gray-400 hover:text-green-400 bg-transparent border-none p-0 m-0 text-left cursor-pointer"
+                          className="truncate max-w-[140px] text-sm text-gray-400 hover:text-green-400 bg-transparent border-none p-0 m-0 text-left cursor-pointer flex items-center gap-1"
                           style={{ background: 'none' }}
                           onClick={() => { setSidebarPreviewFileId(file.file_id); setSidebarPreviewOpen(true); }}
                           title="Preview file"
                         >
+                          {file.filename.endsWith('.csv') && <FaFileCsv className="text-green-400" title="CSV file" />}
                           {file.filename}
                         </button>
                       </li>
@@ -229,7 +238,11 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                       <FaComments className="mr-2" />Chats
                     </span>
                     <button
-                      onClick={handleNewChat}
+                      onClick={() => {
+                        console.log('handleNewChat clicked, selectedEnv:', selectedEnv);
+                        handleNewChat();
+                      }}
+                      disabled={!selectedEnv || selectedEnv === "__add__" || selectedEnv === "__manage__"}
                       className="px-3 py-1 pr-2 rounded-full text-[#166534] hover:text-[#22c55e] text-xs -ml-1"
                       style={{ background: 'none', border: 'none', boxShadow: 'none', padding: 0, minWidth: 0, minHeight: 0 }}
                       title="New Chat"
@@ -237,6 +250,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                       <FaPlus />
                     </button>
                   </div>
+                  {!selectedEnv && <div style={{color: 'red', fontSize: '0.8rem'}}>No environment selected</div>}
                   <ul className="space-y-1">
                     {chatSessions.map(session => (
                       <li key={session.session_id}>
@@ -367,7 +381,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 selectedSessionId,
                 setSelectedSessionId,
                 chatSessions,
-                handleNewChat
+                handleNewChat,
+                refetchChatSessions
               }
             );
           }
@@ -387,7 +402,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 selectedSessionId,
                 setSelectedSessionId,
                 chatSessions,
-                handleNewChat
+                handleNewChat,
+                refetchChatSessions
               }
             );
           }
