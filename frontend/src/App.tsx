@@ -12,11 +12,28 @@ import SettingsDataControls from "./components/SettingsDataControls";
 import CreateEnvironmentSettings from "./components/CreateEnvironmentSettings";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { EnvironmentDetails } from "./components/CreateEnvironment";
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
 import ChatSession from "./components/ChatSession";
 
 function App() {
   const [selectedModel, setSelectedModel] = useState<string>("vanilla");
+  const [environments, setEnvironments] = useState<any[]>([]);
+  const [loadingEnvironments, setLoadingEnvironments] = useState<boolean>(true);
+
+  // Robust refetch function
+  const refetchEnvironments = useCallback(() => {
+    setLoadingEnvironments(true);
+    fetch('/api/environments', { credentials: 'include' })
+      .then(res => res.json())
+      .then(data => setEnvironments(data.environments || []))
+      .finally(() => setLoadingEnvironments(false));
+  }, []);
+
+  // Fetch environments on mount
+  useEffect(() => {
+    refetchEnvironments();
+  }, [refetchEnvironments]);
+
   return (
     <div className="w-screen h-screen min-h-screen min-w-full">
       <Router>
@@ -34,7 +51,11 @@ function App() {
             element={
               <ProtectedRoute>
                 <Layout>
-                  <Dashboard selectedModel={selectedModel} setSelectedModel={setSelectedModel} />
+                  <Dashboard
+                    environments={environments}
+                    refetchEnvironments={refetchEnvironments}
+                    loadingEnvironments={loadingEnvironments}
+                  />
                 </Layout>
               </ProtectedRoute>
             }
@@ -74,7 +95,10 @@ function App() {
             element={
               <ProtectedRoute>
                 <Layout>
-                  <SettingsEnvironments />
+                  <SettingsEnvironments
+                    environments={environments}
+                    refetchEnvironments={refetchEnvironments}
+                  />
                 </Layout>
               </ProtectedRoute>
             }
@@ -84,7 +108,9 @@ function App() {
             element={
               <ProtectedRoute>
                 <Layout>
-                  <CreateEnvironmentSettings />
+                  <CreateEnvironmentSettings
+                    refetchEnvironments={refetchEnvironments}
+                  />
                 </Layout>
               </ProtectedRoute>
             }
@@ -104,7 +130,11 @@ function App() {
             element={
               <ProtectedRoute>
                 <Layout>
-                  <ChatSession selectedModel={selectedModel} setSelectedModel={setSelectedModel} />
+                  <ChatSession
+                    environments={environments}
+                    refetchEnvironments={refetchEnvironments}
+                    loadingEnvironments={loadingEnvironments}
+                  />
                 </Layout>
               </ProtectedRoute>
             }

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import FilePreviewModal from './FilePreviewModal';
-import { FaEye, FaDownload, FaTrash } from 'react-icons/fa';
+import { FaEye, FaDownload, FaTrash, FaFileCsv } from 'react-icons/fa';
+import UploadCsvModal from './UploadCsvModal';
 
 const CreateEnvironment: React.FC = () => {
   const [title, setTitle] = useState("");
@@ -88,6 +89,7 @@ export const EnvironmentDetails: React.FC = () => {
   const navigate = useNavigate();
   const [previewFileId, setPreviewFileId] = useState<number | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [showUploadModal, setShowUploadModal] = useState(false);
 
   useEffect(() => {
     if (!env_id) return;
@@ -273,7 +275,7 @@ export const EnvironmentDetails: React.FC = () => {
               }}
               onMouseOver={e => (e.currentTarget.style.background = 'rgba(22,163,74,0.18)')}
               onMouseOut={e => (e.currentTarget.style.background = 'rgba(22,163,74,0.08)')}
-              onClick={handleUploadClick}
+              onClick={() => setShowUploadModal(true)}
               disabled={uploading}
             >
               {uploading ? 'Uploading...' : (
@@ -283,14 +285,6 @@ export const EnvironmentDetails: React.FC = () => {
                 </span>
               )}
             </button>
-            <input
-              type="file"
-              accept=".csv"
-              ref={fileInputRef}
-              style={{ display: 'none' }}
-              onChange={handleFileChange}
-              disabled={uploading}
-            />
           </div>
         </div>
         <div className="border-b border-gray-700 mb-4 w-full"></div>
@@ -301,14 +295,17 @@ export const EnvironmentDetails: React.FC = () => {
         <ul className="divide-y divide-gray-700 mb-6 pl-8">
           {files.map(file => (
             <li key={file.file_id} className="py-2 flex items-center justify-between gap-4">
-              <button
-                className="text-left font-medium text-gray-200 hover:text-purple-400 transition truncate max-w-[220px]"
-                style={{ background: 'none', border: 'none', padding: 0, margin: 0, cursor: 'pointer', fontSize: '1rem' }}
-                onClick={() => { setPreviewFileId(file.file_id); setPreviewOpen(true); }}
-                title="Preview file"
-              >
-                {file.filename}
-              </button>
+              <div className="flex items-center gap-2">
+                {file.filename.endsWith('.csv') && <FaFileCsv className="text-green-400" title="CSV file" />}
+                <button
+                  className="text-left font-medium text-gray-200 hover:text-purple-400 transition truncate max-w-[220px]"
+                  style={{ background: 'none', border: 'none', padding: 0, margin: 0, cursor: 'pointer', fontSize: '1rem' }}
+                  onClick={() => { setPreviewFileId(file.file_id); setPreviewOpen(true); }}
+                  title="Preview file"
+                >
+                  {file.filename}
+                </button>
+              </div>
               <div className="flex gap-4 px-3 py-1 rounded-full shadow-sm"
                 style={{ background: 'rgba(139, 81, 196, 0.18)', minWidth: 140, justifyContent: 'flex-end' }}>
                 <button
@@ -365,6 +362,19 @@ export const EnvironmentDetails: React.FC = () => {
         fileId={previewFileId}
         isOpen={previewOpen}
         onRequestClose={() => setPreviewOpen(false)}
+      />
+      <UploadCsvModal
+        open={showUploadModal}
+        onClose={() => setShowUploadModal(false)}
+        environments={environments}
+        defaultEnvId={env_id}
+        onUploadSuccess={() => {
+          setShowUploadModal(false);
+          // Refresh file list after upload
+          fetch(`/api/environment/${env_id}/files`, { credentials: 'include' })
+            .then(res => res.json())
+            .then(data => setFiles(data.files || []));
+        }}
       />
     </div>
   );
