@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import FilePreviewModal from './FilePreviewModal';
-import { FaEye, FaDownload, FaTrash, FaFileCsv } from 'react-icons/fa';
+import { FaEye, FaDownload, FaTrash, FaFileCsv, FaFileAlt, FaFileCode, FaDatabase, FaFileImage, FaFile } from 'react-icons/fa';
 import UploadCsvModal from './UploadCsvModal';
 
 const CreateEnvironment: React.FC = () => {
@@ -73,7 +73,7 @@ interface EnvDetails {
   created_at?: string;
 }
 
-export const EnvironmentDetails: React.FC = () => {
+export const EnvironmentDetails: React.FC<{ refreshEnvFiles?: () => void }> = ({ refreshEnvFiles }) => {
   const { env_id } = useParams<{ env_id: string }>();
   const [env, setEnv] = useState<EnvDetails | null>(null);
   const [environments, setEnvironments] = useState<EnvDetails[]>([]);
@@ -179,12 +179,24 @@ export const EnvironmentDetails: React.FC = () => {
       fetch(`/api/environment/${env_id}/files`, { credentials: 'include' })
         .then(res => res.json())
         .then(data => setFiles(data.files || []));
+      if (refreshEnvFiles) refreshEnvFiles();
     } catch {
       setUploadError('Failed to upload file.');
     } finally {
       setUploading(false);
     }
   };
+
+  function getFileIcon(filename: string) {
+    const ext = filename.split('.').pop()?.toLowerCase();
+    if (!ext) return <FaFile />;
+    if (ext === 'csv') return <FaFileCsv className="text-green-400" title="CSV file" />;
+    if (ext === 'txt') return <FaFileAlt className="text-gray-400" title="Text file" />;
+    if (ext === 'json') return <FaFileCode className="text-yellow-400" title="JSON file" />;
+    if (ext === 'parquet') return <FaDatabase className="text-blue-400" title="Parquet file" />;
+    if (["png","jpg","jpeg","gif","bmp","webp"].includes(ext)) return <FaFileImage className="text-purple-400" title="Image file" />;
+    return <FaFile className="text-gray-500" title="File" />;
+  }
 
   if (loading) return <div className="text-white p-8">Loading...</div>;
   if (!env) return <div className="text-white p-8">Environment not found.</div>;
@@ -296,7 +308,7 @@ export const EnvironmentDetails: React.FC = () => {
           {files.map(file => (
             <li key={file.file_id} className="py-2 flex items-center justify-between gap-4">
               <div className="flex items-center gap-2">
-                {file.filename.endsWith('.csv') && <FaFileCsv className="text-green-400" title="CSV file" />}
+                {getFileIcon(file.filename)}
                 <button
                   className="text-left font-medium text-gray-200 hover:text-purple-400 transition truncate max-w-[220px]"
                   style={{ background: 'none', border: 'none', padding: 0, margin: 0, cursor: 'pointer', fontSize: '1rem' }}
@@ -374,6 +386,7 @@ export const EnvironmentDetails: React.FC = () => {
           fetch(`/api/environment/${env_id}/files`, { credentials: 'include' })
             .then(res => res.json())
             .then(data => setFiles(data.files || []));
+          if (refreshEnvFiles) refreshEnvFiles();
         }}
       />
     </div>
