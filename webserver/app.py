@@ -517,8 +517,12 @@ def test_alive():
 @app.route("/api/environments", methods=["GET"])
 @flask_login.login_required
 def api_environments():
-    envs = Environment.get_environments_by_user(flask_login.current_user.user_id)
-    # For admin, you might want to return all environments. For now, just user's.
+    user_id = flask_login.current_user.user_id
+    envs = Environment.get_environments_by_user(user_id)
+    if not envs:
+        # Create a default environment if none exist
+        Environment.create_environment("Base environment", user_id, description="Your starter workspace")
+        envs = Environment.get_environments_by_user(user_id)
     return flask.jsonify({
         "environments": [
             {
