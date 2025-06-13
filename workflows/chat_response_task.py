@@ -40,6 +40,6 @@ def chat_response_task(self, payload):
         "sid": sid,
         "task_id": task_id
     }
-    r.publish("celery_updates", json.dumps(event))
+    r.publish("celery_updates", json.dumps(event, default=str))
 
     return {"response": assistant_content}
