@@ -67,7 +67,7 @@ def probra_task(self, payload):
             "data": message.model_dump(),
             "task_id": task_id,
         }
-        r.publish("celery_updates", json.dumps(event))
+        r.publish("celery_updates", json.dumps(event, default=str))
 
         tmp_filename = f"probra_result_{uuid.uuid4().hex}.md"
         project_tmp_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'tmp'))
@@ -94,7 +94,7 @@ def probra_task(self, payload):
                 "s3_url": download_url,
             },
         }
-        r.publish("celery_updates", json.dumps(file_event))
+        r.publish("celery_updates", json.dumps(file_event, default=str))
 
         logger.info("Task completed successfully")
         return {"done": True}

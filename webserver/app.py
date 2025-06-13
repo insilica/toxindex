@@ -664,6 +664,9 @@ def api_run_probra_task():
     user_id = flask_login.current_user.user_id
     if not prompt:
         return flask.jsonify({"error": "Missing prompt"}), 400
+    # Always create a new chat session for dashboard submissions
+    session = ChatSession.create_session(environment_id, user_id, title=None)
+    session_id = session.session_id if session else None
     # Create a new Task (workflow_id=1 for ToxIndex RAP)
     title = generate_title(prompt)
     task = Task.create_task(
@@ -671,15 +674,16 @@ def api_run_probra_task():
         user_id=user_id,
         workflow_id=1,
         environment_id=environment_id,
+        session_id=session_id,
     )
-    Task.add_message(task.task_id, user_id, "user", prompt)
+    Task.add_message(task.task_id, user_id, "user", prompt, session_id=session_id)
     celery_task = probra_task.delay({
         "payload": prompt,
         "task_id": task.task_id,
         "user_id": str(user_id),
     })
     Task.update_celery_task_id(task.task_id, celery_task.id)
-    return flask.jsonify({"task_id": task.task_id, "celery_id": celery_task.id})
+    return flask.jsonify({"task_id": task.task_id, "celery_id": celery_task.id, "session_id": session_id})
 
 @app.route("/api/tasks", methods=["GET"])
 @flask_login.login_required
@@ -739,15 +743,19 @@ def api_run_vanilla_task():
     user_id = flask_login.current_user.user_id
     if not prompt:
         return flask.jsonify({"error": "Missing prompt"}), 400
-    # Create a new Task (workflow_id=2 for ToxIndex Vanila)
+    # Always create a new chat session for dashboard submissions
+    session = ChatSession.create_session(environment_id, user_id, title=None)
+    session_id = session.session_id if session else None
+    # Create a new Task (workflow_id=2 for ToxIndex Vanilla)
     title = generate_title(prompt)
     task = Task.create_task(
         title=title,
         user_id=user_id,
         workflow_id=2,
         environment_id=environment_id,
+        session_id=session_id,
     )
-    Task.add_message(task.task_id, user_id, "user", prompt)
+    Task.add_message(task.task_id, user_id, "user", prompt, session_id=session_id)
     logging.info(f"[api_run_vanilla_task] Queuing plain_openai_task for task_id={task.task_id}, user_id={user_id}")
     celery_task = plain_openai_task.delay({
         "payload": prompt,
@@ -756,19 +764,31 @@ def api_run_vanilla_task():
     })
     logging.info(f"[api_run_vanilla_task] Queued plain_openai_task with celery_id={celery_task.id}")
     Task.update_celery_task_id(task.task_id, celery_task.id)
-    return flask.jsonify({"task_id": task.task_id, "celery_id": celery_task.id})
+    return flask.jsonify({"task_id": task.task_id, "celery_id": celery_task.id, "session_id": session_id})
 
 # --- Chat Session Endpoints ---
 from flask import jsonify
+import re
+
+def is_valid_uuid(val):
+    try:
+        uuid.UUID(str(val))
+        return True
+    except Exception:
+        return False
 
 @csrf.exempt
 @app.route('/api/environment/<env_id>/chat_sessions', methods=['POST'])
 @flask_login.login_required
 def create_chat_session(env_id):
+    if env_id in ("__add__", "__manage__") or not is_valid_uuid(env_id):
+        return jsonify({"error": "Invalid environment ID"}), 400
     user_id = flask_login.current_user.user_id
     d = flask.request.get_json(force=True)
     title = d.get('title')
     session = ChatSession.create_session(env_id, user_id, title)
+    if not session:
+        return jsonify({"error": "Failed to create chat session"}), 500
     return jsonify(session.to_dict())
 
 @app.route('/api/environment/<env_id>/chat_sessions', methods=['GET'])
@@ -846,7 +866,7 @@ if __name__ == "__main__":
             daemon=True,
             name=thread_name,
         ).start()
-    socketio.run(app, host="0.0.0.0", port=6513, debug=True, use_reloader=False) # set to true if you want to reload while editing code.
+    socketio.run(app, host="0.0.0.0", port=6513, debug=True, use_reloader=True) # set to true if you want to reload while editing code.
 
 # In production (Gunicorn), run the Redis listener as a separate process using redis_listener_service.py
 # See redis_listener_service.py for details.

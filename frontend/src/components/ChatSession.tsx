@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { FaPlus } from 'react-icons/fa';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import UploadCsvModal from './UploadCsvModal';
 
 interface Message {
   role: string;
@@ -15,44 +16,26 @@ interface Environment {
 }
 
 interface ChatSessionProps {
-  selectedModel: string;
+  selectedModel?: string;
+  environments: Environment[];
+  refetchEnvironments: () => void;
+  loadingEnvironments: boolean;
 }
 
-const ChatSession: React.FC<ChatSessionProps> = ({ selectedModel }) => {
+const ChatSession: React.FC<ChatSessionProps> = ({ selectedModel, environments, refetchEnvironments, loadingEnvironments }) => {
   const { sessionId } = useParams<{ sessionId: string }>();
+  const navigate = useNavigate();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [environments, setEnvironments] = useState<Environment[]>([]);
   const [selectedEnv, setSelectedEnv] = useState<string>('');
-  const [uploadFile, setUploadFile] = useState<File | null>(null);
-  const [uploading, setUploading] = useState(false);
-  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [showUploadModal, setShowUploadModal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const chatWindowRef = useRef<HTMLDivElement>(null);
   const selectRef = useRef<HTMLSelectElement>(null);
   const spanRef = useRef<HTMLSpanElement>(null);
   const [selectWidth, setSelectWidth] = useState(120);
   const pollingRef = useRef<number | null>(null);
-
-  // Fetch environments on mount
-  useEffect(() => {
-    fetch('/api/environments', { credentials: 'include' })
-      .then(res => res.json())
-      .then(data => {
-        setEnvironments(data.environments || []);
-        if (data.environments && data.environments.length > 0) {
-          setSelectedEnv(data.environments[0].environment_id);
-        }
-      });
-  }, []);
-
-  // Dynamic width for dropdown
-  useEffect(() => {
-    if (spanRef.current) {
-      setSelectWidth(spanRef.current.offsetWidth + 40);
-    }
-  }, [selectedEnv, environments]);
 
   // Fetch messages for this session
   useEffect(() => {
@@ -87,10 +70,31 @@ const ChatSession: React.FC<ChatSessionProps> = ({ selectedModel }) => {
     }, 2000);
   };
 
-  // Clean up polling on unmount
+  // Start polling for assistant reply when sessionId changes and last message is from user
   useEffect(() => {
+    if (!sessionId) return;
+    if (messages.length > 0 && messages[messages.length - 1].role === 'user') {
+      pollForAssistant();
+    }
+    // Clean up polling on session change
     return () => { if (pollingRef.current !== null) clearInterval(pollingRef.current); };
-  }, []);
+  }, [sessionId, messages.length]);
+
+  // Auto-select first environment and restore from localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem('selectedEnv');
+    if (stored && environments.some(e => e.environment_id === stored)) {
+      setSelectedEnv(stored);
+    } else if (environments.length > 0) {
+      setSelectedEnv(environments[0].environment_id);
+    }
+  }, [environments]);
+
+  useEffect(() => {
+    if (selectedEnv) {
+      localStorage.setItem('selectedEnv', selectedEnv);
+    }
+  }, [selectedEnv]);
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -110,31 +114,6 @@ const ChatSession: React.FC<ChatSessionProps> = ({ selectedModel }) => {
     }
     setInput('');
     setLoading(false);
-  };
-
-  const handleFileUpload = async () => {
-    if (!uploadFile || !selectedEnv) {
-      setUploadError('Please select a file and environment.');
-      return;
-    }
-    setUploading(true);
-    setUploadError(null);
-    const formData = new FormData();
-    formData.append('file', uploadFile);
-    formData.append('environment_id', selectedEnv);
-    try {
-      const res = await fetch('/api/upload-file', {
-        method: 'POST',
-        credentials: 'include',
-        body: formData,
-      });
-      if (!res.ok) throw new Error('Upload failed');
-      setUploadFile(null);
-    } catch {
-      setUploadError('Failed to upload file.');
-    } finally {
-      setUploading(false);
-    }
   };
 
   return (
@@ -199,7 +178,11 @@ const ChatSession: React.FC<ChatSessionProps> = ({ selectedModel }) => {
           )}
         </div>
         {/* Input area styled like Dashboard */}
-        <form onSubmit={handleSend} className="flex flex-col items-center w-full" style={{ maxWidth: '800px', margin: '0 auto', padding: '1.5rem 0', background: 'transparent' }}>
+        <form onSubmit={e => {
+          e.preventDefault();
+          if (selectedEnv === "__add__" || selectedEnv === "__manage__") return;
+          handleSend(e);
+        }} className="flex flex-col items-center w-full" style={{ maxWidth: '800px', margin: '0 auto', padding: '1.5rem 0', background: 'transparent' }}>
           <div className="relative w-full" style={{ maxWidth: '800px', width: '100%' }}>
             {/* Hidden span to measure width */}
             <span
@@ -214,7 +197,13 @@ const ChatSession: React.FC<ChatSessionProps> = ({ selectedModel }) => {
                 padding: "0 16px"
               }}
             >
-              {(environments ?? []).find(e => e.environment_id === selectedEnv)?.title ? `env - ${(environments ?? []).find(e => e.environment_id === selectedEnv)?.title}` : ""}
+              {selectedEnv === "__add__"
+                ? "+ Add environment"
+                : selectedEnv === "__manage__"
+                  ? "⚙ Manage environments"
+                  : (environments ?? []).find(e => e.environment_id === selectedEnv)
+                    ? `env - ${(environments ?? []).find(e => e.environment_id === selectedEnv)?.title}`
+                    : ""}
             </span>
             <textarea
               rows={3}
@@ -224,12 +213,13 @@ const ChatSession: React.FC<ChatSessionProps> = ({ selectedModel }) => {
               onKeyDown={e => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();
-                  if (!loading) handleSend(e);
+                  if (!loading && selectedEnv !== "__add__" && selectedEnv !== "__manage__") handleSend(e);
                 }
               }}
               className="w-full pt-4 pb-4 pr-28 pl-8 text-lg rounded-2xl border border-gray-700 bg-gray-900 bg-opacity-70 text-white resize-none min-h-[80px] shadow-2xl focus:outline-none focus:ring-2 focus:ring-green-400 text-left placeholder:text-left"
               style={{ minHeight: 80, fontFamily: 'inherit', width: '100%', boxShadow: '0 8px 32px 0 rgba(34,197,94,0.10)' }}
               autoFocus
+              disabled={selectedEnv === "__add__" || selectedEnv === "__manage__"}
             />
             <div className="absolute right-4 bottom-11 flex items-center space-x-2 z-30">
               {/* File upload button */}
@@ -238,40 +228,14 @@ const ChatSession: React.FC<ChatSessionProps> = ({ selectedModel }) => {
                 className="w-10 h-10 flex items-center justify-center rounded-full shadow-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-green-400"
                 style={{ padding: 0, borderRadius: '50%', background: 'rgba(255,255,255,0.7)' }}
                 title="Upload CSV file"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={uploading}
+                onClick={() => setShowUploadModal(true)}
               >
                 <FaPlus className="w-5 h-5 text-black" />
               </button>
-              <input
-                type="file"
-                accept=".csv"
-                style={{ display: 'none' }}
-                ref={fileInputRef}
-                onChange={e => setUploadFile(e.target.files?.[0] || null)}
-                disabled={uploading}
-              />
-              {uploadFile && (
-                <div className="text-xs text-green-400 mt-1 truncate max-w-[120px]" title={uploadFile.name}>
-                  {uploadFile.name}
-                  <button type="button" className="ml-1 text-red-400" onClick={() => setUploadFile(null)} title="Remove file">×</button>
-                </div>
-              )}
-              {uploadFile && (
-                <button
-                  type="button"
-                  className="text-xs bg-green-700 text-white px-2 py-1 rounded mt-1 hover:bg-green-800"
-                  onClick={handleFileUpload}
-                  disabled={uploading}
-                >
-                  {uploading ? 'Uploading...' : 'Upload'}
-                </button>
-              )}
-              {uploadError && <div className="text-xs text-red-500 mt-1">{uploadError}</div>}
               {/* Submit button */}
               <button
                 type="submit"
-                disabled={loading || !input.trim()}
+                disabled={loading || !input.trim() || selectedEnv === "__add__" || selectedEnv === "__manage__"}
                 className="w-10 h-10 flex items-center justify-center rounded-full shadow-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-green-400"
                 style={{ padding: 0, borderRadius: '50%', background: 'rgba(255,255,255,0.7)' }}
                 title="Submit"
@@ -301,13 +265,23 @@ const ChatSession: React.FC<ChatSessionProps> = ({ selectedModel }) => {
                       paddingRight: '1.5rem',
                     }}
                     value={selectedEnv}
-                    onChange={e => setSelectedEnv(e.target.value)}
+                    onChange={e => {
+                      if (e.target.value === "__add__") {
+                        navigate("/settings/environments/create");
+                      } else if (e.target.value === "__manage__") {
+                        navigate("/settings/environments");
+                      } else {
+                        setSelectedEnv(e.target.value);
+                      }
+                    }}
                   >
                     {(environments ?? []).length > 0 && (environments ?? []).map(env => (
                       <option key={env.environment_id} value={env.environment_id} style={{ paddingLeft: '1rem' }}>
                         {`env - ${env.title}`}
                       </option>
                     ))}
+                    <option value="__add__">+ Add environment</option>
+                    <option value="__manage__">&#9881; Manage environments</option>
                   </select>
                   {/* Chevron icon */}
                   <span style={{ pointerEvents: 'none', position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center' }}>
@@ -319,9 +293,15 @@ const ChatSession: React.FC<ChatSessionProps> = ({ selectedModel }) => {
               </div>
             </div>
           </div>
-          {uploadError && <div className="text-red-500 mt-2">{uploadError}</div>}
         </form>
       </div>
+      <UploadCsvModal
+        open={showUploadModal}
+        onClose={() => setShowUploadModal(false)}
+        environments={environments}
+        defaultEnvId={selectedEnv}
+        onUploadSuccess={() => { setShowUploadModal(false); }}
+      />
     </div>
   );
 };
