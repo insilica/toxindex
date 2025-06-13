@@ -45,7 +45,7 @@ def plain_openai_task(self, payload):
             "task_id": task_id,
         }
         logger.info(f"[plain_openai_task] Publishing message event: {event}")
-        r.publish("celery_updates", json.dumps(event))
+        r.publish("celery_updates", json.dumps(event, default=str))
 
         tmp_filename = f"plain_openai_result_{uuid.uuid4().hex}.md"
         project_tmp_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'tmp'))
@@ -67,7 +67,7 @@ def plain_openai_task(self, payload):
             },
         }
         logger.info(f"[plain_openai_task] Publishing file event: {file_event}")
-        r.publish("celery_updates", json.dumps(file_event))
+        r.publish("celery_updates", json.dumps(file_event, default=str))
         logger.info("plain_openai_task completed successfully")
         return {"done": True}
     except Exception as e:
@@ -115,7 +115,7 @@ def openai_json_schema_task(self, payload):
             "data": message.model_dump(),
             "task_id": task_id,
         }
-        r.publish("celery_updates", json.dumps(event))
+        r.publish("celery_updates", json.dumps(event, default=str))
 
         tmp_filename = f"openai_json_schema_result_{uuid.uuid4().hex}.json"
         project_tmp_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'tmp'))
@@ -136,7 +136,7 @@ def openai_json_schema_task(self, payload):
                 "s3_url": download_url,
             },
         }
-        r.publish("celery_updates", json.dumps(file_event))
+        r.publish("celery_updates", json.dumps(file_event, default=str))
         logger.info("openai_json_schema_task completed successfully")
         return {"done": True}
     except Exception as e:
