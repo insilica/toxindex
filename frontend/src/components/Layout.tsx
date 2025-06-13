@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import FilePreviewModal from './FilePreviewModal';
-import { FaComments, FaPlus, FaListAlt, FaFileCsv } from 'react-icons/fa';
+import { FaComments, FaPlus, FaListAlt, FaFileCsv, FaFileAlt, FaFileCode, FaDatabase, FaFileImage, FaFile } from 'react-icons/fa';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const navigate = useNavigate();
@@ -48,7 +48,10 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   // Fetch files for selected environment
   useEffect(() => {
-    if (!selectedEnv) return;
+    if (!selectedEnv) {
+      setEnvFiles([]); // Clear files if no environment selected
+      return;
+    }
     fetch(`/api/environment/${selectedEnv}/files`, { credentials: 'include' })
       .then(res => res.json())
       .then(data => setEnvFiles(data.files || []));
@@ -123,6 +126,28 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       navigate(`/chat/session/${session.session_id}`);
     }
   };
+
+  // Add a function to refresh the file list for the current environment
+  const refreshEnvFiles = () => {
+    if (!selectedEnv) {
+      setEnvFiles([]);
+      return;
+    }
+    fetch(`/api/environment/${selectedEnv}/files`, { credentials: 'include' })
+      .then(res => res.json())
+      .then(data => setEnvFiles(data.files || []));
+  };
+
+  function getFileIcon(filename: string) {
+    const ext = filename.split('.').pop()?.toLowerCase();
+    if (!ext) return <FaFile />;
+    if (ext === 'csv') return <FaFileCsv className="text-green-400" title="CSV file" />;
+    if (ext === 'txt') return <FaFileAlt className="text-gray-400" title="Text file" />;
+    if (ext === 'json') return <FaFileCode className="text-yellow-400" title="JSON file" />;
+    if (ext === 'parquet') return <FaDatabase className="text-blue-400" title="Parquet file" />;
+    if (["png","jpg","jpeg","gif","bmp","webp"].includes(ext)) return <FaFileImage className="text-purple-400" title="Image file" />;
+    return <FaFile className="text-gray-500" title="File" />;
+  }
 
   return (
     <div className="flex w-screen min-h-screen overflow-x-hidden" style={{ fontFamily: 'Inter, Arial, sans-serif', position: 'relative' }}>
@@ -222,7 +247,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                           onClick={() => { setSidebarPreviewFileId(file.file_id); setSidebarPreviewOpen(true); }}
                           title="Preview file"
                         >
-                          {file.filename.endsWith('.csv') && <FaFileCsv className="text-green-400" title="CSV file" />}
+                          {getFileIcon(file.filename)}
                           {file.filename}
                         </button>
                       </li>
@@ -404,6 +429,18 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 chatSessions,
                 handleNewChat,
                 refetchChatSessions
+              }
+            );
+          }
+          // Pass refreshEnvFiles to EnvironmentDetails
+          if (
+            React.isValidElement(child) &&
+            (child.type as any).name === 'EnvironmentDetails'
+          ) {
+            return React.cloneElement(
+              child as React.ReactElement<any>,
+              {
+                refreshEnvFiles
               }
             );
           }
