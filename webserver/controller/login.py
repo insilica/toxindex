@@ -128,7 +128,7 @@ def login():
     return "bad login"
 
   flask_login.login_user(user)
-  return flask.redirect(flask.url_for('index'))
+  return flask.redirect("/")
 
 def logout():
   flask_login.logout_user()
