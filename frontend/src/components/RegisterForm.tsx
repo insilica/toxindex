@@ -1,87 +1,148 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { FaUserPlus } from 'react-icons/fa';
+
+const TYPED_TEXT = 'Register';
 
 const RegisterForm: React.FC = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [passwordConfirmation, setPasswordConfirmation] = useState("");
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [passwordConfirmation, setPasswordConfirmation] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [typed, setTyped] = useState('');
+  const [typing, setTyping] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    let i = 0;
+    setTyped('');
+    setTyping(true);
+    const interval = setInterval(() => {
+      setTyped(TYPED_TEXT.slice(0, i + 1));
+      i++;
+      if (i === TYPED_TEXT.length) {
+        clearInterval(interval);
+        setTyping(false);
+      }
+    }, 70);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    setSuccess("");
+    setError(null);
     setLoading(true);
+    if (password !== passwordConfirmation) {
+      setError('Passwords do not match.');
+      setLoading(false);
+      return;
+    }
     try {
-      const response = await fetch("/api/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({
-          email,
-          password,
-          password_confirmation: passwordConfirmation,
-        }),
+      const res = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ email, password, password_confirmation: passwordConfirmation }).toString(),
+        credentials: 'include',
       });
-      if (response.redirected) {
-        window.location.href = response.url;
-        return;
-      }
-      const text = await response.text();
-      if (text.includes("already exists")) {
-        setError("This email is already registered. Please log in.");
-      } else if (text.includes("error") || text.includes("An error occurred")) {
-        setError("An error occurred while creating the account. Please try again.");
+      if (res.ok) {
+        navigate('/login');
       } else {
-        setSuccess("Registration successful! Please check your email to verify your account.");
+        setError('Registration failed.');
       }
     } catch (err) {
-      setError("An error occurred. Please try again.");
+      setError('Registration failed.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-8 rounded shadow-md w-full max-w-sm mx-auto mt-12">
-      <h2 className="text-2xl font-bold mb-6 text-center">Register</h2>
-      {error && <div className="text-red-600 mb-4 text-center">{error}</div>}
-      {success && <div className="text-green-600 mb-4 text-center">{success}</div>}
-      <input
-        type="email"
-        className="block w-full mb-4 p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-        placeholder="Email"
-        value={email}
-        onChange={e => setEmail(e.target.value)}
-        required
-      />
-      <input
-        type="password"
-        className="block w-full mb-4 p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-        placeholder="Password"
-        value={password}
-        onChange={e => setPassword(e.target.value)}
-        required
-      />
-      <input
-        type="password"
-        className="block w-full mb-6 p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-        placeholder="Confirm Password"
-        value={passwordConfirmation}
-        onChange={e => setPasswordConfirmation(e.target.value)}
-        required
-      />
-      <button
-        type="submit"
-        className="w-full bg-green-600 text-white py-3 rounded font-semibold hover:bg-green-700 transition"
-        disabled={loading}
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-900 via-gray-900 to-black">
+      <style>{`
+        @keyframes fadeInScale {
+          0% { opacity: 0; transform: scale(0.95); }
+          100% { opacity: 1; transform: scale(1); }
+        }
+        .animate-bounce-slow {
+          animation: bounce 2.2s infinite cubic-bezier(0.4,0,0.2,1);
+        }
+        @keyframes bounce {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-10px); }
+        }
+        .animate-fade-in {
+          animation: fadeInScale 0.7s cubic-bezier(0.4,0,0.2,1) both;
+        }
+        .typewriter-cursor {
+          display: inline-block;
+          width: 1ch;
+          color: #6ee7b7;
+          font-weight: bold;
+          animation: blink 1s steps(1) infinite;
+        }
+        @keyframes blink {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0; }
+        }
+      `}</style>
+      <div
+        className="bg-gray-950 rounded-2xl shadow-2xl p-10 w-full max-w-md flex flex-col items-center"
+        style={{
+          animation: 'fadeInScale 0.7s cubic-bezier(0.4,0,0.2,1) both',
+          boxShadow: '0 8px 32px 0 rgba(34,197,94,0.15), 0 1.5px 8px 0 rgba(0,0,0,0.10)'
+        }}
       >
-        {loading ? "Registering..." : "Register"}
-      </button>
-      <div className="mt-4 text-center">
-        <a href="/login" className="text-blue-600 hover:underline text-sm">Already have an account? Log in</a>
+        <FaUserPlus className="text-green-400 text-5xl mb-4 drop-shadow-lg animate-bounce-slow" />
+        <h2 className="text-3xl font-extrabold mb-2 text-white tracking-tight" style={{ minHeight: 44 }}>
+          {typed}
+          {typing && <span className="typewriter-cursor">|</span>}
+        </h2>
+        <form onSubmit={handleSubmit} className="w-full flex flex-col gap-4 mt-2">
+          <label className="block text-left text-gray-300 font-semibold">Email</label>
+          <input
+            type="email"
+            className="w-full p-3 rounded-lg border border-gray-700 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-green-400"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            required
+            disabled={loading}
+            placeholder="you@email.com"
+          />
+          <label className="block text-left text-gray-300 font-semibold">Password</label>
+          <input
+            type="password"
+            className="w-full p-3 rounded-lg border border-gray-700 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-green-400"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            required
+            disabled={loading}
+            placeholder="Create a password"
+          />
+          <label className="block text-left text-gray-300 font-semibold">Confirm Password</label>
+          <input
+            type="password"
+            className="w-full p-3 rounded-lg border border-gray-700 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-green-400"
+            value={passwordConfirmation}
+            onChange={e => setPasswordConfirmation(e.target.value)}
+            required
+            disabled={loading}
+            placeholder="Repeat your password"
+          />
+          {error && <div className="text-red-400 mb-2 text-center animate-fade-in">{error}</div>}
+          <button
+            type="submit"
+            className="w-full bg-gradient-to-r from-green-500 to-green-700 text-white py-3 rounded-lg font-bold shadow-lg hover:from-green-600 hover:to-green-800 transition disabled:opacity-50"
+            disabled={loading}
+          >
+            {loading ? 'Registering...' : 'Register'}
+          </button>
+        </form>
+        <div className="flex flex-row justify-between w-full mt-6">
+          <Link to="/login" className="text-green-400 hover:underline text-sm">Back to Login</Link>
+        </div>
       </div>
-    </form>
+    </div>
   );
 };
 

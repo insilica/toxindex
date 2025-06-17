@@ -32,6 +32,8 @@ class ChatSession:
 
     @staticmethod
     def create_session(environment_id, user_id, title=None):
+        if not title:
+            title = 'New chat'
         session_id = str(uuid.uuid4())
         params = (session_id, environment_id, user_id, title)
         ds.execute(
@@ -40,6 +42,10 @@ class ChatSession:
         )
         row = ds.find("SELECT * FROM chat_sessions WHERE session_id = %s", (session_id,))
         return ChatSession.from_row(row) if row else None
+
+    @staticmethod
+    def update_title(session_id, title):
+        ds.execute("UPDATE chat_sessions SET title = %s WHERE session_id = %s", (title, session_id))
 
     @staticmethod
     def get_sessions_by_environment(environment_id, user_id=None):

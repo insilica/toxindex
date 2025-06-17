@@ -16,6 +16,8 @@ import { useState, useCallback, useEffect } from "react";
 import ChatSession from "./components/ChatSession";
 import TaskDetail from './components/TaskDetail';
 import UserProfile from './components/UserProfile';
+import ForgotPasswordPage from './components/ForgotPasswordPage';
+import ResetPasswordPage from './components/ResetPasswordPage';
 
 function App() {
   const [environments, setEnvironments] = useState<any[]>([]);
@@ -45,6 +47,8 @@ function App() {
           <Route path="/verify" element={<VerifyPage />} />
           <Route path="/policies/terms-of-use/" element={<TermsPrivacy />} />
           <Route path="/policies/privacy-policy/" element={<TermsPrivacy />} />
+          <Route path="/forgot_password" element={<ForgotPasswordPage />} />
+          <Route path="/reset_password/:token" element={<ResetPasswordPage />} />
 
           {/* Protected routes: with Layout */}
           <Route

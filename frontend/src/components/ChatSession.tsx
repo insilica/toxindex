@@ -20,9 +20,10 @@ interface ChatSessionProps {
   environments: Environment[];
   refreshEnvFiles?: () => void;
   loadingEnvironments: boolean;
+  refetchChatSessions?: () => void;
 }
 
-const ChatSession: React.FC<ChatSessionProps> = ({ selectedModel, environments, refreshEnvFiles, loadingEnvironments }) => {
+const ChatSession: React.FC<ChatSessionProps> = ({ selectedModel, environments, refreshEnvFiles, loadingEnvironments, refetchChatSessions }) => {
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
   const [messages, setMessages] = useState<Message[]>([]);
@@ -98,6 +99,7 @@ const ChatSession: React.FC<ChatSessionProps> = ({ selectedModel, environments, 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || !sessionId) return;
+    const isFirstUserMessage = messages.filter(m => m.role === 'user').length === 0;
     setMessages(msgs => [...msgs, { role: 'user', content: input }]);
     setLoading(true);
     try {
@@ -108,6 +110,11 @@ const ChatSession: React.FC<ChatSessionProps> = ({ selectedModel, environments, 
         body: JSON.stringify({ prompt: input, environment_id: selectedEnv, model: selectedModel }),
       });
       pollForAssistant();
+      // Refetch chat sessions if this was the first user message
+      if (isFirstUserMessage && typeof refetchChatSessions === 'function') {
+        await refetchChatSessions();
+        console.log('DEBUG: Called refetchChatSessions after first user message');
+      }
     } catch {
       // handle error
     }

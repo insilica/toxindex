@@ -675,7 +675,7 @@ def api_run_probra_task():
     if not prompt:
         return flask.jsonify({"error": "Missing prompt"}), 400
     # Always create a new chat session for dashboard submissions
-    session = ChatSession.create_session(environment_id, user_id, title=None)
+    session = ChatSession.create_session(environment_id, user_id, title=prompt[:60])
     session_id = session.session_id if session else None
     # Create a new Task (workflow_id=1 for ToxIndex RAP)
     title = generate_title(prompt)
@@ -765,7 +765,7 @@ def api_run_vanilla_task():
     if not prompt:
         return flask.jsonify({"error": "Missing prompt"}), 400
     # Always create a new chat session for dashboard submissions
-    session = ChatSession.create_session(environment_id, user_id, title=None)
+    session = ChatSession.create_session(environment_id, user_id, title=prompt[:60])
     session_id = session.session_id if session else None
     # Create a new Task (workflow_id=2 for ToxIndex Vanilla)
     title = generate_title(prompt)
@@ -805,7 +805,7 @@ def create_chat_session(env_id):
         return jsonify({"error": "Invalid environment ID"}), 400
     user_id = flask_login.current_user.user_id
     d = flask.request.get_json(force=True)
-    title = d.get('title')
+    title = d.get('title') or 'New chat'
     session = ChatSession.create_session(env_id, user_id, title)
     if not session:
         return jsonify({"error": "Failed to create chat session"}), 500
@@ -848,6 +848,14 @@ def send_message_in_session(session_id):
     )
     # Add user message to session
     Message.create_message(task.task_id, user_id, 'user', prompt, session_id=session_id)
+    # If this is the first user message, update the session title
+    messages = Message.get_messages_by_session(session_id)
+    user_messages = [m for m in messages if m.role == 'user']
+    if len(user_messages) == 1:
+        from webserver.model.chat_session import ChatSession as CSModel
+        CSModel.update_title(session_id, prompt[:60])
+        import logging
+        logging.info(f"[DEBUG] Updated chat session {session_id} title to: {prompt[:60]}")
     # Trigger the appropriate celery task
     if model == 'toxindex-rap':
         celery_task = probra_task.delay({
@@ -942,7 +950,29 @@ if __name__ == "__main__":
             daemon=True,
             name=thread_name,
         ).start()
-    socketio.run(app, host="0.0.0.0", port=6513, debug=False, use_reloader=False) # set to true if you want to reload while editing code.
+    socketio.run(app, host="0.0.0.0", port=6513, debug=True, use_reloader=True) # set to true if you want to reload while editing code.
 
 # In production (Gunicorn), run the Redis listener as a separate process using redis_listener_service.py
 # See redis_listener_service.py for details.
+
+@csrf.exempt
+@app.route('/api/chat_session/<session_id>', methods=['DELETE'])
+@flask_login.login_required
+def delete_chat_session(session_id):
+    user_id = flask_login.current_user.user_id
+    from webserver.model.chat_session import ChatSession
+    ChatSession.delete_session(session_id, user_id)
+    return flask.jsonify({'success': True})
+
+@csrf.exempt
+@app.route('/api/chat_session/<session_id>', methods=['PATCH'])
+@flask_login.login_required
+def rename_chat_session(session_id):
+    user_id = flask_login.current_user.user_id
+    data = flask.request.get_json(force=True)
+    new_title = data.get('title')
+    if not new_title:
+        return flask.jsonify({'success': False, 'error': 'Missing title'}), 400
+    from webserver.model.chat_session import ChatSession
+    ChatSession.update_title(session_id, new_title)
+    return flask.jsonify({'success': True})
