@@ -134,7 +134,7 @@ function App() {
                 <Layout>
                   <ChatSession
                     environments={environments}
-                    refetchEnvironments={refetchEnvironments}
+                    refreshEnvFiles={refetchEnvironments}
                     loadingEnvironments={loadingEnvironments}
                   />
                 </Layout>

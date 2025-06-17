@@ -27,7 +27,7 @@ interface DashboardProps {
   loadingEnvironments: boolean;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ selectedModel, selectedEnv, setSelectedEnv, environments, refetchChatSessions, refetchEnvironments, loadingEnvironments }) => {
+const Dashboard: React.FC<DashboardProps> = ({ selectedModel, selectedEnv, setSelectedEnv, environments, refetchChatSessions, loadingEnvironments }) => {
   const [chatInput, setChatInput] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [tasksLoading, setTasksLoading] = useState(false);

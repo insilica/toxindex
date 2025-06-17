@@ -83,9 +83,9 @@ export const EnvironmentDetails: React.FC<{ refreshEnvFiles?: () => void }> = ({
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [tasks, setTasks] = useState<any[]>([]);
   const [fileDeleteError, setFileDeleteError] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
-  const [uploadError, setUploadError] = useState<string | null>(null);
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const [uploading] = useState(false);
+  const [uploadError] = useState<string | null>(null);
+  // const fileInputRef = React.useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const [previewFileId, setPreviewFileId] = useState<number | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -155,37 +155,37 @@ export const EnvironmentDetails: React.FC<{ refreshEnvFiles?: () => void }> = ({
     }
   };
 
-  const handleUploadClick = () => {
-    if (fileInputRef.current) fileInputRef.current.value = '';
-    fileInputRef.current?.click();
-  };
+  // const handleUploadClick = () => {
+  //   if (fileInputRef.current) fileInputRef.current.value = '';
+  //   fileInputRef.current?.click();
+  // };
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploading(true);
-    setUploadError(null);
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('environment_id', env_id!);
-    try {
-      const res = await fetch('/api/upload-file', {
-        method: 'POST',
-        credentials: 'include',
-        body: formData,
-      });
-      if (!res.ok) throw new Error('Upload failed');
-      // Refresh file list
-      fetch(`/api/environment/${env_id}/files`, { credentials: 'include' })
-        .then(res => res.json())
-        .then(data => setFiles(data.files || []));
-      if (refreshEnvFiles) refreshEnvFiles();
-    } catch {
-      setUploadError('Failed to upload file.');
-    } finally {
-      setUploading(false);
-    }
-  };
+  // const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const file = e.target.files?.[0];
+  //   if (!file) return;
+  //   setUploading(true);
+  //   setUploadError(null);
+  //   const formData = new FormData();
+  //   formData.append('file', file);
+  //   formData.append('environment_id', env_id!);
+  //   try {
+  //     const res = await fetch('/api/upload-file', {
+  //       method: 'POST',
+  //       credentials: 'include',
+  //       body: formData,
+  //     });
+  //     if (!res.ok) throw new Error('Upload failed');
+  //     // Refresh file list
+  //     fetch(`/api/environment/${env_id}/files`, { credentials: 'include' })
+  //       .then(res => res.json())
+  //       .then(data => setFiles(data.files || []));
+  //     if (refreshEnvFiles) refreshEnvFiles();
+  //   } catch {
+  //     setUploadError('Failed to upload file.');
+  //   } finally {
+  //     setUploading(false);
+  //   }
+  // };
 
   function getFileIcon(filename: string) {
     const ext = filename.split('.').pop()?.toLowerCase();
