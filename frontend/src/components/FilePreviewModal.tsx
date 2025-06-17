@@ -39,9 +39,9 @@ const FilePreviewModal: React.FC<FilePreviewModalProps> = ({ fileId, isOpen, onR
     if (!fileData) return null;
     switch (fileData.type) {
       case 'text':
-        return <pre style={{ whiteSpace: 'pre-wrap', maxHeight: 400, overflowY: 'auto' }}>{fileData.content}</pre>;
+        return <pre style={{ whiteSpace: 'pre-wrap', maxHeight: 300, overflowY: 'auto' }}>{fileData.content}</pre>;
       case 'markdown':
-        return <div style={{ maxHeight: 400, overflowY: 'auto' }} dangerouslySetInnerHTML={{ __html: fileData.content }} />;
+        return <div style={{ maxHeight: 300, overflowY: 'auto' }} dangerouslySetInnerHTML={{ __html: fileData.content }} />;
       case 'csv':
         return (
           <div ref={tableScrollRef} style={{ maxHeight: 400, overflowY: 'auto', paddingLeft: 32, paddingRight: 32 }}>
@@ -88,10 +88,10 @@ const FilePreviewModal: React.FC<FilePreviewModalProps> = ({ fileId, isOpen, onR
           </div>
         );
       case 'json':
-        return <pre style={{ maxHeight: 400, overflowY: 'auto' }}>{JSON.stringify(fileData.content, null, 2)}</pre>;
+        return <pre style={{ maxHeight: 220, overflowY: 'auto' }}>{JSON.stringify(fileData.content, null, 2)}</pre>;
       case 'xlsx':
         return (
-          <div ref={tableScrollRef} style={{ maxHeight: 400, overflowY: 'auto', paddingLeft: 32 }}>
+          <div ref={tableScrollRef} style={{ maxHeight: 220, overflowY: 'auto', paddingLeft: 32 }}>
             <table className="min-w-full text-xs text-gray-200">
               <thead>
                 <tr>
@@ -134,7 +134,7 @@ const FilePreviewModal: React.FC<FilePreviewModalProps> = ({ fileId, isOpen, onR
           </div>
         );
       case 'image':
-        return <img src={fileData.content} alt={fileData.filename} style={{ maxWidth: '100%', maxHeight: 400 }} />;
+        return <img src={fileData.content} alt={fileData.filename} style={{ maxWidth: '100%', maxHeight: 220 }} />;
       case 'unsupported':
         return <div>Preview not supported for this file type.</div>;
       case 'error':
@@ -150,11 +150,16 @@ const FilePreviewModal: React.FC<FilePreviewModalProps> = ({ fileId, isOpen, onR
       onRequestClose={onRequestClose}
       contentLabel="File Preview"
       style={{
-        content: { maxWidth: 800, margin: 'auto', minHeight: 200, background: '#181f1b', color: '#fff', borderRadius: 12 },
+        content: { maxWidth: 800, margin: 'auto', minHeight: 400, maxHeight: 500, background: '#181f1b', color: '#fff', borderRadius: 12, overflow: 'auto', top: '5%' },
         overlay: { backgroundColor: 'rgba(0,0,0,0.7)' }
       }}
     >
       <h2 className="text-lg font-bold mb-4">File Preview</h2>
+      {fileData?.filename && (
+        <div className="mb-2 text-sm text-gray-300 font-mono truncate" title={fileData.filename}>
+          {fileData.filename}
+        </div>
+      )}
       {loading && <div>Loading...</div>}
       {error && <div style={{ color: 'red' }}>{error}</div>}
       {!loading && !error && renderPreview()}
