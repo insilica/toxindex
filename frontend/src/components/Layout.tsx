@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import FilePreviewModal from './FilePreviewModal';
-import { FaComments, FaPlus, FaListAlt, FaFileCsv, FaFileAlt, FaFileCode, FaDatabase, FaFileImage, FaFile } from 'react-icons/fa';
+import { FaComments, FaPlus, FaListAlt, FaFileCsv, FaFileAlt, FaFileCode, FaDatabase, FaFileImage, FaFile, FaEllipsisH } from 'react-icons/fa';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const navigate = useNavigate();
@@ -20,6 +20,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [sidebarPreviewOpen, setSidebarPreviewOpen] = useState(false);
   const [chatSessions, setChatSessions] = useState<any[]>([]);
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
+  const [openChatMenu, setOpenChatMenu] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/me", { credentials: "include", cache: "no-store" })
@@ -108,6 +109,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const res = await fetch(`/api/environment/${selectedEnv}/chat_sessions`, { credentials: 'include' });
     const data = await res.json();
     setChatSessions(data.sessions || []);
+    console.log('DEBUG: Sidebar chat sessions updated', data.sessions);
   };
 
   // Create a new chat session
@@ -148,6 +150,46 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     if (["png","jpg","jpeg","gif","bmp","webp"].includes(ext)) return <FaFileImage className="text-purple-400" title="Image file" />;
     return <FaFile className="text-gray-500" title="File" />;
   }
+
+  // Handler to delete a chat session
+  const handleDeleteChat = async (sessionId: string) => {
+    if (!window.confirm('Are you sure you want to delete this chat?')) return;
+    await fetch(`/api/chat_session/${sessionId}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    });
+    await refetchChatSessions();
+    setOpenChatMenu(null);
+    // If the deleted chat was selected, clear selection
+    if (selectedSessionId === sessionId) {
+      setSelectedSessionId(null);
+    }
+  };
+
+  // Handler to rename a chat session
+  const handleRenameChat = async (sessionId: string, currentTitle: string) => {
+    const newTitle = window.prompt('Enter new chat name:', currentTitle);
+    if (!newTitle || newTitle.trim() === '' || newTitle === currentTitle) return;
+    await fetch(`/api/chat_session/${sessionId}`, {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: newTitle })
+    });
+    await refetchChatSessions();
+    setOpenChatMenu(null);
+  };
+
+  // Add a click-away listener to close the dropdown
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (openChatMenu && !(e.target as HTMLElement).closest('.group')) {
+        setOpenChatMenu(null);
+      }
+    }
+    if (openChatMenu) document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [openChatMenu]);
 
   return (
     <div className="flex w-screen min-h-screen overflow-x-hidden" style={{ fontFamily: 'Inter, Arial, sans-serif', position: 'relative' }}>
@@ -269,7 +311,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                       }}
                       disabled={!selectedEnv || selectedEnv === "__add__" || selectedEnv === "__manage__"}
                       className="px-3 py-1 pr-2 rounded-full text-[#166534] hover:text-[#22c55e] text-xs -ml-1"
-                      style={{ background: 'none', border: 'none', boxShadow: 'none', padding: 0, minWidth: 0, minHeight: 0 }}
+                      style={{ background: 'none', border: 'none', boxShadow: 'none', padding: 0, minWidth: 0, minHeight: 0, paddingRight: 25}}
                       title="New Chat"
                     >
                       <FaPlus />
@@ -278,14 +320,56 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                   {!selectedEnv && <div style={{color: 'red', fontSize: '0.8rem'}}>No environment selected</div>}
                   <ul className="space-y-1">
                     {chatSessions.map(session => (
-                      <li key={session.session_id}>
+                      <li key={session.session_id} className="relative group">
                         <button
                           className={`truncate max-w-[180px] text-sm text-left ${selectedSessionId === session.session_id ? 'text-[#22c55e] font-bold' : 'text-[#4ade80] hover:text-[#22c55e]'}`}
-                          style={{ width: '100%', background: 'none', border: 'none', boxShadow: 'none', padding: '2px 4px', minHeight: 0, minWidth: 0, borderRadius: 0, textAlign: 'left' }}
+                          style={{ width: 'calc(100% - 32px)', background: 'none', border: 'none', boxShadow: 'none', padding: '2px 4px', minHeight: 0, minWidth: 0, borderRadius: 0, textAlign: 'left', display: 'inline-block' }}
                           onClick={() => navigate(`/chat/session/${session.session_id}`)}
                         >
-                          {session.title || `Chat ${session.session_id.slice(0, 6)}`}
+                          {(session.title && session.title.length > 0)
+                            ? session.title.slice(0, 40)
+                            : `Chat ${session.session_id.slice(0, 6)}`}
                         </button>
+                        <button
+                          className="ml-1 p-1 text-gray-400 hover:text-green-400 focus:outline-none"
+                          style={{
+                            background: 'none',
+                            boxShadow: 'none',
+                            border: 'none',
+                            position: 'absolute',
+                            right: 0,
+                            top: 0,
+                            zIndex: 10,
+                            padding: 2,
+                            paddingRight: 25,
+                            minHeight: 0,
+                            borderRadius: 4,
+                            transition: 'color 0.15s'
+                          }}
+                          onClick={e => {
+                            e.stopPropagation();
+                            setOpenChatMenu(openChatMenu === session.session_id ? null : session.session_id);
+                          }}
+                          title="Chat options"
+                        >
+                          <FaEllipsisH size={12} />
+                        </button>
+                        {openChatMenu === session.session_id && (
+                          <div className="absolute right-0 mt-1 w-32 bg-white rounded shadow-lg z-50 border border-gray-200" style={{ minWidth: 120 }}>
+                            <button
+                              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                              onClick={() => handleRenameChat(session.session_id, session.title || '')}
+                            >
+                              Rename
+                            </button>
+                            <button
+                              className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                              onClick={() => handleDeleteChat(session.session_id)}
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        )}
                       </li>
                     ))}
                   </ul>
