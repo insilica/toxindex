@@ -109,7 +109,7 @@ export const EnvironmentDetails: React.FC<{ refreshEnvFiles?: () => void }> = ({
 
   useEffect(() => {
     if (!env_id) return;
-    fetch(`/tasks?environment_id=${env_id}`, { credentials: 'include' })
+    fetch(`/api/tasks?environment_id=${env_id}`, { credentials: 'include' })
       .then(res => res.json())
       .then(data => setTasks((data.active_tasks || []).concat(data.archived_tasks || [])));
   }, [env_id]);
@@ -119,7 +119,7 @@ export const EnvironmentDetails: React.FC<{ refreshEnvFiles?: () => void }> = ({
     setDeleting(true);
     setDeleteError(null);
     try {
-      const res = await fetch(`/environment/${env_id}`, {
+      const res = await fetch(`/api/environment/${env_id}`, {
         method: 'DELETE',
         credentials: 'include',
       });
