@@ -222,36 +222,33 @@ const ChatSession: React.FC<ChatSessionProps> = ({ selectedModel, environments, 
               disabled={selectedEnv === "__add__" || selectedEnv === "__manage__"}
             />
             <div className="absolute right-4 bottom-11 flex items-center space-x-2 z-30">
-              {/* File upload button */}
               <button
-                type="button"
                 className="w-10 h-10 flex items-center justify-center rounded-full shadow-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-green-400"
                 style={{ padding: 0, borderRadius: '50%', background: 'rgba(255,255,255,0.7)' }}
                 title="Upload CSV file"
                 onClick={() => setShowUploadModal(true)}
+                type="button"
               >
                 <FaPlus className="w-5 h-5 text-black" />
               </button>
-              {/* Submit button */}
               <button
                 type="submit"
-                disabled={loading || !input.trim() || selectedEnv === "__add__" || selectedEnv === "__manage__"}
                 className="w-10 h-10 flex items-center justify-center rounded-full shadow-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-green-400"
                 style={{ padding: 0, borderRadius: '50%', background: 'rgba(255,255,255,0.7)' }}
                 title="Submit"
+                disabled={selectedEnv === "__add__" || selectedEnv === "__manage__"}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.2} stroke="black" className="w-5 h-5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
                 </svg>
               </button>
             </div>
-            {/* Environment dropdown, styled as pill, left-aligned */}
             <div className="absolute left-4 z-20 flex items-end" style={{ position: 'relative', width: '210px', overflow: 'visible', bottom: '3rem' }}>
               <div className="relative group" style={{ width: '100%', minWidth: '180px', maxWidth: '210px' }}>
                 <div className="flex items-center w-full" style={{ position: 'relative', height: '1.7rem', display: 'flex', alignItems: 'center' }}>
                   <select
                     ref={selectRef}
-                    className="font-bold text-white text-sm px-1 py-2 rounded-full appearance-none bg-transparent border-none focus:outline-none transition-all duration-150 group-hover:bg-black group-hover:bg-opacity-60 group-hover:border group-hover:border-gray-700 group-hover:px-4 group-hover:pr-10 group-hover:cursor-pointer focus:bg-black focus:bg-opacity-60 focus:border focus:border-gray-700 focus:px-4 focus:pr-10 w-full"
+                    className={`font-bold text-white text-sm px-1 py-2 rounded-full appearance-none bg-transparent border-none focus:outline-none transition-all duration-150 group-hover:bg-black group-hover:bg-opacity-60 group-hover:border group-hover:border-gray-700 group-hover:px-4 group-hover:pr-10 group-hover:cursor-pointer focus:bg-black focus:bg-opacity-60 focus:border focus:border-gray-700 focus:px-4 focus:pr-10 w-full ${loadingEnvironments ? 'opacity-50' : ''}`}
                     style={{
                       width: `${selectWidth}px`,
                       minWidth: "50px",
@@ -274,21 +271,18 @@ const ChatSession: React.FC<ChatSessionProps> = ({ selectedModel, environments, 
                         setSelectedEnv(e.target.value);
                       }
                     }}
+                    disabled={loadingEnvironments}
                   >
                     {(environments ?? []).length > 0 && (environments ?? []).map(env => (
                       <option key={env.environment_id} value={env.environment_id} style={{ paddingLeft: '1rem' }}>
                         {`env - ${env.title}`}
                       </option>
                     ))}
-                    <option value="__add__">+ Add environment</option>
-                    <option value="__manage__">&#9881; Manage environments</option>
+                    <option value="__add__" style={loadingEnvironments ? { opacity: 0.5 } : {}}>
+                      {loadingEnvironments ? '+ Add environment' : '+ Add environment'}
+                    </option>
+                    <option value="__manage__" style={loadingEnvironments ? { opacity: 0.5 } : {}}>&#9881; Manage environments</option>
                   </select>
-                  {/* Chevron icon */}
-                  <span style={{ pointerEvents: 'none', position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center' }}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M7 10l5 5 5-5" />
-                    </svg>
-                  </span>
                 </div>
               </div>
             </div>
