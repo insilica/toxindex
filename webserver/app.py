@@ -16,7 +16,7 @@ dotenv.load_dotenv()
 
 from webserver import login_manager as LM
 from webserver.controller import login
-from webserver.model import Task, Workflow, Message, File, Environment, ChatSession
+from webserver.model import Task, Workflow, Message, File, Environment, ChatSession, User
 from webserver.ai_service import generate_title
 from workflows.chat_response_task import chat_response_task
 from workflows.interactive_echo_task import interactive_echo_task
@@ -38,6 +38,9 @@ from workflows.celery_worker import celery
 # SOCKETIO ====================================================================
 from flask_socketio import SocketIO, emit
 from flask_socketio import join_room
+
+from flask import jsonify
+import re
 
 # BD ENC
 logging.info(f"DB ENV (Flask startup): PGHOST={os.getenv('PGHOST')}, PGPORT={os.getenv('PGPORT')}, PGDATABASE={os.getenv('PGDATABASE')}, PGUSER={os.getenv('PGUSER')}, PGPASSWORD={os.getenv('PGPASSWORD')}")
@@ -437,7 +440,20 @@ def environment_view(env_id):
 @app.route("/environment/<env_id>", methods=["DELETE"])
 @flask_login.login_required
 def environment_delete(env_id):
+    if not is_valid_uuid(env_id):
+        logging.error(f"Attempted to delete environment with invalid UUID: {env_id}")
+        return flask.jsonify({"success": False, "error": "Invalid environment ID"}), 400
     try:
+        # Disk cleanup: remove files from disk before deleting environment
+        files = File.get_files_by_environment(env_id)
+        for file in files:
+            try:
+                if file.filepath and os.path.exists(file.filepath):
+                    os.remove(file.filepath)
+                    logging.info(f"Deleted file from disk: {file.filepath}")
+            except Exception as e:
+                logging.warning(f"Failed to remove file from disk: {file.filepath}, error: {e}")
+        # Now delete the environment (DB rows for files/tasks will be deleted by ON DELETE CASCADE)
         Environment.delete_environment(env_id, flask_login.current_user.user_id)
         return flask.jsonify({"success": True})
     except Exception as e:
@@ -472,9 +488,6 @@ def favicon():
 def serve_icon(filename):
     icons_dir = os.path.join(os.path.dirname(__file__), "icons")
     return send_from_directory(icons_dir, filename)
-
-
-
 
 @app.route('/log_tab_switch', methods=['POST'])
 def log_tab_switch():
@@ -573,7 +586,7 @@ def environment_files(env_id):
     return flask.jsonify({'files': [f.to_dict() for f in files]})
 
 @csrf.exempt
-@app.route('/api/file/<int:file_id>', methods=['DELETE'])
+@app.route('/api/file/<file_id>', methods=['DELETE'])
 @flask_login.login_required
 def delete_file(file_id):
     try:
@@ -594,13 +607,21 @@ def delete_file(file_id):
         logging.error(f"Failed to delete file {file_id}: {e}")
         return flask.jsonify({'success': False, 'error': str(e)}), 500
 
-@app.route('/api/file/<int:file_id>/inspect', methods=['GET'])
+@app.route('/api/file/<file_id>/inspect', methods=['GET'])
 @flask_login.login_required
 def inspect_file(file_id):
+    import logging
+    logging.info(f"[inspect_file] Called with file_id={file_id} (type: {type(file_id)})")
     file = File.get_file(file_id)
-    print(f"INSPECT: file_id={file_id}, file={file}, filepath={getattr(file, 'filepath', None)}")
-    if not file or not file.filepath or not os.path.exists(file.filepath):
-        print("INSPECT: File not found or missing on disk")
+    logging.info(f"[inspect_file] File.get_file({file_id}) returned: {file}")
+    if not file:
+        logging.warning(f"[inspect_file] No file found in DB for file_id={file_id}")
+        return flask.jsonify({'error': 'File not found'}), 404
+    if not file.filepath:
+        logging.warning(f"[inspect_file] File object for file_id={file_id} has no filepath")
+        return flask.jsonify({'error': 'File not found'}), 404
+    if not os.path.exists(file.filepath):
+        logging.warning(f"[inspect_file] Filepath does not exist on disk: {file.filepath}")
         return flask.jsonify({'error': 'File not found'}), 404
     ext = os.path.splitext(file.filename)[1].lower()
     mimetype, _ = mimetypes.guess_type(file.filename)
@@ -645,9 +666,10 @@ def inspect_file(file_id):
         else:
             return flask.jsonify({'error': 'Preview not supported for this file type', 'type': 'unsupported', 'filename': file.filename, 'mimetype': mimetype}), 415
     except Exception as e:
+        logging.error(f"[inspect_file] Exception for file_id={file_id}: {e}")
         return flask.jsonify({'error': str(e), 'type': 'error', 'filename': file.filename, 'mimetype': mimetype}), 500
 
-@app.route('/api/file/<int:file_id>/download', methods=['GET'])
+@app.route('/api/file/<file_id>/download', methods=['GET'])
 @flask_login.login_required
 def download_file(file_id):
     file = File.get_file(file_id)
@@ -713,26 +735,33 @@ def api_get_user_tasks():
         logging.error(f"Error retrieving tasks: {str(e)}")
         return flask.jsonify({"error": "Failed to retrieve tasks"}), 500
 
-@app.route("/api/tasks/<int:task_id>", methods=["GET"])
+@csrf.exempt
+@app.route("/api/tasks/<task_id>", methods=["GET"])
 @flask_login.login_required
 def api_get_task(task_id):
+    if not is_valid_uuid(task_id):
+        return flask.jsonify({"error": "Invalid task ID"}), 400
     task = Task.get_task(task_id)
     if not task or task.user_id != flask_login.current_user.user_id:
         return flask.jsonify({"error": "Task not found"}), 404
     return flask.jsonify(task.to_dict())
 
 @csrf.exempt
-@app.route("/api/tasks/<int:task_id>/archive", methods=["POST"])
+@app.route("/api/tasks/<task_id>/archive", methods=["POST"])
 @flask_login.login_required
 def api_archive_task(task_id):
+    if not is_valid_uuid(task_id):
+        return flask.jsonify({"success": False, "error": "Invalid task ID"}), 400
     user_id = flask_login.current_user.user_id
     ds.execute("UPDATE tasks SET archived = TRUE WHERE task_id = %s AND user_id = %s", (task_id, user_id))
     return flask.jsonify({"success": True})
 
 @csrf.exempt
-@app.route("/api/tasks/<int:task_id>/unarchive", methods=["POST"])
+@app.route("/api/tasks/<task_id>/unarchive", methods=["POST"])
 @flask_login.login_required
 def api_unarchive_task(task_id):
+    if not is_valid_uuid(task_id):
+        return flask.jsonify({"success": False, "error": "Invalid task ID"}), 400
     user_id = flask_login.current_user.user_id
     ds.execute("UPDATE tasks SET archived = FALSE WHERE task_id = %s AND user_id = %s", (task_id, user_id))
     return flask.jsonify({"success": True})
@@ -771,8 +800,7 @@ def api_run_vanilla_task():
     return flask.jsonify({"task_id": task.task_id, "celery_id": celery_task.id, "session_id": session_id})
 
 # --- Chat Session Endpoints ---
-from flask import jsonify
-import re
+
 
 def is_valid_uuid(val):
     try:
@@ -853,6 +881,53 @@ def send_message_in_session(session_id):
         })
     Task.update_celery_task_id(task.task_id, celery_task.id)
     return jsonify({'task_id': task.task_id, 'celery_id': celery_task.id})
+
+@csrf.exempt
+@app.route("/api/environment/<env_id>", methods=["GET"])
+@flask_login.login_required
+def api_environment_view(env_id):
+    env = Environment.get_environment(env_id)
+    if not env:
+        return flask.jsonify({"error": "Environment not found"}), 404
+    tasks = Task.get_tasks_by_environment(env_id, flask_login.current_user.user_id)
+    files = File.get_files_by_environment(env_id)
+    return flask.jsonify({
+        "environment": env.to_dict(),
+        "tasks": [t.to_dict() for t in tasks],
+        "files": [f.to_dict() for f in files]
+    })
+
+@csrf.exempt
+@app.route("/api/environment/<env_id>", methods=["DELETE"])
+@flask_login.login_required
+def api_environment_delete(env_id):
+    if not is_valid_uuid(env_id):
+        logging.error(f"Attempted to delete environment with invalid UUID: {env_id}")
+        return flask.jsonify({"success": False, "error": "Invalid environment ID"}), 400
+    try:
+        # Disk cleanup: remove files from disk before deleting environment
+        files = File.get_files_by_environment(env_id)
+        for file in files:
+            try:
+                if file.filepath and os.path.exists(file.filepath):
+                    os.remove(file.filepath)
+                    logging.info(f"Deleted file from disk: {file.filepath}")
+            except Exception as e:
+                logging.warning(f"Failed to remove file from disk: {file.filepath}, error: {e}")
+        # Now delete the environment (DB rows for files/tasks will be deleted by ON DELETE CASCADE)
+        Environment.delete_environment(env_id, flask_login.current_user.user_id)
+        return flask.jsonify({"success": True})
+    except Exception as e:
+        logging.error(f"Failed to delete environment {env_id}: {e}")
+        return flask.jsonify({"success": False, "error": str(e)}), 500
+
+@app.route("/api/user/<user_id>", methods=["GET"])
+@flask_login.login_required
+def api_get_user(user_id):
+    user = User.get(user_id)
+    if not user:
+        return flask.jsonify({"error": "User not found"}), 404
+    return flask.jsonify({"user_id": user.user_id, "email": user.email})
 
 print("Registered routes:")
 for rule in app.url_map.iter_rules():

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Modal from 'react-modal';
 
 Modal.setAppElement('#root'); // Adjust if your app root is different
@@ -13,6 +13,7 @@ const FilePreviewModal: React.FC<FilePreviewModalProps> = ({ fileId, isOpen, onR
   const [fileData, setFileData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const tableScrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (isOpen && fileId) {
@@ -43,12 +44,43 @@ const FilePreviewModal: React.FC<FilePreviewModalProps> = ({ fileId, isOpen, onR
         return <div style={{ maxHeight: 400, overflowY: 'auto' }} dangerouslySetInnerHTML={{ __html: fileData.content }} />;
       case 'csv':
         return (
-          <div style={{ maxHeight: 400, overflowY: 'auto' }}>
+          <div ref={tableScrollRef} style={{ maxHeight: 400, overflowY: 'auto', paddingLeft: 32, paddingRight: 32 }}>
             <table className="min-w-full text-xs text-gray-200">
+              <thead>
+                <tr>
+                  {fileData.content[0]?.map((cell: string, j: number) => (
+                    <th
+                      key={j}
+                      className="border px-2 py-1 bg-gray-800 sticky top-0 z-10 truncate"
+                      style={{
+                        background: '#23272b',
+                        position: 'sticky',
+                        top: 0,
+                        maxWidth: 120,
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        borderTop: '1px solid #fff',
+                        boxShadow: '0 1px 0 0 #fff'
+                      }}
+                    >
+                      {cell}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
               <tbody>
-                {fileData.content.map((row: string[], i: number) => (
+                {fileData.content.slice(1).map((row: string[], i: number) => (
                   <tr key={i}>
-                    {row.map((cell: string, j: number) => <td key={j} className="border px-2 py-1">{cell}</td>)}
+                    {row.map((cell: string, j: number) => (
+                      <td
+                        key={j}
+                        className="border px-2 py-1 truncate"
+                        style={{ maxWidth: 120, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                      >
+                        {cell}
+                      </td>
+                    ))}
                   </tr>
                 ))}
               </tbody>
@@ -59,17 +91,42 @@ const FilePreviewModal: React.FC<FilePreviewModalProps> = ({ fileId, isOpen, onR
         return <pre style={{ maxHeight: 400, overflowY: 'auto' }}>{JSON.stringify(fileData.content, null, 2)}</pre>;
       case 'xlsx':
         return (
-          <div style={{ maxHeight: 400, overflowY: 'auto' }}>
+          <div ref={tableScrollRef} style={{ maxHeight: 400, overflowY: 'auto', paddingLeft: 32 }}>
             <table className="min-w-full text-xs text-gray-200">
               <thead>
                 <tr>
-                  {fileData.columns.map((col: string, i: number) => <th key={i} className="border px-2 py-1">{col}</th>)}
+                  {fileData.columns.map((col: string, i: number) => (
+                    <th
+                      key={i}
+                      className="border px-2 py-1 bg-gray-800 sticky top-0 z-10 truncate"
+                      style={{
+                        background: '#23272b',
+                        position: 'sticky',
+                        top: 0,
+                        maxWidth: 120,
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        boxShadow: '0 3px 0 0 #fff'
+                      }}
+                    >
+                      {col}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
                 {fileData.content.map((row: any, i: number) => (
                   <tr key={i}>
-                    {fileData.columns.map((col: string, j: number) => <td key={j} className="border px-2 py-1">{row[col]}</td>)}
+                    {fileData.columns.map((col: string, j: number) => (
+                      <td
+                        key={j}
+                        className="border px-2 py-1 truncate"
+                        style={{ maxWidth: 120, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                      >
+                        {row[col]}
+                      </td>
+                    ))}
                   </tr>
                 ))}
               </tbody>
@@ -97,7 +154,6 @@ const FilePreviewModal: React.FC<FilePreviewModalProps> = ({ fileId, isOpen, onR
         overlay: { backgroundColor: 'rgba(0,0,0,0.7)' }
       }}
     >
-      <button onClick={onRequestClose} style={{ float: 'right', fontSize: 22, background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}>&times;</button>
       <h2 className="text-lg font-bold mb-4">File Preview</h2>
       {loading && <div>Loading...</div>}
       {error && <div style={{ color: 'red' }}>{error}</div>}

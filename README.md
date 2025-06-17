@@ -55,10 +55,31 @@ cd frontend && npm install
 
 - **Production:**
 
+  - connect to ssh
+    `ssh kyu-ubuntu`
 
+- run nix develop
 
+- remove uv cache
+rm -rf ~/.cache/uv
+rm -rf ~/.cache/*
+rm -rf ~/.npm
+rm -rf ~/toxindex/aws/dist
+rm -rf ~/toxindex/frontend/node_modules
+
+  - make swap
+sudo dd if=/dev/zero of=/swapfile bs=1M count=1024
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+echo '/swapfile swap swap defaults 0 0' | sudo tee -a /etc/fstab
+  - clear RAM
+    `sudo sync; sudo echo 3 | sudo sh -c 'echo 3 > /proc/sys/vm/drop_caches'`
+  - check RAM
+    `free -h`
+  
   - start React
-    `cd toxindex && nix develop && cd frontend && npm install && sudo sync; sudo echo 3 | sudo tee /proc/sys/vm/drop_caches && npm run build`
+    `cd toxindex && nix develop && cd frontend && npm install &&  && npm run build`
 
   - Start webserver:  
     `gunicorn webserver.app:app --bind 0.0.0.0:8000 --worker-class eventlet`

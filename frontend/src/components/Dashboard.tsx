@@ -27,8 +27,6 @@ interface DashboardProps {
   loadingEnvironments: boolean;
 }
 
-const blinkStyle = `@keyframes blink { 0%{opacity:1;} 50%{opacity:0.2;} 100%{opacity:1;} } .blink { animation: blink 1s linear infinite; }`;
-
 const Dashboard: React.FC<DashboardProps> = ({ selectedModel, selectedEnv, setSelectedEnv, environments, refetchChatSessions, refetchEnvironments, loadingEnvironments }) => {
   const [chatInput, setChatInput] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -247,6 +245,7 @@ const Dashboard: React.FC<DashboardProps> = ({ selectedModel, selectedEnv, setSe
                   key={task.task_id}
                   className="flex items-center justify-between px-4 py-1 transition-colors duration-150 hover:bg-purple-900/20 rounded-lg text-base"
                   style={{ background: 'none', minHeight: 44 }}
+                  onClick={() => navigate(`/task/${task.task_id}`)}
                 >
                   <div className="flex items-center min-w-0 flex-1 gap-3">
                     <span
@@ -282,7 +281,10 @@ const Dashboard: React.FC<DashboardProps> = ({ selectedModel, selectedEnv, setSe
                     )}
                   </div>
                   <button
-                    onClick={() => archiveTask(task.task_id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      archiveTask(task.task_id);
+                    }}
                     className="ml-2 flex items-center justify-center w-7 h-7 rounded-full bg-purple-800 hover:bg-purple-700 active:bg-purple-900 text-white transition border-none shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-400 hover:ring-2 hover:ring-purple-400"
                     style={{ padding: 0, borderRadius: '50%', fontSize: '1.1rem', border: 'none', outline: 'none', boxShadow: 'none', cursor: 'pointer' }}
                     title="Archive task"
@@ -302,13 +304,42 @@ const Dashboard: React.FC<DashboardProps> = ({ selectedModel, selectedEnv, setSe
           ) : (
             <ul className="divide-y divide-gray-800">
               {archivedTasks.map(task => (
-                <li key={task.task_id} className="flex items-center justify-between px-4 py-3">
-                  <span className="text-gray-300">{task.title}</span>
+                <li
+                  key={task.task_id}
+                  className="flex items-center justify-between px-4 py-3 hover:bg-gray-800 cursor-pointer rounded"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/task/${task.task_id}`);
+                  }}
+                >
+                  <span className="text-gray-300">
+                    {task.title}
+                    <span className="ml-2 text-xs text-gray-400">
+                      {task.created_at &&
+                        new Date(task.created_at).toLocaleString(undefined, {
+                          month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true
+                        })}
+                      {task.archived &&
+                        <>
+                          {" (archived)"}
+                        </>
+                      }
+                    </span>
+                  </span>
                   <button
-                    onClick={() => unarchiveTask(task.task_id)}
-                    className="ml-4 px-3 py-1 rounded bg-green-700 text-white hover:bg-green-800 text-sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      unarchiveTask(task.task_id);
+                    }}
+                    className="ml-1 px-1 rounded bg-green-700 text-white hover:bg-green-800 text-xs flex items-center"
+                    style={{ marginTop: 0, marginBottom: 0, height: 'auto', minHeight: 0, paddingTop: 0, paddingBottom: 0, background: 'none', border: 'none', outline: 'none', boxShadow: 'none', cursor: 'pointer' }}
                     title="Unarchive task"
-                  >Unarchive</button>
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 mr-1">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 19V6m0 0l-6 6m6-6l6 6" />
+                    </svg>
+                    Unarchive
+                  </button>
                 </li>
               ))}
             </ul>
