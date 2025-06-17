@@ -21,7 +21,7 @@ from flask_socketio import SocketIO, emit, join_room
 from flask_wtf.csrf import CSRFError
 from flask_wtf import CSRFProtect
 from celery.result import AsyncResult
-from flask import request, send_from_directory, jsonify, render_template, send_file, abort
+from flask import request, send_from_directory, jsonify, send_file, abort
 
 # Local imports
 import webserver.datastore as ds
@@ -42,7 +42,7 @@ import redis
 
 # FLASK APP ===================================================================
 static_folder_path = os.path.join(os.path.dirname(__file__), "webserver", "static")
-app = flask.Flask(__name__, template_folder="templates")
+app = flask.Flask(__name__, static_folder=static_folder_path)
 # app.config["SERVER_NAME"] = os.environ.get("SERVER_NAME")
 app.config["PREFERRED_URL_SCHEME"] = os.environ.get("PREFERRED_URL_SCHEME")
 app.config["TEMPLATES_AUTO_RELOAD"] = True
@@ -134,17 +134,9 @@ def redis_listener(name):
 
 
 # INDEX / ROOT ===============================================================
-@app.route("/", methods=["GET"])
-def index():
-    logging.info(f"current user: {flask_login.current_user}")
-    if flask_login.current_user.is_authenticated:
-        environments = Environment.get_environments_by_user(
-            flask_login.current_user.user_id
-        )
-        return flask.render_template("index.html", environments=environments)
-    else:
-        print("user is not logged in")
-        return flask.render_template("login_register.html")
+# @app.route("/", methods=["GET"])
+# def index():
+#     ...
 
 
 # SOCKETIO HANDLERS ==========================================================
@@ -294,40 +286,40 @@ def get_user_tasks():
         return flask.jsonify({"error": "Failed to retrieve tasks"}), 500
 
 
-@app.route("/task/<task_id>", methods=["GET"])
-def task(task_id):
-    messages = Message.get_messages(task_id)
-    files = File.get_files(task_id)
+# @app.route("/task/<task_id>", methods=["GET"])
+# def task(task_id):
+#     messages = Message.get_messages(task_id)
+#     files = File.get_files(task_id)
 
-    # Find the latest assistant message
-    assistant_messages = [m for m in messages if m.role == "assistant"]
-    latest_assistant_message = assistant_messages[-1].content if assistant_messages else None
+#     # Find the latest assistant message
+#     assistant_messages = [m for m in messages if m.role == "assistant"]
+#     latest_assistant_message = assistant_messages[-1].content if assistant_messages else None
 
-    # Pre-render markdown content for convenience
-    rendered_files = []
-    for f in files:
-        file_info = f.to_dict()
-        if f.filename.lower().endswith((".md", ".markdown")):
-            file_info["html"] = f.markdown_to_html()
-        else:
-            file_info["html"] = ""
-        rendered_files.append(file_info)
+#     # Pre-render markdown content for convenience
+#     rendered_files = []
+#     for f in files:
+#         file_info = f.to_dict()
+#         if f.filename.lower().endswith((".md", ".markdown")):
+#             file_info["html"] = f.markdown_to_html()
+#         else:
+#             file_info["html"] = ""
+#         rendered_files.append(file_info)
 
-    # Render latest assistant message as HTML (if present)
-    if latest_assistant_message:
-        import markdown
-        latest_assistant_message_html = markdown.markdown(latest_assistant_message, extensions=["extra", "tables"])
-    else:
-        latest_assistant_message_html = None
+#     # Render latest assistant message as HTML (if present)
+#     if latest_assistant_message:
+#         import markdown
+#         latest_assistant_message_html = markdown.markdown(latest_assistant_message, extensions=["extra", "tables"])
+#     else:
+#         latest_assistant_message_html = None
 
-    return flask.render_template(
-        "task.html", 
-        task_id=task_id, 
-        messages=messages, 
-        files=rendered_files, 
-        latest_assistant_message=latest_assistant_message,
-        latest_assistant_message_html=latest_assistant_message_html
-    )
+#     return flask.render_template(
+#         "task.html", 
+#         task_id=task_id, 
+#         messages=messages, 
+#         files=rendered_files, 
+#         latest_assistant_message=latest_assistant_message,
+#         latest_assistant_message_html=latest_assistant_message_html
+#     )
 
 
 # MESSAGE MANAGEMENT =========================================================
@@ -360,26 +352,26 @@ def message_new():
 
 
 # WORKFLOW MANAGEMENT ========================================================
-@app.route("/workflow/new", methods=["GET", "POST"])
-def workflow_new():
-    if request.method == "POST":
-        workflow_data = request.get_json()
-        title = workflow_data.get("title", "New workflow")
-        description = workflow_data.get("description", "")
-        workflow = Workflow.create_workflow(
-            title=title,
-            description=description,
-            user_id=flask_login.current_user.user_id,
-        )
-        logging.info(f"created workflow {workflow.workflow_id}")
-        return flask.jsonify({"workflow_id": workflow.workflow_id})
-    return flask.render_template("create_workflow.html")
+# @app.route("/workflow/new", methods=["GET", "POST"])
+# def workflow_new():
+#     if request.method == "POST":
+#         workflow_data = request.get_json()
+#         title = workflow_data.get("title", "New workflow")
+#         description = workflow_data.get("description", "")
+#         workflow = Workflow.create_workflow(
+#             title=title,
+#             description=description,
+#             user_id=flask_login.current_user.user_id,
+#         )
+#         logging.info(f"created workflow {workflow.workflow_id}")
+#         return flask.jsonify({"workflow_id": workflow.workflow_id})
+#     return flask.render_template("create_workflow.html")
 
 
-@app.route("/workflow/<workflow_id>", methods=["GET"])
-def workflow(workflow_id):
-    workflow = Workflow.get_workflow(workflow_id)
-    return flask.render_template("workflow_run.html", workflow=workflow)
+# @app.route("/workflow/<workflow_id>", methods=["GET"])
+# def workflow(workflow_id):
+#     workflow = Workflow.get_workflow(workflow_id)
+#     return flask.render_template("workflow_run.html", workflow=workflow)
 
 
 # ENVIRONMENT MANAGEMENT =====================================================
@@ -416,20 +408,20 @@ def environment_list():
     return flask.jsonify({"environments": [e.to_dict() for e in envs]})
 
 
-@app.route("/environment/<env_id>", methods=["GET"])
-@flask_login.login_required
-def environment_view(env_id):
-    workflow = Workflow.get_workflow(1)
-    tasks = Task.get_tasks_by_environment(env_id, flask_login.current_user.user_id)
-    env = Environment.get_environment(env_id)
-    user_id = flask_login.current_user.user_id
-    user_workflows = Workflow.get_workflows_by_user(user_id)
-    global_workflows = Workflow.get_workflows_by_user(None)
-    all_workflows = {str(w.workflow_id): w.title for w in (user_workflows + global_workflows)}
-    logging.info(f"[environment_view] workflow_titles mapping: {all_workflows}")
-    return flask.render_template(
-        "environment.html", tasks=tasks, workflow=workflow, environment=env, workflow_titles=all_workflows
-    )
+# @app.route("/environment/<env_id>", methods=["GET"])
+# @flask_login.login_required
+# def environment_view(env_id):
+#     workflow = Workflow.get_workflow(1)
+#     tasks = Task.get_tasks_by_environment(env_id, flask_login.current_user.user_id)
+#     env = Environment.get_environment(env_id)
+#     user_id = flask_login.current_user.user_id
+#     user_workflows = Workflow.get_workflows_by_user(user_id)
+#     global_workflows = Workflow.get_workflows_by_user(None)
+#     all_workflows = {str(w.workflow_id): w.title for w in (user_workflows + global_workflows)}
+#     logging.info(f"[environment_view] workflow_titles mapping: {all_workflows}")
+#     return flask.render_template(
+#         "environment.html", tasks=tasks, workflow=workflow, environment=env, workflow_titles=all_workflows
+#     )
 
 
 @app.route("/environment/<env_id>", methods=["DELETE"])
@@ -492,12 +484,6 @@ def log_tab_switch():
     timestamp = data.get('timestamp')
     logging.info(f"[Tab Switch] User switched to tab '{tab}' for task_id={task_id} at {timestamp}")
     return flask.jsonify({'status': 'ok'})
-
-@app.errorhandler(CSRFError)
-def handle_csrf_error(e):
-    logging.error(f"[CSRF] {e.description}")
-    from webserver.forms.registration_form import RegistrationForm
-    return flask.render_template('register.html', form=RegistrationForm(), csrf_error=e.description), 400
 
 @app.route("/api/me", methods=["GET"])
 def api_me():
@@ -934,6 +920,15 @@ def api_get_user(user_id):
 print("Registered routes:")
 for rule in app.url_map.iter_rules():
     print(rule)
+
+# --- ADD catch-all route for React SPA ---
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve_react_app(path):
+    # Only serve index.html for non-API, non-static routes
+    if path.startswith('api/') or path.startswith('static/') or path.startswith('uploads/'):
+        abort(404)
+    return send_from_directory(app.static_folder, 'index.html')
 
 # LAUNCH =====================================================================
 # In development, start the Redis listener only in the reloader child process
