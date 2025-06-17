@@ -39,6 +39,8 @@ report.json
 result/
 tmp/
 result 
+uploads/
+uploads
 
 # Uncomment to ignore VSCode settings (if user-specific)
 # .vscode/
