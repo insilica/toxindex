@@ -113,7 +113,7 @@ def register():
                 logging.debug(f"[register] Field '{field}' error: {error}")
         flask.flash("An error occurred while creating the user. Please try again.")
         
-    return flask.render_template('register.html', form=form)
+    return flask.redirect("/login")
 
 # USER LOGIN/OUT ==================================================================================
 def login():
