@@ -134,3 +134,28 @@ def logout():
   flask_login.logout_user()
   flask.session.clear()  # Explicitly clear the session
   return flask.jsonify({"success": True})
+
+# API: Forgot Password (send reset email)
+@login_page.route('/api/forgot_password', methods=['POST'])
+def api_forgot_password():
+    data = flask.request.get_json()
+    email = data.get('email')
+    if not email:
+        return flask.jsonify({'success': False, 'error': 'Email is required.'}), 400
+    if not User.user_exists(email):
+        return flask.jsonify({'success': True})  # Don't reveal if user exists
+    send_password_reset(email)
+    return flask.jsonify({'success': True})
+
+# API: Reset Password (with token)
+@login_page.route('/api/reset_password/<token>', methods=['POST'])
+def api_reset_password(token):
+    data = flask.request.get_json()
+    password = data.get('password')
+    if not password:
+        return flask.jsonify({'success': False, 'error': 'Password is required.'}), 400
+    user_id = ds.find('SELECT user_id from user_link WHERE link_token=(%s)', (token,))['user_id']
+    ds.execute('UPDATE users set password = (%s) WHERE user_id = (%s)', (password, user_id,))
+    if User.get(user_id) is not None:
+        flask_login.login_user(User.get(user_id))
+    return flask.jsonify({'success': True})
