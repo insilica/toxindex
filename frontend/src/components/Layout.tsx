@@ -242,7 +242,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                     {envFiles.map(file => (
                       <li key={file.file_id} className="flex items-center justify-between text-sm">
                         <button
-                          className="truncate max-w-[140px] text-sm text-gray-400 hover:text-green-400 bg-transparent border-none p-0 m-0 text-left cursor-pointer flex items-center gap-1"
+                          className="truncate max-w-[250px] text-sm text-gray-400 hover:text-green-400 bg-transparent border-none p-0 m-0 text-left cursor-pointer flex items-center gap-1"
                           style={{ background: 'none' }}
                           onClick={() => { setSidebarPreviewFileId(file.file_id); setSidebarPreviewOpen(true); }}
                           title="Preview file"
