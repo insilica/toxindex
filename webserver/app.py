@@ -1,3 +1,6 @@
+import eventlet
+eventlet.monkey_patch()
+
 # Standard library imports
 import os
 import uuid
@@ -10,7 +13,6 @@ import re
 from datetime import datetime
 
 # Third-party imports
-import eventlet
 import dotenv
 from werkzeug.utils import secure_filename
 import flask
@@ -33,7 +35,7 @@ from workflows.celery_worker import celery
 from workflows.chat_response_task import chat_response_task
 
 print("RUNNING WEBSERVER/APP.PY")
-eventlet.monkey_patch()
+
 dotenv.load_dotenv()
 
 import redis
@@ -945,7 +947,7 @@ if __name__ == "__main__":
             daemon=True,
             name=thread_name,
         ).start()
-    socketio.run(app, host="0.0.0.0", port=6513, debug=True, use_reloader=True) # set to true if you want to reload while editing code.
+    socketio.run(app, host="0.0.0.0", port=6513, debug=False, use_reloader=False) # set to true if you want to reload while editing code.
 
 # In production (Gunicorn), run the Redis listener as a separate process using redis_listener_service.py
 # See redis_listener_service.py for details.
