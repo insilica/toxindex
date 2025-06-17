@@ -388,6 +388,7 @@ export const EnvironmentDetails: React.FC<{ refreshEnvFiles?: () => void }> = ({
             .then(data => setFiles(data.files || []));
           if (refreshEnvFiles) refreshEnvFiles();
         }}
+        refreshEnvFiles={refreshEnvFiles}
       />
     </div>
   );

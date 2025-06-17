@@ -11,9 +11,10 @@ interface UploadCsvModalProps {
   environments: Environment[];
   defaultEnvId?: string;
   onUploadSuccess?: () => void;
+  refreshEnvFiles?: () => void;
 }
 
-const UploadCsvModal: React.FC<UploadCsvModalProps> = ({ open, onClose, environments, defaultEnvId, onUploadSuccess }) => {
+const UploadCsvModal: React.FC<UploadCsvModalProps> = ({ open, onClose, environments, defaultEnvId, onUploadSuccess, refreshEnvFiles }) => {
   const [uploadEnvId, setUploadEnvId] = useState<string>(defaultEnvId || (environments[0]?.environment_id ?? ''));
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -48,6 +49,7 @@ const UploadCsvModal: React.FC<UploadCsvModalProps> = ({ open, onClose, environm
       setUploadFile(null);
       setUploadError(null);
       if (onUploadSuccess) onUploadSuccess();
+      if (refreshEnvFiles) refreshEnvFiles();
       onClose();
     } catch (err) {
       setUploadError('Failed to upload file.');

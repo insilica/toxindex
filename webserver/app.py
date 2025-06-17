@@ -1,49 +1,42 @@
-print("RUNNING WEBSERVER/APP.PY")
-# from gevent import monkey
-# monkey.patch_all()
-import eventlet
-eventlet.monkey_patch()
-
-import dotenv
-import uuid
+# Standard library imports
 import os
+import uuid
 import base64
 import mimetypes
-import pandas as pd
+import threading
+import logging
+import json
+import re
+from datetime import datetime
+
+# Third-party imports
+import eventlet
+import dotenv
+from werkzeug.utils import secure_filename
+import flask
+import flask_login
+from flask_socketio import SocketIO, emit, join_room
+from flask_wtf.csrf import CSRFError
+from flask_wtf import CSRFProtect
+from celery.result import AsyncResult
+from flask import request, send_from_directory, jsonify, render_template, send_file, abort
+
+# Local imports
 import webserver.datastore as ds
-
-dotenv.load_dotenv()
-
 from webserver import login_manager as LM
 from webserver.controller import login
 from webserver.model import Task, Workflow, Message, File, Environment, ChatSession, User
 from webserver.ai_service import generate_title
-from workflows.chat_response_task import chat_response_task
-from workflows.interactive_echo_task import interactive_echo_task
 from workflows.plain_openai_tasks import plain_openai_task, openai_json_schema_task
-from flask import request, Response, send_from_directory
-
-import flask, flask_login
-import os, logging, requests, threading, redis, json
-from datetime import datetime
-from werkzeug.utils import secure_filename
-
-# CELERY ======================================================================
 from workflows.probra import probra_task
+from workflows.celery_worker import celery
 from workflows.chat_response_task import chat_response_task
 
-from celery.result import AsyncResult
-from workflows.celery_worker import celery
+print("RUNNING WEBSERVER/APP.PY")
+eventlet.monkey_patch()
+dotenv.load_dotenv()
 
-# SOCKETIO ====================================================================
-from flask_socketio import SocketIO, emit
-from flask_socketio import join_room
-
-from flask import jsonify
-import re
-
-# BD ENC
-logging.info(f"DB ENV (Flask startup): PGHOST={os.getenv('PGHOST')}, PGPORT={os.getenv('PGPORT')}, PGDATABASE={os.getenv('PGDATABASE')}, PGUSER={os.getenv('PGUSER')}, PGPASSWORD={os.getenv('PGPASSWORD')}")
+import redis
 
 # FLASK APP ===================================================================
 static_folder_path = os.path.join(os.path.dirname(__file__), "webserver", "static")
@@ -87,9 +80,9 @@ for handler in logging.getLogger().handlers:
 LM.init(app)
 Workflow.load_default_workflows()
 
-from flask_wtf.csrf import CSRFError
-from flask_wtf import CSRFProtect
 csrf = CSRFProtect(app)
+
+logging.info(f"DB ENV (Flask startup): PGHOST={os.getenv('PGHOST')}, PGPORT={os.getenv('PGPORT')}, PGDATABASE={os.getenv('PGDATABASE')}, PGUSER={os.getenv('PGUSER')}, PGPASSWORD={os.getenv('PGPASSWORD')}")
 
 # REDIS PUB/SUB BACKGROUND LISTENER ==========================================
 def redis_listener(name):
@@ -530,23 +523,26 @@ def test_alive():
 @app.route("/api/environments", methods=["GET"])
 @flask_login.login_required
 def api_environments():
-    user_id = flask_login.current_user.user_id
-    envs = Environment.get_environments_by_user(user_id)
-    if not envs:
-        # Create a default environment if none exist
-        Environment.create_environment("Base environment", user_id, description="Your starter workspace")
+    try:
+        user_id = flask_login.current_user.user_id
         envs = Environment.get_environments_by_user(user_id)
-    return flask.jsonify({
-        "environments": [
-            {
-                "environment_id": e.environment_id,
-                "title": e.title,
-                "user_id": flask_login.current_user.email,  # Use email for creator
-                "created_at": e.created_at.strftime("%Y-%m-%dT%H:%M:%S") if e.created_at else ""
-            }
-            for e in envs
-        ]
-    })
+        if not envs:
+            Environment.create_environment("Base environment", user_id, description="Your starter workspace")
+            envs = Environment.get_environments_by_user(user_id)
+        return flask.jsonify({
+            "environments": [
+                {
+                    "environment_id": e.environment_id,
+                    "title": e.title,
+                    "user_id": flask_login.current_user.email,  # Use email for creator
+                    "created_at": e.created_at.strftime("%Y-%m-%dT%H:%M:%S") if e.created_at else ""
+                }
+                for e in envs
+            ]
+        })
+    except Exception as e:
+        logging.error(f"/api/environments error: {e}", exc_info=True)
+        return flask.jsonify({"error": "Internal server error"}), 500
 
 # FILE UPLOAD ENDPOINT ======================================================
 @csrf.exempt
@@ -739,12 +735,16 @@ def api_get_user_tasks():
 @app.route("/api/tasks/<task_id>", methods=["GET"])
 @flask_login.login_required
 def api_get_task(task_id):
-    if not is_valid_uuid(task_id):
-        return flask.jsonify({"error": "Invalid task ID"}), 400
-    task = Task.get_task(task_id)
-    if not task or task.user_id != flask_login.current_user.user_id:
-        return flask.jsonify({"error": "Task not found"}), 404
-    return flask.jsonify(task.to_dict())
+    try:
+        if not is_valid_uuid(task_id):
+            return flask.jsonify({"error": "Invalid task ID"}), 400
+        task = Task.get_task(task_id)
+        if not task or task.user_id != flask_login.current_user.user_id:
+            return flask.jsonify({"error": "Task not found"}), 404
+        return flask.jsonify(task.to_dict())
+    except Exception as e:
+        logging.error(f"/api/tasks/{task_id} error: {e}", exc_info=True)
+        return flask.jsonify({"error": "Internal server error"}), 500
 
 @csrf.exempt
 @app.route("/api/tasks/<task_id>/archive", methods=["POST"])
