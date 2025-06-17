@@ -14,9 +14,10 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { EnvironmentDetails } from "./components/CreateEnvironment";
 import { useState, useCallback, useEffect } from "react";
 import ChatSession from "./components/ChatSession";
+import TaskDetail from './components/TaskDetail';
+import UserProfile from './components/UserProfile';
 
 function App() {
-  const [selectedModel, setSelectedModel] = useState<string>("vanilla");
   const [environments, setEnvironments] = useState<any[]>([]);
   const [loadingEnvironments, setLoadingEnvironments] = useState<boolean>(true);
 
@@ -98,6 +99,7 @@ function App() {
                   <SettingsEnvironments
                     environments={environments}
                     refetchEnvironments={refetchEnvironments}
+                    setEnvironments={setEnvironments}
                   />
                 </Layout>
               </ProtectedRoute>
@@ -139,6 +141,8 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/task/:task_id" element={<TaskDetail />} />
+          <Route path="/user/:user_id" element={<UserProfile />} />
         </Routes>
       </Router>
     </div>
