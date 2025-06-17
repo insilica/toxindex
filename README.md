@@ -58,14 +58,7 @@ cd frontend && npm install
   - connect to ssh
     `ssh kyu-ubuntu`
 
-- run nix develop
 
-- remove uv cache
-rm -rf ~/.cache/uv
-rm -rf ~/.cache/*
-rm -rf ~/.npm
-rm -rf ~/toxindex/aws/dist
-rm -rf ~/toxindex/frontend/node_modules
 
   - make swap
 sudo dd if=/dev/zero of=/swapfile bs=1M count=1024

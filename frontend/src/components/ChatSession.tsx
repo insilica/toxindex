@@ -18,11 +18,11 @@ interface Environment {
 interface ChatSessionProps {
   selectedModel?: string;
   environments: Environment[];
-  refetchEnvironments: () => void;
+  refreshEnvFiles?: () => void;
   loadingEnvironments: boolean;
 }
 
-const ChatSession: React.FC<ChatSessionProps> = ({ selectedModel, environments, refetchEnvironments, loadingEnvironments }) => {
+const ChatSession: React.FC<ChatSessionProps> = ({ selectedModel, environments, refreshEnvFiles, loadingEnvironments }) => {
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
   const [messages, setMessages] = useState<Message[]>([]);
@@ -30,11 +30,10 @@ const ChatSession: React.FC<ChatSessionProps> = ({ selectedModel, environments, 
   const [loading, setLoading] = useState(false);
   const [selectedEnv, setSelectedEnv] = useState<string>('');
   const [showUploadModal, setShowUploadModal] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const chatWindowRef = useRef<HTMLDivElement>(null);
   const selectRef = useRef<HTMLSelectElement>(null);
   const spanRef = useRef<HTMLSpanElement>(null);
-  const [selectWidth, setSelectWidth] = useState(120);
+  const [selectWidth] = useState(120);
   const pollingRef = useRef<number | null>(null);
 
   // Fetch messages for this session
@@ -294,7 +293,11 @@ const ChatSession: React.FC<ChatSessionProps> = ({ selectedModel, environments, 
         onClose={() => setShowUploadModal(false)}
         environments={environments}
         defaultEnvId={selectedEnv}
-        onUploadSuccess={() => { setShowUploadModal(false); }}
+        onUploadSuccess={() => {
+          setShowUploadModal(false);
+          if (refreshEnvFiles) refreshEnvFiles();
+        }}
+        refreshEnvFiles={refreshEnvFiles}
       />
     </div>
   );
