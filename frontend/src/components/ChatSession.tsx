@@ -40,7 +40,7 @@ const ChatSession: React.FC<ChatSessionProps> = ({ selectedModel, environments, 
   // Fetch messages for this session
   useEffect(() => {
     if (!sessionId) return;
-    fetch(`/api/chat_session/${sessionId}/messages`, { credentials: 'include' })
+    fetch(`/api/chat_sessions/${sessionId}/messages`, { credentials: 'include' })
       .then(res => res.json())
       .then(data => setMessages(data.messages || []));
   }, [sessionId]);
@@ -59,7 +59,7 @@ const ChatSession: React.FC<ChatSessionProps> = ({ selectedModel, environments, 
   const pollForAssistant = () => {
     if (pollingRef.current !== null) clearInterval(pollingRef.current);
     pollingRef.current = window.setInterval(() => {
-      fetch(`/api/chat_session/${sessionId}/messages`, { credentials: 'include' })
+      fetch(`/api/chat_sessions/${sessionId}/messages`, { credentials: 'include' })
         .then(res => res.json())
         .then(data => {
           setMessages(data.messages || []);
@@ -103,7 +103,7 @@ const ChatSession: React.FC<ChatSessionProps> = ({ selectedModel, environments, 
     setMessages(msgs => [...msgs, { role: 'user', content: input }]);
     setLoading(true);
     try {
-      await fetch(`/api/chat_session/${sessionId}/message`, {
+      await fetch(`/api/chat_sessions/${sessionId}/message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
