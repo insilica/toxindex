@@ -12,11 +12,9 @@ def request_loader(request):
   email = request.form.get('email')
   if User.user_exists(email):
     user = User.get_user(email)
-    print(f'got user {user} with email {email}')
     return User.get_user(email)
   else:
     user = User.get_user(email)
-    print(f'got user {user} with email {email}')
     return None
 
 def init(app):
