@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import FilePreviewModal from './FilePreviewModal';
 import { FaComments, FaPlus, FaListAlt, FaFileCsv, FaFileAlt, FaFileCode, FaDatabase, FaFileImage, FaFile, FaEllipsisH } from 'react-icons/fa';
+import { createPortal } from "react-dom";
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [chatSessions, setChatSessions] = useState<any[]>([]);
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
   const [openChatMenu, setOpenChatMenu] = useState<string | null>(null);
+  const menuButtonRefs = useRef<{ [key: string]: React.RefObject<HTMLButtonElement> }>({});
 
   useEffect(() => {
     fetch("/api/me", { credentials: "include", cache: "no-store" })
@@ -53,7 +55,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       setEnvFiles([]); // Clear files if no environment selected
       return;
     }
-    fetch(`/api/environment/${selectedEnv}/files`, { credentials: 'include' })
+    fetch(`/api/environments/${selectedEnv}/files`, { credentials: 'include' })
       .then(res => res.json())
       .then(data => setEnvFiles(data.files || []));
   }, [selectedEnv]);
@@ -72,10 +74,9 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       });
   }, []);
 
-  // Fetch chat sessions for environment
+  // Fetch chat sessions (flat, not by environment)
   useEffect(() => {
-    if (!selectedEnv) return;
-    fetch(`/api/environment/${selectedEnv}/chat_sessions`, { credentials: 'include' })
+    fetch(`/api/chat_sessions`, { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         setChatSessions(data.sessions || []);
@@ -85,11 +86,11 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           setSelectedSessionId(null);
         }
       });
-  }, [selectedEnv]);
+  }, []);
 
   const handleLogout = () => {
-    fetch("/api/logout", {
-      method: "GET",
+    fetch("/api/auth/logout", {
+      method: "POST",
       credentials: "include",
     }).then(() => {
       navigate("/login");
@@ -103,19 +104,17 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   else if (location.pathname === "/settings/data-controls") settingsSection = 'data-controls';
   else if (location.pathname === "/settings/general") settingsSection = 'general';
 
-  // Helper to refetch chat sessions for the current environment
+  // Helper to refetch chat sessions (flat)
   const refetchChatSessions = async () => {
-    if (!selectedEnv) return;
-    const res = await fetch(`/api/environment/${selectedEnv}/chat_sessions`, { credentials: 'include' });
+    const res = await fetch(`/api/chat_sessions`, { credentials: 'include' });
     const data = await res.json();
     setChatSessions(data.sessions || []);
     console.log('DEBUG: Sidebar chat sessions updated', data.sessions);
   };
 
-  // Create a new chat session
+  // Create a new chat session (flat)
   const handleNewChat = async () => {
-    if (!selectedEnv) return;
-    const res = await fetch(`/api/environment/${selectedEnv}/chat_sessions`, {
+    const res = await fetch(`/api/chat_sessions`, {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
@@ -135,7 +134,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       setEnvFiles([]);
       return;
     }
-    fetch(`/api/environment/${selectedEnv}/files`, { credentials: 'include' })
+    fetch(`/api/environments/${selectedEnv}/files`, { credentials: 'include' })
       .then(res => res.json())
       .then(data => setEnvFiles(data.files || []));
   };
@@ -154,7 +153,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Handler to delete a chat session
   const handleDeleteChat = async (sessionId: string) => {
     if (!window.confirm('Are you sure you want to delete this chat?')) return;
-    await fetch(`/api/chat_session/${sessionId}`, {
+    await fetch(`/api/chat_sessions/${sessionId}`, {
       method: 'DELETE',
       credentials: 'include',
     });
@@ -170,7 +169,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const handleRenameChat = async (sessionId: string, currentTitle: string) => {
     const newTitle = window.prompt('Enter new chat name:', currentTitle);
     if (!newTitle || newTitle.trim() === '' || newTitle === currentTitle) return;
-    await fetch(`/api/chat_session/${sessionId}`, {
+    await fetch(`/api/chat_sessions/${sessionId}`, {
       method: 'PATCH',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
@@ -202,8 +201,9 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           {/* Close button */}
           {sidebarOpen && (
             <button
-              className={`absolute transition-all duration-300 w-9 h-9 flex items-center justify-center rounded-full bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-green-400 shadow`}
+              className={`absolute transition-all duration-300 w-9 h-9 flex items-center justify-center rounded-full text-gray-300 hover:text-green-400 shadow`}
               style={{
+                background: 'none',
                 top: '2rem',
                 zIndex: 50,
                 minWidth: '36px',
@@ -224,7 +224,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               }}
               title="Collapse sidebar"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="15 18 9 12 15 6" />
               </svg>
             </button>
@@ -276,30 +276,34 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                   </svg>
                 </button>
               </div>
-              {/* Environment Files List - moved above settings button */}
-              {sidebarOpen && !isSettings && selectedEnv && envFiles.length > 0 && (
+              {/* Environment Files List - always show if environment is selected */}
+              {sidebarOpen && !isSettings && selectedEnv && (
                 <div style={{ marginLeft: '1.2rem', marginTop: '1.5rem', maxHeight: '180px', overflowY: 'auto' }}>
                   <div className="text-m text-gray-400 mb-2 font-semibold flex items-center"><FaListAlt className="mr-2" />Files in environment</div>
-                  <ul className="space-y-1">
-                    {envFiles.map(file => (
-                      <li key={file.file_id} className="flex items-center justify-between text-sm">
-                        <button
-                          className="truncate max-w-[250px] text-sm text-gray-400 hover:text-green-400 bg-transparent border-none p-0 m-0 text-left cursor-pointer flex items-center gap-1"
-                          style={{ background: 'none' }}
-                          onClick={() => { setSidebarPreviewFileId(file.file_id); setSidebarPreviewOpen(true); }}
-                          title="Preview file"
-                        >
-                          {getFileIcon(file.filename)}
-                          {file.filename}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
+                  {envFiles.length === 0 ? (
+                    <div className="text-gray-500 text-sm">No files yet.</div>
+                  ) : (
+                    <ul className="space-y-1">
+                      {envFiles.map(file => (
+                        <li key={file.file_id} className="flex items-center justify-between text-sm">
+                          <button
+                            className="truncate max-w-[250px] text-sm text-gray-400 hover:text-green-400 bg-transparent border-none p-0 m-0 text-left cursor-pointer flex items-center gap-1"
+                            style={{ background: 'none' }}
+                            onClick={() => { setSidebarPreviewFileId(file.file_id); setSidebarPreviewOpen(true); }}
+                            title="Preview file"
+                          >
+                            {getFileIcon(file.filename)}
+                            {file.filename}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               )}
               {/* Chat Sessions List */}
               {sidebarOpen && !isSettings && selectedEnv && (
-                <div style={{ marginLeft: '1.2rem', marginTop: '2rem', maxHeight: '180px', overflowY: 'auto' }}>
+                <div style={{ marginLeft: '1.2rem', marginTop: '2rem', maxHeight: '600px', overflowY: 'auto' }}>
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-m text-gray-400 font-semibold flex items-center">
                       <FaComments className="mr-2" />Chats
@@ -311,68 +315,63 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                       }}
                       disabled={!selectedEnv || selectedEnv === "__add__" || selectedEnv === "__manage__"}
                       className="px-3 py-1 pr-2 rounded-full text-[#166534] hover:text-[#22c55e] text-xs -ml-1"
-                      style={{ background: 'none', border: 'none', boxShadow: 'none', padding: 0, minWidth: 0, minHeight: 0, paddingRight: 25}}
+                      style={{ background: 'none', border: 'none', boxShadow: 'none', padding: 0, minWidth: 0, minHeight: 0, paddingRight: 35}}
                       title="New Chat"
                     >
                       <FaPlus />
                     </button>
                   </div>
                   {!selectedEnv && <div style={{color: 'red', fontSize: '0.8rem'}}>No environment selected</div>}
-                  <ul className="space-y-1">
-                    {chatSessions.map(session => (
-                      <li key={session.session_id} className="relative group">
-                        <button
-                          className={`truncate max-w-[180px] text-sm text-left ${selectedSessionId === session.session_id ? 'text-[#22c55e] font-bold' : 'text-[#4ade80] hover:text-[#22c55e]'}`}
-                          style={{ width: 'calc(100% - 32px)', background: 'none', border: 'none', boxShadow: 'none', padding: '2px 4px', minHeight: 0, minWidth: 0, borderRadius: 0, textAlign: 'left', display: 'inline-block' }}
-                          onClick={() => navigate(`/chat/session/${session.session_id}`)}
-                        >
-                          {(session.title && session.title.length > 0)
-                            ? session.title.slice(0, 40)
-                            : `Chat ${session.session_id.slice(0, 6)}`}
-                        </button>
-                        <button
-                          className="ml-1 p-1 text-gray-400 hover:text-green-400 focus:outline-none"
-                          style={{
-                            background: 'none',
-                            boxShadow: 'none',
-                            border: 'none',
-                            position: 'absolute',
-                            right: 0,
-                            top: 0,
-                            zIndex: 10,
-                            padding: 2,
-                            paddingRight: 25,
-                            minHeight: 0,
-                            borderRadius: 4,
-                            transition: 'color 0.15s'
-                          }}
-                          onClick={e => {
-                            e.stopPropagation();
-                            setOpenChatMenu(openChatMenu === session.session_id ? null : session.session_id);
-                          }}
-                          title="Chat options"
-                        >
-                          <FaEllipsisH size={12} />
-                        </button>
-                        {openChatMenu === session.session_id && (
-                          <div className="absolute right-0 mt-1 w-32 bg-white rounded shadow-lg z-50 border border-gray-200" style={{ minWidth: 120 }}>
-                            <button
-                              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                              onClick={() => handleRenameChat(session.session_id, session.title || '')}
-                            >
-                              Rename
-                            </button>
-                            <button
-                              className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                              onClick={() => handleDeleteChat(session.session_id)}
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
+                  {chatSessions.length === 0 ? (
+                    <div className="text-gray-500 text-sm">No chats yet.</div>
+                  ) : (
+                    <ul className="space-y-1">
+                      {chatSessions.map(session => (
+                        <li key={session.session_id} className="relative group">
+                          <button
+                            className={`truncate max-w-[180px] text-sm text-left ${selectedSessionId === session.session_id ? 'text-[#22c55e] font-bold' : 'text-[#4ade80] hover:text-[#22c55e]'}`}
+                            style={{ width: 'calc(100% - 32px)', background: 'none', border: 'none', boxShadow: 'none', padding: '2px 4px', minHeight: 0, minWidth: 0, borderRadius: 0, textAlign: 'left', display: 'inline-block' }}
+                            onClick={() => navigate(`/chat/session/${session.session_id}`)}
+                          >
+                            {(session.title && session.title.length > 0)
+                              ? session.title.slice(0, 40)
+                              : `Chat ${session.session_id.slice(0, 6)}`}
+                          </button>
+                          <button
+                            ref={(() => {
+                              if (!menuButtonRefs.current[session.session_id]) {
+                                menuButtonRefs.current[session.session_id] = React.createRef<HTMLButtonElement>() as React.RefObject<HTMLButtonElement>;
+                              }
+                              return menuButtonRefs.current[session.session_id] as React.RefObject<HTMLButtonElement>;
+                            })()}
+                            className="ml-1 p-1 text-gray-400 hover:text-green-400 focus:outline-none"
+                            style={{
+                              background: 'none',
+                              boxShadow: 'none',
+                              border: 'none',
+                              position: 'absolute',
+                              right: 0,
+                              top: 0,
+                              zIndex: 10,
+                              padding: 2,
+                              paddingRight: 25,
+                              minHeight: 0,
+                              borderRadius: 4,
+                              transition: 'color 0.15s'
+                            }}
+                            onClick={e => {
+                              e.stopPropagation();
+                              setOpenChatMenu(openChatMenu === session.session_id ? null : session.session_id);
+                            }}
+                            title="Chat options"
+                          >
+                            <FaEllipsisH size={12} />
+                          </button>
+                          {openChatMenu === session.session_id && menuButtonRefs.current[session.session_id] && <ChatMenuPortal anchorRef={menuButtonRefs.current[session.session_id] as React.RefObject<HTMLButtonElement | null>} onRename={() => handleRenameChat(session.session_id, session.title || '')} onDelete={() => handleDeleteChat(session.session_id)} onClose={() => setOpenChatMenu(null)} />}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               )}
               {/* Settings button at the bottom above logout */}
@@ -395,12 +394,12 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         {/* Open sidebar button */}
         {!sidebarOpen && !sidebarClosing && (
           <button
-            className="fixed left-2 z-50 w-9 h-9 flex items-center justify-center rounded-full bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-green-400 shadow transition"
-            style={{ top: '2rem', minWidth: '36px', minHeight: '36px', padding: 0, position: 'fixed' }}
+            className="fixed left-2 z-50 w-9 h-9 flex items-center justify-center rounded-full text-gray-300 hover:text-green-400 shadow transition"
+            style={{ top: '2rem', minWidth: '36px', minHeight: '36px', padding: 0, position: 'fixed', background: 'none', paddingLeft: 10}}
             onClick={() => setSidebarOpen(true)}
             title="Open sidebar"
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="9 18 15 12 9 6" />
             </svg>
           </button>
@@ -512,7 +511,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 setSelectedSessionId,
                 chatSessions,
                 handleNewChat,
-                refetchChatSessions
+                refetchChatSessions,
+                refreshEnvFiles
               }
             );
           }
@@ -533,10 +533,83 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       </main>
       <FilePreviewModal
         fileId={sidebarPreviewFileId}
+        envId={selectedEnv}
         isOpen={sidebarPreviewOpen}
         onRequestClose={() => setSidebarPreviewOpen(false)}
       />
     </div>
+  );
+};
+
+const ChatMenuPortal: React.FC<{ anchorRef: React.RefObject<HTMLButtonElement | null>, onRename: () => void, onDelete: () => void, onClose: () => void }> = ({ anchorRef, onRename, onDelete, onClose }) => {
+  const [pos, setPos] = useState<{ top: number, left: number }>({ top: 0, left: 0 });
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function updatePos() {
+      if (anchorRef && anchorRef.current) {
+        const rect = anchorRef.current.getBoundingClientRect();
+        setPos({
+          top: rect.bottom + window.scrollY,
+          left: rect.left + window.scrollX
+        });
+      }
+    }
+    updatePos();
+    window.addEventListener('resize', updatePos);
+    window.addEventListener('scroll', updatePos, true);
+    return () => {
+      window.removeEventListener('resize', updatePos);
+      window.removeEventListener('scroll', updatePos, true);
+    };
+  }, [anchorRef]);
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(e.target as Node) &&
+        anchorRef.current &&
+        !anchorRef.current.contains(e.target as Node)
+      ) {
+        console.log('onClose from document click');
+        onClose();
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [onClose, anchorRef]);
+
+  return createPortal(
+    <div ref={menuRef} className="bg-white rounded shadow-lg z-50 border border-gray-200" style={{ minWidth: 120, position: 'absolute', top: pos.top, left: pos.left, width: 128 }}>
+      <button
+        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+        onMouseDown={e => {
+          e.preventDefault();
+          e.stopPropagation();
+          console.log('Rename clicked');
+          onRename();
+          console.log('onClose after rename');
+          onClose();
+        }}
+      >
+        Rename
+      </button>
+      <button
+        className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+        onMouseDown={e => {
+          e.preventDefault();
+          e.stopPropagation();
+          console.log('Delete clicked');
+          onDelete();
+          console.log('onClose after delete');
+          onClose();
+        }}
+      >
+        Delete
+      </button>
+    </div>,
+    document.body
   );
 };
 

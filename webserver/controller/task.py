@@ -1,0 +1,122 @@
+from flask import Blueprint, request, jsonify
+import flask_login
+from webserver.model import Task
+from webserver.csrf import csrf
+import logging, datetime
+from webserver.util import is_valid_uuid
+
+task_bp = Blueprint('tasks', __name__, url_prefix='/api/tasks')
+
+@task_bp.route('', methods=['GET'])
+@flask_login.login_required
+def get_user_tasks():
+    try:
+        user_id = flask_login.current_user.user_id
+        env_id = request.args.get("environment_id")
+        if env_id:
+            tasks = Task.get_tasks_by_environment(env_id, user_id)
+        else:
+            tasks = Task.get_tasks_by_user(user_id)
+        active_tasks = [t for t in tasks if not t.archived]
+        archived_tasks = [t for t in tasks if t.archived]
+        def sort_key(t):
+            return t.last_accessed or t.created_at or datetime.datetime.min
+        active_tasks = sorted(active_tasks, key=sort_key, reverse=True)
+        archived_tasks = sorted(archived_tasks, key=sort_key, reverse=True)
+        return jsonify({
+            "active_tasks": [t.to_dict() for t in active_tasks],
+            "archived_tasks": [t.to_dict() for t in archived_tasks],
+        })
+    except Exception as e:
+        logging.error(f"Error retrieving tasks: {str(e)}")
+        return jsonify({"error": "Failed to retrieve tasks"}), 500
+
+@csrf.exempt
+@task_bp.route('', methods=['POST'])
+@flask_login.login_required
+def create_task():
+    from webserver.ai_service import generate_title
+    from workflows.plain_openai_tasks import plain_openai_task, openai_json_schema_task
+    from workflows.probra import probra_task
+    task_data = request.get_json()
+    message = task_data.get("message", "")
+    title = generate_title(message)
+    user_id = flask_login.current_user.user_id
+    workflow_id = int(task_data.get("workflow", 1))
+    environment_id = task_data.get("environment_id")
+    sid = task_data.get("sid")
+    task = Task.create_task(
+        title=title,
+        user_id=user_id,
+        workflow_id=workflow_id,
+        environment_id=environment_id,
+        session_id=sid,
+    )
+    Task.add_message(task.task_id, flask_login.current_user.user_id, "user", message)
+    if workflow_id == 1:
+        celery_task = probra_task.delay({
+            "payload": message,
+            "sid": sid,
+            "task_id": task.task_id,
+            "user_id": str(user_id),
+        })
+    elif workflow_id == 2:
+        celery_task = plain_openai_task.delay({
+            "payload": message,
+            "sid": sid,
+            "task_id": task.task_id,
+            "user_id": str(user_id),
+        })
+    elif workflow_id == 3:
+        celery_task = openai_json_schema_task.delay({
+            "payload": message,
+            "sid": sid,
+            "task_id": task.task_id,
+            "user_id": str(user_id),
+        })
+    else:
+        celery_task = probra_task.delay({
+            "payload": message,
+            "sid": sid,
+            "task_id": task.task_id,
+            "user_id": str(user_id),
+        })
+    Task.update_celery_task_id(task.task_id, celery_task.id)
+    return jsonify({"task_id": task.task_id, "celery_id": celery_task.id})
+
+@csrf.exempt
+@task_bp.route('/<task_id>', methods=['GET'])
+@flask_login.login_required
+def get_task(task_id):
+    try:
+        if not is_valid_uuid(task_id):
+            return jsonify({"error": "Invalid task ID"}), 400
+        task = Task.get_task(task_id)
+        if not task or task.user_id != flask_login.current_user.user_id:
+            return jsonify({"error": "Task not found"}), 404
+        return jsonify(task.to_dict())
+    except Exception as e:
+        logging.error(f"/api/tasks/{task_id} error: {e}", exc_info=True)
+        return jsonify({"error": "Internal server error"}), 500
+
+@csrf.exempt
+@task_bp.route('/<task_id>/archive', methods=['POST'])
+@flask_login.login_required
+def archive_task(task_id):
+    if not is_valid_uuid(task_id):
+        return jsonify({"success": False, "error": "Invalid task ID"}), 400
+    user_id = flask_login.current_user.user_id
+    from webserver import datastore as ds
+    ds.execute("UPDATE tasks SET archived = TRUE WHERE task_id = %s AND user_id = %s", (task_id, user_id))
+    return jsonify({"success": True})
+
+@csrf.exempt
+@task_bp.route('/<task_id>/unarchive', methods=['POST'])
+@flask_login.login_required
+def unarchive_task(task_id):
+    if not is_valid_uuid(task_id):
+        return jsonify({"success": False, "error": "Invalid task ID"}), 400
+    user_id = flask_login.current_user.user_id
+    from webserver import datastore as ds
+    ds.execute("UPDATE tasks SET archived = FALSE WHERE task_id = %s AND user_id = %s", (task_id, user_id))
+    return jsonify({"success": True}) 
