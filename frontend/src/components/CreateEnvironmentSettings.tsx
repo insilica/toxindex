@@ -13,7 +13,7 @@ interface CreateEnvironmentSettingsProps {
 const CreateEnvironmentSettings: React.FC<CreateEnvironmentSettingsProps> = ({ refetchEnvironments }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [users, setUsers] = useState<User[]>([]);
+  const [, setUsers] = useState<User[]>([]);
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -105,10 +105,10 @@ const CreateEnvironmentSettings: React.FC<CreateEnvironmentSettingsProps> = ({ r
     }
   };
 
-  const handleUserSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const options = Array.from(e.target.selectedOptions, option => option.value);
-    setSelectedUsers(options);
-  };
+  // const handleUserSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  //   const options = Array.from(e.target.selectedOptions, option => option.value);
+  //   setSelectedUsers(options);
+  // };
 
   return (
     <div className="flex flex-col items-center min-h-screen min-w-full w-full h-screen pt-52" 
