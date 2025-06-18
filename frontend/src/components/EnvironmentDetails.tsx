@@ -22,9 +22,9 @@ export const EnvironmentDetails: React.FC = () => {
   const [, setEnvironments] = useState<EnvDetails[]>([]);
   const [, setFiles] = useState<FileMeta[]>([]);
   const [loading, setLoading] = useState(true);
-  const [, setDeleting] = useState(false);
-  const [, setDeleteError] = useState<string | null>(null);
-  const navigate = useNavigate();
+  // const [, setDeleting] = useState(false);
+  // const [, setDeleteError] = useState<string | null>(null);
+  // const navigate = useNavigate();
   const [previewFileId, ] = useState<number | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [, setTasks] = useState<any[]>([]);
