@@ -1,7 +1,7 @@
 from webserver.model.user import User
-import flask_login
+from flask_login import LoginManager
 
-login_manager = flask_login.LoginManager()
+login_manager = LoginManager()
 
 @login_manager.user_loader
 def load_user(user_id):

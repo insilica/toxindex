@@ -11,6 +11,7 @@ const LoginForm: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [typed, setTyped] = useState('');
   const [typing, setTyping] = useState(true);
+  const [errorAnim, setErrorAnim] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -33,7 +34,7 @@ const LoginForm: React.FC = () => {
     setError(null);
     setLoading(true);
     try {
-      const res = await fetch('/api/login', {
+      const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({ email, password }).toString(),
@@ -42,10 +43,21 @@ const LoginForm: React.FC = () => {
       if (res.ok) {
         navigate('/');
       } else {
-        setError('Invalid email or password.');
+        const data = await res.json();
+        setError(data.error || 'Invalid email or password.');
+        setErrorAnim(true);
+        setTimeout(() => {
+          setErrorAnim(false);
+          setError(null);
+        }, 3000);
       }
     } catch (err) {
       setError('Login failed.');
+      setErrorAnim(true);
+      setTimeout(() => {
+        setErrorAnim(false);
+        setError(null);
+      }, 3000);
     } finally {
       setLoading(false);
     }
@@ -79,15 +91,47 @@ const LoginForm: React.FC = () => {
           0%, 100% { opacity: 1; }
           50% { opacity: 0; }
         }
+        @keyframes shake {
+          0% { transform: translateX(0); }
+          15% { transform: translateX(-8px); }
+          30% { transform: translateX(8px); }
+          45% { transform: translateX(-6px); }
+          60% { transform: translateX(6px); }
+          75% { transform: translateX(-4px); }
+          90% { transform: translateX(4px); }
+          100% { transform: translateX(0); }
+        }
+        .shake-glow {
+          animation: shake 0.6s cubic-bezier(0.4,0,0.2,1);
+          box-shadow: 0 0 24px 6px #fde047, 0 8px 32px 0 rgba(34,197,94,0.15), 0 1.5px 8px 0 rgba(0,0,0,0.10) !important;
+        }
+        .lock-error {
+          color: #f87171 !important;
+          filter: drop-shadow(0 0 8px #f87171);
+          transition: color 0.2s, filter 0.2s;
+        }
+        .login-error-shake {
+          animation: shake 0.6s cubic-bezier(0.4,0,0.2,1) 0s 5;
+          background: linear-gradient(90deg, #f87171 0%, #dc2626 100%) !important;
+          color: #fff !important;
+        }
+        .enlarge-on-error {
+          transform: scale(1.35);
+          transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+        }
       `}</style>
       <div
-        className="bg-gray-950 rounded-2xl shadow-2xl p-10 w-full max-w-md flex flex-col items-center"
+        className={`bg-gray-950 rounded-2xl shadow-2xl p-10 w-full max-w-md flex flex-col items-center${errorAnim ? ' shake-glow' : ''}`}
         style={{
           animation: 'fadeInScale 0.7s cubic-bezier(0.4,0,0.2,1) both',
-          boxShadow: '0 8px 32px 0 rgba(34,197,94,0.15), 0 1.5px 8px 0 rgba(0,0,0,0.10)'
+          boxShadow: errorAnim
+            ? '0 0 24px 6px #fde047, 0 8px 32px 0 rgba(34,197,94,0.15), 0 1.5px 8px 0 rgba(0,0,0,0.10)'
+            : '0 8px 32px 0 rgba(34,197,94,0.15), 0 1.5px 8px 0 rgba(0,0,0,0.10)'
         }}
       >
-        <FaLock className="text-green-400 text-5xl mb-4 drop-shadow-lg animate-bounce-slow" />
+        <FaLock
+          className={`text-5xl mb-4 drop-shadow-lg animate-bounce-slow${errorAnim ? ' lock-error' : ' text-green-400'}`}
+        />
         <h2 className="text-3xl font-extrabold mb-2 text-white tracking-tight" style={{ minHeight: 44 }}>
           {typed}
           {typing && <span className="typewriter-cursor">|</span>}
@@ -113,22 +157,39 @@ const LoginForm: React.FC = () => {
             disabled={loading}
             placeholder="Your password"
           />
-          {error && <div className="text-red-400 mb-2 text-center animate-fade-in">{error}</div>}
+          {/* Error message placeholder to prevent layout shift */}
+          <div style={{ minHeight: 24, marginBottom: 8, textAlign: 'center' }}>
+            {error ? (
+              <span className="text-red-400 animate-fade-in">{error}</span>
+            ) : (
+              <span style={{ visibility: 'hidden' }}>placeholder</span>
+            )}
+          </div>
           <button
             type="submit"
-            className="w-full bg-gradient-to-r from-green-500 to-green-700 text-white py-3 rounded-lg font-bold shadow-lg hover:from-green-600 hover:to-green-800 transition disabled:opacity-50"
+            className={`w-full bg-gradient-to-r from-green-500 to-green-700 text-white py-3 rounded-lg font-bold shadow-lg hover:from-green-600 hover:to-green-800 transition disabled:opacity-50${errorAnim ? ' login-error-shake' : ''}`}
             disabled={loading}
           >
             {loading ? 'Logging in...' : 'Login'}
           </button>
         </form>
         <div className="flex flex-row justify-between w-full mt-6">
-          <Link to="/register" className="text-green-400 hover:underline text-sm">Create Account</Link>
-          <Link to="/forgot_password" className="text-green-400 hover:underline text-sm">Forgot Password?</Link>
+          <Link
+            to="/register"
+            className={`text-green-400 hover:underline text-sm font-semibold px-4 py-2 rounded-lg transition hover:bg-green-900/30${errorAnim ? ' enlarge-on-error' : ''}`}
+          >
+            Create Account
+          </Link>
+          <Link
+            to="/forgot_password"
+            className={`text-green-400 hover:underline text-sm font-semibold px-4 py-2 rounded-lg transition hover:bg-green-900/30${errorAnim ? ' enlarge-on-error' : ''}`}
+          >
+            Forgot Password?
+          </Link>
         </div>
       </div>
     </div>
   );
 };
 
-export default LoginForm; 
+export default LoginForm;
