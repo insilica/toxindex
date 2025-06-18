@@ -53,27 +53,27 @@ export const EnvironmentDetails: React.FC = () => {
       .then(data => setTasks((data.active_tasks || []).concat(data.archived_tasks || [])));
   }, [env_id]);
 
-  const handleDelete = async () => {
-    if (!window.confirm('Are you sure you want to delete this environment? This cannot be undone.')) return;
-    setDeleting(true);
-    setDeleteError(null);
-    try {
-      const res = await fetch(`/api/environments/${env_id}`, {
-        method: 'DELETE',
-        credentials: 'include',
-      });
-      const data = await res.json();
-      if (data.success) {
-        navigate('/settings/environments');
-      } else {
-        setDeleteError('Failed to delete environment.');
-      }
-    } catch {
-      setDeleteError('Failed to delete environment.');
-    } finally {
-      setDeleting(false);
-    }
-  };
+  // const handleDelete = async () => {
+  //   if (!window.confirm('Are you sure you want to delete this environment? This cannot be undone.')) return;
+  //   setDeleting(true);
+  //   setDeleteError(null);
+  //   try {
+  //     const res = await fetch(`/api/environments/${env_id}`, {
+  //       method: 'DELETE',
+  //       credentials: 'include',
+  //     });
+  //     const data = await res.json();
+  //     if (data.success) {
+  //       navigate('/settings/environments');
+  //     } else {
+  //       setDeleteError('Failed to delete environment.');
+  //     }
+  //   } catch {
+  //     setDeleteError('Failed to delete environment.');
+  //   } finally {
+  //     setDeleting(false);
+  //   }
+  // };
 
   // const handleFileDelete = async (file_id: number) => {
   //   if (!window.confirm('Are you sure you want to delete this file?')) return;
