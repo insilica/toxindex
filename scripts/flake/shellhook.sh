@@ -28,10 +28,22 @@ source scripts/load_environment.sh "$AWS_PROFILE" "insilica/toxindex+dev-secret"
 eval "$OLD_OPTS"
 
 export FLASK_APP=webserver.app
-export FLASK_ENV=development
-export DEBUG=1
+# export FLASK_ENV=development
+# export FLASK_DEBUG=1
+export FLASK_ENV=production
+export FLASK_DEBUG=0
 export PREFERRED_URL_SCHEME=http
-export SERVER_NAME=localhost:6513
+
+# export SERVER_NAME=localhost:6513
+export SERVER_NAME=18.118.10.140
 source .env
+
 export FRONTEND_URL=http://18.118.10.140
+
+# Redis (Redis is running on the same EC2 instance as the webserver)
+export CELERY_BROKER_URL=redis://localhost:6379/0
+export CELERY_RESULT_BACKEND=redis://localhost:6379/0
+export SOCKETIO_MESSAGE_QUEUE=redis://localhost:6379/0
+
+# Python
 export PYTHONPATH="${PYTHONPATH:+${PYTHONPATH}:}${PWD}"

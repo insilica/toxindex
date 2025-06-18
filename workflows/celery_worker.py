@@ -14,8 +14,12 @@ os.makedirs(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'logs'
 log_filename = os.path.abspath(os.path.join(
     os.path.dirname(__file__), '..', 'logs', f'app_{datetime.now().strftime("%Y-%m-%d_%H")}.log'))
 
+# Remove print statements and use env vars for Redis URLs
+broker_url = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379/0")
+result_backend = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
+
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=logging.INFO,  # Set to INFO for production
     format='%(asctime)s - %(name)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s',
     handlers=[
         logging.FileHandler(log_filename),
@@ -28,8 +32,8 @@ from . import celery_config
 
 celery = Celery(
     'workflows',
-    broker='redis://localhost:6379/0',
-    backend='redis://localhost:6379/0',
+    broker=broker_url,
+    backend=result_backend,
 )
 celery.config_from_object(celery_config)
 

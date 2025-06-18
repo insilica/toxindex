@@ -56,7 +56,7 @@ cd frontend && npm install
 - **Production:**
 
   - connect to ssh
-    `ssh kyu-ubuntu`
+    `ssh kyu-ubuntu30`
 
 
 
