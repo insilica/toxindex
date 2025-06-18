@@ -74,4 +74,12 @@ class ChatSession:
             query += " AND user_id = %s"
             params = (session_id, user_id)
         ds.execute(query, params)
-        logging.info(f"Deleted chat session {session_id} for user {user_id}") 
+        logging.info(f"Deleted chat session {session_id} for user {user_id}")
+
+    @staticmethod
+    def get_sessions_by_user(user_id):
+        rows = ds.find_all(
+            "SELECT * FROM chat_sessions WHERE user_id = %s ORDER BY created_at DESC",
+            (user_id,)
+        )
+        return [ChatSession.from_row(row) for row in rows] 

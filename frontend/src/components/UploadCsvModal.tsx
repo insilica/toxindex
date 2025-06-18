@@ -39,7 +39,7 @@ const UploadCsvModal: React.FC<UploadCsvModalProps> = ({ open, onClose, environm
     formData.append('file', uploadFile);
     formData.append('environment_id', uploadEnvId);
     try {
-      const res = await fetch('/api/upload-file', {
+      const res = await fetch(`/api/environments/${uploadEnvId}/files`, {
         method: 'POST',
         credentials: 'include',
         cache: 'no-store',

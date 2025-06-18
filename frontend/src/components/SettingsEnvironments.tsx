@@ -20,7 +20,7 @@ const SettingsEnvironments: React.FC<SettingsEnvironmentsProps> = ({ environment
   const navigate = useNavigate();
 
   const handleDelete = (envId: string) => {
-    fetch(`/api/environment/${envId}`, {
+    fetch(`/api/environments/${envId}`, {
       method: 'DELETE',
       credentials: 'include',
     })

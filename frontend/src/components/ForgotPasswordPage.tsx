@@ -32,16 +32,28 @@ const ForgotPasswordPage: React.FC = () => {
     setError(null);
     setLoading(true);
     try {
-      const res = await fetch('/api/forgot_password', {
+      const res = await fetch('/api/auth/forgot_password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
       });
-      const data = await res.json();
-      if (data.success) {
-        setSuccess(true);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          setSuccess(true);
+        } else {
+          setError(data.error || 'Failed to send reset email.');
+        }
       } else {
-        setError(data.error || 'Failed to send reset email.');
+        let errorMsg = 'Failed to send reset email.';
+        try {
+          const data = await res.json();
+          errorMsg = data.error || errorMsg;
+        } catch {
+          const text = await res.text();
+          if (text) errorMsg = text;
+        }
+        setError(errorMsg);
       }
     } catch (err) {
       setError('Failed to send reset email.');

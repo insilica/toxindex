@@ -74,6 +74,42 @@ echo '/swapfile swap swap defaults 0 0' | sudo tee -a /etc/fstab
   - start React
     `cd toxindex && nix develop && cd frontend && npm install &&  && npm run build`
 
+sudo apt update
+sudo apt install nginx
+
+sudo nano /etc/nginx/conf.d/toxindex.conf
+
+server {
+    listen 80;
+    server_name yourdomain.com;  # or your EC2 public IP
+
+    root /home/kyu/Documents/toxindex/frontend/dist;
+    index index.html;
+
+    location / {
+        try_files $uri /index.html;
+    }
+
+    location /api/ {
+        proxy_pass http://127.0.0.1:8000/api/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+sudo nginx -t
+sudo systemctl reload nginx
+
+sudo chown -R ubuntu:www-data /home/ubuntu/toxindex/frontend/dist
+sudo chmod -R 755 /home/ubuntu/toxindex/frontend/dist
+sudo chmod -R o+rx /home/ubuntu/toxindex/frontend/dist
+sudo chmod o+x /home/ubuntu
+sudo systemctl reload nginx
+
+sudo tail -n 50 /var/log/nginx/error.log
+
   - Start webserver:  
     `gunicorn webserver.app:app --bind 0.0.0.0:8000 --worker-class eventlet`
   - Start Redis listener:  

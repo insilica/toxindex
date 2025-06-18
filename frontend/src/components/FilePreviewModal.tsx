@@ -5,21 +5,22 @@ Modal.setAppElement('#root'); // Adjust if your app root is different
 
 interface FilePreviewModalProps {
   fileId: number | null;
+  envId: string;
   isOpen: boolean;
   onRequestClose: () => void;
 }
 
-const FilePreviewModal: React.FC<FilePreviewModalProps> = ({ fileId, isOpen, onRequestClose }) => {
+const FilePreviewModal: React.FC<FilePreviewModalProps> = ({ fileId, envId, isOpen, onRequestClose }) => {
   const [fileData, setFileData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const tableScrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (isOpen && fileId) {
+    if (isOpen && fileId && envId) {
       setLoading(true);
       setError('');
-      fetch(`/api/file/${fileId}/inspect`, { credentials: 'include' })
+      fetch(`/api/environments/${envId}/files/${fileId}/inspect`, { credentials: 'include' })
         .then(res => res.json())
         .then(data => {
           setFileData(data);
@@ -33,7 +34,7 @@ const FilePreviewModal: React.FC<FilePreviewModalProps> = ({ fileId, isOpen, onR
       setFileData(null);
       setError('');
     }
-  }, [isOpen, fileId]);
+  }, [isOpen, fileId, envId]);
 
   const renderPreview = () => {
     if (!fileData) return null;

@@ -1,27 +1,39 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 
 const VerifyPage: React.FC = () => {
+  const { token } = useParams<{ token: string }>();
+  const [status, setStatus] = useState<'pending' | 'success' | 'error'>('pending');
+  const [message, setMessage] = useState('');
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!token) return;
+    fetch(`/api/auth/verification/${token}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setStatus('success');
+          setMessage(data.message || 'Your account has been activated!');
+          setTimeout(() => navigate('/login'), 3000);
+        } else {
+          setStatus('error');
+          setMessage(data.error || 'Verification failed.');
+        }
+      })
+      .catch(() => {
+        setStatus('error');
+        setMessage('Verification failed.');
+      });
+  }, [token, navigate]);
+
   return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #101614 0%, #1a2a1a 60%, #1a2320 100%)' }}>
-      <div className="max-w-md w-full p-8 bg-white rounded-2xl shadow-2xl flex flex-col items-center" style={{ boxShadow: '0 8px 32px 0 rgba(34,197,94,0.10)' }}>
-        <div className="flex items-center mb-4">
-          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
-            <circle cx="12" cy="12" r="10" />
-            <path d="M9 12l2 2l4-4" />
-          </svg>
-          <h2 className="text-2xl font-bold text-gray-900">Verify Your Email</h2>
-        </div>
-        <p className="text-gray-700 text-center mb-6">
-          Please check your email and click the verification link to activate your account.
-        </p>
-        <button
-          onClick={() => navigate('/login')}
-          className="mt-2 px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-full font-semibold shadow transition"
-        >
-          Go to Login
-        </button>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-900 via-gray-900 to-black">
+      <div className="bg-gray-950 rounded-2xl shadow-2xl p-10 w-full max-w-md flex flex-col items-center">
+        <h2 className="text-3xl font-extrabold mb-4 text-white tracking-tight">Account Verification</h2>
+        {status === 'pending' && <div className="text-gray-300">Verifying your account...</div>}
+        {status === 'success' && <div className="text-green-400 font-bold text-lg mb-2">{message} Redirecting to login...</div>}
+        {status === 'error' && <div className="text-red-400 font-bold text-lg mb-2">{message}</div>}
       </div>
     </div>
   );

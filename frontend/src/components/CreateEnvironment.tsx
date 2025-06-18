@@ -14,7 +14,7 @@ const CreateEnvironment: React.FC = () => {
     e.preventDefault();
     setError(null);
 
-    const res = await fetch("/api/environment/new", {
+    const res = await fetch("/api/environments", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -101,7 +101,7 @@ export const EnvironmentDetails: React.FC<{ refreshEnvFiles?: () => void }> = ({
         const found = (data.environments || []).find((e: any) => e.environment_id == env_id);
         setEnv(found || null);
       });
-    fetch(`/api/environment/${env_id}/files`, { credentials: 'include' })
+    fetch(`/api/environments/${env_id}/files`, { credentials: 'include' })
       .then(res => res.json())
       .then(data => setFiles(data.files || []))
       .finally(() => setLoading(false));
@@ -140,7 +140,7 @@ export const EnvironmentDetails: React.FC<{ refreshEnvFiles?: () => void }> = ({
     if (!window.confirm('Are you sure you want to delete this file?')) return;
     setFileDeleteError(null);
     try {
-      const res = await fetch(`/api/file/${file_id}`, {
+      const res = await fetch(`/api/environments/${env_id}/files/${file_id}`, {
         method: 'DELETE',
         credentials: 'include',
       });
@@ -329,7 +329,7 @@ export const EnvironmentDetails: React.FC<{ refreshEnvFiles?: () => void }> = ({
                   <FaEye />
                 </button>
                 <a
-                  href={`/api/file/${file.file_id}/download`}
+                  href={`/api/environments/${env_id}/files/${file.file_id}/download`}
                   className="bg-purple-700 hover:bg-purple-600 active:bg-purple-800 text-white transition flex items-center justify-center"
                   style={{ width: 36, height: 36, borderRadius: '50%', fontSize: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, border: 'none' }}
                   target="_blank"
@@ -372,6 +372,7 @@ export const EnvironmentDetails: React.FC<{ refreshEnvFiles?: () => void }> = ({
       )}
       <FilePreviewModal
         fileId={previewFileId}
+        envId={env_id || ''}
         isOpen={previewOpen}
         onRequestClose={() => setPreviewOpen(false)}
       />
@@ -383,7 +384,7 @@ export const EnvironmentDetails: React.FC<{ refreshEnvFiles?: () => void }> = ({
         onUploadSuccess={() => {
           setShowUploadModal(false);
           // Refresh file list after upload
-          fetch(`/api/environment/${env_id}/files`, { credentials: 'include' })
+          fetch(`/api/environments/${env_id}/files`, { credentials: 'include' })
             .then(res => res.json())
             .then(data => setFiles(data.files || []));
           if (refreshEnvFiles) refreshEnvFiles();

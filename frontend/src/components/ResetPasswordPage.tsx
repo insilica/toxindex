@@ -15,17 +15,29 @@ const ResetPasswordPage: React.FC = () => {
     setError(null);
     setLoading(true);
     try {
-      const res = await fetch(`/api/reset_password/${token}`, {
+      const res = await fetch(`/api/auth/reset_password/${token}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password }),
       });
-      const data = await res.json();
-      if (data.success) {
-        setSuccess(true);
-        setTimeout(() => navigate('/login'), 2000);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          setSuccess(true);
+          setTimeout(() => navigate('/login'), 2000);
+        } else {
+          setError(data.error || 'Failed to reset password.');
+        }
       } else {
-        setError(data.error || 'Failed to reset password.');
+        let errorMsg = 'Failed to reset password.';
+        try {
+          const data = await res.json();
+          errorMsg = data.error || errorMsg;
+        } catch {
+          const text = await res.text();
+          if (text) errorMsg = text;
+        }
+        setError(errorMsg);
       }
     } catch (err) {
       setError('Failed to reset password.');

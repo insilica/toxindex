@@ -54,7 +54,7 @@ CREATE TABLE tasks (
     environment_id UUID REFERENCES environments(environment_id),
     archived BOOLEAN DEFAULT FALSE,
     last_accessed TIMESTAMP,
-    session_id UUID REFERENCES chat_sessions(session_id)
+    session_id UUID REFERENCES chat_sessions(session_id) ON DELETE CASCADE
 );
 
 CREATE TABLE files (

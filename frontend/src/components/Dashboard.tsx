@@ -27,6 +27,8 @@ interface DashboardProps {
   loadingEnvironments: boolean;
 }
 
+const TYPEWRITER_TEXT = "Is it toxic, or just misunderstood? Let's break it down!";
+
 const Dashboard: React.FC<DashboardProps> = ({ selectedModel, selectedEnv, setSelectedEnv, environments, refetchChatSessions, loadingEnvironments }) => {
   const [chatInput, setChatInput] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -45,6 +47,10 @@ const Dashboard: React.FC<DashboardProps> = ({ selectedModel, selectedEnv, setSe
   const [selectWidth, setSelectWidth] = useState(120); // default min width
   const selectRef = useRef<HTMLSelectElement>(null);
   const spanRef = useRef<HTMLSpanElement>(null);
+  const [typedHeading, setTypedHeading] = useState("");
+  const [typingHeading, setTypingHeading] = useState(true);
+  const typewriterTimeoutRef = useRef<number | null>(null);
+  const typewriterIntervalRef = useRef<number | null>(null);
 
   useEffect(() => {
     setTasksLoading(true);
@@ -83,6 +89,33 @@ const Dashboard: React.FC<DashboardProps> = ({ selectedModel, selectedEnv, setSe
       localStorage.setItem('selectedEnv', selectedEnv);
     }
   }, [selectedEnv]);
+
+  useEffect(() => {
+    function startTypewriter() {
+      let i = 0;
+      setTypedHeading("");
+      setTypingHeading(true);
+      if (typewriterIntervalRef.current) clearInterval(typewriterIntervalRef.current);
+      if (typewriterTimeoutRef.current) clearTimeout(typewriterTimeoutRef.current);
+      typewriterIntervalRef.current = setInterval(() => {
+        setTypedHeading(TYPEWRITER_TEXT.slice(0, i + 1));
+        i++;
+        if (i === TYPEWRITER_TEXT.length) {
+          if (typewriterIntervalRef.current) clearInterval(typewriterIntervalRef.current);
+          setTypingHeading(false);
+          // Restart after 5 seconds
+          typewriterTimeoutRef.current = setTimeout(() => {
+            startTypewriter();
+          }, 5000);
+        }
+      }, 80);
+    }
+    startTypewriter();
+    return () => {
+      if (typewriterIntervalRef.current) clearInterval(typewriterIntervalRef.current);
+      if (typewriterTimeoutRef.current) clearTimeout(typewriterTimeoutRef.current);
+    };
+  }, []);
 
   const handleDropdownChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     if (e.target.value === "__manage__") {
@@ -214,7 +247,16 @@ const Dashboard: React.FC<DashboardProps> = ({ selectedModel, selectedEnv, setSe
   return (
     <div className="min-h-screen flex flex-col flex-1" style={{ background: 'linear-gradient(135deg, #101614 0%, #1a2a1a 60%, #1a2320 100%)', position: 'relative' }}>
       <div className="w-full flex justify-center pt-24 pb-4">
-        <h2 className="text-2xl font-normal text-white text-center" style={{ fontFamily: 'inherit' }}>Is it toxic, or just misunderstood? Let's break it down!</h2>
+        <h2 className="text-3xl font-normal text-white text-center" style={{ fontFamily: 'inherit', minHeight: 60, letterSpacing: '-0.01em' }}>
+          {typedHeading}
+          {typingHeading && <span style={{ color: '#6ee7b7', fontWeight: 'bold', marginLeft: 2, animation: 'blink 1s steps(1) infinite' }}>|</span>}
+        </h2>
+        <style>{`
+          @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+          }
+        `}</style>
       </div>
       <div className="w-full max-w-2xl mx-auto mt-8">
         <div className="flex space-x-2 mb-4 border-b border-gray-700">
