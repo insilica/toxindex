@@ -30,7 +30,6 @@ from webserver.controller.auth import auth_bp
 from webserver.csrf import csrf
 from webserver.socketio import socketio
 
-print("RUNNING WEBSERVER/APP.PY")
 dotenv.load_dotenv()
 
 # FLASK APP ===================================================================
@@ -278,4 +277,4 @@ if __name__ == "__main__":
             daemon=True,
             name=thread_name,
         ).start()
-    socketio.run(app, host="0.0.0.0", port=6513, debug=True, use_reloader=True) # set to true if you want to reload while editing code.
+    socketio.run(app, host="0.0.0.0", port=6513, debug=False, use_reloader=False) # Always debug=False in prod
