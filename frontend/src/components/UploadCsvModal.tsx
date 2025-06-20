@@ -1,4 +1,5 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
+import { FaTimes } from 'react-icons/fa';
 
 interface Environment {
   environment_id: string;
@@ -8,121 +9,145 @@ interface Environment {
 interface UploadCsvModalProps {
   open: boolean;
   onClose: () => void;
-  environments: Environment[];
+  environments?: Environment[];
   defaultEnvId?: string;
   onUploadSuccess?: () => void;
-  refreshEnvFiles?: () => void;
+  refreshEnvFiles?: (envId: string) => Promise<void>;
 }
 
-const UploadCsvModal: React.FC<UploadCsvModalProps> = ({ open, onClose, environments, defaultEnvId, onUploadSuccess, refreshEnvFiles }) => {
-  const [uploadEnvId, setUploadEnvId] = useState<string>(defaultEnvId || (environments[0]?.environment_id ?? ''));
-  const [uploadFile, setUploadFile] = useState<File | null>(null);
-  const [uploadError, setUploadError] = useState<string | null>(null);
+const UploadCsvModal: React.FC<UploadCsvModalProps> = ({
+  open,
+  onClose,
+  environments = [],
+  defaultEnvId,
+  onUploadSuccess,
+  refreshEnvFiles
+}) => {
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedEnv, setSelectedEnv] = useState(defaultEnvId || '');
   const [uploading, setUploading] = useState(false);
-  const [dragActive, setDragActive] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  React.useEffect(() => {
-    setUploadEnvId(defaultEnvId || (environments[0]?.environment_id ?? ''));
-  }, [defaultEnvId, environments]);
+  const [error, setError] = useState<string | null>(null);
 
   if (!open) return null;
 
-  const handleUploadConfirm = async () => {
-    if (!uploadFile) {
-      setUploadError('Please select a file.');
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.name.toLowerCase().endsWith('.csv')) {
+        setError('Please select a CSV file');
+        return;
+      }
+      setSelectedFile(file);
+      setError(null);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedFile || !selectedEnv) {
+      setError('Please select both a file and an environment');
       return;
     }
+
     setUploading(true);
-    setUploadError(null);
+    setError(null);
+
     const formData = new FormData();
-    formData.append('file', uploadFile);
-    formData.append('environment_id', uploadEnvId);
+    formData.append('file', selectedFile);
+
     try {
-      const res = await fetch(`/api/environments/${uploadEnvId}/files`, {
+      const response = await fetch(`/api/environments/${selectedEnv}/files`, {
         method: 'POST',
         credentials: 'include',
-        cache: 'no-store',
         body: formData,
       });
-      if (!res.ok) throw new Error('Upload failed');
-      setUploadFile(null);
-      setUploadError(null);
-      if (onUploadSuccess) onUploadSuccess();
-      if (refreshEnvFiles) refreshEnvFiles();
-      onClose();
+
+      const data = await response.json();
+
+      if (data.success) {
+        if (onUploadSuccess) {
+          onUploadSuccess();
+        }
+        if (refreshEnvFiles) {
+          await refreshEnvFiles(selectedEnv);
+        }
+        onClose();
+      } else {
+        setError(data.error || 'Failed to upload file');
+      }
     } catch (err) {
-      setUploadError('Failed to upload file.');
+      setError('Failed to upload file');
     } finally {
       setUploading(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
-      <div className="bg-gray-900 rounded-lg p-6 w-full max-w-md relative">
-        <button
-          className="absolute top-2 right-2 text-gray-400 hover:text-white"
-          onClick={onClose}
-          disabled={uploading}
-        >
-          ×
-        </button>
-        <h2 className="text-lg font-bold text-white mb-4">Upload CSV File</h2>
-        <label className="block text-white mb-2">Select Environment</label>
-        <select
-          className="w-full p-2 rounded border mb-4 text-white bg-gray-800"
-          value={uploadEnvId}
-          onChange={e => setUploadEnvId(e.target.value)}
-          disabled={uploading}
-        >
-          {(environments ?? []).map(env => (
-            <option key={env.environment_id} value={env.environment_id}>{env.title}</option>
-          ))}
-        </select>
-        {/* Drag and drop zone */}
-        <div
-          onDragOver={e => { e.preventDefault(); setDragActive(true); }}
-          onDragLeave={e => { e.preventDefault(); setDragActive(false); }}
-          onDrop={e => {
-            e.preventDefault();
-            setDragActive(false);
-            if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-              const file = e.dataTransfer.files[0];
-              if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
-                setUploadFile(file);
-                setUploadError(null);
-              } else {
-                setUploadError('Please drop a valid CSV file.');
-              }
-            }
-          }}
-          onClick={() => fileInputRef.current?.click()}
-          className={`w-full mb-4 p-4 border-2 rounded-lg transition-colors duration-200 ${dragActive ? 'border-green-400 bg-green-900/20' : 'border-dashed border-gray-600 bg-gray-800/40'}`}
-          style={{ textAlign: 'center', color: dragActive ? '#22c55e' : '#fff', cursor: 'pointer' }}
-        >
-          {uploadFile ? (
-            <span>Selected file: <span className="font-semibold text-green-400">{uploadFile.name}</span></span>
-          ) : (
-            <span>Drag and drop your CSV file here, or <span className="underline">click to browse</span>.</span>
-          )}
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-gray-900 rounded-lg p-6 max-w-md w-full mx-4">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold text-white">Upload CSV File</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-white transition-colors"
+          >
+            <FaTimes />
+          </button>
         </div>
-        <input
-          type="file"
-          accept=".csv"
-          style={{ display: 'none' }}
-          ref={fileInputRef}
-          onChange={e => setUploadFile(e.target.files?.[0] || null)}
-          disabled={uploading}
-        />
-        {uploadError && <div className="text-red-500 mb-2">{uploadError}</div>}
-        <button
-          className="w-full bg-green-700 text-white py-2 rounded hover:bg-green-800 disabled:opacity-50"
-          onClick={handleUploadConfirm}
-          disabled={uploading}
-        >
-          {uploading ? 'Uploading...' : 'Upload'}
-        </button>
+
+        <form onSubmit={handleSubmit}>
+          <div className="mb-4">
+            <label className="block text-gray-300 mb-2">Environment</label>
+            <select
+              value={selectedEnv}
+              onChange={(e) => setSelectedEnv(e.target.value)}
+              className="w-full bg-gray-800 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+              required
+            >
+              <option value="">Select an environment</option>
+              {environments.map((env) => (
+                <option key={env.environment_id} value={env.environment_id}>
+                  {env.title}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-gray-300 mb-2">CSV File</label>
+            <input
+              type="file"
+              accept=".csv"
+              onChange={handleFileChange}
+              className="w-full bg-gray-800 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+              required
+            />
+          </div>
+
+          {error && (
+            <div className="mb-4 text-red-500">{error}</div>
+          )}
+
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={onClose}
+              className="mr-2 px-4 py-2 text-gray-300 hover:text-white transition-colors"
+              disabled={uploading}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className={`px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors ${
+                uploading ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+              disabled={uploading}
+            >
+              {uploading ? 'Uploading...' : 'Upload'}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
