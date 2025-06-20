@@ -9,12 +9,13 @@ import logging
 
 class User(flask_login.UserMixin):
   
-  def __init__(self, user_id, email, token, hashpw, stripe_customer_id):
+  def __init__(self, user_id, email, token, hashpw, stripe_customer_id, email_verified=False):
     self.user_id = user_id
     self.email = email
     self.token = token
     self.hashpw = hashpw
     self.stripe_customer_id = stripe_customer_id
+    self.email_verified = email_verified
     self.name = email.split('@')[0] if '@' in email else email
 
   def is_authenticated(self):
@@ -40,7 +41,14 @@ class User(flask_login.UserMixin):
 
   @staticmethod
   def from_row(row):
-    return User(row['user_id'], row['email'], row['token'], row['hashpw'], row['stripe_customer_id'])
+    return User(
+      row['user_id'], 
+      row['email'], 
+      row['token'], 
+      row['hashpw'], 
+      row['stripe_customer_id'],
+      row.get('email_verified', False)  # Get email_verified with default False
+    )
 
   @staticmethod
   def get(user_id):

@@ -14,7 +14,6 @@ interface Task {
   environment_id: string;
   created_at?: string;
   session_id?: string;
-  // Add other fields as needed
 }
 
 interface DashboardProps {
@@ -29,7 +28,7 @@ interface DashboardProps {
 
 const TYPEWRITER_TEXT = "Is it toxic, or just misunderstood? Let's break it down!";
 
-const Dashboard: React.FC<DashboardProps> = ({ selectedModel, selectedEnv, setSelectedEnv, environments, refetchChatSessions, loadingEnvironments }) => {
+const Dashboard: React.FC<DashboardProps> = ({ selectedModel, selectedEnv, setSelectedEnv, environments, refetchChatSessions, refetchEnvironments, loadingEnvironments }) => {
   const [chatInput, setChatInput] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [tasksLoading, setTasksLoading] = useState(false);
@@ -52,6 +51,11 @@ const Dashboard: React.FC<DashboardProps> = ({ selectedModel, selectedEnv, setSe
   const typewriterTimeoutRef = useRef<number | null>(null);
   const typewriterIntervalRef = useRef<number | null>(null);
 
+  // Fetch environments when component mounts
+  useEffect(() => {
+    refetchEnvironments();
+  }, [refetchEnvironments]);
+
   useEffect(() => {
     setTasksLoading(true);
     let url = "/api/tasks";
@@ -73,20 +77,42 @@ const Dashboard: React.FC<DashboardProps> = ({ selectedModel, selectedEnv, setSe
     }
   }, [selectedEnv, environments]);
 
-  // Auto-select first environment and restore from localStorage
+  const isLocalStorageAvailable = () => {
+    try {
+      const test = '__storage_test__';
+      localStorage.setItem(test, test);
+      localStorage.removeItem(test);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  };
+
   useEffect(() => {
     if (!setSelectedEnv) return;
-    const stored = localStorage.getItem('selectedEnv');
-    if (stored && environments.some(e => e.environment_id === stored)) {
-      setSelectedEnv(stored);
-    } else if (environments.length > 0) {
-      setSelectedEnv(environments[0].environment_id);
+    try {
+      const stored = isLocalStorageAvailable() ? localStorage.getItem('selectedEnv') : null;
+      if (stored && environments.some(e => e.environment_id === stored)) {
+        setSelectedEnv(stored);
+      } else if (environments.length > 0) {
+        setSelectedEnv(environments[0].environment_id);
+      }
+    } catch (error) {
+      // Fallback to first environment if localStorage fails
+      if (environments.length > 0) {
+        setSelectedEnv(environments[0].environment_id);
+      }
     }
   }, [environments, setSelectedEnv]);
 
   useEffect(() => {
-    if (selectedEnv) {
-      localStorage.setItem('selectedEnv', selectedEnv);
+    if (selectedEnv && isLocalStorageAvailable()) {
+      try {
+        localStorage.setItem('selectedEnv', selectedEnv);
+      } catch (error) {
+        // Silently fail if localStorage is not available
+        console.debug('Could not save environment selection to localStorage');
+      }
     }
   }, [selectedEnv]);
 
@@ -443,7 +469,7 @@ const Dashboard: React.FC<DashboardProps> = ({ selectedModel, selectedEnv, setSe
               <div className="absolute left-4 z-20 flex items-end" style={{ position: 'relative', width: '210px', overflow: 'visible', bottom: '3rem' }}>
                 <div className="relative group" style={{ width: '100%', minWidth: '180px', maxWidth: '210px' }}>
                   <div className="flex items-center w-full" style={{ position: 'relative', height: '1.7rem', display: 'flex', alignItems: 'center' }}>
-                    {/* Hidden span to measure width */}
+
                     <span
                       ref={spanRef}
                       style={{
@@ -479,7 +505,7 @@ const Dashboard: React.FC<DashboardProps> = ({ selectedModel, selectedEnv, setSe
                         cursor: 'pointer',
                         paddingRight: '1.5rem',
                       }}
-                      value={selectedEnv}
+                      value={selectedEnv || ''}
                       onChange={handleDropdownChange}
                       disabled={loadingEnvironments}
                     >
@@ -501,7 +527,7 @@ const Dashboard: React.FC<DashboardProps> = ({ selectedModel, selectedEnv, setSe
           </form>
         </div>
       </div>
-      {/* Upload Modal */}
+
       {showUploadModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
           <div className="bg-gray-900 rounded-lg p-6 w-full max-w-md relative">

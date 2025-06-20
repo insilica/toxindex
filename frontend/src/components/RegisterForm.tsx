@@ -66,16 +66,17 @@ const RegisterForm: React.FC = () => {
         body: new URLSearchParams({ email, password, password_confirmation: passwordConfirmation }).toString(),
         credentials: 'include',
       });
+      const data = await res.json();
       if (res.ok) {
-        const data = await res.json();
         setSuccess(true);
         setSuccessMsg(data.message || 'Check your email to verify your account.');
         setTimeout(() => navigate('/login'), 5000);
       } else {
-        setError('Registration failed.');
+        setError(data.error || 'Registration failed.');
       }
     } catch (err) {
-      setError('Registration failed.');
+      console.error('Registration error:', err);
+      setError('An unexpected error occurred. Please try again.');
     } finally {
       setLoading(false);
     }
