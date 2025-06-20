@@ -11,8 +11,8 @@ import { SettingsGeneral } from "./components/Settings";
 import SettingsDataControls from "./components/SettingsDataControls";
 import CreateEnvironmentSettings from "./components/CreateEnvironmentSettings";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { EnvironmentDetails } from "./components/CreateEnvironment";
-import { useState, useCallback, useEffect } from "react";
+import EnvironmentDetails from "./components/EnvironmentDetails";
+import { useState, useCallback } from "react";
 import ChatSession from "./components/ChatSession";
 import TaskDetail from './components/TaskDetail';
 import UserProfile from './components/UserProfile';
@@ -21,21 +21,29 @@ import ResetPasswordPage from './components/ResetPasswordPage';
 
 function App() {
   const [environments, setEnvironments] = useState<any[]>([]);
-  const [loadingEnvironments, setLoadingEnvironments] = useState<boolean>(true);
+  const [loadingEnvironments, setLoadingEnvironments] = useState<boolean>(false);
 
-  // Robust refetch function
+  // Robust refetch function for environments
   const refetchEnvironments = useCallback(() => {
     setLoadingEnvironments(true);
-    fetch('/api/environments', { credentials: 'include' })
+    return fetch('/api/environments', { credentials: 'include' })
       .then(res => res.json())
-      .then(data => setEnvironments(data.environments || []))
+      .then(data => {
+        setEnvironments(data.environments || []);
+        return data.environments || [];
+      })
       .finally(() => setLoadingEnvironments(false));
   }, []);
 
-  // Fetch environments on mount
-  useEffect(() => {
-    refetchEnvironments();
-  }, [refetchEnvironments]);
+  // Function to refresh files for a specific environment
+  const refreshEnvFiles = useCallback((envId: string) => {
+    return fetch(`/api/environments/${envId}/files`, { 
+      credentials: 'include',
+      cache: 'no-store'
+    })
+      .then(res => res.json())
+      .then(data => data.files || []);
+  }, []);
 
   return (
     <div className="w-screen h-screen min-h-screen min-w-full">
@@ -44,7 +52,7 @@ function App() {
           {/* Public routes: no Layout */}
           <Route path="/login" element={<LoginForm />} />
           <Route path="/register" element={<RegisterForm />} />
-          <Route path="/verify" element={<VerifyPage />} />
+          <Route path="/verify/:token" element={<VerifyPage />} />
           <Route path="/policies/terms-of-use/" element={<TermsPrivacy />} />
           <Route path="/policies/privacy-policy/" element={<TermsPrivacy />} />
           <Route path="/forgot_password" element={<ForgotPasswordPage />} />
@@ -60,6 +68,7 @@ function App() {
                     environments={environments}
                     refetchEnvironments={refetchEnvironments}
                     loadingEnvironments={loadingEnvironments}
+                    refreshEnvFiles={refreshEnvFiles}
                   />
                 </Layout>
               </ProtectedRoute>
@@ -126,7 +135,11 @@ function App() {
             element={
               <ProtectedRoute>
                 <Layout>
-                  <EnvironmentDetails />
+                  <EnvironmentDetails 
+                    environments={environments}
+                    loadingEnvironments={loadingEnvironments}
+                    refetchEnvironments={refetchEnvironments}
+                  />
                 </Layout>
               </ProtectedRoute>
             }
@@ -138,7 +151,6 @@ function App() {
                 <Layout>
                   <ChatSession
                     environments={environments}
-                    refreshEnvFiles={refetchEnvironments}
                     loadingEnvironments={loadingEnvironments}
                   />
                 </Layout>
