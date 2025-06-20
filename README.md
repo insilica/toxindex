@@ -117,6 +117,15 @@ sudo tail -n 50 /var/log/nginx/error.log
   - Start Celery worker:  
     `cd toxindex && nix develop && celery -A workflows.celery_worker worker --loglevel=info`
 
+terminal #1
+gunicorn webserver.app:app --bind 0.0.0.0:8000 --worker-class eventlet
+
+terminal #2
+python redis_listener_service.py
+
+terminal #3
+celery -A workflows.celery_worker worker --loglevel=info
+
 - **Development:**
   - Start Flask app:  
     `python -m webserver.app`

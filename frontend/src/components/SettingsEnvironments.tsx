@@ -1,4 +1,4 @@
-import React, {useState } from "react";
+import React, {useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 interface Environment {
@@ -18,6 +18,11 @@ const SettingsEnvironments: React.FC<SettingsEnvironmentsProps> = ({ environment
   const [modalOpen, setModalOpen] = useState(false);
   const [envToDelete, setEnvToDelete] = useState<Environment | null>(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Fetch environments when component mounts
+    refetchEnvironments();
+  }, [refetchEnvironments]);
 
   const handleDelete = (envId: string) => {
     fetch(`/api/environments/${envId}`, {

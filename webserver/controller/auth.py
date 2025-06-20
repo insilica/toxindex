@@ -33,16 +33,20 @@ ERROR_MESSAGES = [
 ]
 
 def generate_validation_link(user):
+  print(f"Generating validation link for user: {user.user_id}")  # Debug log
   link_token = secrets.token_urlsafe(16)
   expiration = datetime.datetime.now() + datetime.timedelta(days=1)
   params = (user.user_id, link_token, expiration)
-  ds.execute('INSERT INTO user_link (user_id,link_token,expiration) values (%s,%s,%s)',params)
+  print(f"Inserting token {link_token} into user_links")  # Debug log
+  ds.execute('INSERT INTO user_links (user_id,link_token,expiration) values (%s,%s,%s)',params)
   return link_token
 
 def validate(user: User):
+  print(f"Starting validation for user: {user.email}")  # Debug log
   link = generate_validation_link(user)
   # Use the React SPA route for verification
   route = f"{FRONTEND_URL}/verify/{link}"
+  print(f"Generated verification URL: {route}")  # Debug log
   msg = (
     f"<p>Dear {user.name if user.name else 'User'},</p>"
     "<p>Thank you for registering with Toxindex.com! To complete your registration and activate your account, please click on the link below:</p>"
@@ -56,37 +60,72 @@ def validate(user: User):
 @auth_bp.route('/verification/<token>', methods=['GET'])
 def api_verification(token):
     try:
-        user_id = ds.find('SELECT user_id from user_link WHERE link_token=(%s)', (token,))['user_id']
+        print(f"Verifying token: {token}")  # Debug log
+        user_id = ds.find('SELECT user_id from user_links WHERE link_token=(%s)', (token,))['user_id']
+        print(f"Found user_id: {user_id}")  # Debug log
+        
+        # Check current verification status
+        current_status = ds.find('SELECT email_verified FROM users WHERE user_id = (%s)', (user_id,))
+        print(f"Current verification status: {current_status}")  # Debug log
+        
         ds.execute('UPDATE users SET email_verified = TRUE WHERE user_id = (%s)', (user_id,))
+        print("Updated email_verified to TRUE")  # Debug log
+        
+        # Verify the update worked
+        new_status = ds.find('SELECT email_verified FROM users WHERE user_id = (%s)', (user_id,))
+        print(f"New verification status: {new_status}")  # Debug log
+        
         user = User.get(user_id)
         if user is not None:
-            # flask_login.login_user(user)
+            print(f"User found: {user.email}")  # Debug log
             return jsonify({'success': True, 'message': 'Email verified!'})
+        
+        print("User not found after verification")  # Debug log
         return jsonify({'error': 'Invalid or expired token.'}), 400
-    except Exception:
+    except Exception as e:
+        print(f"Verification error: {str(e)}")  # Debug log
         return jsonify({'error': 'Invalid or expired token.'}), 400
 
 @csrf.exempt
 @auth_bp.route('/login', methods=['POST'])
 def api_login():
-    # Accept both JSON and form data
-    if request.is_json:
-        data = request.get_json()
-        email = data.get('email')
-        password = data.get('password')
-    else:
-        email = request.form.get('email')
-        password = request.form.get('password')
+    try:
+        # Accept both JSON and form data
+        if request.is_json:
+            data = request.get_json()
+            email = data.get('email')
+            password = data.get('password')
+        else:
+            email = request.form.get('email')
+            password = request.form.get('password')
 
-    user = User.get_user(email)
-    if not user or not user.validate_password(password):
-        return jsonify({'error': random.choice(ERROR_MESSAGES)}), 401
-    # Require email verification except for test account
-    if email != 'test@test.com' and not getattr(user, 'email_verified', False):
-        return jsonify({'error': 'Please verify your email before logging in.'}), 403
+        print(f"Login attempt for email: {email}")  # Debug log
 
-    flask_login.login_user(user)
-    return jsonify({'success': True, 'user_id': user.user_id, 'email': user.email})
+        # Normalize email
+        email = email.lower().strip()
+        
+        user = User.get_user(email)
+        if not user:
+            print(f"No user found for email: {email}")  # Debug log
+            return jsonify({'error': random.choice(ERROR_MESSAGES)}), 401
+
+        if not user.validate_password(password):
+            print(f"Invalid password for user: {email}")  # Debug log
+            return jsonify({'error': random.choice(ERROR_MESSAGES)}), 401
+
+        # Check email verification
+        print(f"Email verification status for {email}: {user.email_verified}")  # Debug log
+        
+        if email != 'test@test.com' and not user.email_verified:
+            return jsonify({'error': 'Please verify your email before logging in.'}), 403
+
+        flask_login.login_user(user)
+        print(f"Login successful for user: {email}")  # Debug log
+        return jsonify({'success': True, 'user_id': user.user_id, 'email': user.email})
+
+    except Exception as e:
+        print(f"Login error: {str(e)}")  # Debug log
+        return jsonify({'error': 'An unexpected error occurred.'}), 500
 
 @csrf.exempt
 @auth_bp.route('/logout', methods=['POST'])
@@ -96,11 +135,22 @@ def api_logout():
     return jsonify({"success": True})
 
 def send_password_reset(email):
-  link = generate_validation_link(User.get_user(email))
-  route = url_for("reset_password", token=link, _external=True) # Added token parameter and _external=True
-  msg = f"Reset your password at this <a href='{route}'>link</a>"
-  sendgrid.send(email,"Toxindex.com Password Reset",msg)
+  user = User.get_user(email)
+  if not user:
+    return  # Silently return if user doesn't exist
+  link = generate_validation_link(user)
+  # Use the frontend URL for password reset
+  route = f"{FRONTEND_URL}/reset_password/{link}"
+  msg = (
+    "<p>Hello,</p>"
+    "<p>You have requested to reset your password. Click the link below to proceed:</p>"
+    f"<p><a href='{route}'><b>Reset My Password</b></a></p>"
+    "<p>If you did not request this reset, please ignore this email.</p>"
+    "<p>Best regards,<br>The Toxindex Team</p>"
+  )
+  sendgrid.send(email, "Toxindex.com Password Reset", msg)
 
+@csrf.exempt
 @auth_bp.route('/forgot_password', methods=['POST'])
 def api_forgot_password():
     data = flask.request.get_json()
@@ -109,47 +159,102 @@ def api_forgot_password():
         return flask.jsonify({'success': False, 'error': 'Email is required.'}), 400
     if not User.user_exists(email):
         return flask.jsonify({'success': True})  # Don't reveal if user exists
-    send_password_reset(email)
-    return flask.jsonify({'success': True})
+    try:
+        send_password_reset(email)
+        return flask.jsonify({'success': True})
+    except Exception as e:
+        print(f"Error sending password reset: {str(e)}")  # Debug log
+        return flask.jsonify({'success': False, 'error': 'Failed to send reset email.'}), 500
 
+@csrf.exempt
 @auth_bp.route('/reset_password/<token>', methods=['POST'])
 def api_reset_password(token):
-    data = flask.request.get_json()
-    password = data.get('password')
-    if not password:
-        return flask.jsonify({'success': False, 'error': 'Password is required.'}), 400
-    user_id = ds.find('SELECT user_id from user_link WHERE link_token=(%s)', (token,))['user_id']
-    ds.execute('UPDATE users set password = (%s) WHERE user_id = (%s)', (password, user_id,))
-    if User.get(user_id) is not None:
-        flask_login.login_user(User.get(user_id))
-    return flask.jsonify({'success': True})
+    try:
+        data = flask.request.get_json()
+        password = data.get('password')
+        if not password:
+            return flask.jsonify({'success': False, 'error': 'Password is required.'}), 400
+
+        # Get user from token
+        user_id = ds.find('SELECT user_id from user_links WHERE link_token=(%s)', (token,))['user_id']
+        user = User.get(user_id)
+        if user is None:
+            return flask.jsonify({'error': 'Invalid or expired token.'}), 400
+
+        # Create hashed password using User model's method
+        user.set_password(password)
+        ds.execute('UPDATE users set password = (%s) WHERE user_id = (%s)', (user.hashpw, user_id))
+        
+        # Log the user in
+        flask_login.login_user(user)
+        
+        # Clean up used token
+        ds.execute('DELETE FROM user_links WHERE link_token = (%s)', (token,))
+        
+        return flask.jsonify({'success': True})
+    except Exception as e:
+        print(f"Password reset error: {str(e)}")  # Debug log
+        return flask.jsonify({'error': 'Failed to reset password.'}), 500
 
 @csrf.exempt
 @auth_bp.route('/register', methods=['POST'])
 def api_register():
-    # Accept both JSON and form data
-    if request.is_json:
-        data = request.get_json()
-        email = data.get('email')
-        password = data.get('password')
-        password_confirmation = data.get('password_confirmation')
-    else:
-        email = request.form.get('email')
-        password = request.form.get('password')
-        password_confirmation = request.form.get('password_confirmation')
+    try:
+        # Accept both JSON and form data
+        if request.is_json:
+            data = request.get_json()
+            email = data.get('email')
+            password = data.get('password')
+            password_confirmation = data.get('password_confirmation')
+        else:
+            email = request.form.get('email')
+            password = request.form.get('password')
+            password_confirmation = request.form.get('password_confirmation')
 
-    # Validate input
-    if not email or not password or not password_confirmation:
-        return jsonify({'error': 'All fields are required.'}), 400
-    if len(email) < 6 or '@' not in email:
-        return jsonify({'error': 'Please enter a valid email address.'}), 400
-    if password != password_confirmation:
-        return jsonify({'error': 'Passwords do not match.'}), 400
-    if User.user_exists(email):
-        return jsonify({'error': 'Email already registered.'}), 409
+        print(f"Registration attempt for email: {email}")  # Debug log
 
-    user = User.create_user(email, password)
-    if user is None:
-        return jsonify({'error': 'Failed to create user.'}), 500
-    validate(user)
-    return jsonify({'success': True, 'message': 'Check your email to verify your account.'})
+        # Validate input
+        if not email or not password or not password_confirmation:
+            return jsonify({'error': 'All fields are required.'}), 400
+
+        # Email validation
+        email = email.lower().strip()  # Normalize email
+        if len(email) < 6 or '@' not in email or '.' not in email:
+            return jsonify({'error': 'Please enter a valid email address.'}), 400
+
+        # Password validation
+        if len(password) < 4:
+            return jsonify({'error': 'Password must be at least 4 characters long.'}), 400
+        if password != password_confirmation:
+            return jsonify({'error': 'Passwords do not match.'}), 400
+
+        # Check if user exists
+        if User.user_exists(email):
+            return jsonify({'error': 'Email already registered.'}), 409
+
+        # Create user
+        user = User.create_user(email, password)
+        if user is None:
+            return jsonify({'error': 'Failed to create user.'}), 500
+        
+        print(f"User created successfully, proceeding to validation")  # Debug log
+        
+        # Send verification email
+        try:
+            validate(user)
+        except Exception as e:
+            print(f"Failed to send verification email: {str(e)}")
+            # Don't fail registration if email fails, just notify the user
+            return jsonify({
+                'success': True,
+                'message': 'Account created, but verification email could not be sent. Please contact support.'
+            })
+
+        return jsonify({
+            'success': True,
+            'message': 'Check your email to verify your account.'
+        })
+
+    except Exception as e:
+        print(f"Registration error: {str(e)}")  # Debug log
+        return jsonify({'error': 'Registration failed. Please try again.'}), 500

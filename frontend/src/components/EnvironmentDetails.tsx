@@ -1,109 +1,367 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import FilePreviewModal from './FilePreviewModal';
+import UploadCsvModal from './UploadCsvModal';
+import { FaEye, FaDownload, FaTrash } from 'react-icons/fa';
+import EnvironmentSelector from './shared/EnvironmentSelector';
+import LoadingSpinner from './shared/LoadingSpinner';
+import { useEnvironmentSelection } from './shared/utils/useEnvironmentSelection';
 
-interface FileMeta {
-  file_id: number;
-  filename: string;
-  filepath: string;
-  created_at: string;
-}
-
-interface EnvDetails {
+interface Environment {
   environment_id: string;
   title: string;
   description?: string;
   created_at?: string;
 }
 
-export const EnvironmentDetails: React.FC = () => {
+interface EnvironmentFile {
+  file_id: string;
+  filename: string;
+  upload_date: string;
+}
+
+interface EnvironmentDetailsProps {
+  environments: Environment[];
+  selectedEnv?: string;
+  setSelectedEnv?: (envId: string) => void;
+  loadingEnvironments?: boolean;
+  refetchEnvironments?: () => void;
+}
+
+export const EnvironmentDetails: React.FC<EnvironmentDetailsProps> = ({
+  environments = [],
+  selectedEnv,
+  setSelectedEnv,
+  loadingEnvironments = false,
+  refetchEnvironments
+}) => {
   const { env_id } = useParams<{ env_id: string }>();
-  const [env, setEnv] = useState<EnvDetails | null>(null);
-  const [, setEnvironments] = useState<EnvDetails[]>([]);
-  const [, setFiles] = useState<FileMeta[]>([]);
+  const navigate = useNavigate();
+  const [env, setEnv] = useState<Environment | null>(null);
+  const [files, setFiles] = useState<EnvironmentFile[]>([]);
   const [loading, setLoading] = useState(true);
-  // const [, setDeleting] = useState(false);
-  // const [, setDeleteError] = useState<string | null>(null);
-  // const navigate = useNavigate();
-  const [previewFileId, ] = useState<number | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [fileDeleteError, setFileDeleteError] = useState<string | null>(null);
+  const [previewFileId, setPreviewFileId] = useState<number | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
-  const [, setTasks] = useState<any[]>([]);
-  // const [, setFileDeleteError] = useState<string | null>(null);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [tasks, setTasks] = useState<any[]>([]);
 
+  useEnvironmentSelection(environments, selectedEnv, setSelectedEnv);
+
+  // Load environment data
   useEffect(() => {
-    if (!env_id) return;
-    setLoading(true);
-    fetch(`/api/environments`, { credentials: 'include' })
-      .then(res => res.json())
-      .then(data => {
-        setEnvironments(data.environments || []);
-        const found = (data.environments || []).find((e: any) => e.environment_id == env_id);
-        setEnv(found || null);
+    const loadEnvironment = async () => {
+      setLoading(true);
+      try {
+        // Use the URL param if available, otherwise use selectedEnv prop
+        const targetEnvId = env_id || selectedEnv;
+        if (!targetEnvId || targetEnvId === "__add__" || targetEnvId === "__manage__") {
+          setLoading(false);
+          return;
+        }
+
+        // First try to find the environment in the props
+        const foundEnv = environments.find(e => e.environment_id === targetEnvId);
+        if (foundEnv) {
+          setEnv(foundEnv);
+          
+          // Update selectedEnv prop if using URL param
+          if (env_id && setSelectedEnv) {
+            setSelectedEnv(env_id);
+          }
+        } else {
+          // If not found in props, fetch from API
+          const envResponse = await fetch(`/api/environments/${targetEnvId}`, { 
+            credentials: 'include',
+            cache: "no-store"
+          });
+          const envData = await envResponse.json();
+          if (envData.environment) {
+            setEnv(envData.environment);
+            
+            // Update selectedEnv prop if using URL param
+            if (env_id && setSelectedEnv) {
+              setSelectedEnv(env_id);
+            }
+          }
+        }
+
+        // Fetch files
+        const filesResponse = await fetch(`/api/environments/${targetEnvId}/files`, { 
+          credentials: 'include',
+          cache: "no-store"
+        });
+        const filesData = await filesResponse.json();
+        setFiles(filesData.files || []);
+
+        // Fetch tasks
+        const tasksResponse = await fetch(`/api/tasks?environment_id=${targetEnvId}`, { 
+          credentials: 'include',
+          cache: "no-store"
+        });
+        const tasksData = await tasksResponse.json();
+        setTasks((tasksData.active_tasks || []).concat(tasksData.archived_tasks || []));
+      } catch (error) {
+        console.error('Error loading environment:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadEnvironment();
+  }, [env_id, selectedEnv, setSelectedEnv, environments]);
+
+  const handleDelete = async () => {
+    if (!window.confirm('Are you sure you want to delete this environment? This cannot be undone.')) return;
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      const res = await fetch(`/api/environments/${env_id}`, {
+        method: 'DELETE',
+        credentials: 'include',
       });
-    fetch(`/api/environments/${env_id}/files`, { credentials: 'include' })
-      .then(res => res.json())
-      .then(data => setFiles(data.files || []))
-      .finally(() => setLoading(false));
-  }, [env_id]);
+      const data = await res.json();
+      if (data.success) {
+        // Refresh both files and environments lists
+        if (refetchEnvironments) {
+          await refetchEnvironments();
+        }
+        navigate('/settings/environments');
+      } else {
+        setDeleteError('Failed to delete environment.');
+      }
+    } catch {
+      setDeleteError('Failed to delete environment.');
+    } finally {
+      setDeleting(false);
+    }
+  };
 
-  useEffect(() => {
-    if (!env_id) return;
-    fetch(`/api/tasks?environment_id=${env_id}`, { credentials: 'include' })
-      .then(res => res.json())
-      .then(data => setTasks((data.active_tasks || []).concat(data.archived_tasks || [])));
-  }, [env_id]);
+  const handleFileDelete = async (file_id: string) => {
+    if (!selectedEnv || selectedEnv === "__add__" || selectedEnv === "__manage__") return;
+    if (!window.confirm('Are you sure you want to delete this file?')) return;
+    setFileDeleteError(null);
+    try {
+      const res = await fetch(`/api/environments/${selectedEnv}/files/${file_id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      const data = await res.json();
+      if (data.success) {
+        setFiles(files => files.filter(f => f.file_id !== file_id));
+        // Refresh files list after deletion
+        if (refetchEnvironments) {
+          await refetchEnvironments();
+        }
+      } else {
+        setFileDeleteError('Failed to delete file.');
+      }
+    } catch {
+      setFileDeleteError('Failed to delete file.');
+    }
+  };
 
-  // const handleDelete = async () => {
-  //   if (!window.confirm('Are you sure you want to delete this environment? This cannot be undone.')) return;
-  //   setDeleting(true);
-  //   setDeleteError(null);
-  //   try {
-  //     const res = await fetch(`/api/environments/${env_id}`, {
-  //       method: 'DELETE',
-  //       credentials: 'include',
-  //     });
-  //     const data = await res.json();
-  //     if (data.success) {
-  //       navigate('/settings/environments');
-  //     } else {
-  //       setDeleteError('Failed to delete environment.');
-  //     }
-  //   } catch {
-  //     setDeleteError('Failed to delete environment.');
-  //   } finally {
-  //     setDeleting(false);
-  //   }
-  // };
-
-  // const handleFileDelete = async (file_id: number) => {
-  //   if (!window.confirm('Are you sure you want to delete this file?')) return;
-  //   try {
-  //     const res = await fetch(`/api/environments/${env_id}/files/${file_id}`, {
-  //       method: 'DELETE',
-  //       credentials: 'include',
-  //     });
-  //     const data = await res.json();
-  //     if (data.success) {
-  //       setFiles(files => files.filter(f => f.file_id !== file_id));
-  //     } else {
-  //       setFileDeleteError('Failed to delete file.');
-  //     }
-  //   } catch {
-  //     setFileDeleteError('Failed to delete file.');
-  //   }
-  // };
-
-  if (loading) return <div className="text-white p-8">Loading...</div>;
-  if (!env) return <div className="text-white p-8">Environment not found.</div>;
+  if (loading) return (
+    <div className="min-h-screen flex flex-col flex-1" style={{ background: 'linear-gradient(135deg, #1a1426 0%, #2a1a2a 60%, #231a23 100%)' }}>
+      <div className="flex-1 flex items-center justify-center">
+        <LoadingSpinner size="large" />
+      </div>
+    </div>
+  );
+  
+  if (!env) return (
+    <div className="min-h-screen flex flex-col flex-1" style={{ background: 'linear-gradient(135deg, #1a1426 0%, #2a1a2a 60%, #231a23 100%)' }}>
+      <div className="flex-1 flex items-center justify-center">
+        <div className="text-white text-xl">Environment not found</div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="w-full h-full min-h-screen pt-24 px-100 pb-12 text-white flex flex-col" style={{ background: 'linear-gradient(135deg, #1a1426 0%, #2a1a2a 60%, #231a23 100%)' }}>
+      <div className="flex items-center justify-between mb-2">
+        <div className="relative group" style={{ minWidth: 180, maxWidth: 340 }}>
+          <EnvironmentSelector
+            environments={environments}
+            selectedEnv={selectedEnv}
+            onEnvironmentChange={setSelectedEnv}
+            loadingEnvironments={loadingEnvironments}
+            variant="large"
+          />
+        </div>
+        <button
+          className="px-6 font-semibold transition border border-red-500"
+          style={{
+            fontWeight: 600,
+            fontSize: '.8rem',
+            paddingTop: 0,
+            paddingBottom: 2,
+            lineHeight: 1.1,
+            background: 'rgba(220,38,38,0.08)',
+            color: '#ef4444',
+            borderRadius: '9999px',
+            width: 'auto',
+            minWidth: 0,
+            boxShadow: '0 1px 4px 0 rgba(0,0,0,0.04)',
+            borderWidth: 1.5,
+            borderStyle: 'solid',
+            borderColor: '#ef4444',
+            cursor: deleting ? 'not-allowed' : 'pointer',
+          }}
+          onMouseOver={e => (e.currentTarget.style.background = 'rgba(220,38,38,0.18)')}
+          onMouseOut={e => (e.currentTarget.style.background = 'rgba(220,38,38,0.08)')}
+          onClick={handleDelete}
+          disabled={deleting}
+        >
+          {deleting ? 'Deleting...' : (
+            <span style={{display: 'flex', alignItems: 'center'}}>
+              <span style={{fontSize: '1.2rem', fontWeight:900, marginRight:10, lineHeight: 1}}>-</span>
+              <span style={{fontSize: '.8rem', fontWeight: 600}}>Delete Environment</span>
+            </span>
+          )}
+        </button>
+      </div>
+      <div className="w-full border-b border-gray-400 mb-4"></div>
+      {env.description && <div className="mb-4 text-gray-300">{env.description}</div>}
+      <div className="mb-8 text-sm text-gray-400">
+        Created at: {env.created_at && new Date(env.created_at).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
+      </div>
+      {deleteError && <div className="text-red-400 mb-4">{deleteError}</div>}
+
+      <div className="pl-8">
+        <div className="flex items-center justify-between mb-2 gap-4">
+          <h2 className="text-lg font-semibold">Files</h2>
+          <div className="flex items-center">
+            <button
+              className="px-6 font-semibold transition border border-green-600"
+              style={{
+                fontWeight: 600,
+                fontSize: '.8rem',
+                paddingTop: 0,
+                paddingBottom: 2,
+                lineHeight: 1.1,
+                background: 'rgba(22,163,74,0.08)',
+                color: '#22c55e',
+                borderRadius: '9999px',
+                width: 'auto',
+                minWidth: 0,
+                boxShadow: '0 1px 4px 0 rgba(0,0,0,0.04)',
+                borderWidth: 1.5,
+                borderStyle: 'solid',
+                borderColor: '#22c55e',
+                cursor: 'pointer',
+              }}
+              onMouseOver={e => (e.currentTarget.style.background = 'rgba(22,163,74,0.18)')}
+              onMouseOut={e => (e.currentTarget.style.background = 'rgba(22,163,74,0.08)')}
+              onClick={() => setShowUploadModal(true)}
+            >
+              <span style={{display: 'flex', alignItems: 'center'}}>
+                <span style={{fontSize: '1.2rem', fontWeight:900, marginRight:10, lineHeight: 1}}>+</span>
+                <span style={{fontSize: '.8rem', fontWeight: 600}}>Upload CSV</span>
+              </span>
+            </button>
+          </div>
+        </div>
+        <div className="border-b border-gray-700 mb-4 w-full"></div>
+      </div>
+      {loading ? (
+        <div className="flex justify-center">
+          <LoadingSpinner size="medium" text="Loading files..." />
+        </div>
+      ) : files.length === 0 ? (
+        <div className="text-gray-400 mb-6 pl-8">No files uploaded for this environment.</div>
+      ) : (
+        <ul className="divide-y divide-gray-700 mb-6 pl-8">
+          {files.map(file => (
+            <li key={file.file_id} className="py-2 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-2">
+                <button
+                  className="text-left font-medium text-gray-200 hover:text-purple-400 transition truncate max-w-[220px]"
+                  style={{ background: 'none', border: 'none', padding: 0, margin: 0, cursor: 'pointer', fontSize: '1rem' }}
+                  onClick={() => { setPreviewFileId(parseInt(file.file_id)); setPreviewOpen(true); }}
+                  title="Preview file"
+                >
+                  {file.filename}
+                </button>
+              </div>
+              <div className="flex gap-4 px-3 py-1 rounded-full shadow-sm"
+                style={{ background: 'rgba(139, 81, 196, 0.18)', minWidth: 140, justifyContent: 'flex-end' }}>
+                <button
+                  className="bg-purple-700 hover:bg-purple-600 active:bg-purple-800 text-white transition flex items-center justify-center"
+                  style={{ width: 36, height: 36, borderRadius: '50%', fontSize: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, border: 'none' }}
+                  onClick={() => { setPreviewFileId(parseInt(file.file_id)); setPreviewOpen(true); }}
+                  title="Preview"
+                >
+                  <FaEye />
+                </button>
+                <a
+                  href={`/api/environments/${selectedEnv}/files/${file.file_id}/download`}
+                  className="bg-purple-700 hover:bg-purple-600 active:bg-purple-800 text-white transition flex items-center justify-center"
+                  style={{ width: 36, height: 36, borderRadius: '50%', fontSize: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, border: 'none' }}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="Download"
+                >
+                  <FaDownload />
+                </a>
+                <button
+                  className="bg-purple-700 hover:bg-purple-600 active:bg-purple-800 text-white transition flex items-center justify-center"
+                  style={{ width: 36, height: 36, borderRadius: '50%', fontSize: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, border: 'none' }}
+                  onClick={() => handleFileDelete(file.file_id)}
+                  title="Delete"
+                >
+                  <FaTrash />
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+      {fileDeleteError && <div className="text-red-400 mb-4">{fileDeleteError}</div>}
+
+      <div className="pl-8">
+        <h2 className="text-lg font-semibold mb-2">Tasks</h2>
+        <div className="border-b border-gray-700 mb-4 w-full"></div>
+      </div>
+      {tasks.length === 0 ? (
+        <div className="text-gray-400 pl-8">No tasks for this environment.</div>
+      ) : (
+        <ul className="divide-y divide-gray-700 pl-8">
+          {tasks.map(task => (
+            <li key={task.task_id} className="py-2 flex items-center justify-between">
+              <span>{task.title}</span>
+              <span className="text-xs text-gray-400 ml-2">
+                {task.created_at && new Date(task.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+
       <FilePreviewModal
         fileId={previewFileId}
-        envId={env_id || ''}
+        envId={selectedEnv || ''}
         isOpen={previewOpen}
         onRequestClose={() => setPreviewOpen(false)}
       />
+      {showUploadModal && (
+        <UploadCsvModal
+          open={showUploadModal}
+          onClose={() => setShowUploadModal(false)}
+          environments={environments}
+          defaultEnvId={selectedEnv}
+          onUploadSuccess={() => {
+            setShowUploadModal(false);
+            if (selectedEnv && selectedEnv !== "__add__" && selectedEnv !== "__manage__") {
+              fetch(`/api/environments/${selectedEnv}/files`, { credentials: "include", cache: "no-store" })
+                .then(res => res.json())
+                .then(data => setFiles(data.files || []));
+            }
+          }}
+        />
+      )}
     </div>
   );
 };

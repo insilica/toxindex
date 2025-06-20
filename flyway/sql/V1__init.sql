@@ -6,6 +6,7 @@ CREATE TABLE users (
     hashpw VARCHAR(255) NOT NULL,
     token VARCHAR(255),
     stripe_customer_id VARCHAR(255),
+    email_verified BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
