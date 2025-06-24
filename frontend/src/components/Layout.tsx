@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import FilePreviewModal from './FilePreviewModal';
 import { FaComments, FaPlus, FaListAlt, FaFileCsv, FaFileAlt, FaFileCode, FaDatabase, FaFileImage, FaFile, FaEllipsisH } from 'react-icons/fa';
 import { createPortal } from "react-dom";
+import { useEnvironmentSelection } from './shared/utils/useEnvironmentSelection';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const navigate = useNavigate();
@@ -12,7 +13,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [sidebarClosing, setSidebarClosing] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
-  const [user, setUser] = useState<{ email?: string } | null>(null);
+  const [user, setUser] = useState<{ email?: string; user_id?: string } | null>(null);
   const [selectedModel, setSelectedModel] = useState("toxindex-rap");
   const [environments, setEnvironments] = useState<{ environment_id: string; title: string }[]>([]);
   const [selectedEnv, setSelectedEnv] = useState<string>("");
@@ -87,6 +88,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         }
       });
   }, []);
+
+  useEnvironmentSelection(environments, selectedEnv, setSelectedEnv);
 
   const handleLogout = () => {
     fetch("/api/auth/logout", {
@@ -457,7 +460,20 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           {profileOpen && (
             <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-2 text-gray-900 border border-gray-200">
               <div className="px-4 py-2 border-b border-gray-100 text-sm">
-                <div className="font-medium">{user?.email || "Logged in"}</div>
+                {user?.user_id ? (
+                  <button
+                    onClick={() => {
+                      navigate(`/user/${user.user_id}`);
+                      setProfileOpen(false);
+                    }}
+                    className="font-medium text-green-700 underline hover:text-green-500 transition-colors cursor-pointer w-full text-left"
+                    style={{ background: 'none', border: 'none', padding: 0 }}
+                  >
+                    {user.email || "Logged in"}
+                  </button>
+                ) : (
+                  <div className="font-medium">{user?.email || "Logged in"}</div>
+                )}
               </div>
               <button
                 onClick={handleLogout}
