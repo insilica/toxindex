@@ -374,7 +374,6 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                   )}
                 </div>
               )}
-              {/* Settings button at the bottom above logout */}
               <div className="flex flex-col items-center mt-auto mb-2">
                 <button
                   onClick={() => navigate('/settings/general')}
