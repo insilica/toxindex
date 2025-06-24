@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, send_file, abort
 import flask_login
-from webserver.model import Environment, File, ChatSession, Task
+from webserver.model import Environment, File, Task
 import os, logging, mimetypes, base64
 from webserver.csrf import csrf
 from webserver.util import is_valid_uuid
@@ -201,33 +201,3 @@ def download_file(env_id, file_id):
     if not file or not file.filepath or not os.path.exists(file.filepath) or str(file.environment_id) != str(env_id):
         return abort(404)
     return send_file(file.filepath, as_attachment=True, download_name=file.filename)
-
-# @csrf.exempt
-# @env_bp.route('/<env_id>/chat_sessions', methods=['POST'])
-# @flask_login.login_required
-# def create_chat_session(env_id):
-#     if env_id in ("__add__", "__manage__") or not is_valid_uuid(env_id):
-#         return jsonify({"error": "Invalid environment ID"}), 400
-#     user_id = flask_login.current_user.user_id
-#     d = request.get_json(force=True)
-#     title = d.get('title') or 'New chat'
-#     session = ChatSession.create_session(env_id, user_id, title)
-#     if not session:
-#         return jsonify({"error": "Failed to create chat session"}), 500
-#     return jsonify(session.to_dict())
-
-# @env_bp.route('/<env_id>/chat_sessions', methods=['GET'])
-# @flask_login.login_required
-# def list_chat_sessions(env_id):
-#     user_id = flask_login.current_user.user_id
-#     sessions = ChatSession.get_sessions_by_environment(env_id, user_id)
-#     return jsonify({'sessions': [s.to_dict() for s in sessions]})
-
-# Helper function (move or import as needed)
-def is_valid_uuid(val):
-    import uuid
-    try:
-        uuid.UUID(str(val))
-        return True
-    except Exception:
-        return False 

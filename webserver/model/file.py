@@ -88,18 +88,17 @@ class File:
     def get_files(task_id):
         import os
         try:
-            task_id_int = int(task_id)
             logging.info(f"DB ENV (get_files): PGHOST={os.getenv('PGHOST')}, PGPORT={os.getenv('PGPORT')}, PGDATABASE={os.getenv('PGDATABASE')}, PGUSER={os.getenv('PGUSER')}, PGPASSWORD={os.getenv('PGPASSWORD')}")
-            logging.info(f"Calling get_files with task_id={task_id_int} (type: {type(task_id_int)})")
+            logging.info(f"Calling get_files with task_id={task_id} (type: {type(task_id)})")
             rows = ds.find_all(
                 "SELECT * FROM files WHERE task_id = %s ORDER BY created_at ASC",
-                (task_id_int,)
+                (task_id,)
             )
-            logging.info(f"Raw rows returned from DB for task_id={task_id_int}: {rows}")
+            logging.info(f"Raw rows returned from DB for task_id={task_id}: {rows}")
             if not rows:
-                logging.warning(f"No files found in DB for task_id={task_id_int}")
+                logging.warning(f"No files found in DB for task_id={task_id}")
             else:
-                logging.info(f"Found {len(rows)} files in DB for task_id={task_id_int}")
+                logging.info(f"Found {len(rows)} files in DB for task_id={task_id}")
             return [File.from_row(row) for row in rows]
         except Exception as e:
             logging.error(f"Error retrieving files for task_id={task_id}: {e}")

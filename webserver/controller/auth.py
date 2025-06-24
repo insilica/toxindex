@@ -2,7 +2,7 @@ from webserver.model.user import User
 from webserver.controller import sendgrid
 from webserver import datastore as ds
 from webserver.csrf import csrf
-from flask import url_for, request, jsonify, Blueprint
+from flask import request, jsonify, Blueprint
 import flask, flask_login, secrets, datetime, os
 import random
 

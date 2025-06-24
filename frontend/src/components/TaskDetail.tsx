@@ -110,66 +110,80 @@ const TaskDetail: React.FC = () => {
           <div className="text-gray-400">No assistant message found for this task.</div>
         )}
       </div>
-      <footer className="mt-8 pt-6 border-t border-gray-700 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm bg-gray-950 rounded-b-lg">
-        <div>
-          <b>Tool:</b> {task.workflow_id === 1 ? "ToxIndex RAP" : task.workflow_id === 2 ? "ToxIndex Vanilla" : task.workflow_id ?? <span className="text-gray-400">Unknown</span>}
-        </div>
-        <div>
-          <b>Executed by user:</b> {task.user_id ? (
-            <button
-              className="text-purple-400 underline hover:text-purple-300 focus:outline-none bg-transparent p-0 shadow-none border-none"
-              style={{ background: 'none', boxShadow: 'none', border: 'none' }}
-              onClick={() => navigate(`/user/${task.user_id}`)}
-              title="Go to user profile"
-              aria-label="Go to user profile"
-            >
-              {task.user_id}
-            </button>
-          ) : (
-            <span className="text-gray-400">Unknown</span>
-          )}
-        </div>
-        <div>
-          <b>Created:</b> {task.created_at ? new Date(task.created_at).toLocaleString() : <span className="text-gray-400">Unknown</span>}
-        </div>
-        <div>
-          <b>Finished:</b> {task.finished_at ? new Date(task.finished_at).toLocaleString() : <span className="text-gray-400">-</span>}
-        </div>
-        <div>
-          <b>Duration:</b> {duration ?? <span className="text-gray-400">-</span>}
-        </div>
-        <div>
-          <b>Environment:</b> {task.environment_id ? (
-            <button
-              className="text-blue-400 underline hover:text-blue-300 focus:outline-none bg-transparent p-0 shadow-none border-none"
-              style={{ background: 'none', boxShadow: 'none', border: 'none' }}
-              onClick={() => navigate(`/environment/${task.environment_id}`)}
-              title="Go to environment"
-              aria-label="Go to environment"
-            >
-              {task.environment_id}
-            </button>
-          ) : (
-            <span className="text-gray-400">None</span>
-          )}
-        </div>
-        <div>
-          <b>Chat Session:</b> {task.session_id ? (
-            <button
-              className="text-green-400 underline hover:text-green-300 focus:outline-none bg-transparent p-0 shadow-none border-none"
-              style={{ background: 'none', boxShadow: 'none', border: 'none' }}
-              onClick={() => navigate(`/chat/session/${task.session_id}`)}
-              title="Go to chat session"
-              aria-label="Go to chat session"
-            >
-              {task.session_id}
-            </button>
-          ) : (
-            <span className="text-gray-400">None</span>
-          )}
-        </div>
-        <div className="col-span-1 md:col-span-2 flex justify-end">
-          <button className="mt-2 px-4 py-2 bg-green-700 rounded" onClick={() => navigate(-1)} aria-label="Back">Back</button>
+      <footer className="mt-8 pt-8 pb-8 pl-8 pr-8 border-t border-gray-700 bg-gray-950 rounded-b-lg shadow-inner">
+        <div className="w-full max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 text-base overflow-x-auto min-w-0 w-full">
+            <div className="flex items-center space-x-2">
+              <span className="font-semibold text-gray-300">Tool:</span>
+              <span>{task.workflow_id === 1 ? "ToxIndex RAP" : task.workflow_id === 2 ? "ToxIndex Vanilla" : task.workflow_id ?? <span className="text-gray-400">Unknown</span>}</span>
+            </div>
+            <div className="flex items-center space-x-2 min-w-0 w-full">
+              <span className="font-semibold text-gray-300 whitespace-nowrap">Executed by user:</span>
+              <span className="flex-1 min-w-0 w-full">
+                {task.user_id ? (
+                  <button
+                    className="text-purple-400 underline hover:text-purple-300 focus:outline-none bg-transparent p-0 shadow-none border-none break-all w-full text-left"
+                    style={{ background: 'none', boxShadow: 'none', border: 'none', wordBreak: 'break-all' }}
+                    onClick={() => navigate(`/user/${task.user_id}`)}
+                    title="Go to user profile"
+                    aria-label="Go to user profile"
+                  >
+                    {task.user_id}
+                  </button>
+                ) : (
+                  <span className="text-gray-400">Unknown</span>
+                )}
+              </span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="font-semibold text-gray-300">Created:</span>
+              <span>{task.created_at ? new Date(task.created_at).toLocaleString() : <span className="text-gray-400">Unknown</span>}</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="font-semibold text-gray-300">Finished:</span>
+              <span>{task.finished_at ? new Date(task.finished_at).toLocaleString() : <span className="text-gray-400">-</span>}</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="font-semibold text-gray-300">Duration:</span>
+              <span>{duration ?? <span className="text-gray-400">-</span>}</span>
+            </div>
+            <div className="flex items-center space-x-2 min-w-0 w-full">
+              <span className="font-semibold text-gray-300 whitespace-nowrap">Environment:</span>
+              <span className="flex-1 min-w-0 w-full">
+                {task.environment_id ? (
+                  <button
+                    className="text-blue-400 underline hover:text-blue-300 focus:outline-none bg-transparent p-0 shadow-none border-none break-all w-full text-left"
+                    style={{ background: 'none', boxShadow: 'none', border: 'none', wordBreak: 'break-all' }}
+                    onClick={() => navigate(`/environment/${task.environment_id}`)}
+                    title="Go to environment"
+                    aria-label="Go to environment"
+                  >
+                    {task.environment_id}
+                  </button>
+                ) : (
+                  <span className="text-gray-400">None</span>
+                )}
+              </span>
+            </div>
+            <div className="flex items-center space-x-2 min-w-0 w-full">
+              <span className="font-semibold text-gray-300 whitespace-nowrap">Chat Session:</span>
+              <span className="flex-1 min-w-0 w-full">
+                {task.session_id ? (
+                  <button
+                    className="text-green-400 underline hover:text-green-300 focus:outline-none bg-transparent p-0 shadow-none border-none break-all w-full text-left"
+                    style={{ background: 'none', boxShadow: 'none', border: 'none', wordBreak: 'break-all' }}
+                    onClick={() => navigate(`/chat/session/${task.session_id}`)}
+                    title="Go to chat session"
+                    aria-label="Go to chat session"
+                  >
+                    {task.session_id}
+                  </button>
+                ) : (
+                  <span className="text-gray-400">None</span>
+                )}
+              </span>
+            </div>
+          </div>
         </div>
       </footer>
     </div>
