@@ -340,12 +340,15 @@ export const EnvironmentDetails: React.FC<EnvironmentDetailsProps> = ({
         </ul>
       )}
 
-      <FilePreviewModal
-        fileId={previewFileId}
-        envId={selectedEnv || ''}
-        isOpen={previewOpen}
-        onRequestClose={() => setPreviewOpen(false)}
-      />
+      {(selectedEnv || env_id) && (
+        <FilePreviewModal
+          fileId={previewFileId}
+          envId={selectedEnv || env_id || ''}
+          isOpen={previewOpen}
+          onRequestClose={() => setPreviewOpen(false)}
+        />
+      )}
+      
       {showUploadModal && (
         <UploadCsvModal
           open={showUploadModal}
