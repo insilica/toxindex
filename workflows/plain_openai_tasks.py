@@ -9,6 +9,10 @@ from workflows.celery_worker import celery
 from webserver.model.message import MessageSchema
 from webserver.storage import S3FileStorage
 from RAP.toxicity_schema import TOXICITY_SCHEMA
+# Update finished_at in the database
+import datetime
+import webserver.datastore as ds
+from webserver.model.task import Task
 
 logger = logging.getLogger(__name__)
 
@@ -69,7 +73,13 @@ def plain_openai_task(self, payload):
         logger.info(f"[plain_openai_task] Publishing file event: {file_event}")
         r.publish("celery_updates", json.dumps(file_event, default=str))
         logger.info("plain_openai_task completed successfully")
-        return {"done": True}
+
+        finished_at = Task.mark_finished(task_id)
+
+        return {
+            "done": True,
+            "finished_at": finished_at,
+        }
     except Exception as e:
         logger.error(f"Error in plain_openai_task: {str(e)}", exc_info=True)
         raise

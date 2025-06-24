@@ -13,8 +13,7 @@ import redis
 import dotenv
 import flask
 import flask_login
-from flask_socketio import SocketIO, emit, join_room
-from flask_wtf import CSRFProtect
+from flask_socketio import emit, join_room
 from flask import request, send_from_directory, abort, make_response, jsonify
 
 # Local imports
@@ -29,6 +28,7 @@ from webserver.controller.chat import chat_bp
 from webserver.controller.auth import auth_bp
 from webserver.csrf import csrf
 from webserver.socketio import socketio
+from webserver.controller.user import user_bp
 
 dotenv.load_dotenv()
 
@@ -166,6 +166,7 @@ app.register_blueprint(env_bp)
 app.register_blueprint(task_bp)
 app.register_blueprint(chat_bp)
 app.register_blueprint(auth_bp)
+app.register_blueprint(user_bp)
 
 # ICONS ======================================================================
 @app.route("/favicon.ico")
@@ -293,4 +294,4 @@ if __name__ == "__main__":
             daemon=True,
             name=thread_name,
         ).start()
-    socketio.run(app, host="0.0.0.0", port=6513, debug=True, use_reloader=True) # Always debug=False in prod
+    socketio.run(app, host="0.0.0.0", port=8000, debug=False, use_reloader=False) # Always debug=False in prod
