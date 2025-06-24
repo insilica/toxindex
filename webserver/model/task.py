@@ -15,6 +15,7 @@ class Task:
         celery_task_id=None,
         description=None,
         created_at=None,
+        finished_at=None,
         archived=False,
         last_accessed=None,
         session_id=None,
@@ -27,6 +28,7 @@ class Task:
         self.celery_task_id = celery_task_id
         self.description = description
         self.created_at = created_at
+        self.finished_at = finished_at
         self.archived = archived
         self.last_accessed = last_accessed
         self.session_id = session_id
@@ -40,13 +42,18 @@ class Task:
             "environment_id": self.environment_id,
             "description": self.description,
             "created_at": (
-                self.created_at.strftime("%Y-%m-%d %H:%M:%S")
+                self.created_at.isoformat()
                 if self.created_at
+                else None
+            ),
+            "finished_at": (
+                self.finished_at.isoformat()
+                if self.finished_at
                 else None
             ),
             "archived": self.archived,
             "last_accessed": (
-                self.last_accessed.strftime("%Y-%m-%d %H:%M:%S")
+                self.last_accessed.isoformat()
                 if self.last_accessed
                 else None
             ),
@@ -63,8 +70,9 @@ class Task:
             environment_id=row.get("environment_id"),
             celery_task_id=row["celery_task_id"],
             description=row.get("description"),
-            created_at=row["created_at"],
-            archived=row.get("archived", False),
+            created_at=row["created_at"], #required
+            finished_at=row.get("finished_at"), #optional   
+            archived=row.get("archived", False),  #optional with default  
             last_accessed=row.get("last_accessed"),
             session_id=row.get("session_id"),
         )
@@ -78,8 +86,12 @@ class Task:
         celery_task_id=None,
         description=None,
         session_id=None,
+        created_at=None,
     ):
+        if created_at is None:
+            created_at = datetime.datetime.now(datetime.timezone.utc)
         logging.info(f"Creating new task with title='{title}' for user_id={user_id}, session_id={session_id}")
+        logging.info(f"create_task: created_at={created_at} (type: {type(created_at)})")
         params = (
             title,
             user_id,
@@ -88,11 +100,14 @@ class Task:
             environment_id,
             description,
             session_id,
+            created_at,
         )
+        logging.info(f"create_task params: {params}")
         ds.execute(
-            "INSERT INTO tasks (title, user_id, celery_task_id, workflow_id, environment_id, description, session_id) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+            "INSERT INTO tasks (title, user_id, celery_task_id, workflow_id, environment_id, description, session_id, created_at) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
             params,
         )
+
 
         # Fetch and return the newly created task
         res = ds.find(
@@ -177,3 +192,12 @@ class Task:
             }
             for row in rows
         ]
+
+    @staticmethod
+    def mark_finished(task_id):
+        finished_at = datetime.datetime.now(datetime.timezone.utc)
+        ds.execute(
+            "UPDATE tasks SET finished_at = %s WHERE task_id = %s",
+            (finished_at, task_id)
+        )
+        return finished_at
