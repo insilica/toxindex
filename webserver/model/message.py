@@ -10,6 +10,8 @@ class MessageSchema(BaseModel):
 
 class Message():
 
+    ASSISTANT_USER_ID = "00000000-0000-0000-0000-000000000000"
+
     def __init__(self, message_id, task_id, user_id, role, content, created_at, session_id=None):
         self.message_id = message_id
         self.task_id = task_id
@@ -22,12 +24,12 @@ class Message():
     def to_dict(self):
         return {
             'message_id': str(self.message_id),
-            'task_id': self.task_id,
+            'task_id': str(self.task_id),
             'user_id': str(self.user_id),
             'role': self.role,
             'content': self.content,
-            'created_at': self.created_at.strftime('%Y-%m-%d %H:%M:%S') if self.created_at else None,
-            'session_id': str(self.session_id) if self.session_id else None
+            'created_at': str(self.created_at),
+            'session_id': str(self.session_id) if self.session_id else None,
         }
 
     
@@ -48,18 +50,34 @@ class Message():
 
     @staticmethod
     def create_message(task_id, user_id, role, content, session_id=None):
-        # Duplicate check: does a message with this task_id, role, and content already exist?
-        existing = ds.find("SELECT 1 FROM messages WHERE task_id = %s AND role = %s AND content = %s", (task_id, role, content))
-        if existing:
-            logging.warning(f"[Message.create_message] Duplicate message for task_id={task_id}, role={role} -- skipping insert.")
-            return
-        logging.info(f"[Message.create_message] Storing message for task_id={task_id}, user_id={user_id}, role={role}, content={content}, session_id={session_id}")
-        params = (task_id, user_id, role, content, session_id)
-        ds.execute(
-            "INSERT INTO messages (task_id, user_id, role, content, session_id) VALUES (%s, %s, %s, %s, %s)",
-            params
-        )
-        logging.info(f"[Message.create_message] Message stored for task_id={task_id}")
+        try:
+            logging.info(f"[Message.create_message] Called with task_id={task_id}, user_id={user_id}, role={role}, content={content}, session_id={session_id}")
+            # Duplicate check: does a message with this task_id, role, and content already exist?
+            existing = ds.find("SELECT 1 FROM messages WHERE task_id = %s AND role = %s AND content = %s", (task_id, role, content))
+            if existing:
+                logging.warning(f"[Message.create_message] Duplicate message for task_id={task_id}, role={role} -- skipping insert.")
+                return None
+            logging.info(f"[Message.create_message] Storing message for task_id={task_id}, user_id={user_id}, role={role}, content={content}, session_id={session_id}")
+            params = (task_id, user_id, role, content, session_id)
+            ds.execute(
+                "INSERT INTO messages (task_id, user_id, role, content, session_id) VALUES (%s, %s, %s, %s, %s)",
+                params
+            )
+            logging.info(f"[Message.create_message] Message stored for task_id={task_id}")
+            # Fetch and return the newly created message
+            row = ds.find(
+                "SELECT * FROM messages WHERE task_id = %s AND user_id = %s AND role = %s AND content = %s ORDER BY created_at DESC LIMIT 1",
+                (task_id, user_id, role, content)
+            )
+            if row:
+                logging.info(f"[Message.create_message] Returning created message for task_id={task_id}, message_id={row.get('message_id')}")
+                return Message.from_row(row)
+            else:
+                logging.error(f"[Message.create_message] Failed to fetch created message for task_id={task_id}")
+                return None
+        except Exception as e:
+            logging.error(f"[Message.create_message] Exception: {e}", exc_info=True)
+            return None
 
     @staticmethod
     def get_messages_by_session(session_id):
@@ -86,9 +104,12 @@ class Message():
         content = event_data.get("content")
         session_id = getattr(task, 'session_id', None)
         if content and role:
-            Message.create_message(task.task_id, None, role, content, session_id=session_id)
+            user_id = Message.ASSISTANT_USER_ID if role == "assistant" else None
+            msg = Message.create_message(task.task_id, user_id, role, content, session_id=session_id)
             logging.info(f"[Message.process_event] Stored message for task_id={task.task_id} from role={role}")
+            return msg
         else:
             logging.warning(f"[Message.process_event] Malformed task_message event received data: {event_data}")
             logging.warning(f"[Message.process_event] Role: {role}")
             logging.warning(f"[Message.process_event] Content: {content}")
+            return None

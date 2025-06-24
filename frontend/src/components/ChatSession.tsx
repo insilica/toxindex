@@ -1,9 +1,12 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { FaArrowLeft } from 'react-icons/fa';
-import EnvironmentSelector from './shared/EnvironmentSelector';
-import LoadingSpinner from './shared/LoadingSpinner';
+import { useParams } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { useEnvironmentSelection } from './shared/utils/useEnvironmentSelection';
+import ChatInputBar from './shared/ChatInputBar';
+import { io, Socket } from 'socket.io-client';
+import LoadingSpinner from './shared/LoadingSpinner';
+import { uploadFileToBackend } from './shared/utils/uploadFile';
 
 interface Environment {
   environment_id: string;
@@ -15,34 +18,82 @@ interface ChatSessionProps {
   selectedEnv?: string;
   setSelectedEnv?: (envId: string) => void;
   loadingEnvironments?: boolean;
+  selectedModel?: string;
+  refreshEnvFiles?: (envId: string) => Promise<any>;
 }
+
+let mountCount = 0;
 
 const ChatSession: React.FC<ChatSessionProps> = ({
   environments,
   selectedEnv,
   setSelectedEnv,
-  loadingEnvironments = false
+  loadingEnvironments = false,
+  selectedModel,
+  refreshEnvFiles
 }) => {
-  const { session_id } = useParams<{ session_id: string }>();
-  const navigate = useNavigate();
+  const { sessionId } = useParams<{ sessionId: string }>();
   const [messages, setMessages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [input, setInput] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const socketRef = useRef<Socket | null>(null);
 
   useEnvironmentSelection(environments, selectedEnv, setSelectedEnv);
 
+  console.log("ChatSession mounted", sessionId);
+
   useEffect(() => {
-    if (!session_id) return;
+    mountCount += 1;
+    console.log("ChatSession useEffect mount count:", mountCount);
+  }, []);
+
+  useEffect(() => {
+    // Only create the socket once
+    if (!socketRef.current) {
+      socketRef.current = io('/', { withCredentials: true });
+    }
+    return () => {
+      socketRef.current?.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!socketRef.current || !sessionId) return;
+
+    // Join the room
+    console.log('[SocketIO] Emitting join_chat_session', sessionId);
+    socketRef.current.emit('join_chat_session', { session_id: sessionId });
+
+    // Handler for new_message
+    const handler = (msg: any) => {
+      console.log('[SocketIO] Received new_message:', msg);
+      setMessages(prev => [...prev, msg]);
+    };
+    socketRef.current.on('new_message', handler);
+
+    // Cleanup handler only (not the socket)
+    return () => {
+      socketRef.current?.off('new_message', handler);
+    };
+  }, [sessionId]);
+
+  useEffect(() => {
+    if (!sessionId) return;
     setLoading(true);
-    fetch(`/api/chat-sessions/${session_id}`, { credentials: 'include' })
+    fetch(`/api/chat_sessions/${sessionId}/messages`, { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         setMessages(data.messages || []);
-        setLoading(false);
-      });
-  }, [session_id]);
+      })
+      .catch(err => {
+        setMessages([]);
+      })
+      .finally(() => setLoading(false));
+  }, [sessionId]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -55,84 +106,118 @@ const ChatSession: React.FC<ChatSessionProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || sending) return;
-
     setSending(true);
+    setError(null);
     try {
-      const res = await fetch(`/api/chat-sessions/${session_id}/messages`, {
+      const res = await fetch(`/api/chat_sessions/${sessionId}/message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: input.trim() }),
+        body: JSON.stringify({ prompt: input.trim(), environment_id: selectedEnv, model: selectedModel }),
         credentials: 'include'
       });
       const data = await res.json();
-      if (data.success) {
-        setMessages(prev => [...prev, data.message]);
+      if (data.error) {
+        setError(data.error);
+      } else {
+        setMessages(prev => [...prev, { content: input.trim(), role: 'user' }]);
         setInput('');
       }
     } catch (error) {
+      setError('Error sending message.');
       console.error('Error sending message:', error);
     } finally {
       setSending(false);
     }
   };
 
+  const handleUpload = async (file: File) => {
+    setUploading(true);
+    try {
+      await uploadFileToBackend(file, selectedEnv || '');
+      alert(`Uploaded file: ${file.name}`);
+    } catch (err) {
+      alert('Failed to upload file.');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col flex-1" style={{ background: 'linear-gradient(135deg, #101614 0%, #1a2a1a 60%, #1a2320 100%)' }}>
       <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full px-4 py-8">
-        <div className="flex items-center mb-8">
-          <button
-            onClick={() => navigate(-1)}
-            className="mr-4 text-gray-400 hover:text-white transition-colors"
-          >
-            <FaArrowLeft size={24} />
-          </button>
-          <EnvironmentSelector
-            environments={environments}
-            selectedEnv={selectedEnv}
-            onEnvironmentChange={setSelectedEnv}
-            loadingEnvironments={loadingEnvironments}
-            variant="large"
-          />
-        </div>
-
-        <div className="flex-1 bg-black bg-opacity-40 rounded-lg p-6 mb-8 overflow-y-auto">
+        <div
+          ref={messagesEndRef}
+          className="flex-1 overflow-y-auto px-4 pt-24 pb-6 min-h-0"
+          style={{ scrollBehavior: 'smooth', background: 'transparent' }}
+        >
           {loading ? (
-            <div className="flex-1 flex items-center justify-center">
-              <LoadingSpinner size="large" />
-            </div>
-          ) : messages.length === 0 ? (
-            <div className="text-gray-400 text-center">No messages yet. Start the conversation!</div>
+            <LoadingSpinner text="Loading messages..." />
           ) : (
-            <div className="space-y-6">
+            <>
+              {messages.length === 0 && (
+                <div className="text-gray-400 text-center mt-12">No messages yet. Start the conversation!</div>
+              )}
               {messages.map((msg, idx) => (
-                <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-3xl p-4 rounded-lg ${msg.role === 'user' ? 'bg-green-900 bg-opacity-40' : 'bg-gray-800 bg-opacity-40'}`}>
-                    <pre className="whitespace-pre-wrap font-sans text-white">{msg.content}</pre>
-                  </div>
+                <div key={idx} className={`flex mb-4 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`} style={{ width: '100%' }}>
+                  {msg.role === 'user' ? (
+                    <div
+                      className="rounded-2xl px-5 py-3 shadow-md max-w-[70%] bg-gradient-to-br from-purple-600 to-green-500 text-white ml-auto"
+                      style={{
+                        textAlign: 'right',
+                        fontSize: '1rem',
+                        wordBreak: 'break-word',
+                        borderBottomRightRadius: 8,
+                        borderBottomLeftRadius: 24,
+                        borderTopLeftRadius: 24,
+                        borderTopRightRadius: 24,
+                        marginLeft: 32,
+                        marginRight: 0,
+                        boxShadow: '0 2px 8px 0 rgba(34,197,94,0.10)'
+                      }}
+                    >
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
+                    </div>
+                  ) : (
+                    <div
+                      className="text-gray-100 w-full"
+                      style={{
+                        textAlign: 'left',
+                        fontSize: '1rem',
+                        wordBreak: 'break-word',
+                        marginLeft: 0,
+                        lineHeight: 1.8,
+                      }}
+                    >
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
+                    </div>
+                  )}
                 </div>
               ))}
-              <div ref={messagesEndRef} />
-            </div>
+              {messages.length > 0 && messages[messages.length-1]?.role === 'user' && (
+                <div className="flex justify-start mb-2">
+                  <div className="rounded-xl px-4 py-2 bg-gray-700 text-white max-w-[70%] text-sm opacity-80">
+                    Task is running...
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
 
-        <form onSubmit={handleSubmit} className="flex gap-4">
-          <input
-            type="text"
+        <div className="w-full flex justify-center">
+          <ChatInputBar
+            environments={environments}
+            selectedEnv={selectedEnv}
+            setSelectedEnv={setSelectedEnv}
+            loadingEnvironments={loadingEnvironments}
             value={input}
-            onChange={e => setInput(e.target.value)}
-            placeholder="Type your message..."
-            className="flex-1 bg-black bg-opacity-40 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-            disabled={sending}
+            onChange={setInput}
+            onSubmit={handleSubmit}
+            uploading={uploading || sending}
+            error={error}
+            refreshEnvFiles={refreshEnvFiles}
           />
-          <button
-            type="submit"
-            className={`px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors ${sending ? 'opacity-50 cursor-not-allowed' : ''}`}
-            disabled={sending}
-          >
-            {sending ? <LoadingSpinner size="small" text="" /> : 'Send'}
-          </button>
-        </form>
+        </div>
       </div>
     </div>
   );
