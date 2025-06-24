@@ -5,7 +5,6 @@ const UserProfile: React.FC = () => {
   const { user_id } = useParams<{ user_id: string }>();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
 
   useEffect(() => {
     if (!user_id) return;
