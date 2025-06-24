@@ -294,4 +294,4 @@ if __name__ == "__main__":
             daemon=True,
             name=thread_name,
         ).start()
-    socketio.run(app, host="0.0.0.0", port=8000, debug=False, use_reloader=False) # Always debug=False in prod
+    socketio.run(app, host="0.0.0.0", port=6513, debug=False, use_reloader=False) # Always debug=False in prod
