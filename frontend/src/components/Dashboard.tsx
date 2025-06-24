@@ -81,7 +81,8 @@ const Dashboard: React.FC<DashboardProps> = ({ selectedModel, selectedEnv, setSe
       .catch(err => {
         setActiveTasks([]);
         setArchivedTasks([]);
-        // Optionally, set an error state here
+        setError("Failed to load tasks.");
+        console.error("Error loading tasks:", err);
       })
       .finally(() => setTasksLoading(false));
   }, [selectedEnv]);
@@ -165,9 +166,8 @@ const Dashboard: React.FC<DashboardProps> = ({ selectedModel, selectedEnv, setSe
     setUploadError(null);
     const formData = new FormData();
     formData.append('file', uploadFile);
-    formData.append('environment_id', uploadEnvId);
     try {
-      const res = await fetch('/api/upload-file', {
+      const res = await fetch(`/api/environments/${uploadEnvId}/files`, {
         method: 'POST',
         credentials: 'include',
         cache: 'no-store',
