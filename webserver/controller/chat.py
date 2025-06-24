@@ -8,6 +8,8 @@ from webserver.model.chat_session import ChatSession as CSModel
 from workflows.plain_openai_tasks import plain_openai_task
 from workflows.probra import probra_task
 import logging
+from flask_socketio import emit, join_room
+from webserver.socketio import socketio
 
 chat_bp = Blueprint('chat_sessions', __name__, url_prefix='/api/chat_sessions')
 
@@ -44,13 +46,21 @@ def send_message_in_session(session_id):
         session_id=session_id,
     )
     # Add user message to session
-    Message.create_message(task.task_id, user_id, 'user', prompt, session_id=session_id)
+    message = Message.create_message(task.task_id, user_id, 'user', prompt, session_id=session_id)
+    if message is None:
+        logging.error(f"Failed to create message for task_id={task.task_id}, user_id={user_id}, session_id={session_id}")
+        return jsonify({'error': 'Failed to create message'}), 500
     # If this is the first user message, update the session title
     messages = Message.get_messages_by_session(session_id)
     user_messages = [m for m in messages if m.role == 'user']
     if len(user_messages) == 1:
         CSModel.update_title(session_id, generate_title(prompt))
         logging.info(f"[DEBUG] Updated chat session {session_id} title to: {generate_title(prompt)}")
+
+    # Emit new_message event to the chat session room
+    room = f"chat_session_{session_id}"
+    logging.info(f"[SocketIO] Emitting new_message to room {room} with message: {message.to_dict()}")
+    emit('new_message', message.to_dict(), room=room, namespace='/')
 
     if model == 'toxindex-rap':
         celery_task = probra_task.delay({
@@ -116,4 +126,13 @@ def create_chat_session():
     session = CSModel.create_session(environment_id, user_id, title)
     if not session:
         return jsonify({'error': 'Failed to create chat session'}), 500
-    return jsonify(session.to_dict()) 
+    return jsonify(session.to_dict())
+
+# Add a socketio event to join a chat session room
+@socketio.on('join_chat_session')
+def handle_join_chat_session(data):
+    print(f"[SocketIO] Received join_chat_session: {data}, sid: {request.sid}")
+    session_id = data.get('session_id')
+    room = f"chat_session_{session_id}"
+    logging.info(f"[SocketIO] Client {request.sid} joined room: {room}")
+    join_room(room) 

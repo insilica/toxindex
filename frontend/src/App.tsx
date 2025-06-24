@@ -7,7 +7,7 @@ import CreateEnvironment from "./components/CreateEnvironment";
 import Dashboard from "./components/Dashboard";
 import SettingsEnvironments from "./components/SettingsEnvironments";
 import TermsPrivacy from "./components/TermsPrivacy";
-import { SettingsGeneral } from "./components/Settings";
+import Settings from "./components/Settings";
 import SettingsDataControls from "./components/SettingsDataControls";
 import CreateEnvironmentSettings from "./components/CreateEnvironmentSettings";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
@@ -89,7 +89,7 @@ function App() {
             element={
               <ProtectedRoute>
                 <Layout>
-                  <SettingsGeneral />
+                  <Settings/>
                 </Layout>
               </ProtectedRoute>
             }
@@ -152,6 +152,7 @@ function App() {
                   <ChatSession
                     environments={environments}
                     loadingEnvironments={loadingEnvironments}
+                    refreshEnvFiles={refreshEnvFiles}
                   />
                 </Layout>
               </ProtectedRoute>

@@ -102,7 +102,13 @@ def redis_listener(name):
                 continue
             if event_type == "task_message":
                 logging.info(f"[redis_listener] ({listener_id}) Processing task_message for task_id={event_task_id}")
-                Message.process_event(task, event_data)
+                msg = Message.process_event(task, event_data)
+                # Emit to chat session room if possible
+                if msg and getattr(task, 'session_id', None):
+                    chat_room = f"chat_session_{task.session_id}"
+                    logging.info(f"[redis_listener] ({listener_id}) Emitting new_message to room {chat_room} with message: {msg.to_dict()}")
+                    socketio.emit('new_message', msg.to_dict(), to=chat_room)
+                    logging.info(f"[redis_listener] ({listener_id}) new_message sent to {chat_room}")
             elif event_type == "task_file":
                 logging.info(f"[redis_listener] ({listener_id}) Processing task_file for task_id={event_task_id}")
                 File.process_event(task, event_data)
@@ -144,6 +150,16 @@ def handle_join_task_room(data):
     join_room(room)
     logging.info(f"[socketio] {request.sid} joined room: {room}")
     emit("joined_task_room", {"task_id": task_id})
+
+@socketio.on("join_chat_session")
+def handle_join_chat_session(data):
+    session_id = data.get("session_id")
+    if not session_id:
+        logging.warning(f"[socketio] join_chat_session called without session_id by {request.sid}")
+        return
+    join_room(f"chat_session_{session_id}")
+    logging.info(f"[socketio] {request.sid} joined chat_session_{session_id}")
+    emit("joined_chat_session", {"session_id": session_id}, room=request.sid)
 
 # Register Blueprints for modularized API endpoints
 app.register_blueprint(env_bp)
