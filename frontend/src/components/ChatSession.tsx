@@ -6,7 +6,6 @@ import { useEnvironmentSelection } from './shared/utils/useEnvironmentSelection'
 import ChatInputBar from './shared/ChatInputBar';
 import { io, Socket } from 'socket.io-client';
 import LoadingSpinner from './shared/LoadingSpinner';
-import { uploadFileToBackend } from './shared/utils/uploadFile';
 
 interface Environment {
   environment_id: string;
@@ -38,7 +37,6 @@ const ChatSession: React.FC<ChatSessionProps> = ({
   const [sending, setSending] = useState(false);
   const [input, setInput] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const socketRef = useRef<Socket | null>(null);
 
@@ -91,6 +89,8 @@ const ChatSession: React.FC<ChatSessionProps> = ({
       })
       .catch(err => {
         setMessages([]);
+        setError("Failed to load messages.");
+        console.error("Error loading messages:", err);
       })
       .finally(() => setLoading(false));
   }, [sessionId]);
@@ -127,18 +127,6 @@ const ChatSession: React.FC<ChatSessionProps> = ({
       console.error('Error sending message:', error);
     } finally {
       setSending(false);
-    }
-  };
-
-  const handleUpload = async (file: File) => {
-    setUploading(true);
-    try {
-      await uploadFileToBackend(file, selectedEnv || '');
-      alert(`Uploaded file: ${file.name}`);
-    } catch (err) {
-      alert('Failed to upload file.');
-    } finally {
-      setUploading(false);
     }
   };
 
@@ -213,7 +201,7 @@ const ChatSession: React.FC<ChatSessionProps> = ({
             value={input}
             onChange={setInput}
             onSubmit={handleSubmit}
-            uploading={uploading || sending}
+            uploading={sending}
             error={error}
             refreshEnvFiles={refreshEnvFiles}
           />
