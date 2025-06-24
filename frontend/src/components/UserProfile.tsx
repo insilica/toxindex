@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import HomeButton from "./shared/HomeButton";
 
 const UserProfile: React.FC = () => {
   const { user_id } = useParams<{ user_id: string }>();
@@ -19,7 +20,8 @@ const UserProfile: React.FC = () => {
   if (!user || !user.email) return <div className="text-white p-8">User not found.</div>;
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-950 via-gray-900 to-gray-800 py-16 px-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-950 via-gray-900 to-gray-800 py-16 px-4 relative">
+      <HomeButton className="absolute top-8 left-8" />
       <div className="w-full max-w-lg bg-gray-900 rounded-2xl shadow-2xl p-10 flex flex-col items-center border border-gray-800">
         <div className="flex flex-col items-center mb-6">
           <div className="w-20 h-20 rounded-full bg-gradient-to-br from-green-400 to-green-700 flex items-center justify-center mb-4 shadow-lg">
