@@ -29,7 +29,7 @@ A collection of toxicology workflows for research and analysis.
 
 ```sh
 # Clean up previous environments (if needed)
-deactivate
+exit
 rm -rf .venv
 rm -rf ~/.cache/uv
 unset LD_LIBRARY_PATH
@@ -81,9 +81,9 @@ sudo nano /etc/nginx/conf.d/toxindex.conf
 
 server {
     listen 80;
-    server_name yourdomain.com;  # or your EC2 public IP
+    server_name 18.118.10.140;  # or your EC2 public IP
 
-    root /home/kyu/Documents/toxindex/frontend/dist;
+    root /home/ubuntu/toxindex/frontend/dist;
     index index.html;
 
     location / {

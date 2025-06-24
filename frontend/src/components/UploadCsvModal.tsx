@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { FaTimes } from 'react-icons/fa';
 
 interface Environment {
@@ -27,6 +27,8 @@ const UploadCsvModal: React.FC<UploadCsvModalProps> = ({
   const [selectedEnv, setSelectedEnv] = useState(defaultEnvId || '');
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [dragActive, setDragActive] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (!open) return null;
 
@@ -35,11 +37,42 @@ const UploadCsvModal: React.FC<UploadCsvModalProps> = ({
     if (file) {
       if (!file.name.toLowerCase().endsWith('.csv')) {
         setError('Please select a CSV file');
+        setSelectedFile(null);
         return;
       }
       setSelectedFile(file);
       setError(null);
     }
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setDragActive(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setDragActive(false);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setDragActive(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      if (!file.name.toLowerCase().endsWith('.csv')) {
+        setError('Please select a CSV file');
+        setSelectedFile(null);
+        return;
+      }
+      setSelectedFile(file);
+      setError(null);
+    }
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleDropZoneClick = () => {
+    fileInputRef.current?.click();
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -115,13 +148,34 @@ const UploadCsvModal: React.FC<UploadCsvModalProps> = ({
 
           <div className="mb-4">
             <label className="block text-gray-300 mb-2">CSV File</label>
-            <input
-              type="file"
-              accept=".csv"
-              onChange={handleFileChange}
-              className="w-full bg-gray-800 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-              required
-            />
+            <div
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onClick={handleDropZoneClick}
+              className={`w-full mb-2 p-4 border-2 rounded-lg transition-colors duration-200 cursor-pointer ${
+                dragActive ? 'border-green-400 bg-green-900/20' : 'border-dashed border-gray-600 bg-gray-800/40'
+              }`}
+              style={{ textAlign: 'center', color: dragActive ? '#22c55e' : '#fff' }}
+            >
+              {selectedFile ? (
+                <span>
+                  Selected file: <span className="font-semibold text-green-400">{selectedFile.name}</span>
+                </span>
+              ) : (
+                <span>
+                  Drag and drop your CSV file here, or <span className="underline">click to browse</span>.
+                </span>
+              )}
+              <input
+                type="file"
+                accept=".csv"
+                style={{ display: 'none' }}
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                disabled={uploading}
+              />
+            </div>
           </div>
 
           {error && (

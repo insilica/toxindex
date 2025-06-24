@@ -77,4 +77,21 @@ CREATE TABLE messages (
     content TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     session_id UUID REFERENCES chat_sessions(session_id) ON DELETE CASCADE
-); 
+);
+
+-- Insert default workflows
+INSERT INTO workflows (workflow_id, title, description)
+VALUES
+  (1, 'ToxRAP', 'Default workflow'),
+  (2, 'ToxDirect', 'Vanilla workflow'),
+  (3, 'ToxJson', 'JSON schema workflow')
+ON CONFLICT (workflow_id) DO NOTHING;
+
+-- Insert assistant user for system messages
+INSERT INTO users (user_id, email, hashpw, token, stripe_customer_id)
+VALUES (
+  '00000000-0000-0000-0000-000000000000',
+  'assistant@test.com',
+  '', '', ''
+)
+ON CONFLICT (user_id) DO NOTHING; 
