@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-interface User {
-  user_id: string;
-  email: string;
-}
+// interface User {
+//   user_id: string;
+//   email: string;
+// }
 
 interface CreateEnvironmentSettingsProps {
   refetchEnvironments: () => void;
@@ -13,7 +13,7 @@ interface CreateEnvironmentSettingsProps {
 const CreateEnvironmentSettings: React.FC<CreateEnvironmentSettingsProps> = ({ refetchEnvironments }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [, setUsers] = useState<User[]>([]);
+  // const [, setUsers] = useState<User[]>([]);
   const [selectedUsers, ] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -30,12 +30,12 @@ const CreateEnvironmentSettings: React.FC<CreateEnvironmentSettingsProps> = ({ r
   const [descFocused, setDescFocused] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    // Fetch all users for sharing
-    fetch("/api/users", { credentials: "include" })
-      .then(res => res.json())
-      .then(data => setUsers(data.users || []));
-  }, []);
+  // useEffect(() => {
+  //   // Fetch all users for sharing
+  //   fetch("/api/users", { credentials: "include" })
+  //     .then(res => res.json())
+  //     .then(data => setUsers(data.users || []));
+  // }, []);
 
   useEffect(() => {
     let i = 0;
@@ -104,11 +104,6 @@ const CreateEnvironmentSettings: React.FC<CreateEnvironmentSettingsProps> = ({ r
       setError("Failed to create environment.");
     }
   };
-
-  // const handleUserSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
-  //   const options = Array.from(e.target.selectedOptions, option => option.value);
-  //   setSelectedUsers(options);
-  // };
 
   return (
     <div className="flex flex-col items-center min-h-screen min-w-full w-full h-screen pt-52" 
