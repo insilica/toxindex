@@ -24,11 +24,12 @@ interface DashboardProps {
   refetchChatSessions?: () => void;
   refetchEnvironments: () => void;
   loadingEnvironments: boolean;
+  refreshEnvFiles: (envId: string) => Promise<any>;
 }
 
 const TYPEWRITER_TEXT = "Is it toxic, or just misunderstood? Let's break it down!";
 
-const Dashboard: React.FC<DashboardProps> = ({ selectedModel, selectedEnv, setSelectedEnv, environments, refetchChatSessions, refetchEnvironments, loadingEnvironments }) => {
+const Dashboard: React.FC<DashboardProps> = ({ selectedModel, selectedEnv, setSelectedEnv, environments, refetchChatSessions, refetchEnvironments, loadingEnvironments, refreshEnvFiles }) => {
   const [chatInput, setChatInput] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [tasksLoading, setTasksLoading] = useState(false);
@@ -57,6 +58,12 @@ const Dashboard: React.FC<DashboardProps> = ({ selectedModel, selectedEnv, setSe
   }, [refetchEnvironments]);
 
   useEffect(() => {
+    if (selectedEnv && selectedEnv !== "__add__" && selectedEnv !== "__manage__") {
+      refreshEnvFiles(selectedEnv);
+    }
+  }, [selectedEnv, refreshEnvFiles]);
+
+  useEffect(() => {
     setTasksLoading(true);
     let url = "/api/tasks";
     if (selectedEnv && selectedEnv !== "__add__" && selectedEnv !== "__manage__") {
@@ -76,45 +83,6 @@ const Dashboard: React.FC<DashboardProps> = ({ selectedModel, selectedEnv, setSe
       setSelectWidth(spanRef.current.offsetWidth + 40); // add some padding
     }
   }, [selectedEnv, environments]);
-
-  const isLocalStorageAvailable = () => {
-    try {
-      const test = '__storage_test__';
-      localStorage.setItem(test, test);
-      localStorage.removeItem(test);
-      return true;
-    } catch (e) {
-      return false;
-    }
-  };
-
-  useEffect(() => {
-    if (!setSelectedEnv) return;
-    try {
-      const stored = isLocalStorageAvailable() ? localStorage.getItem('selectedEnv') : null;
-      if (stored && environments.some(e => e.environment_id === stored)) {
-        setSelectedEnv(stored);
-      } else if (environments.length > 0) {
-        setSelectedEnv(environments[0].environment_id);
-      }
-    } catch (error) {
-      // Fallback to first environment if localStorage fails
-      if (environments.length > 0) {
-        setSelectedEnv(environments[0].environment_id);
-      }
-    }
-  }, [environments, setSelectedEnv]);
-
-  useEffect(() => {
-    if (selectedEnv && isLocalStorageAvailable()) {
-      try {
-        localStorage.setItem('selectedEnv', selectedEnv);
-      } catch (error) {
-        // Silently fail if localStorage is not available
-        console.debug('Could not save environment selection to localStorage');
-      }
-    }
-  }, [selectedEnv]);
 
   useEffect(() => {
     function startTypewriter() {
@@ -269,6 +237,7 @@ const Dashboard: React.FC<DashboardProps> = ({ selectedModel, selectedEnv, setSe
       setError("Failed to create new chat session.");
     }
   };
+
 
   return (
     <div className="min-h-screen flex flex-col flex-1" style={{ background: 'linear-gradient(135deg, #101614 0%, #1a2a1a 60%, #1a2320 100%)', position: 'relative' }}>
