@@ -52,6 +52,8 @@ const Dashboard: React.FC<DashboardProps> = ({ selectedModel, selectedEnv, setSe
   const typewriterTimeoutRef = useRef<number | null>(null);
   const typewriterIntervalRef = useRef<number | null>(null);
 
+  console.log("Dashboard mounted");
+
   // Fetch environments when component mounts
   useEffect(() => {
     refetchEnvironments();
@@ -64,6 +66,7 @@ const Dashboard: React.FC<DashboardProps> = ({ selectedModel, selectedEnv, setSe
   }, [selectedEnv, refreshEnvFiles]);
 
   useEffect(() => {
+    console.log("selectedEnv", selectedEnv);
     setTasksLoading(true);
     let url = "/api/tasks";
     if (selectedEnv && selectedEnv !== "__add__" && selectedEnv !== "__manage__") {
@@ -74,6 +77,11 @@ const Dashboard: React.FC<DashboardProps> = ({ selectedModel, selectedEnv, setSe
       .then(data => {
         setActiveTasks(data.active_tasks || []);
         setArchivedTasks(data.archived_tasks || []);
+      })
+      .catch(err => {
+        setActiveTasks([]);
+        setArchivedTasks([]);
+        // Optionally, set an error state here
       })
       .finally(() => setTasksLoading(false));
   }, [selectedEnv]);
