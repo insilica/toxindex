@@ -4,7 +4,7 @@ import Modal from 'react-modal';
 Modal.setAppElement('#root'); // Adjust if your app root is different
 
 interface FilePreviewModalProps {
-  fileId: number | null;
+  fileId: string | null;
   envId: string;
   isOpen: boolean;
   onRequestClose: () => void;

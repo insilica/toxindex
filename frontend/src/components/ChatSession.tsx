@@ -111,12 +111,11 @@ const ChatSession = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col flex-1" style={{ background: 'linear-gradient(135deg, #101614 0%, #1a2a1a 60%, #1a2320 100%)' }}>
-      <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full px-4 py-8">
+    <div className="h-screen flex flex-col flex-1" style={{ background: 'linear-gradient(135deg, #101614 0%, #1a2a1a 60%, #1a2320 100%)' }}>
+      <div className="flex-1 flex flex-col max-w-5xl mx-auto w-full px-4 pt-20 py-0">
         <div
-          ref={messagesEndRef}
-          className="flex-1 overflow-y-auto px-4 pt-24 pb-6 min-h-0"
-          style={{ scrollBehavior: 'smooth', background: 'transparent' }}
+          className="w-full max-w-5xl mx-auto px-20 py-0 bg-transparent rounded-lg shadow-inner"
+          style={{ maxHeight: '70vh', overflowY: 'auto', scrollBehavior: 'smooth', background: 'transparent' }}
         >
           {loading ? (
             <LoadingSpinner text="Loading messages..." />
@@ -168,11 +167,12 @@ const ChatSession = () => {
                   </div>
                 </div>
               )}
+              <div ref={messagesEndRef} />
             </>
           )}
         </div>
 
-        <div className="w-full flex justify-center">
+        <div className="w-full flex justify-center mt-6">
           <ChatInputBar
             value={input}
             onChange={setInput}
