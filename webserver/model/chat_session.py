@@ -1,6 +1,5 @@
 import webserver.datastore as ds
 import logging
-import datetime
 import uuid
 
 class ChatSession:

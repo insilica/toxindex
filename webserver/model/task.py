@@ -1,6 +1,8 @@
 import webserver.datastore as ds
 import logging
 import datetime
+import redis
+import json
 
 
 class Task:
@@ -19,6 +21,7 @@ class Task:
         archived=False,
         last_accessed=None,
         session_id=None,
+        status=None,
     ):
         self.task_id = task_id
         self.title = title
@@ -32,6 +35,7 @@ class Task:
         self.archived = archived
         self.last_accessed = last_accessed
         self.session_id = session_id
+        self.status = status
 
     def to_dict(self):
         return {
@@ -58,6 +62,7 @@ class Task:
                 else None
             ),
             "session_id": str(self.session_id) if self.session_id else None,
+            "status": self.status,
         }
 
     @staticmethod
@@ -75,6 +80,7 @@ class Task:
             archived=row.get("archived", False),  #optional with default  
             last_accessed=row.get("last_accessed"),
             session_id=row.get("session_id"),
+            status=row.get("status"),
         )
 
     @staticmethod
@@ -101,13 +107,13 @@ class Task:
             description,
             session_id,
             created_at,
+            'processing', # status
         )
         logging.info(f"create_task params: {params}")
         ds.execute(
-            "INSERT INTO tasks (title, user_id, celery_task_id, workflow_id, environment_id, description, session_id, created_at) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+            "INSERT INTO tasks (title, user_id, celery_task_id, workflow_id, environment_id, description, session_id, created_at, status) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
             params,
         )
-
 
         # Fetch and return the newly created task
         res = ds.find(
@@ -197,7 +203,16 @@ class Task:
     def mark_finished(task_id):
         finished_at = datetime.datetime.now(datetime.timezone.utc)
         ds.execute(
-            "UPDATE tasks SET finished_at = %s WHERE task_id = %s",
+            "UPDATE tasks SET finished_at = %s, status = 'done' WHERE task_id = %s",
             (finished_at, task_id)
         )
+        # Publish status update to Redis for real-time UI
+        r = redis.Redis()
+        task = Task.get_task(task_id)
+        event = {
+            "type": "task_status_update",
+            **task.to_dict(),
+        }
+        logging.info(f"[mark_finished] Publishing task_status_update for task_id={task_id}: {event}")
+        r.publish("celery_updates", json.dumps(event, default=str))
         return finished_at
