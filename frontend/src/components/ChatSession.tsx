@@ -2,35 +2,15 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { useEnvironmentSelection } from './shared/utils/useEnvironmentSelection';
+import { useEnvironment } from "../context/EnvironmentContext";
+import { useModel } from "../context/ModelContext";
 import ChatInputBar from './shared/ChatInputBar';
 import { io, Socket } from 'socket.io-client';
 import LoadingSpinner from './shared/LoadingSpinner';
 
-interface Environment {
-  environment_id: string;
-  title: string;
-}
-
-interface ChatSessionProps {
-  environments: Environment[];
-  selectedEnv?: string;
-  setSelectedEnv?: (envId: string) => void;
-  loadingEnvironments?: boolean;
-  selectedModel?: string;
-  refreshEnvFiles?: (envId: string) => Promise<any>;
-}
-
 let mountCount = 0;
 
-const ChatSession: React.FC<ChatSessionProps> = ({
-  environments,
-  selectedEnv,
-  setSelectedEnv,
-  loadingEnvironments = false,
-  selectedModel,
-  refreshEnvFiles
-}) => {
+const ChatSession = () => {
   const { sessionId } = useParams<{ sessionId: string }>();
   const [messages, setMessages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -39,8 +19,8 @@ const ChatSession: React.FC<ChatSessionProps> = ({
   const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const socketRef = useRef<Socket | null>(null);
-
-  useEnvironmentSelection(environments, selectedEnv, setSelectedEnv);
+  const { selectedEnv } = useEnvironment();
+  const { selectedModel } = useModel();
 
   console.log("ChatSession mounted", sessionId);
 
@@ -112,7 +92,7 @@ const ChatSession: React.FC<ChatSessionProps> = ({
       const res = await fetch(`/api/chat_sessions/${sessionId}/message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: input.trim(), environment_id: selectedEnv, model: selectedModel }),
+        body: JSON.stringify({ prompt: input.trim(), environment_id: selectedEnv || undefined, model: selectedModel }),
         credentials: 'include'
       });
       const data = await res.json();
@@ -194,16 +174,11 @@ const ChatSession: React.FC<ChatSessionProps> = ({
 
         <div className="w-full flex justify-center">
           <ChatInputBar
-            environments={environments}
-            selectedEnv={selectedEnv}
-            setSelectedEnv={setSelectedEnv}
-            loadingEnvironments={loadingEnvironments}
             value={input}
             onChange={setInput}
             onSubmit={handleSubmit}
             uploading={sending}
             error={error}
-            refreshEnvFiles={refreshEnvFiles}
           />
         </div>
       </div>
