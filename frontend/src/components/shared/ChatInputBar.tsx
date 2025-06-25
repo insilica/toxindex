@@ -2,17 +2,9 @@ import React, { useState } from 'react';
 import { FaPlus } from 'react-icons/fa';
 import EnvironmentSelector from './EnvironmentSelector';
 import UploadCsvModal from '../UploadCsvModal';
-
-interface Environment {
-  environment_id: string;
-  title: string;
-}
+import { useEnvironment } from "../../context/EnvironmentContext";
 
 interface ChatInputBarProps {
-  environments: Environment[];
-  selectedEnv?: string;
-  setSelectedEnv?: (envId: string) => void;
-  loadingEnvironments?: boolean;
   value: string;
   onChange: (v: string) => void;
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
@@ -20,23 +12,18 @@ interface ChatInputBarProps {
   error?: string | null;
   placeholder?: string;
   disabled?: boolean;
-  refreshEnvFiles?: (envId: string) => Promise<any>;
 }
 
 const ChatInputBar: React.FC<ChatInputBarProps> = ({
-  environments,
-  selectedEnv,
-  setSelectedEnv,
-  loadingEnvironments = false,
   value,
   onChange,
   onSubmit,
   uploading = false,
   error,
   placeholder = 'Ask me your toxicology question [ Is green tea nephrotoxic? ]',
-  refreshEnvFiles
 }) => {
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const { environments, selectedEnv } = useEnvironment();
 
   const handleUploadClick = () => {
     setShowUploadModal(true);
@@ -85,13 +72,7 @@ const ChatInputBar: React.FC<ChatInputBarProps> = ({
             </button>
           </div>
           <div className="absolute left-4 z-20 flex items-end" style={{ position: 'relative', width: '210px', overflow: 'visible', bottom: '3rem' }}>
-            <EnvironmentSelector
-              environments={environments}
-              selectedEnv={selectedEnv}
-              onEnvironmentChange={setSelectedEnv}
-              loadingEnvironments={loadingEnvironments}
-              variant="default"
-            />
+            <EnvironmentSelector/>
           </div>
         </div>
         {error && <div className="text-red-500 mt-2">{error}</div>}
@@ -100,9 +81,8 @@ const ChatInputBar: React.FC<ChatInputBarProps> = ({
         open={showUploadModal}
         onClose={() => setShowUploadModal(false)}
         environments={environments}
-        defaultEnvId={selectedEnv}
+        defaultEnvId={selectedEnv || undefined}
         onUploadSuccess={() => setShowUploadModal(false)}
-        refreshEnvFiles={refreshEnvFiles}
       />
     </>
   );

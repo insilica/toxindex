@@ -1,32 +1,19 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-interface Environment {
-  environment_id: string;
-  title: string;
-}
+import { useEnvironment } from "../../context/EnvironmentContext";
 
 interface EnvironmentSelectorProps {
-  environments: Environment[];
-  selectedEnv?: string;
-  onEnvironmentChange?: (envId: string) => void;
-  loadingEnvironments?: boolean;
-  variant?: 'default' | 'large';
   className?: string;
 }
 
 const EnvironmentSelector: React.FC<EnvironmentSelectorProps> = ({
-  environments,
-  selectedEnv,
-  onEnvironmentChange,
-  loadingEnvironments = false,
-  variant = 'default',
   className = ''
 }) => {
   const navigate = useNavigate();
   const selectRef = useRef<HTMLSelectElement>(null);
   const spanRef = useRef<HTMLSpanElement>(null);
   const [selectWidth, setSelectWidth] = useState(120);
+  const { environments, selectedEnv, setSelectedEnv, loadingEnvironments } = useEnvironment();
 
   // Update width based on selected content
   useEffect(() => {
@@ -42,14 +29,12 @@ const EnvironmentSelector: React.FC<EnvironmentSelectorProps> = ({
     } else if (value === "__manage__") {
       navigate("/settings/environments");
     } else {
-      onEnvironmentChange?.(value);
+      setSelectedEnv(value);
     }
   };
 
-  const isLarge = variant === 'large';
-
   return (
-    <div className="relative group" style={{ minWidth: isLarge ? 180 : 180, maxWidth: isLarge ? 340 : 210 }}>
+    <div className="relative group" style={{ minWidth: 180, maxWidth: 210 }}>
       {/* Hidden span to measure width */}
       <span
         ref={spanRef}
@@ -58,7 +43,7 @@ const EnvironmentSelector: React.FC<EnvironmentSelectorProps> = ({
           visibility: "hidden",
           whiteSpace: "nowrap",
           fontWeight: "bold",
-          fontSize: isLarge ? "1.2rem" : "0.875rem",
+          fontSize: "0.875rem",
           fontFamily: "inherit",
           padding: "0 16px"
         }}
@@ -73,12 +58,12 @@ const EnvironmentSelector: React.FC<EnvironmentSelectorProps> = ({
       </span>
       <select
         ref={selectRef}
-        className={`font-bold text-white ${isLarge ? 'text-lg' : 'text-sm'} px-1 py-2 rounded-full appearance-none bg-transparent border-none focus:outline-none transition-all duration-150 group-hover:bg-black group-hover:bg-opacity-60 group-hover:border group-hover:border-gray-700 group-hover:px-4 group-hover:pr-10 group-hover:cursor-pointer focus:bg-black focus:bg-opacity-60 focus:border focus:border-gray-700 focus:px-4 focus:pr-10 w-full ${loadingEnvironments ? 'opacity-50' : ''} ${className}`}
+        className={`font-bold text-white text-sm px-1 py-2 rounded-full appearance-none bg-transparent border-none focus:outline-none transition-all duration-150 group-hover:bg-black group-hover:bg-opacity-60 group-hover:border group-hover:border-gray-700 group-hover:px-4 group-hover:pr-10 group-hover:cursor-pointer focus:bg-black focus:bg-opacity-60 focus:border focus:border-gray-700 focus:px-4 focus:pr-10 w-full ${loadingEnvironments ? 'opacity-50' : ''} ${className}`}
         style={{
           width: `${selectWidth}px`,
           minWidth: "50px",
-          maxWidth: isLarge ? "340px" : "260px",
-          height: isLarge ? '2rem' : '1.7rem',
+          maxWidth: "260px",
+          height: '1.7rem',
           borderRadius: '999px',
           position: 'relative',
           zIndex: 1,
