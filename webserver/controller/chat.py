@@ -57,11 +57,6 @@ def send_message_in_session(session_id):
         CSModel.update_title(session_id, generate_title(prompt))
         logging.info(f"[DEBUG] Updated chat session {session_id} title to: {generate_title(prompt)}")
 
-    # Emit new_message event to the chat session room
-    # room = f"chat_session_{session_id}"
-    # logging.info(f"[SocketIO] Emitting new_message to room {room} with message: {message.to_dict()}")
-    # emit('new_message', message.to_dict(), room=room, namespace='/')
-
     if model == 'toxindex-rap':
         celery_task = probra_task.delay({
             'payload': prompt,
