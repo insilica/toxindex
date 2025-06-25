@@ -91,7 +91,7 @@ server {
     }
 
     location /api/ {
-        proxy_pass http://127.0.0.1:6513/;
+        proxy_pass http://127.0.0.1:6513;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -109,6 +109,10 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 }
+
+
+
+
 
 sudo nginx -t
 sudo systemctl reload nginx
@@ -144,6 +148,42 @@ celery -A workflows.celery_worker worker --loglevel=info
     `celery -A workflows.celery_worker worker --loglevel=info`
   - Start frontend:  
     `cd frontend && npm run dev`
+
+sudo nano /etc/nginx/sites-available/toxindex
+
+server {
+    listen 80;
+    server_name localhost;
+
+    root /home/kyu/Documents/toxindex/frontend/dist;
+    index index.html;
+
+    location / {
+        try_files $uri /index.html;
+    }
+
+    location /api/ {
+        proxy_pass http://127.0.0.1:6513;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location /socket.io/ {
+        proxy_pass http://127.0.0.1:6513;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+sudo nginx -t
+sudo systemctl reload nginx
 
 ---
 

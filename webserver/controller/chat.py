@@ -8,7 +8,7 @@ from webserver.model.chat_session import ChatSession as CSModel
 from workflows.plain_openai_tasks import plain_openai_task
 from workflows.probra import probra_task
 import logging
-from flask_socketio import emit, join_room
+from flask_socketio import join_room
 from webserver.socketio import socketio
 
 chat_bp = Blueprint('chat_sessions', __name__, url_prefix='/api/chat_sessions')
@@ -58,9 +58,9 @@ def send_message_in_session(session_id):
         logging.info(f"[DEBUG] Updated chat session {session_id} title to: {generate_title(prompt)}")
 
     # Emit new_message event to the chat session room
-    room = f"chat_session_{session_id}"
-    logging.info(f"[SocketIO] Emitting new_message to room {room} with message: {message.to_dict()}")
-    emit('new_message', message.to_dict(), room=room, namespace='/')
+    # room = f"chat_session_{session_id}"
+    # logging.info(f"[SocketIO] Emitting new_message to room {room} with message: {message.to_dict()}")
+    # emit('new_message', message.to_dict(), room=room, namespace='/')
 
     if model == 'toxindex-rap':
         celery_task = probra_task.delay({

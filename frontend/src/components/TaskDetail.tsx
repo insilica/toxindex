@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import HomeButton from "./shared/HomeButton";
 
 interface Task {
   task_id: string;
@@ -32,6 +33,10 @@ const TaskDetail: React.FC = () => {
   const [assistantMessage, setAssistantMessage] = useState<string | null>(null);
   const [messageLoading, setMessageLoading] = useState(false);
   const navigate = useNavigate();
+
+  // Tab state
+  const [activeTab, setActiveTab] = useState<'MDrender' | 'MDraw' | 'JsonSchema'>('MDrender');
+  const [toxicitySchema, setToxicitySchema] = useState<any>(null);
 
   const fetchTask = useCallback(async () => {
     if (!task_id) return;
@@ -87,6 +92,16 @@ const TaskDetail: React.FC = () => {
     fetchAssistantMessage();
   }, [task_id]);
 
+  // Fetch schema when JsonSchema tab is selected
+  useEffect(() => {
+    if (activeTab === 'JsonSchema' && !toxicitySchema) {
+      fetch('/api/schema/toxicity')
+        .then(res => res.json())
+        .then(setToxicitySchema)
+        .catch(() => setToxicitySchema({ error: "Failed to load schema" }));
+    }
+  }, [activeTab, toxicitySchema]);
+
   useEffect(() => {
     fetchTask();
   }, [fetchTask]);
@@ -98,21 +113,88 @@ const TaskDetail: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto p-8 bg-gray-900 rounded-lg shadow text-white mt-12 flex flex-col min-h-[70vh]">
-      <h2 className="text-3xl font-bold mb-6 text-center">{task.title}</h2>
-      <div className="flex-1 flex flex-col items-center justify-center">
-        {messageLoading ? (
-          <div className="text-gray-400">Loading result...</div>
-        ) : assistantMessage ? (
-          <div className="prose prose-invert w-full max-w-full bg-gray-800 rounded-lg p-6 shadow-inner overflow-x-auto" style={{ lineHeight: 2 }}>
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{assistantMessage}</ReactMarkdown>
+      <HomeButton className="absolute top-8 left-8" />
+      <div className="flex items-center justify-center mb-5" style={{ minHeight: '2.0rem' }}>
+        <h2 className="text-3xl font-semibold text-center mr-6" style={{ marginBottom: 0 }}>{task.title}</h2>
+        <div className="flex space-x-2 ml-4">
+          <button
+            className={`px-4 py-2 font-semibold rounded-t-lg focus:outline-none transition border-b-4 ${activeTab === 'MDrender' ? 'border-green-400 text-green-300 bg-gray-800' : 'border-transparent text-gray-400 bg-gray-900 hover:text-white'}`}
+            onClick={() => setActiveTab('MDrender')}
+          >
+            MDrender
+          </button>
+          <button
+            className={`px-4 py-2 font-semibold rounded-t-lg focus:outline-none transition border-b-4 ${activeTab === 'MDraw' ? 'border-green-400 text-green-300 bg-gray-800' : 'border-transparent text-gray-400 bg-gray-900 hover:text-white'}`}
+            onClick={() => setActiveTab('MDraw')}
+          >
+            MDraw
+          </button>
+          <button
+            className={`px-4 py-2 font-semibold rounded-t-lg focus:outline-none transition border-b-4 ${activeTab === 'JsonSchema' ? 'border-green-400 text-green-300 bg-gray-800' : 'border-transparent text-gray-400 bg-gray-900 hover:text-white'}`}
+            onClick={() => setActiveTab('JsonSchema')}
+          >
+            JsonSchema
+          </button>
+        </div>
+      </div>
+      {/* Tab content */}
+      <div className="flex-1 flex flex-col items-center justify-center w-full">
+        {activeTab === 'MDrender' && (
+          <div className="w-full max-w-full bg-gray-800 rounded-lg p-6 shadow-inner">
+            {messageLoading ? (
+              <div className="text-gray-400">Loading result...</div>
+            ) : assistantMessage ? (
+              <div
+                className="prose prose-invert w-full max-w-full"
+                style={{ lineHeight: 2, maxHeight: 650, overflowY: 'auto' }}
+              >
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{assistantMessage}</ReactMarkdown>
+              </div>
+            ) : (
+              <div className="text-gray-400">No assistant message found for this task.</div>
+            )}
           </div>
-        ) : (
-          <div className="text-gray-400">No assistant message found for this task.</div>
+        )}
+        {activeTab === 'MDraw' && (
+          <div className="w-full max-w-full bg-gray-800 rounded-lg p-6 shadow-inner">
+            <div className="text-lg font-semibold mb-2">Raw Markdown</div>
+            <pre
+              style={{
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-all',
+                textAlign: 'left',
+                color: '#a3e635',
+                background: 'transparent',
+                fontSize: '1.1em',
+                maxHeight: 650,
+                overflowY: 'auto'
+              }}
+            >
+              {assistantMessage}
+            </pre>
+          </div>
+        )}
+        {activeTab === 'JsonSchema' && (
+          <div
+            className="w-full max-w-full bg-gray-800 rounded-lg p-6 shadow-inner"
+          >
+            <div className="text-lg font-semibold mb-2">Toxicity Schema</div>
+            <pre style={{
+              textAlign: 'left',
+              color: '#a3e635',
+              background: 'transparent',
+              fontSize: '1.1em',
+              maxHeight: 650,
+              overflowY: 'auto'
+            }}>
+              {toxicitySchema ? JSON.stringify(toxicitySchema, null, 2) : "Loading..."}
+            </pre>
+          </div>
         )}
       </div>
-      <footer className="mt-8 pt-8 pb-8 pl-8 pr-8 border-t border-gray-700 bg-gray-950 rounded-b-lg shadow-inner">
-        <div className="w-full max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 text-base overflow-x-auto min-w-0 w-full">
+      <footer className="mt-6 pt-1 pb-1 pl-20 pr-10 border-t border-gray-700 bg-gray-950 rounded-b-lg shadow-inner">
+        <div className="w-full max-w-10xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-0 text-base overflow-x-auto min-w-0 w-full">
             <div className="flex items-center space-x-2">
               <span className="font-semibold text-gray-300">Tool:</span>
               <span>{task.workflow_id === 1 ? "ToxIndex RAP" : task.workflow_id === 2 ? "ToxIndex Vanilla" : task.workflow_id ?? <span className="text-gray-400">Unknown</span>}</span>
@@ -123,7 +205,17 @@ const TaskDetail: React.FC = () => {
                 {task.user_id ? (
                   <button
                     className="text-purple-400 underline hover:text-purple-300 focus:outline-none bg-transparent p-0 shadow-none border-none break-all w-full text-left"
-                    style={{ background: 'none', boxShadow: 'none', border: 'none', wordBreak: 'break-all' }}
+                    style={{
+                      background: 'none',
+                      boxShadow: 'none',
+                      border: 'none',
+                      wordBreak: 'break-all',
+                      minHeight: '1rem',
+                      lineHeight: '1rem',
+                      paddingTop: '1px',
+                      paddingBottom: '1px',
+                      display: 'inline-block',
+                    }}
                     onClick={() => navigate(`/user/${task.user_id}`)}
                     title="Go to user profile"
                     aria-label="Go to user profile"
@@ -153,7 +245,17 @@ const TaskDetail: React.FC = () => {
                 {task.environment_id ? (
                   <button
                     className="text-blue-400 underline hover:text-blue-300 focus:outline-none bg-transparent p-0 shadow-none border-none break-all w-full text-left"
-                    style={{ background: 'none', boxShadow: 'none', border: 'none', wordBreak: 'break-all' }}
+                    style={{
+                      background: 'none',
+                      boxShadow: 'none',
+                      border: 'none',
+                      wordBreak: 'break-all',
+                      minHeight: '1rem',
+                      lineHeight: '1rem',
+                      paddingTop: '1px',
+                      paddingBottom: '1px',
+                      display: 'inline-block',
+                    }}
                     onClick={() => navigate(`/environment/${task.environment_id}`)}
                     title="Go to environment"
                     aria-label="Go to environment"
@@ -171,7 +273,17 @@ const TaskDetail: React.FC = () => {
                 {task.session_id ? (
                   <button
                     className="text-green-400 underline hover:text-green-300 focus:outline-none bg-transparent p-0 shadow-none border-none break-all w-full text-left"
-                    style={{ background: 'none', boxShadow: 'none', border: 'none', wordBreak: 'break-all' }}
+                    style={{
+                      background: 'none',
+                      boxShadow: 'none',
+                      border: 'none',
+                      wordBreak: 'break-all',
+                      minHeight: '1rem',
+                      lineHeight: '1rem',
+                      paddingTop: '1px',
+                      paddingBottom: '1px',
+                      display: 'inline-block',
+                    }}
                     onClick={() => navigate(`/chat/session/${task.session_id}`)}
                     title="Go to chat session"
                     aria-label="Go to chat session"

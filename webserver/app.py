@@ -29,6 +29,7 @@ from webserver.controller.auth import auth_bp
 from webserver.csrf import csrf
 from webserver.socketio import socketio
 from webserver.controller.user import user_bp
+from webserver.controller.schema import schema_bp
 
 dotenv.load_dotenv()
 
@@ -167,6 +168,7 @@ app.register_blueprint(task_bp)
 app.register_blueprint(chat_bp)
 app.register_blueprint(auth_bp)
 app.register_blueprint(user_bp)
+app.register_blueprint(schema_bp)
 
 # ICONS ======================================================================
 @app.route("/favicon.ico")

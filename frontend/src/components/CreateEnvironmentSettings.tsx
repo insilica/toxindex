@@ -1,19 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useEnvironment } from "../context/EnvironmentContext";
 
-// interface User {
-//   user_id: string;
-//   email: string;
-// }
-
-interface CreateEnvironmentSettingsProps {
-  refetchEnvironments: () => void;
-}
-
-const CreateEnvironmentSettings: React.FC<CreateEnvironmentSettingsProps> = ({ refetchEnvironments }) => {
+const CreateEnvironmentSettings: React.FC = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  // const [, setUsers] = useState<User[]>([]);
   const [selectedUsers, ] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -29,13 +20,7 @@ const CreateEnvironmentSettings: React.FC<CreateEnvironmentSettingsProps> = ({ r
   const [nameFocused, setNameFocused] = useState(false);
   const [descFocused, setDescFocused] = useState(false);
   const navigate = useNavigate();
-
-  // useEffect(() => {
-  //   // Fetch all users for sharing
-  //   fetch("/api/users", { credentials: "include" })
-  //     .then(res => res.json())
-  //     .then(data => setUsers(data.users || []));
-  // }, []);
+  const { setSelectedEnv, refetchEnvironments } = useEnvironment();
 
   useEffect(() => {
     let i = 0;
@@ -100,6 +85,10 @@ const CreateEnvironmentSettings: React.FC<CreateEnvironmentSettingsProps> = ({ r
       setSuccess("Environment created successfully!");
       refetchEnvironments();
       setTimeout(() => navigate("/settings/environments"), 1200);
+      const data = await res.json();
+      if (data.environment_id) {
+        setSelectedEnv(data.environment_id);
+      }
     } else {
       setError("Failed to create environment.");
     }
