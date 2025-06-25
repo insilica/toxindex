@@ -115,8 +115,9 @@ def redis_listener(name):
                 File.process_event(task, event_data)
             elif event_type == "task_status_update":
                 logging.info(f"[redis_listener] ({listener_id}) Processing task_status_update for task_id={event_task_id}")
-                # event_data should be the full task dict
-                room = f"task_{task.task_id}"
+                # For task_status_update, the event itself is the task dict
+                event_data = event
+                room = f"task_{event_task_id}"
                 logging.info(f"[redis_listener] ({listener_id}) Emitting task_status_update to room {room} with data: {event_data}")
                 socketio.emit("task_status_update", event_data, to=room)
                 logging.info(f"[redis_listener] ({listener_id}) task_status_update sent to {room}")
