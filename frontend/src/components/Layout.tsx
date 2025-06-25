@@ -3,9 +3,11 @@ import { useNavigate, useLocation } from "react-router-dom";
 import FilePreviewModal from './FilePreviewModal';
 import { FaComments, FaPlus, FaListAlt, FaFileCsv, FaFileAlt, FaFileCode, FaDatabase, FaFileImage, FaFile, FaEllipsisH } from 'react-icons/fa';
 import { createPortal } from "react-dom";
-import { useEnvironmentSelection } from './shared/utils/useEnvironmentSelection';
-
+import { useEnvironment } from "../context/EnvironmentContext";
+import { useChatSession } from "../context/ChatSessionContext";
+import { useModel } from "../context/ModelContext";
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  console.log("Layout mounted");
   const navigate = useNavigate();
   const location = useLocation();
   const [auth, setAuth] = useState<null | boolean>(null);
@@ -14,14 +16,14 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
   const [user, setUser] = useState<{ email?: string; user_id?: string } | null>(null);
-  const [selectedModel, setSelectedModel] = useState("toxindex-rap");
+  const { selectedModel, setSelectedModel } = useModel();
   const [environments, setEnvironments] = useState<{ environment_id: string; title: string }[]>([]);
-  const [selectedEnv, setSelectedEnv] = useState<string>("");
   const [envFiles, setEnvFiles] = useState<{ file_id: number; filename: string }[]>([]);
   const [sidebarPreviewFileId, setSidebarPreviewFileId] = useState<number | null>(null);
   const [sidebarPreviewOpen, setSidebarPreviewOpen] = useState(false);
-  const [chatSessions, setChatSessions] = useState<any[]>([]);
-  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
+
+  const { refetchChatSessions, selectedSessionId, setSelectedSessionId, chatSessions} = useChatSession();
+  const { selectedEnv, setSelectedEnv } = useEnvironment(); 
   const [openChatMenu, setOpenChatMenu] = useState<string | null>(null);
   const menuButtonRefs = useRef<{ [key: string]: React.RefObject<HTMLButtonElement> }>({});
 
@@ -75,21 +77,36 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       });
   }, []);
 
+  // Robust two-way sync between selectedEnv and the URL
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const envParam = params.get("env");
+
+    // 1. If the URL param is valid and different, update selectedEnv
+    if (
+      environments.length > 0 &&
+      envParam &&
+      environments.some(e => e.environment_id === envParam) &&
+      envParam !== selectedEnv
+    ) {
+      setSelectedEnv(envParam);
+      return; // Don't update URL in this render
+    }
+
+    // 2. If selectedEnv is valid and different from the URL, update the URL
+    if (
+      selectedEnv &&
+      (!envParam || envParam !== selectedEnv)
+    ) {
+      params.set("env", selectedEnv);
+      navigate({ search: params.toString() }, { replace: true });
+    }
+  }, [environments, selectedEnv, location.search, navigate]);
+
   // Fetch chat sessions (flat, not by environment)
   useEffect(() => {
-    fetch(`/api/chat_sessions`, { credentials: 'include' })
-      .then(res => res.json())
-      .then(data => {
-        setChatSessions(data.sessions || []);
-        if (data.sessions && data.sessions.length > 0) {
-          setSelectedSessionId(data.sessions[0].session_id);
-        } else {
-          setSelectedSessionId(null);
-        }
-      });
-  }, []);
-
-  useEnvironmentSelection(environments, selectedEnv, setSelectedEnv);
+    refetchChatSessions();
+  }, [refetchChatSessions]);
 
   const handleLogout = () => {
     fetch("/api/auth/logout", {
@@ -107,14 +124,6 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   else if (location.pathname === "/settings/data-controls") settingsSection = 'data-controls';
   else if (location.pathname === "/settings/general") settingsSection = 'general';
 
-  // Helper to refetch chat sessions (flat)
-  const refetchChatSessions = async () => {
-    const res = await fetch(`/api/chat_sessions`, { credentials: 'include' });
-    const data = await res.json();
-    setChatSessions(data.sessions || []);
-    console.log('DEBUG: Sidebar chat sessions updated', data.sessions);
-  };
-
   // Create a new chat session (flat)
   const handleNewChat = async () => {
     const res = await fetch(`/api/chat_sessions`, {
@@ -129,17 +138,6 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       setSelectedSessionId(session.session_id);
       navigate(`/chat/session/${session.session_id}`);
     }
-  };
-
-  // Add a function to refresh the file list for the current environment
-  const refreshEnvFiles = () => {
-    if (!selectedEnv) {
-      setEnvFiles([]);
-      return;
-    }
-    fetch(`/api/environments/${selectedEnv}/files`, { credentials: 'include' })
-      .then(res => res.json())
-      .then(data => setEnvFiles(data.files || []));
   };
 
   function getFileIcon(filename: string) {
@@ -161,11 +159,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       credentials: 'include',
     });
     await refetchChatSessions();
-    setOpenChatMenu(null);
-    // If the deleted chat was selected, clear selection
-    if (selectedSessionId === sessionId) {
-      setSelectedSessionId(null);
-    }
+    setSelectedSessionId(null);
   };
 
   // Handler to rename a chat session
@@ -179,7 +173,6 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       body: JSON.stringify({ title: newTitle })
     });
     await refetchChatSessions();
-    setOpenChatMenu(null);
   };
 
   // Add a click-away listener to close the dropdown
@@ -312,10 +305,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                       <FaComments className="mr-2" />Chats
                     </span>
                     <button
-                      onClick={() => {
-                        console.log('handleNewChat clicked, selectedEnv:', selectedEnv);
-                        handleNewChat();
-                      }}
+                      onClick={handleNewChat}
                       disabled={!selectedEnv || selectedEnv === "__add__" || selectedEnv === "__manage__"}
                       className="px-3 py-1 pr-2 rounded-full text-[#166534] hover:text-[#22c55e] text-xs -ml-1"
                       style={{ background: 'none', border: 'none', boxShadow: 'none', padding: 0, minWidth: 0, minHeight: 0, paddingRight: 35}}
@@ -329,7 +319,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                     <div className="text-gray-500 text-sm">No chats yet.</div>
                   ) : (
                     <ul className="space-y-1">
-                      {chatSessions.map(session => (
+                      {chatSessions.map((session: any) => (
                         <li key={session.session_id} className="relative group">
                           <button
                             className={`truncate max-w-[180px] text-sm text-left ${selectedSessionId === session.session_id ? 'text-[#22c55e] font-bold' : 'text-[#4ade80] hover:text-[#22c55e]'}`}
@@ -485,70 +475,14 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           )}
         </div>
       )}
+      
       {/* Main Content */}
       <main className="flex-1 flex items-center justify-center h-screen">
-        {React.Children.map(children, child => {
-          if (
-            React.isValidElement(child) &&
-            (child.type as any).name === 'Dashboard'
-          ) {
-            return React.cloneElement(
-              child as React.ReactElement<any>,
-              { 
-                selectedModel, 
-                setSelectedModel, 
-                selectedEnv, 
-                setSelectedEnv, 
-                environments, 
-                setEnvironments,
-                selectedSessionId,
-                setSelectedSessionId,
-                chatSessions,
-                handleNewChat,
-                refetchChatSessions
-              }
-            );
-          }
-          if (
-            React.isValidElement(child) &&
-            (child.type as any).name === 'ChatSession'
-          ) {
-            return React.cloneElement(
-              child as React.ReactElement<any>,
-              {
-                selectedModel,
-                setSelectedModel,
-                selectedEnv,
-                setSelectedEnv,
-                environments,
-                setEnvironments,
-                selectedSessionId,
-                setSelectedSessionId,
-                chatSessions,
-                handleNewChat,
-                refetchChatSessions,
-                refreshEnvFiles
-              }
-            );
-          }
-          // Pass refreshEnvFiles to EnvironmentDetails
-          if (
-            React.isValidElement(child) &&
-            (child.type as any).name === 'EnvironmentDetails'
-          ) {
-            return React.cloneElement(
-              child as React.ReactElement<any>,
-              {
-                refreshEnvFiles
-              }
-            );
-          }
-          return child;
-        })}
+        {children}
       </main>
       <FilePreviewModal
         fileId={sidebarPreviewFileId}
-        envId={selectedEnv}
+        envId={selectedEnv || ''}
         isOpen={sidebarPreviewOpen}
         onRequestClose={() => setSidebarPreviewOpen(false)}
       />

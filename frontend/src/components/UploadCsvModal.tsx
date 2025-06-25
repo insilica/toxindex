@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { FaTimes } from 'react-icons/fa';
+import { useEnvironment } from "../context/EnvironmentContext";
 
 interface Environment {
   environment_id: string;
@@ -12,7 +13,6 @@ interface UploadCsvModalProps {
   environments?: Environment[];
   defaultEnvId?: string;
   onUploadSuccess?: () => void;
-  refreshEnvFiles?: (envId: string) => Promise<void>;
 }
 
 const UploadCsvModal: React.FC<UploadCsvModalProps> = ({
@@ -20,8 +20,7 @@ const UploadCsvModal: React.FC<UploadCsvModalProps> = ({
   onClose,
   environments = [],
   defaultEnvId,
-  onUploadSuccess,
-  refreshEnvFiles
+  onUploadSuccess
 }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedEnv, setSelectedEnv] = useState(defaultEnvId || '');
@@ -29,6 +28,7 @@ const UploadCsvModal: React.FC<UploadCsvModalProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { refreshEnvFiles } = useEnvironment();
 
   if (!open) return null;
 
@@ -101,9 +101,7 @@ const UploadCsvModal: React.FC<UploadCsvModalProps> = ({
         if (onUploadSuccess) {
           onUploadSuccess();
         }
-        if (refreshEnvFiles) {
-          await refreshEnvFiles(selectedEnv);
-        }
+        await refreshEnvFiles(selectedEnv);
         onClose();
       } else {
         setError(data.error || 'Failed to upload file');
