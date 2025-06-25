@@ -29,7 +29,7 @@ export const EnvironmentDetails: React.FC = () => {
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [fileDeleteError, setFileDeleteError] = useState<string | null>(null);
-  const [previewFileId, setPreviewFileId] = useState<number | null>(null);
+  const [previewFileId, setPreviewFileId] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [tasks, setTasks] = useState<any[]>([]);
@@ -257,7 +257,7 @@ export const EnvironmentDetails: React.FC = () => {
                 <button
                   className="text-left font-medium text-gray-200 hover:text-purple-400 transition truncate max-w-[220px]"
                   style={{ background: 'none', border: 'none', padding: 0, margin: 0, cursor: 'pointer', fontSize: '1rem' }}
-                  onClick={() => { setPreviewFileId(parseInt(file.file_id)); setPreviewOpen(true); }}
+                  onClick={() => { setPreviewFileId(file.file_id); setPreviewOpen(true); }}
                   title="Preview file"
                 >
                   {file.filename}
@@ -268,7 +268,7 @@ export const EnvironmentDetails: React.FC = () => {
                 <button
                   className="bg-purple-700 hover:bg-purple-600 active:bg-purple-800 text-white transition flex items-center justify-center"
                   style={{ width: 36, height: 36, borderRadius: '50%', fontSize: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, border: 'none' }}
-                  onClick={() => { setPreviewFileId(parseInt(file.file_id)); setPreviewOpen(true); }}
+                  onClick={() => { setPreviewFileId(file.file_id); setPreviewOpen(true); }}
                   title="Preview"
                 >
                   <FaEye />
@@ -307,9 +307,20 @@ export const EnvironmentDetails: React.FC = () => {
       ) : (
         <ul className="divide-y divide-gray-700 pl-8">
           {tasks.map(task => (
-            <li key={task.task_id} className="py-2 flex items-center justify-between">
-              <span>{task.title}</span>
-              <span className="text-xs text-gray-400 ml-2">
+            <li
+              key={task.task_id}
+              className="py-2 flex items-center justify-between hover:bg-purple-900/20 rounded-lg cursor-pointer transition-colors"
+              style={{ minHeight: 44 }}
+              onClick={() => navigate(`/task/${task.task_id}`)}
+            >
+              <span className="text-white text-left font-medium truncate" style={{ fontSize: '1rem', maxWidth: 220 }} title={task.title}>
+                {task.title}
+              </span>
+              <span
+                className="text-xs text-gray-400 ml-2 whitespace-nowrap"
+                style={{ fontWeight: 500 }}
+                onClick={e => e.stopPropagation()}
+              >
                 {task.created_at && new Date(task.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
               </span>
             </li>

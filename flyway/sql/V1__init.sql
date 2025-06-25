@@ -56,7 +56,8 @@ CREATE TABLE tasks (
     environment_id UUID REFERENCES environments(environment_id),
     archived BOOLEAN DEFAULT FALSE,
     last_accessed TIMESTAMPTZ,
-    session_id UUID REFERENCES chat_sessions(session_id) ON DELETE CASCADE
+    session_id UUID REFERENCES chat_sessions(session_id) ON DELETE CASCADE,
+    status VARCHAR(32) DEFAULT 'processing'
 );
 
 CREATE TABLE files (

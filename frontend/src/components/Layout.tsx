@@ -11,15 +11,15 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [auth, setAuth] = useState<null | boolean>(null);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarClosing, setSidebarClosing] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
   const [user, setUser] = useState<{ email?: string; user_id?: string } | null>(null);
   const { selectedModel, setSelectedModel } = useModel();
   const [environments, setEnvironments] = useState<{ environment_id: string; title: string }[]>([]);
-  const [envFiles, setEnvFiles] = useState<{ file_id: number; filename: string }[]>([]);
-  const [sidebarPreviewFileId, setSidebarPreviewFileId] = useState<number | null>(null);
+  const [envFiles, setEnvFiles] = useState<{ file_id: string; filename: string }[]>([]);
+  const [sidebarPreviewFileId, setSidebarPreviewFileId] = useState<string | null>(null);
   const [sidebarPreviewOpen, setSidebarPreviewOpen] = useState(false);
 
   const { refetchChatSessions, selectedSessionId, setSelectedSessionId, chatSessions} = useChatSession();

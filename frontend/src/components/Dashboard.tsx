@@ -1,9 +1,11 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { FaListAlt, FaPlus, FaArchive } from 'react-icons/fa';
+import { useNavigate } from "react-router-dom";
+import { FaListAlt, FaPlus, FaArchive, FaUndo } from 'react-icons/fa';
 import { useEnvironment } from "../context/EnvironmentContext";
-import { useChatSession } from "../context/ChatSessionContext";
+// import { useChatSession } from "../context/ChatSessionContext";
 import { useModel } from "../context/ModelContext";
+import LoadingSpinner from "./shared/LoadingSpinner";
+import { io, Socket } from 'socket.io-client';
 
 interface Task {
   task_id: string;
@@ -12,6 +14,7 @@ interface Task {
   environment_id: string;
   created_at?: string;
   session_id?: string;
+  status?: string; // e.g., 'processing', 'done'
 }
 
 const TYPEWRITER_TEXT = "Is it toxic, or just misunderstood? Let's break it down!";
@@ -26,7 +29,7 @@ const Dashboard = () => {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
-  const location = useLocation();
+  // const location = useLocation();
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [uploadEnvId, setUploadEnvId] = useState<string>("");
   const [uploadFile, setUploadFile] = useState<File | null>(null);
@@ -40,11 +43,12 @@ const Dashboard = () => {
   const typewriterTimeoutRef = useRef<number | null>(null);
   const typewriterIntervalRef = useRef<number | null>(null);
   const { selectedEnv, setSelectedEnv, environments, loadingEnvironments, refetchEnvironments } = useEnvironment();
-  const { refetchChatSessions } = useChatSession();
+  // const { refetchChatSessions } = useChatSession();
   const { selectedModel } = useModel();
+  const socketRef = useRef<Socket | null>(null);
 
   console.log("Dashboard mounted");
-  console.log("Dashboard location:", location.pathname);
+  // console.log("Dashboard location:", location.pathname);
 
   // Fetch environments when component mounts
   useEffect(() => {
@@ -105,6 +109,48 @@ const Dashboard = () => {
       if (typewriterTimeoutRef.current) clearTimeout(typewriterTimeoutRef.current);
     };
   }, []);
+
+  // Socket.IO setup for real-time task status updates
+  useEffect(() => {
+    if (!socketRef.current) {
+      socketRef.current = io('/', { withCredentials: true });
+    }
+    const socket = socketRef.current;
+
+    // Function to join all active task rooms
+    const joinAllRooms = () => {
+      activeTasks.forEach(task => {
+        console.log('[SocketIO] Joining task room', task.task_id);
+        socket.emit('join_task_room', { task_id: task.task_id });
+      });
+    };
+
+    // Join rooms initially and on connect (reconnect)
+    joinAllRooms();
+    socket.on('connect', joinAllRooms);
+
+    // Listen for status updates
+    const handler = (data: any) => {
+      console.log('[SocketIO] Received task_status_update', data);
+      setActiveTasks(prev => {
+        const idx = prev.findIndex(t => t.task_id === data.task_id);
+        if (idx !== -1) {
+          // Update the task in place
+          const updated = [...prev];
+          updated[idx] = { ...updated[idx], ...data };
+          return updated;
+        }
+        return prev;
+      });
+    };
+    socket.on('task_status_update', handler);
+
+    return () => {
+      socket.off('connect', joinAllRooms);
+      socket.off('task_status_update', handler);
+    };
+    // Only rerun if activeTasks changes (to re-join rooms)
+  }, [activeTasks]);
 
   const handleDropdownChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     if (e.target.value === "__manage__") {
@@ -197,6 +243,7 @@ const Dashboard = () => {
       setError("Unknown model selected.");
       return;
     }
+    setChatInput(""); // clear input
     try {
       const res = await fetch(endpoint, {
         method: "POST",
@@ -209,9 +256,7 @@ const Dashboard = () => {
         }),
       });
       if (!res.ok) throw new Error("Failed to create task");
-      const data = await res.json();
-      setChatInput("");
-      // Optionally, you can refresh the tasks list here by refetching
+
       setTasksLoading(true);
       let url = "/api/tasks";
       if (selectedEnv && selectedEnv !== "__add__" && selectedEnv !== "__manage__") {
@@ -220,15 +265,9 @@ const Dashboard = () => {
       const tasksData = await fetch(url, { credentials: "include", cache: "no-store" }).then(r => r.json());
       setActiveTasks(tasksData.active_tasks || []);
       setArchivedTasks(tasksData.archived_tasks || []);
-      // --- NEW: Use session_id from backend response for redirect ---
-      if (data.session_id) {
-        navigate(`/chat/session/${data.session_id}`);
-        if (typeof refetchChatSessions === 'function') {
-          refetchChatSessions();
-        }
-      }
+      setTasksLoading(false);
     } catch (err) {
-      setError("Failed to create new chat session.");
+      setError("Failed to post task.");
     }
   };
 
@@ -270,15 +309,23 @@ const Dashboard = () => {
           ) : activeTasks.length === 0 ? (
             <div className="text-gray-400">No active tasks.</div>
           ) : (
-            <ul className="divide-y divide-gray-800">
+            <ul className="divide-y">
               {activeTasks.map(task => (
                 <li
                   key={task.task_id}
-                  className="flex items-center justify-between px-4 py-1 transition-colors duration-150 hover:bg-purple-900/20 rounded-lg text-base"
-                  style={{ background: 'none', minHeight: 44 }}
-                  onClick={() => navigate(`/task/${task.task_id}`)}
+                  className="flex items-center justify-between px-4 py-0 transition-colors duration-150 border-b border-gray-800 hover:border-purple-700 rounded-lg text-base"
+                  style={{ minHeight: 44 }}
                 >
-                  <div className="flex items-center min-w-0 flex-1 gap-3">
+                  <div
+                    className="flex items-center min-w-0 gap-3 cursor-pointer"
+                    style={{ flex: '1 1 0%', minWidth: 0 }}
+                    onClick={() => task.status === 'done' && navigate(`/task/${task.task_id}`)}
+                    tabIndex={0}
+                    role="button"
+                    onKeyDown={e => {
+                      if (task.status === 'processing'&& (e.key === 'Enter' || e.key === ' ')) navigate(`/task/${task.task_id}`);
+                    }}
+                  >
                     <span
                       className="text-white text-left font-medium truncate"
                       style={{
@@ -297,7 +344,10 @@ const Dashboard = () => {
                     >
                       {task.title}
                     </span>
-                    {task.created_at && (
+                    {(task.status !== 'done') && (
+                      <span className="ml-2 align-middle inline-block"><LoadingSpinner size="small" text="" showTimer={true} /></span>
+                    )}
+                    {task.created_at && task.status === 'done' && (
                       <span className="text-xs text-gray-400 ml-2 whitespace-nowrap" style={{fontWeight: 500}}>
                         {new Date(task.created_at).toLocaleString('en-US', {
                           month: 'short', day: '2-digit', year: 'numeric',
@@ -305,23 +355,26 @@ const Dashboard = () => {
                         }).replace(',', '')}
                       </span>
                     )}
-                    {task.session_id && (
+                    {task.session_id && task.status === 'done' && (
                       <span className="ml-2 px-2 py-0.5 bg-gray-800 rounded text-green-400 font-mono text-xs" title={task.session_id} style={{fontWeight: 500}}>
                         chat {task.session_id.slice(0, 6)}
                       </span>
                     )}
                   </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      archiveTask(task.task_id);
-                    }}
-                    className="ml-2 flex items-center justify-center w-7 h-7 rounded-full bg-purple-800 hover:bg-purple-700 active:bg-purple-900 text-white transition border-none shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-400 hover:ring-2 hover:ring-purple-400"
-                    style={{ padding: 0, borderRadius: '50%', fontSize: '1.1rem', border: 'none', outline: 'none', boxShadow: 'none', cursor: 'pointer' }}
-                    title="Archive task"
-                  >
-                    <FaArchive />
-                  </button>
+                  <div className="w-32" />
+                  {task.status === 'done' && (
+                    <button
+                      onClick={e => {
+                        e.stopPropagation();
+                        archiveTask(task.task_id);
+                      }}
+                      className="ml-2 flex items-center justify-center w-7 h-7 rounded-full bg-purple-800 hover:bg-purple-700 active:bg-purple-900 text-white transition border-none shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-400 hover:ring-2 hover:ring-purple-400"
+                      style={{ padding: 0, borderRadius: '50%', fontSize: '1.1rem', border: 'none', outline: 'none', boxShadow: 'none', cursor: 'pointer' }}
+                      title="Archive task"
+                    >
+                      <FaArchive />
+                    </button>
+                  )}
                 </li>
               ))}
             </ul>
@@ -333,43 +386,49 @@ const Dashboard = () => {
           ) : archivedTasks.length === 0 ? (
             <div className="text-gray-400">No archived tasks.</div>
           ) : (
-            <ul className="divide-y divide-gray-800">
+            <ul className="divide-y">
               {archivedTasks.map(task => (
                 <li
                   key={task.task_id}
-                  className="flex items-center justify-between px-4 py-3 hover:bg-gray-800 cursor-pointer rounded"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/task/${task.task_id}`);
-                  }}
+                  className="flex items-center justify-between px-4 py-3 border-b border-gray-800 hover:border-purple-800 rounded"
+                  style={{ minHeight: 44 }}
                 >
-                  <span className="text-gray-300">
-                    {task.title}
-                    <span className="ml-2 text-xs text-gray-400">
-                      {task.created_at &&
-                        new Date(task.created_at).toLocaleString(undefined, {
-                          month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true
-                        })}
-                      {task.archived &&
-                        <>
-                          {" (archived)"}
-                        </>
-                      }
+                  <div
+                    className="flex items-center min-w-0 gap-3 cursor-pointer"
+                    style={{ flex: '1 1 0%', minWidth: 0 }}
+                    onClick={() => navigate(`/task/${task.task_id}`)}
+                    tabIndex={0}
+                    role="button"
+                    onKeyDown={e => {
+                      if (e.key === 'Enter' || e.key === ' ') navigate(`/task/${task.task_id}`);
+                    }}
+                  >
+                    <span className="text-gray-300">
+                      {task.title}
+                      <span className="ml-2 text-xs text-gray-400">
+                        {task.created_at &&
+                          new Date(task.created_at).toLocaleString(undefined, {
+                            month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true
+                          })}
+                        {task.archived &&
+                          <>
+                            {" (archived)"}
+                          </>
+                        }
+                      </span>
                     </span>
-                  </span>
+                  </div>
+                  <div className="w-32" />
                   <button
-                    onClick={(e) => {
+                    onClick={e => {
                       e.stopPropagation();
                       unarchiveTask(task.task_id);
                     }}
-                    className="ml-1 px-1 rounded bg-green-700 text-white hover:bg-green-800 text-xs flex items-center"
+                    className="ml-1 px-2 rounded bg-green-700 text-white hover:bg-green-800 text-xs flex items-center justify-center"
                     style={{ marginTop: 0, marginBottom: 0, height: 'auto', minHeight: 0, paddingTop: 0, paddingBottom: 0, background: 'none', border: 'none', outline: 'none', boxShadow: 'none', cursor: 'pointer' }}
                     title="Unarchive task"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 mr-1">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 19V6m0 0l-6 6m6-6l6 6" />
-                    </svg>
-                    Unarchive
+                    <FaUndo className="mr-1" />
                   </button>
                 </li>
               ))}

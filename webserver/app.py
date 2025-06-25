@@ -94,7 +94,7 @@ def redis_listener(name):
             if event_task_id is None or event_data is None:
                 logging.warning(f"[redis_listener] ({listener_id}) Redis event missing required fields: event_type={event_type}, task_id={event_task_id}, data={event_data}")
                 continue
-            if event_type not in ("task_message", "task_file"):
+            if event_type not in ("task_message", "task_file", "task_status_update"):
                 logging.debug(f"[redis_listener] ({listener_id}) Ignoring event_type={event_type}")
                 continue
             task = Task.get_task(event_task_id)
@@ -113,10 +113,18 @@ def redis_listener(name):
             elif event_type == "task_file":
                 logging.info(f"[redis_listener] ({listener_id}) Processing task_file for task_id={event_task_id}")
                 File.process_event(task, event_data)
-            room = f"task_{task.task_id}"
-            logging.info(f"[redis_listener] ({listener_id}) Emitting {event_type} to room {room} with data: {event_data}")
-            socketio.emit(event_type, event_data, to=room)
-            logging.info(f"[redis_listener] ({listener_id}) {event_type} sent to {room}")
+            elif event_type == "task_status_update":
+                logging.info(f"[redis_listener] ({listener_id}) Processing task_status_update for task_id={event_task_id}")
+                # event_data should be the full task dict
+                room = f"task_{task.task_id}"
+                logging.info(f"[redis_listener] ({listener_id}) Emitting task_status_update to room {room} with data: {event_data}")
+                socketio.emit("task_status_update", event_data, to=room)
+                logging.info(f"[redis_listener] ({listener_id}) task_status_update sent to {room}")
+            if event_type in ("task_message", "task_file"):
+                room = f"task_{task.task_id}"
+                logging.info(f"[redis_listener] ({listener_id}) Emitting {event_type} to room {room} with data: {event_data}")
+                socketio.emit(event_type, event_data, to=room)
+                logging.info(f"[redis_listener] ({listener_id}) {event_type} sent to {room}")
         except json.JSONDecodeError:
             logging.error(f"[redis_listener] ({listener_id}) Failed to decode Redis message as JSON.")
         except Exception as e:

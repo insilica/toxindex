@@ -81,7 +81,7 @@ sudo nano /etc/nginx/conf.d/toxindex.conf
 
 server {
     listen 80;
-    server_name 18.118.10.140;  # or your EC2 public IP
+    server_name 18.118.10.140;
 
     root /home/ubuntu/toxindex/frontend/dist;
     index index.html;
@@ -98,7 +98,7 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 
-        location /socket.io/ {
+    location /socket.io/ {
         proxy_pass http://127.0.0.1:6513;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
