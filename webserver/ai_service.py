@@ -4,6 +4,9 @@ import openai
 
 openai.api_key = os.environ.get('OPENAI_API_KEY')
 
+def capitalize_words(s: str) -> str:
+    return ' '.join(word.capitalize() for word in s.split())
+
 def generate_title(message: str) -> str:
     """Generate a short title summarizing the given message using OpenAI."""
     try:
@@ -16,9 +19,10 @@ def generate_title(message: str) -> str:
             max_tokens=10,
             temperature=0.5,
         )
-        return resp.choices[0].message["content"].strip()
+        title = resp.choices[0].message["content"].strip()
+        return capitalize_words(title)
     except Exception:
-        return message.strip()
+        return capitalize_words(message.strip())
     
 # def generate_response(message, conversation_history=None):
 #     """

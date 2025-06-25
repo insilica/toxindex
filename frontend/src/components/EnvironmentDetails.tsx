@@ -5,7 +5,7 @@ import UploadCsvModal from './UploadCsvModal';
 import { FaEye, FaDownload, FaTrash } from 'react-icons/fa';
 import EnvironmentSelector from './shared/EnvironmentSelector';
 import LoadingSpinner from './shared/LoadingSpinner';
-import { useEnvironmentSelection } from './shared/utils/useEnvironmentSelection';
+import { useEnvironment } from "../context/EnvironmentContext";
 
 interface Environment {
   environment_id: string;
@@ -20,21 +20,7 @@ interface EnvironmentFile {
   upload_date: string;
 }
 
-interface EnvironmentDetailsProps {
-  environments: Environment[];
-  selectedEnv?: string;
-  setSelectedEnv?: (envId: string) => void;
-  loadingEnvironments?: boolean;
-  refetchEnvironments?: () => void;
-}
-
-export const EnvironmentDetails: React.FC<EnvironmentDetailsProps> = ({
-  environments = [],
-  selectedEnv,
-  setSelectedEnv,
-  loadingEnvironments = false,
-  refetchEnvironments
-}) => {
+export const EnvironmentDetails: React.FC = () => {
   const { env_id } = useParams<{ env_id: string }>();
   const navigate = useNavigate();
   const [env, setEnv] = useState<Environment | null>(null);
@@ -47,8 +33,7 @@ export const EnvironmentDetails: React.FC<EnvironmentDetailsProps> = ({
   const [previewOpen, setPreviewOpen] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [tasks, setTasks] = useState<any[]>([]);
-
-  useEnvironmentSelection(environments, selectedEnv, setSelectedEnv);
+  const { selectedEnv, setSelectedEnv, environments, refetchEnvironments } = useEnvironment();
 
   // Load environment data
   useEffect(() => {
@@ -182,15 +167,7 @@ export const EnvironmentDetails: React.FC<EnvironmentDetailsProps> = ({
   return (
     <div className="w-full h-full min-h-screen pt-24 px-100 pb-12 text-white flex flex-col" style={{ background: 'linear-gradient(135deg, #1a1426 0%, #2a1a2a 60%, #231a23 100%)' }}>
       <div className="flex items-center justify-between mb-2">
-        <div className="relative group" style={{ minWidth: 180, maxWidth: 340 }}>
-          <EnvironmentSelector
-            environments={environments}
-            selectedEnv={selectedEnv}
-            onEnvironmentChange={setSelectedEnv}
-            loadingEnvironments={loadingEnvironments}
-            variant="large"
-          />
-        </div>
+        <EnvironmentSelector/>
         <button
           className="px-6 font-semibold transition border border-red-500"
           style={{
@@ -297,7 +274,7 @@ export const EnvironmentDetails: React.FC<EnvironmentDetailsProps> = ({
                   <FaEye />
                 </button>
                 <a
-                  href={`/api/environments/${selectedEnv}/files/${file.file_id}/download`}
+                  href={`/api/environments/${selectedEnv || undefined}/files/${file.file_id}/download`}
                   className="bg-purple-700 hover:bg-purple-600 active:bg-purple-800 text-white transition flex items-center justify-center"
                   style={{ width: 36, height: 36, borderRadius: '50%', fontSize: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, border: 'none' }}
                   target="_blank"
@@ -354,7 +331,7 @@ export const EnvironmentDetails: React.FC<EnvironmentDetailsProps> = ({
           open={showUploadModal}
           onClose={() => setShowUploadModal(false)}
           environments={environments}
-          defaultEnvId={selectedEnv}
+          defaultEnvId={selectedEnv || undefined}
           onUploadSuccess={() => {
             setShowUploadModal(false);
             if (selectedEnv && selectedEnv !== "__add__" && selectedEnv !== "__manage__") {

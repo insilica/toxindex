@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  console.log("ProtectedRoute mounted");
   const [auth, setAuth] = useState<null | boolean>(null);
 
   useEffect(() => {

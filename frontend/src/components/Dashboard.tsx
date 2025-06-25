@@ -1,11 +1,9 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { FaListAlt, FaPlus, FaArchive } from 'react-icons/fa';
-
-interface Environment {
-  environment_id: string;
-  title: string;
-}
+import { useEnvironment } from "../context/EnvironmentContext";
+import { useChatSession } from "../context/ChatSessionContext";
+import { useModel } from "../context/ModelContext";
 
 interface Task {
   task_id: string;
@@ -16,20 +14,9 @@ interface Task {
   session_id?: string;
 }
 
-interface DashboardProps {
-  selectedModel?: string;
-  selectedEnv?: string;
-  setSelectedEnv?: (envId: string) => void;
-  environments: Environment[];
-  refetchChatSessions?: () => void;
-  refetchEnvironments: () => void;
-  loadingEnvironments: boolean;
-  refreshEnvFiles: (envId: string) => Promise<any>;
-}
-
 const TYPEWRITER_TEXT = "Is it toxic, or just misunderstood? Let's break it down!";
 
-const Dashboard: React.FC<DashboardProps> = ({ selectedModel, selectedEnv, setSelectedEnv, environments, refetchChatSessions, refetchEnvironments, loadingEnvironments, refreshEnvFiles }) => {
+const Dashboard = () => {
   const [chatInput, setChatInput] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [tasksLoading, setTasksLoading] = useState(false);
@@ -39,6 +26,7 @@ const Dashboard: React.FC<DashboardProps> = ({ selectedModel, selectedEnv, setSe
   const [uploading, setUploading] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
+  const location = useLocation();
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [uploadEnvId, setUploadEnvId] = useState<string>("");
   const [uploadFile, setUploadFile] = useState<File | null>(null);
@@ -51,19 +39,17 @@ const Dashboard: React.FC<DashboardProps> = ({ selectedModel, selectedEnv, setSe
   const [typingHeading, setTypingHeading] = useState(true);
   const typewriterTimeoutRef = useRef<number | null>(null);
   const typewriterIntervalRef = useRef<number | null>(null);
+  const { selectedEnv, setSelectedEnv, environments, loadingEnvironments, refetchEnvironments } = useEnvironment();
+  const { refetchChatSessions } = useChatSession();
+  const { selectedModel } = useModel();
 
   console.log("Dashboard mounted");
+  console.log("Dashboard location:", location.pathname);
 
   // Fetch environments when component mounts
   useEffect(() => {
     refetchEnvironments();
   }, [refetchEnvironments]);
-
-  useEffect(() => {
-    if (selectedEnv && selectedEnv !== "__add__" && selectedEnv !== "__manage__") {
-      refreshEnvFiles(selectedEnv);
-    }
-  }, [selectedEnv, refreshEnvFiles]);
 
   useEffect(() => {
     console.log("selectedEnv", selectedEnv);
@@ -126,7 +112,7 @@ const Dashboard: React.FC<DashboardProps> = ({ selectedModel, selectedEnv, setSe
     } else if (e.target.value === "__add__") {
       navigate("/settings/environments/create");
     } else {
-      setSelectedEnv && setSelectedEnv(String(e.target.value || ''));
+      setSelectedEnv(String(e.target.value || ''));
     }
   };
 

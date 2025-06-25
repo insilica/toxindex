@@ -1,5 +1,6 @@
 import React, {useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useEnvironment } from "../context/EnvironmentContext";
 
 interface Environment {
   environment_id: string;
@@ -8,16 +9,11 @@ interface Environment {
   created_at: string;
 }
 
-interface SettingsEnvironmentsProps {
-  environments: Environment[];
-  refetchEnvironments: () => void;
-  setEnvironments?: React.Dispatch<React.SetStateAction<Environment[]>>;
-}
-
-const SettingsEnvironments: React.FC<SettingsEnvironmentsProps> = ({ environments, refetchEnvironments, setEnvironments }) => {
+const SettingsEnvironments: React.FC = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [envToDelete, setEnvToDelete] = useState<Environment | null>(null);
   const navigate = useNavigate();
+  const { environments, setEnvironments, refetchEnvironments } = useEnvironment();
 
   useEffect(() => {
     // Fetch environments when component mounts
