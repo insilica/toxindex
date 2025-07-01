@@ -26,6 +26,7 @@ from webserver.controller.environment import env_bp
 from webserver.controller.task import task_bp
 from webserver.controller.chat import chat_bp
 from webserver.controller.auth import auth_bp
+from webserver.controller.file import file_bp
 from webserver.csrf import csrf
 from webserver.socketio import socketio
 from webserver.controller.user import user_bp
@@ -175,6 +176,7 @@ def handle_join_chat_session(data):
 app.register_blueprint(env_bp)
 app.register_blueprint(task_bp)
 app.register_blueprint(chat_bp)
+app.register_blueprint(file_bp)
 app.register_blueprint(auth_bp)
 app.register_blueprint(user_bp)
 app.register_blueprint(schema_bp)
