@@ -7,7 +7,7 @@ import openai
 import hashlib
 from workflows.celery_worker import celery
 from webserver.model.message import MessageSchema
-from webserver.storage import S3FileStorage
+# from webserver.storage import S3FileStorage
 from RAP.toxicity_schema import TOXICITY_SCHEMA
 # Update finished_at in the database
 import datetime
@@ -57,17 +57,13 @@ def plain_openai_task(self, payload):
         tmp_path = os.path.join(project_tmp_dir, tmp_filename)
         with open(tmp_path, 'w', encoding='utf-8') as f:
             f.write(content)
-        storage = S3FileStorage()
-        s3_key = storage.upload_file(tmp_path, f"{task_id}/{tmp_filename}", "text/plain")
-        download_url = storage.generate_download_url(s3_key)
         file_event = {
             "type": "task_file",
             "task_id": task_id,
             "data": {
                 "user_id": user_id,
                 "filename": tmp_filename,
-                "filepath": s3_key,
-                "s3_url": download_url,
+                "filepath": tmp_path,
             },
         }
         logger.info(f"[plain_openai_task] Publishing file event: {file_event}")
@@ -128,22 +124,18 @@ def openai_json_schema_task(self, payload):
         r.publish("celery_updates", json.dumps(event, default=str))
 
         tmp_filename = f"openai_json_schema_result_{uuid.uuid4().hex}.json"
-        project_tmp_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'tmp'))
+        project_tmp_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'chats'))
         os.makedirs(project_tmp_dir, exist_ok=True)
         tmp_path = os.path.join(project_tmp_dir, tmp_filename)
         with open(tmp_path, 'w', encoding='utf-8') as f:
             f.write(content)
-        storage = S3FileStorage()
-        s3_key = storage.upload_file(tmp_path, f"{task_id}/{tmp_filename}", "application/json")
-        download_url = storage.generate_download_url(s3_key)
         file_event = {
             "type": "task_file",
             "task_id": task_id,
             "data": {
                 "user_id": user_id,
                 "filename": tmp_filename,
-                "filepath": s3_key,
-                "s3_url": download_url,
+                "filepath": tmp_path,
             },
         }
         r.publish("celery_updates", json.dumps(file_event, default=str))

@@ -15,9 +15,14 @@ interface Task {
   created_at?: string;
   session_id?: string;
   status?: string; // e.g., 'processing', 'done'
+  finished_at?: string;
 }
 
-const TYPEWRITER_TEXT = "Is it toxic, or just misunderstood? Let's break it down!";
+// const TYPEWRITER_TEXT = "Is it toxic, or just misunderstood? Let's break it down!";
+const TYPEWRITER_TEXT = "ToxIndex";
+const ENABLE_TYPEWRITER = true; // Set to true to enable typewriter effect
+const RESTART_TYPEWRITER = false; // Set to true to restart typewriter after delay
+const RESTART_DELAY_MS = 5000; // Delay in ms before restarting typewriter
 
 const Dashboard = () => {
   const [chatInput, setChatInput] = useState("");
@@ -38,8 +43,7 @@ const Dashboard = () => {
   const [selectWidth, setSelectWidth] = useState(120); // default min width
   const selectRef = useRef<HTMLSelectElement>(null);
   const spanRef = useRef<HTMLSpanElement>(null);
-  const [typedHeading, setTypedHeading] = useState("");
-  const [typingHeading, setTypingHeading] = useState(true);
+  const [typedHeading, setTypedHeading] = useState(ENABLE_TYPEWRITER ? "" : TYPEWRITER_TEXT);
   const typewriterTimeoutRef = useRef<number | null>(null);
   const typewriterIntervalRef = useRef<number | null>(null);
   const { selectedEnv, setSelectedEnv, environments, loadingEnvironments, refetchEnvironments } = useEnvironment();
@@ -84,10 +88,13 @@ const Dashboard = () => {
   }, [selectedEnv, environments]);
 
   useEffect(() => {
+    if (!ENABLE_TYPEWRITER) {
+      setTypedHeading(TYPEWRITER_TEXT);
+      return;
+    }
     function startTypewriter() {
       let i = 0;
       setTypedHeading("");
-      setTypingHeading(true);
       if (typewriterIntervalRef.current) clearInterval(typewriterIntervalRef.current);
       if (typewriterTimeoutRef.current) clearTimeout(typewriterTimeoutRef.current);
       typewriterIntervalRef.current = setInterval(() => {
@@ -95,11 +102,11 @@ const Dashboard = () => {
         i++;
         if (i === TYPEWRITER_TEXT.length) {
           if (typewriterIntervalRef.current) clearInterval(typewriterIntervalRef.current);
-          setTypingHeading(false);
-          // Restart after 5 seconds
-          typewriterTimeoutRef.current = setTimeout(() => {
-            startTypewriter();
-          }, 5000);
+          if (RESTART_TYPEWRITER) {
+            typewriterTimeoutRef.current = setTimeout(() => {
+              startTypewriter();
+            }, RESTART_DELAY_MS);
+          }
         }
       }, 80);
     }
@@ -277,7 +284,7 @@ const Dashboard = () => {
       <div className="w-full flex justify-center pt-24 pb-4">
         <h2 className="text-3xl font-normal text-white text-center" style={{ fontFamily: 'inherit', minHeight: 60, letterSpacing: '-0.01em' }}>
           {typedHeading}
-          {typingHeading && <span style={{ color: '#6ee7b7', fontWeight: 'bold', marginLeft: 2, animation: 'blink 1s steps(1) infinite' }}>|</span>}
+          {typedHeading.length < TYPEWRITER_TEXT.length && <span style={{ color: '#6ee7b7', fontWeight: 'bold', marginLeft: 2, animation: 'blink 1s steps(1) infinite' }}>|</span>}
         </h2>
         <style>{`
           @keyframes blink {
@@ -344,24 +351,55 @@ const Dashboard = () => {
                     >
                       {task.title}
                     </span>
+
                     {(task.status !== 'done') && (
-                      <span className="ml-2 align-middle inline-block"><LoadingSpinner size="small" text="" showTimer={true} /></span>
-                    )}
-                    {task.created_at && task.status === 'done' && (
-                      <span className="text-xs text-gray-400 ml-2 whitespace-nowrap" style={{fontWeight: 500}}>
-                        {new Date(task.created_at).toLocaleString('en-US', {
-                          month: 'short', day: '2-digit', year: 'numeric',
-                          hour: 'numeric', minute: '2-digit', hour12: true
-                        }).replace(',', '')}
+                      <span className="ml-2 align-middle inline-block">
+                        <LoadingSpinner size="small" text="" showTimer={true} startTime={task.created_at ? new Date(task.created_at).getTime() : undefined} />
                       </span>
                     )}
+
+                    {/*
+                    {task.created_at && task.status === 'done' && (
+                      <span className="ml-2 text-xs text-gray-400 whitespace-nowrap">
+                        <span className="font-semibold text-gray-500">Created:</span>
+
+                          {new Date(task.created_at).toLocaleString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            hour: 'numeric',
+                            minute: '2-digit',
+                            hour12: true,
+                          })}
+
+                      </span>
+                    )}
+                    */}
+                    
+                    {task.status === 'done' && task.created_at && task.finished_at && (
+                      (() => {
+                        const start = new Date(task.created_at).getTime();
+                        const end = new Date(task.finished_at).getTime();
+                        const diff = Math.max(0, end - start);
+                        const mins = Math.floor(diff / 60000);
+                        const secs = Math.floor((diff % 60000) / 1000);
+                        return (
+                          <span className="text-xs text-gray-400 ml-2 whitespace-nowrap font-mono" title="Task duration">
+                            <span className="font-semibold text-gray-500">Duration:</span>
+                            {mins}m {secs}s
+                          </span>
+                        );
+                      })()
+                    )}
+                    {/* the user does not need to know the session id for now. */}
+                    {/*
                     {task.session_id && task.status === 'done' && (
                       <span className="ml-2 px-2 py-0.5 bg-gray-800 rounded text-green-400 font-mono text-xs" title={task.session_id} style={{fontWeight: 500}}>
-                        chat {task.session_id.slice(0, 6)}
+                        chat {task.session_id.slice(0, 4)}
                       </span>
                     )}
+                      */}
                   </div>
-                  <div className="w-32" />
+                  <div className="w-12" />
                   {task.status === 'done' && (
                     <button
                       onClick={e => {
@@ -406,15 +444,11 @@ const Dashboard = () => {
                     <span className="text-gray-300">
                       {task.title}
                       <span className="ml-2 text-xs text-gray-400">
+                        <span className="font-bold text-gray-500">Archived - </span>{' task initially created at: '}
                         {task.created_at &&
                           new Date(task.created_at).toLocaleString(undefined, {
                             month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true
                           })}
-                        {task.archived &&
-                          <>
-                            {" (archived)"}
-                          </>
-                        }
                       </span>
                     </span>
                   </div>

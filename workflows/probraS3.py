@@ -6,7 +6,10 @@ import logging
 import pydantic
 from workflows.celery_worker import celery
 from webserver.model.message import MessageSchema
+from webserver.storage import S3FileStorage
 import hashlib
+# import datetime
+# import webserver.datastore as ds
 from webserver.model.task import Task
 
 from RAP.tool_deeptox import deeptox_agent
@@ -56,7 +59,7 @@ def probra_task(self, payload):
         r.publish("celery_updates", json.dumps(event, default=str))
 
         tmp_filename = f"probra_result_{uuid.uuid4().hex}.md"
-        project_tmp_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'chats'))
+        project_tmp_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'tmp'))
         os.makedirs(project_tmp_dir, exist_ok=True)
         tmp_path = os.path.join(project_tmp_dir, tmp_filename)
 
@@ -65,17 +68,21 @@ def probra_task(self, payload):
             f.write(response_content)
         logger.info(f"File created in tmp: {tmp_path} for task {task_id}")
 
-        # S3 upload removed; only local file creation remains
+        storage = S3FileStorage()
+        s3_key = storage.upload_file(tmp_path, f"{task_id}/{tmp_filename}", "text/plain")
+        download_url = storage.generate_download_url(s3_key)
+        logger.info(f"File uploaded to S3: {s3_key}")
+
         file_event = {
             "type": "task_file",
             "task_id": task_id,
             "data": {
                 "user_id": user_id,
                 "filename": tmp_filename,
-                "filepath": tmp_path,  # Use filepath for local file path
+                "filepath": s3_key,
+                "s3_url": download_url,
             },
         }
-        
         r.publish("celery_updates", json.dumps(file_event, default=str))
 
         logger.info("Task completed successfully")

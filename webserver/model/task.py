@@ -211,7 +211,8 @@ class Task:
         task = Task.get_task(task_id)
         event = {
             "type": "task_status_update",
-            **task.to_dict(),
+            "task_id": task.task_id,
+            "data": task.to_dict(),
         }
         logging.info(f"[mark_finished] Publishing task_status_update for task_id={task_id}: {event}")
         r.publish("celery_updates", json.dumps(event, default=str))
