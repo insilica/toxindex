@@ -482,7 +482,6 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       </main>
       <FilePreviewModal
         fileId={sidebarPreviewFileId}
-        envId={selectedEnv || ''}
         isOpen={sidebarPreviewOpen}
         onRequestClose={() => setSidebarPreviewOpen(false)}
       />
