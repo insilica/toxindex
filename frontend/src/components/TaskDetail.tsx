@@ -37,7 +37,7 @@ const TaskDetail: React.FC = () => {
 
   // Tab state
   // const [activeTab, setActiveTab] = useState<'MDrender' | 'MDraw' | 'JsonSchema'>('MDrender');
-  const [toxicitySchema, setToxicitySchema] = useState<any>(null);
+  // const [toxicitySchema, setToxicitySchema] = useState<any>(null);
 
   const [taskFiles, setTaskFiles] = useState<any[]>([]);
   const [envFiles, setEnvFiles] = useState<any[]>([]);
