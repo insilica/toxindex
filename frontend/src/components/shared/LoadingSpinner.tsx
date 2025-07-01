@@ -6,13 +6,15 @@ interface LoadingSpinnerProps {
   className?: string;
   text?: string;
   showTimer?: boolean;
+  startTime?: number; // UNIX timestamp in seconds or ms
 }
 
 const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   size = 'medium',
   className = '',
   text = '',
-  showTimer = false
+  showTimer = false,
+  startTime
 }) => {
   const sizeClass = {
     small: 'text-xl',
@@ -20,12 +22,23 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
     large: 'text-4xl'
   }[size];
 
-  const [seconds, setSeconds] = React.useState(0);
+  // If startTime is provided, calculate elapsed seconds from it
+  const getInitialSeconds = () => {
+    if (!startTime) return 0;
+    const now = Date.now();
+    // If startTime is in seconds, convert to ms
+    const startMs = startTime > 1e12 ? startTime : startTime * 1000;
+    return Math.floor((now - startMs) / 1000);
+  };
+
+  const [seconds, setSeconds] = React.useState(getInitialSeconds());
   React.useEffect(() => {
     if (!showTimer) return;
-    const interval = setInterval(() => setSeconds(s => s + 1), 1000);
+    const update = () => setSeconds(getInitialSeconds());
+    update(); // set immediately
+    const interval = setInterval(update, 1000);
     return () => clearInterval(interval);
-  }, [showTimer]);
+  }, [showTimer, startTime]);
 
   return (
     <div className={`flex items-center justify-center flex-col gap-3 ${className}`}>

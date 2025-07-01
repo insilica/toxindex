@@ -38,7 +38,7 @@ celery = Celery(
 celery.config_from_object(celery_config)
 
 # Import tasks so they are registered
-import workflows.probra
-import workflows.chat_response_task
-import workflows.interactive_echo_task
-import workflows.plain_openai_tasks
+import workflows.probra # noqa: F401
+import workflows.plain_openai_tasks # noqa: F401
+import workflows.raptool_task # noqa: F401
+
