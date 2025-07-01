@@ -100,14 +100,14 @@ const TaskDetail: React.FC = () => {
   }, [task_id]);
 
   // Fetch schema when JsonSchema tab is selected
-  useEffect(() => {
-    if (activeTab === 'JsonSchema' && !toxicitySchema) {
-      fetch('/api/schema/toxicity')
-        .then(res => res.json())
-        .then(setToxicitySchema)
-        .catch(() => setToxicitySchema({ error: "Failed to load schema" }));
-    }
-  }, [activeTab, toxicitySchema]);
+  // useEffect(() => {
+  //   if (activeTab === 'JsonSchema' && !toxicitySchema) {
+  //     fetch('/api/schema/toxicity')
+  //       .then(res => res.json())
+  //       .then(setToxicitySchema)
+  //       .catch(() => setToxicitySchema({ error: "Failed to load schema" }));
+  //   }
+  // }, [activeTab, toxicitySchema]);
 
   useEffect(() => {
     fetchTask();
@@ -245,7 +245,7 @@ const TaskDetail: React.FC = () => {
         <div className="flex-1 flex flex-col items-center justify-center w-full pl-8">
           {/* Tab content */}
           <div className="flex-1 flex flex-col items-center justify-center w-full">
-            {activeTab === 'MDrender' && (
+            {/* {activeTab === 'MDrender' && (   */}
               <div className="w-full max-w-full bg-gray-800 rounded-lg p-6 shadow-inner">
                 {messageLoading ? (
                   <div className="text-gray-400">Loading result...</div>
@@ -260,7 +260,7 @@ const TaskDetail: React.FC = () => {
                   <div className="text-gray-400">No assistant message found for this task.</div>
                 )}
               </div>
-            )}
+            {/* )} */}
             {/* {activeTab === 'MDraw' && (
               <div className="w-full max-w-full bg-gray-800 rounded-lg p-6 shadow-inner">
                 <div className="text-lg font-semibold mb-2">Raw Markdown</div>
