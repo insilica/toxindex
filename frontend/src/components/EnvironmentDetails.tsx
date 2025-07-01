@@ -331,7 +331,6 @@ export const EnvironmentDetails: React.FC = () => {
       {(selectedEnv || env_id) && (
         <FilePreviewModal
           fileId={previewFileId}
-          envId={selectedEnv || env_id || ''}
           isOpen={previewOpen}
           onRequestClose={() => setPreviewOpen(false)}
         />
