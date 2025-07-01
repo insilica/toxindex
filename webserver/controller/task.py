@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, send_file, abort
 import flask_login
 from webserver.model import Task
 from webserver.csrf import csrf
@@ -9,6 +9,7 @@ from webserver.ai_service import generate_title
 from workflows.plain_openai_tasks import plain_openai_task, openai_json_schema_task
 from workflows.probra import probra_task
 from webserver.model.file import File
+import os
 
 task_bp = Blueprint('tasks', __name__, url_prefix='/api/tasks')
 
@@ -132,7 +133,7 @@ def unarchive_task(task_id):
 @task_bp.route('/<task_id>/files', methods=['GET'])
 @flask_login.login_required
 def get_task_files(task_id):
-    files = File.get_files(task_id)
+    files = File.get_files_by_task(task_id)
     return jsonify({'files': [f.to_dict() for f in files]})
 
 @task_bp.route('/<task_id>/messages', methods=['GET'])
@@ -140,4 +141,14 @@ def get_task_files(task_id):
 def get_task_messages(task_id):
     user_id = flask_login.current_user.user_id
     messages = Task.get_messages(task_id, user_id)
-    return jsonify({'messages': messages}) 
+    return jsonify({'messages': messages})
+
+@task_bp.route('/<task_id>/files/<file_id>/download', methods=['GET'])
+@flask_login.login_required
+def download_task_file(task_id, file_id):
+    if not is_valid_uuid(task_id) or not is_valid_uuid(file_id):
+        return jsonify({'error': 'Invalid task or file ID'}), 400
+    file = File.get_file(file_id)
+    if not file or not file.filepath or not os.path.exists(file.filepath) or str(file.task_id) != str(task_id):
+        return abort(404)
+    return send_file(file.filepath, as_attachment=True, download_name=file.filename) 
