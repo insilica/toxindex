@@ -1,42 +1,85 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+.markdown-body, .prose, .prose-invert {
+  line-height: 1.2;
+  font-size: 1.05rem;
+  color: #e5e7eb;
+  background: #20232a;
+  border-radius: 8px;
+  padding: 48px;
+  word-break: break-word;
 }
-
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
+.markdown-body h1, .prose h1, .prose-invert h1 {
+  color: #decdff;
+  font-size: 1.8rem !important;
+  margin-top: 0em;
+  margin-bottom: 0.4em;
+  font-weight: 700;
 }
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
+.markdown-body h2, .prose h2, .prose-invert h2 {
+  color: #e5ffce;
+  font-size: 1.4rem !important;
+  margin-top: 0em;
+  margin-bottom: 0.2em;
+  font-weight: 600;
 }
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.markdown-body h3, .prose h3, .prose-invert h3 {
+  color: #d9f99d;
+  font-size: 1.2rem !important;
+  margin-top: 0em;
+  margin-bottom: 0.3em;
+  font-weight: 500;
 }
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.markdown-body h4, .prose h4, .prose-invert h4 {
+  color: #e0e7ff;
+  font-size: 1rem !important;
+  margin-top: 0.8em;
+  margin-bottom: 0.2em;
+  font-weight: 500;
 }
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.markdown-body ul, .markdown-body ol, .prose ul, .prose ol, .prose-invert ul, .prose-invert ol {
+  margin-left: 1.5em;
+  margin-bottom: 1em;
 }
-
-.card {
-  padding: 2em;
+.markdown-body li, .prose li, .prose-invert li {
+  margin-bottom: 0.3em;
 }
-
-.read-the-docs {
-  color: #888;
+.markdown-body pre, .markdown-body code, .prose pre, .prose code, .prose-invert pre, .prose-invert code {
+  background: #181f1b;
+  color: #a3e635;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-family: 'Fira Mono', 'Menlo', 'Monaco', 'Consolas', monospace;
+  font-size: 0.98em;
+}
+.markdown-body pre, .prose pre, .prose-invert pre {
+  padding: 12px;
+  overflow-x: auto;
+  margin-bottom: 1em;
+}
+.markdown-body blockquote, .prose blockquote, .prose-invert blockquote {
+  border-left: 4px solid #22c55e;
+  background: #23272b;
+  color: #b5e0b8;
+  padding: 8px 16px;
+  margin: 1em 0;
+  border-radius: 4px;
+}
+.markdown-body table, .prose table, .prose-invert table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 1.5em;
+  background: #181f1b;
+}
+.markdown-body th, .markdown-body td, .prose th, .prose td, .prose-invert th, .prose-invert td {
+  border: 1px solid #4ade80 !important;
+  padding: 8px 12px;
+  text-align: left;
+  color: #e5e7eb;
+}
+.markdown-body th, .prose th, .prose-invert th {
+  background: #23272b;
+  color: #bef264;
+  font-weight: 600;
+}
+.markdown-body tr:nth-child(even), .prose tr:nth-child(even), .prose-invert tr:nth-child(even) {
+  background: #20232a;
 }

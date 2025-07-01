@@ -116,3 +116,11 @@ class File:
             params = (file_id, user_id)
         ds.execute(query, params)
 
+    @staticmethod
+    def get_files_by_task(task_id):
+        rows = ds.find_all(
+            "SELECT * FROM files WHERE task_id = %s ORDER BY created_at DESC",
+            (task_id,)
+        )
+        return [File.from_row(row) for row in rows]
+
