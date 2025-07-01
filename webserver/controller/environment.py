@@ -98,7 +98,6 @@ def upload_file(env_id):
         user_id=user_id,
         filename=filename,
         filepath=file_path,
-        s3_url='',
         environment_id=env_id
     )
     return jsonify({'success': True, 'filename': filename})

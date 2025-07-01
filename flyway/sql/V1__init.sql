@@ -66,7 +66,6 @@ CREATE TABLE files (
     user_id UUID REFERENCES users(user_id),
     filename TEXT NOT NULL,
     filepath TEXT NOT NULL,
-    s3_url TEXT NOT NULL,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     environment_id UUID REFERENCES environments(environment_id)
 );
