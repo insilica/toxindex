@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import HomeButton from "./shared/HomeButton";
+import FilePreviewModal from './FilePreviewModal';
 
 interface Task {
   task_id: string;
@@ -40,6 +41,9 @@ const TaskDetail: React.FC = () => {
 
   const [taskFiles, setTaskFiles] = useState<any[]>([]);
   const [envFiles, setEnvFiles] = useState<any[]>([]);
+
+  const [previewFileId, setPreviewFileId] = useState<string | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   const fetchTask = useCallback(async () => {
     if (!task_id) return;
@@ -135,123 +139,166 @@ const TaskDetail: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto p-8 bg-gray-900 rounded-lg shadow text-white mt-12 flex flex-col min-h-[70vh]">
       <HomeButton className="absolute top-8 left-8" />
-      <div className="mb-6 w-full">
-        <div className="mb-2 font-semibold text-green-300">Files for this Task:</div>
-        {taskFiles.length === 0 ? (
-          <div className="text-gray-400 mb-2">No files for this task.</div>
-        ) : (
-          <ul className="mb-2">
-            {taskFiles.map(f => (
-              <li key={f.file_id}>
-                <a
-                  href={`/api/environments/${f.environment_id}/files/${f.file_id}/download`}
-                  className="text-blue-400 underline hover:text-blue-300"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {f.filename}
-                </a>
-              </li>
-            ))}
-          </ul>
-        )}
-        <div className="mb-2 font-semibold text-blue-300">Files for this Environment:</div>
-        {envFiles.length === 0 ? (
-          <div className="text-gray-400">No files for this environment.</div>
-        ) : (
-          <ul>
-            {envFiles.map(f => (
-              <li key={f.file_id}>
-                <a
-                  href={`/api/environments/${f.environment_id}/files/${f.file_id}/download`}
-                  className="text-blue-400 underline hover:text-blue-300"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {f.filename}
-                </a>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-      <div className="flex items-center justify-center mb-5" style={{ minHeight: '2.0rem' }}>
-        <h2 className="text-3xl font-semibold text-center mr-6" style={{ marginBottom: 0 }}>{task.title}</h2>
-        <div className="flex space-x-2 ml-4">
-          <button
-            className={`px-4 py-2 font-semibold rounded-t-lg focus:outline-none transition border-b-4 ${activeTab === 'MDrender' ? 'border-green-400 text-green-300 bg-gray-800' : 'border-transparent text-gray-400 bg-gray-900 hover:text-white'}`}
-            onClick={() => setActiveTab('MDrender')}
-          >
-            MDrender
-          </button>
-          <button
-            className={`px-4 py-2 font-semibold rounded-t-lg focus:outline-none transition border-b-4 ${activeTab === 'MDraw' ? 'border-green-400 text-green-300 bg-gray-800' : 'border-transparent text-gray-400 bg-gray-900 hover:text-white'}`}
-            onClick={() => setActiveTab('MDraw')}
-          >
-            MDraw
-          </button>
-          <button
-            className={`px-4 py-2 font-semibold rounded-t-lg focus:outline-none transition border-b-4 ${activeTab === 'JsonSchema' ? 'border-green-400 text-green-300 bg-gray-800' : 'border-transparent text-gray-400 bg-gray-900 hover:text-white'}`}
-            onClick={() => setActiveTab('JsonSchema')}
-          >
-            JsonSchema
-          </button>
-        </div>
-      </div>
-      {/* Tab content */}
-      <div className="flex-1 flex flex-col items-center justify-center w-full">
-        {activeTab === 'MDrender' && (
-          <div className="w-full max-w-full bg-gray-800 rounded-lg p-6 shadow-inner">
-            {messageLoading ? (
-              <div className="text-gray-400">Loading result...</div>
-            ) : assistantMessage ? (
-              <div
-                className="prose prose-invert w-full max-w-full"
-                style={{ lineHeight: 2, maxHeight: 650, overflowY: 'auto' }}
-              >
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>{assistantMessage}</ReactMarkdown>
-              </div>
+      <div className="flex flex-row w-full min-h-[60vh]">
+        {/* Sidebar: File List */}
+        <div className="w-64 pr-6 border-r border-gray-800 flex-shrink-0 overflow-y-auto" style={{ minWidth: 220 }}>
+          <div className="mb-6">
+            <div className="mb-2 font-semibold text-green-300">Output files for this Task:</div>
+            {taskFiles.length === 0 ? (
+              <div className="text-gray-400 mb-2">No files for this task.</div>
             ) : (
-              <div className="text-gray-400">No assistant message found for this task.</div>
+              <ul className="mb-2">
+                {(() => {
+                  const maxFilenameLength = 30;
+                  const truncate = (name: string) => {
+                    if (name.length <= maxFilenameLength) return name;
+                    const startLen = maxFilenameLength - 10;
+                    const extMatch = name.match(/(\.[^./\\]+)$/);
+                    const ext = extMatch ? extMatch[1] : '';
+                    return `${name.slice(0, startLen)}...${ext}`;
+                  };
+                  return taskFiles.map(f => (
+                    <li key={f.file_id} className="flex items-center space-x-2">
+                      <button
+                        className="text-blue-400 underline hover:text-blue-300 cursor-pointer bg-transparent border-none p-0 m-0"
+                        title={f.filename}
+                        style={{
+                          background: 'none',
+                          fontSize: '12px',
+                          lineHeight: '1',
+                          padding: '0',
+                          border: 'none',
+                          height: '20px',
+                          minHeight: 'unset',
+                        }}
+                        onClick={() => {
+                          setPreviewFileId(f.file_id);
+                          setPreviewOpen(true);
+                        }}
+                      >
+                        {truncate(f.filename)}
+                      </button>
+                      <a
+                        href={`/api/tasks/${f.task_id}/files/${f.file_id}/download`}
+                        className="ml-2 px-1 py-1 text-gray-300 bg-transparent hover:bg-green-400/10 hover:border-green-300 hover:text-green-200 rounded-full text-xs font-semibold flex items-center gap-1 transition focus:outline-none focus:ring-2 focus:ring-green-400/50"
+                        title={`Download ${f.filename}`}
+                        download
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 mr-1"><path d="M9 3.75a1 1 0 0 1 2 0v6.19l1.72-1.72a1 1 0 1 1 1.42 1.42l-3.43 3.43a1 1 0 0 1-1.42 0l-3.43-3.43a1 1 0 1 1 1.42-1.42L9 9.94V3.75ZM4.25 15a.75.75 0 0 1 .75-.75h10a.75.75 0 0 1 0 1.5H5a.75.75 0 0 1-.75-.75Z" /></svg>
+                      </a>
+                    </li>
+                  ));
+                })()}
+              </ul>
+            )}
+            <div className="mb-2 font-semibold text-blue-300">Available files for this Environment:</div>
+            {envFiles.length === 0 ? (
+              <div className="text-gray-400">No files for this environment.</div>
+            ) : (
+              <ul>
+                {(() => {
+                  const maxFilenameLength = 30;
+                  const truncate = (name: string) => {
+                    if (name.length <= maxFilenameLength) return name;
+                    const startLen = maxFilenameLength - 10;
+                    const extMatch = name.match(/(\.[^./\\]+)$/);
+                    const ext = extMatch ? extMatch[1] : '';
+                    return `${name.slice(0, startLen)}...${ext}`;
+                  };
+                  return envFiles.map(f => (
+                    <li key={f.file_id} className="flex items-center space-x-2">
+                      <button
+                        className="text-blue-400 underline hover:text-blue-300 cursor-pointer bg-transparent border-none p-0 m-0"
+                        title={f.filename}
+                        style={{
+                          background: 'none',
+                          fontSize: '12px',
+                          lineHeight: '1',
+                          padding: '0',
+                          border: 'none',
+                          height: '20px',
+                          minHeight: 'unset',
+                        }}
+                        onClick={() => {
+                          setPreviewFileId(f.file_id);
+                          setPreviewOpen(true);
+                        }}
+                      >
+                        {truncate(f.filename)}
+                      </button>
+                      <a
+                        href={`/api/environments/${f.environment_id}/files/${f.file_id}/download`}
+                        className="ml-2 px-0 py-1 text-gray-300 bg-transparent hover:bg-green-400/10 hover:border-green-300 hover:text-green-200 rounded-full text-xs font-semibold flex items-center gap-1 transition focus:outline-none focus:ring-2 focus:ring-green-400/50"
+                        title={`Download ${f.filename}`}
+                        download
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 mr-1"><path d="M9 3.75a1 1 0 0 1 2 0v6.19l1.72-1.72a1 1 0 1 1 1.42 1.42l-3.43 3.43a1 1 0 0 1-1.42 0l-3.43-3.43a1 1 0 1 1 1.42-1.42L9 9.94V3.75ZM4.25 15a.75.75 0 0 1 .75-.75h10a.75.75 0 0 1 0 1.5H5a.75.75 0 0 1-.75-.75Z" /></svg>
+                      </a>
+                    </li>
+                  ));
+                })()}
+              </ul>
             )}
           </div>
-        )}
-        {activeTab === 'MDraw' && (
-          <div className="w-full max-w-full bg-gray-800 rounded-lg p-6 shadow-inner">
-            <div className="text-lg font-semibold mb-2">Raw Markdown</div>
-            <pre
-              style={{
-                whiteSpace: 'pre-wrap',
-                wordBreak: 'break-all',
-                textAlign: 'left',
-                color: '#a3e635',
-                background: 'transparent',
-                fontSize: '1.1em',
-                maxHeight: 650,
-                overflowY: 'auto'
-              }}
-            >
-              {assistantMessage}
-            </pre>
+        </div>
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col items-center justify-center w-full pl-8">
+          {/* Tab content */}
+          <div className="flex-1 flex flex-col items-center justify-center w-full">
+            {activeTab === 'MDrender' && (
+              <div className="w-full max-w-full bg-gray-800 rounded-lg p-6 shadow-inner">
+                {messageLoading ? (
+                  <div className="text-gray-400">Loading result...</div>
+                ) : assistantMessage ? (
+                  <div
+                    className="prose prose-invert w-full max-w-full"
+                    style={{ lineHeight: 2, maxHeight: 650, overflowY: 'auto' }}
+                  >
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{assistantMessage}</ReactMarkdown>
+                  </div>
+                ) : (
+                  <div className="text-gray-400">No assistant message found for this task.</div>
+                )}
+              </div>
+            )}
+            {/* {activeTab === 'MDraw' && (
+              <div className="w-full max-w-full bg-gray-800 rounded-lg p-6 shadow-inner">
+                <div className="text-lg font-semibold mb-2">Raw Markdown</div>
+                <pre
+                  style={{
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-all',
+                    textAlign: 'left',
+                    color: '#a3e635',
+                    background: 'transparent',
+                    fontSize: '1.1em',
+                    maxHeight: 650,
+                    overflowY: 'auto'
+                  }}
+                >
+                  {assistantMessage}
+                </pre>
+              </div>
+            )}
+            {activeTab === 'JsonSchema' && (
+              <div
+                className="w-full max-w-full bg-gray-800 rounded-lg p-6 shadow-inner"
+              >
+                <div className="text-lg font-semibold mb-2">Toxicity Schema</div>
+                <pre style={{
+                  textAlign: 'left',
+                  color: '#a3e635',
+                  background: 'transparent',
+                  fontSize: '1.1em',
+                  maxHeight: 650,
+                  overflowY: 'auto'
+                }}>
+                  {toxicitySchema ? JSON.stringify(toxicitySchema, null, 2) : "Loading..."}
+                </pre>
+              </div>
+            )} */}
           </div>
-        )}
-        {activeTab === 'JsonSchema' && (
-          <div
-            className="w-full max-w-full bg-gray-800 rounded-lg p-6 shadow-inner"
-          >
-            <div className="text-lg font-semibold mb-2">Toxicity Schema</div>
-            <pre style={{
-              textAlign: 'left',
-              color: '#a3e635',
-              background: 'transparent',
-              fontSize: '1.1em',
-              maxHeight: 650,
-              overflowY: 'auto'
-            }}>
-              {toxicitySchema ? JSON.stringify(toxicitySchema, null, 2) : "Loading..."}
-            </pre>
-          </div>
-        )}
+        </div>
       </div>
       <footer className="mt-6 pt-1 pb-1 pl-20 pr-10 border-t border-gray-700 bg-gray-950 rounded-b-lg shadow-inner">
         <div className="w-full max-w-10xl mx-auto">
@@ -359,6 +406,11 @@ const TaskDetail: React.FC = () => {
           </div>
         </div>
       </footer>
+      <FilePreviewModal
+        fileId={previewFileId}
+        isOpen={previewOpen}
+        onRequestClose={() => setPreviewOpen(false)}
+      />
     </div>
   );
 };
