@@ -38,6 +38,9 @@ const TaskDetail: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'MDrender' | 'MDraw' | 'JsonSchema'>('MDrender');
   const [toxicitySchema, setToxicitySchema] = useState<any>(null);
 
+  const [taskFiles, setTaskFiles] = useState<any[]>([]);
+  const [envFiles, setEnvFiles] = useState<any[]>([]);
+
   const fetchTask = useCallback(async () => {
     if (!task_id) return;
     setLoading(true);
@@ -106,6 +109,24 @@ const TaskDetail: React.FC = () => {
     fetchTask();
   }, [fetchTask]);
 
+  useEffect(() => {
+    if (!task_id) return;
+    // Fetch files for the task
+    fetch(`/api/tasks/${task_id}/files`, { credentials: "include" })
+      .then(res => res.json())
+      .then(data => setTaskFiles(data.files || []))
+      .catch(() => setTaskFiles([]));
+  }, [task_id]);
+
+  useEffect(() => {
+    if (task && task.environment_id) {
+      fetch(`/api/environments/${task.environment_id}/files`, { credentials: "include" })
+        .then(res => res.json())
+        .then(data => setEnvFiles(data.files || []))
+        .catch(() => setEnvFiles([]));
+    }
+  }, [task]);
+
   if (loading) return <div className="text-white p-8">Loading...</div>;
   if (!task) return <div className="text-white p-8">Task not found.</div>;
 
@@ -114,6 +135,46 @@ const TaskDetail: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto p-8 bg-gray-900 rounded-lg shadow text-white mt-12 flex flex-col min-h-[70vh]">
       <HomeButton className="absolute top-8 left-8" />
+      <div className="mb-6 w-full">
+        <div className="mb-2 font-semibold text-green-300">Files for this Task:</div>
+        {taskFiles.length === 0 ? (
+          <div className="text-gray-400 mb-2">No files for this task.</div>
+        ) : (
+          <ul className="mb-2">
+            {taskFiles.map(f => (
+              <li key={f.file_id}>
+                <a
+                  href={`/api/environments/${f.environment_id}/files/${f.file_id}/download`}
+                  className="text-blue-400 underline hover:text-blue-300"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {f.filename}
+                </a>
+              </li>
+            ))}
+          </ul>
+        )}
+        <div className="mb-2 font-semibold text-blue-300">Files for this Environment:</div>
+        {envFiles.length === 0 ? (
+          <div className="text-gray-400">No files for this environment.</div>
+        ) : (
+          <ul>
+            {envFiles.map(f => (
+              <li key={f.file_id}>
+                <a
+                  href={`/api/environments/${f.environment_id}/files/${f.file_id}/download`}
+                  className="text-blue-400 underline hover:text-blue-300"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {f.filename}
+                </a>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
       <div className="flex items-center justify-center mb-5" style={{ minHeight: '2.0rem' }}>
         <h2 className="text-3xl font-semibold text-center mr-6" style={{ marginBottom: 0 }}>{task.title}</h2>
         <div className="flex space-x-2 ml-4">

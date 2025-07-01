@@ -1,14 +1,15 @@
 # Toxindex Portal
 
-A collection of toxicology workflows for research and analysis.
+A collection of toxicology workflows for research and analysis. This portal provides tools and workflows for toxicology research, including hazard prediction, data management, and more.
 
 ---
 
 ## Table of Contents
 
+- [Project Overview](#project-overview)
 - [Services](#services)
 - [Development Setup](#development-setup)
-- [Usage](#usage)
+- [Production Setup](#production-setup)
 - [Troubleshooting](#troubleshooting)
 - [Roadmap](#roadmap)
 - [Tech Stack](#tech-stack)
@@ -17,11 +18,19 @@ A collection of toxicology workflows for research and analysis.
 
 ---
 
+## Project Overview
+
+Toxindex Portal is designed to streamline toxicology research by providing a unified interface for running workflows, managing data, and visualizing results. It integrates modern web technologies with robust backend services for a seamless research experience.
+
+---
+
 ## Services
 
-1. **Postgres** – Database service.
-2. **Flyway** – Runs at the start of `docker compose up` and performs all necessary migrations on the Postgres service.
-3. **Webserver** – Flask web user interface. Features users, projects, and project-specific service views.
+| Service     | Description                                                      |
+|-------------|------------------------------------------------------------------|
+| **Postgres**| Database service.                                                |
+| **Flyway**  | Runs migrations on the Postgres service at startup.              |
+| **Webserver**| Flask web UI for users, projects, and workflow management.      |
 
 ---
 
@@ -29,184 +38,145 @@ A collection of toxicology workflows for research and analysis.
 
 ```sh
 # Clean up previous environments (if needed)
-exit
-rm -rf .venv
-rm -rf ~/.cache/uv
+rm -rf .venv ~/.cache/uv
 unset LD_LIBRARY_PATH
-nix develop
-# Update dependencies
-nix flake update
+```
 
+```sh
 # Enter development environment
 nix develop
+```
 
-# If c++ binaries not found
-unset LD_LIBRARY_PATH && nix develop
-
+```sh
 # Install frontend dependencies
 cd frontend && npm install
 ```
 
+**Development Commands:**
+
+- Start Flask app:
+  ```sh
+  python -m webserver.app
+  ```
+- Start Celery worker:
+  ```sh
+  celery -A workflows.celery_worker worker --loglevel=info
+  ```
+- Start frontend:
+  ```sh
+  cd frontend && npm run dev
+  ```
+
 ---
 
-## Usage
+## Production Setup
 
-### Start Services
+### 1. Connect to Server
+```sh
+ssh kyu-ubuntu30
+```
 
-- **Production:**
-
-  - connect to ssh
-    `ssh kyu-ubuntu30`
-
-
-
-  - make swap
+### 2. Expand RAM with Swap (if needed)
+```sh
 sudo dd if=/dev/zero of=/swapfile bs=1M count=1024
 sudo chmod 600 /swapfile
 sudo mkswap /swapfile
 sudo swapon /swapfile
 echo '/swapfile swap swap defaults 0 0' | sudo tee -a /etc/fstab
-  - clear RAM
-    `sudo sync; sudo echo 3 | sudo sh -c 'echo 3 > /proc/sys/vm/drop_caches'`
-  - check RAM
-    `free -h`
-  
-  - start React
-    `cd toxindex && nix develop && cd frontend && npm install &&  && npm run build`
+```
 
+### 3. RAM Management
+```sh
+# Clear RAM cache
+sudo sync; sudo sh -c 'echo 3 > /proc/sys/vm/drop_caches'
+
+# Check RAM usage
+free -h
+```
+
+### 4. Enter Nix Environment
+```sh
+cd toxindex && nix develop
+```
+
+### 5. Install and Build Frontend
+```sh
+cd frontend && npm install
+npm run build
+```
+
+### 6. Install and Configure Nginx
+```sh
 sudo apt update
 sudo apt install nginx
+```
 
-sudo nano /etc/nginx/conf.d/toxindex.conf
+- Create Nginx config file:
+  ```sh
+  sudo nano /etc/nginx/conf.d/toxindex.conf
+  ```
+  
+  Example config:
+  ```nginx
+  server {
+      listen 80;
+      server_name 18.118.10.140; # Use 'localhost' for dev
 
-server {
-    listen 80;
-    server_name 18.118.10.140;
+      root /home/ubuntu/toxindex/frontend/dist;
+      index index.html;
 
-    root /home/ubuntu/toxindex/frontend/dist;
-    index index.html;
+      location / {
+          try_files $uri /index.html;
+      }
 
-    location / {
-        try_files $uri /index.html;
-    }
+      location /api/ {
+          proxy_pass http://127.0.0.1:6513;
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+      }
 
-    location /api/ {
-        proxy_pass http://127.0.0.1:6513;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
+      location /socket.io/ {
+          proxy_pass http://127.0.0.1:6513;
+          proxy_http_version 1.1;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection "upgrade";
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+      }
+  }
+  ```
 
-    location /socket.io/ {
-        proxy_pass http://127.0.0.1:6513;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
+- Test config:
+  ```sh
+  sudo nginx -t
+  ```
 
+- Set permissions to expose frontend static files to Nginx:
+  ```sh
+  sudo chown -R ubuntu:www-data /home/ubuntu/toxindex/frontend/dist
+  sudo chmod -R 755 /home/ubuntu/toxindex/frontend/dist
+  sudo chmod -R o+rx /home/ubuntu/toxindex/frontend/dist
+  sudo chmod o+x /home/ubuntu
+  ```
 
-
-
-
-sudo nginx -t
-sudo systemctl reload nginx
-
-sudo chown -R ubuntu:www-data /home/ubuntu/toxindex/frontend/dist
-sudo chmod -R 755 /home/ubuntu/toxindex/frontend/dist
-sudo chmod -R o+rx /home/ubuntu/toxindex/frontend/dist
-sudo chmod o+x /home/ubuntu
-sudo systemctl reload nginx
-
-sudo tail -n 50 /var/log/nginx/error.log
-
-  - Start webserver:  
-    `gunicorn webserver.app:app --bind 0.0.0.0:8000 --worker-class eventlet`
-  - Start Redis listener:  
-    `cd toxindex && nix develop && python redis_listener_service.py`
-  - Start Celery worker:  
-    `cd toxindex && nix develop && celery -A workflows.celery_worker worker --loglevel=info`
-
-terminal #1
-gunicorn webserver.app:app --bind 0.0.0.0:8000 --worker-class eventlet
-
-terminal #2
-python redis_listener_service.py
-
-terminal #3
-celery -A workflows.celery_worker worker --loglevel=info
-
-- **Development:**
-  - Start Flask app:  
-    `python -m webserver.app`
-  - Start Celery worker:  
-    `celery -A workflows.celery_worker worker --loglevel=info`
-  - Start frontend:  
-    `cd frontend && npm run dev`
-
-sudo nano /etc/nginx/sites-available/toxindex
-
-server {
-    listen 80;
-    server_name localhost;
-
-    root /home/kyu/Documents/toxindex/frontend/dist;
-    index index.html;
-
-    location / {
-        try_files $uri /index.html;
-    }
-
-    location /api/ {
-        proxy_pass http://127.0.0.1:6513;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-
-    location /socket.io/ {
-        proxy_pass http://127.0.0.1:6513;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
-
-sudo nginx -t
-sudo systemctl reload nginx
+- Reload Nginx:
+  ```sh
+  sudo systemctl reload nginx
+  ```
 
 ---
 
 ## Troubleshooting
 
-If Gunicorn cannot start (e.g., port 8000 is in use):
-
-```sh
-lsof -i :8000
-kill <PID>
-```
-
----
-
-## Committing Changes
-
-After making changes:
-
-```sh
-git add .
-git commit -m "Describe your change"
-git push
-```
+- If a port is in use:
+  ```sh
+  lsof -i :8000
+  kill <PID>
+  ```
 
 ---
 
@@ -220,31 +190,27 @@ The basic workflow:
 ### ToxIndex RAP Workflow
 
 - Users can predict hazard with toxtransformer.
-- Example: User enters prompt "Is PFOA hepatotoxic?"
+- Example: User enters prompt: _"Is PFOA hepatotoxic?"_
 - System creates a task, adds it to a table, sends it to the workflow, and creates a webhook for activities/results.
-
-See tasks in `pfoa_tasks.md` for more details.
 
 ---
 
 ## Tech Stack
 
 - **Frontend:** React, Tailwind CSS, Vite, TypeScript
-- **Backend:** Flask, Eventlet, Celery
-- **Data:** Langchain, Agno, Scikit-learn, Postgres, Flyway
-- **Deployment:** Gunicorn on EC2
+- **Backend:** Flask, Eventlet, Celery, Postgres, Flyway
+- **Data:** Langchain, Agno, Scikit-learn
 
 ---
 
 ## Contributing
 
-Please open issues or submit pull requests.
+Contributions are welcome! Please open issues or submit pull requests for improvements.
 
 ---
 
 ## License
 
-TBD
-
+Distributed under the MIT License. See `LICENSE` for more information.
 
 
