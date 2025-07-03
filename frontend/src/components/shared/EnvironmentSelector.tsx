@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEnvironment } from "../../context/EnvironmentContext";
+import { IoServerOutline } from 'react-icons/io5';
 
 interface EnvironmentSelectorProps {
   className?: string;
@@ -30,11 +31,13 @@ const EnvironmentSelector: React.FC<EnvironmentSelectorProps> = ({
       navigate("/settings/environments");
     } else {
       setSelectedEnv(value);
+      navigate(`/environment/${value}`);
     }
   };
 
   return (
-    <div className="relative group" style={{ minWidth: 180, maxWidth: 210 }}>
+    <div className="relative group flex items-center gap-2" style={{ minWidth: 180, maxWidth: 210 }}>
+      <IoServerOutline className="text-blue-400" style={{ fontSize: '1.6rem', flexShrink: 0 }} title="Environment" />
       {/* Hidden span to measure width */}
       <span
         ref={spanRef}
@@ -52,24 +55,23 @@ const EnvironmentSelector: React.FC<EnvironmentSelectorProps> = ({
           ? "+ Add environment"
           : selectedEnv === "__manage__"
             ? "⚙ Manage environments"
-            : (environments ?? []).find(e => e.environment_id === selectedEnv)
-              ? `env - ${(environments ?? []).find(e => e.environment_id === selectedEnv)?.title}`
-              : ""}
+            : (environments ?? []).find(e => e.environment_id === selectedEnv)?.title || ""}
       </span>
       <select
         ref={selectRef}
-        className={`font-bold text-white text-sm px-1 py-2 rounded-full appearance-none bg-transparent border-none focus:outline-none transition-all duration-150 group-hover:bg-black group-hover:bg-opacity-60 group-hover:border group-hover:border-gray-700 group-hover:px-4 group-hover:pr-10 group-hover:cursor-pointer focus:bg-black focus:bg-opacity-60 focus:border focus:border-gray-700 focus:px-4 focus:pr-10 w-full ${loadingEnvironments ? 'opacity-50' : ''} ${className}`}
+        className={`font-bold text-white text-base leading-tight px-4 py-2 rounded-full appearance-none bg-transparent border-none focus:outline-none transition-all duration-150 group-hover:bg-black group-hover:bg-opacity-60 group-hover:border group-hover:border-gray-700 group-hover:px-6 group-hover:pr-12 group-hover:cursor-pointer focus:bg-black focus:bg-opacity-60 focus:border focus:border-gray-700 focus:px-6 focus:pr-12 w-full ${loadingEnvironments ? 'opacity-50' : ''} ${className}`}
         style={{
           width: `${selectWidth}px`,
           minWidth: "50px",
           maxWidth: "260px",
-          height: '1.7rem',
+          height: '2.5rem',
           borderRadius: '999px',
           position: 'relative',
           zIndex: 1,
           backgroundColor: 'transparent',
           cursor: 'pointer',
-          paddingRight: '1.5rem',
+          paddingRight: '2.2rem',
+          lineHeight: '1.5rem',
         }}
         value={selectedEnv || ''}
         onChange={handleChange}
@@ -77,7 +79,7 @@ const EnvironmentSelector: React.FC<EnvironmentSelectorProps> = ({
       >
         {(environments ?? []).length > 0 && (environments ?? []).map(env => (
           <option key={env.environment_id} value={env.environment_id} style={{ paddingLeft: '1rem' }}>
-            {`env - ${env.title}`}
+            {env.title}
           </option>
         ))}
         <option value="__add__" style={loadingEnvironments ? { opacity: 0.5 } : {}}>

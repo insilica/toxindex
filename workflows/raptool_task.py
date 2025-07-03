@@ -19,6 +19,17 @@ from raptool.parse_chemicals import parse_chemicals
 
 logger = logging.getLogger(__name__)
 
+def emit_status(task_id, status):
+    Task.set_status(task_id, status)
+    r = redis.Redis()
+    task = Task.get_task(task_id)
+    event = {
+        "type": "task_status_update",
+        "task_id": task.task_id,
+        "data": task.to_dict(),
+    }
+    r.publish("celery_updates", json.dumps(event, default=str))
+
 @celery.task(bind=True)
 def raptool_task(self, payload):
     """Run RAPtool parse_chemicals on an uploaded file and publish the result."""
@@ -31,6 +42,7 @@ def raptool_task(self, payload):
         if not all([task_id, user_id, file_id]):
             raise ValueError(f"Missing required fields. task_id={task_id}, user_id={user_id}, file_id={file_id}")
 
+        emit_status(task_id, "fetching file")
         # Get file info from DB
         file_obj = File.get_file(file_id)
         if not file_obj or not file_obj.filepath or not os.path.exists(file_obj.filepath):
@@ -40,6 +52,7 @@ def raptool_task(self, payload):
 
         # Prepare TXT if needed
         if ext == ".csv":
+            emit_status(task_id, "converting csv")
             txt_path = os.path.join("outputs", f"{os.path.splitext(os.path.basename(input_path))[0]}_{uuid.uuid4().hex}.txt")
             os.makedirs(os.path.dirname(txt_path), exist_ok=True)
             csv_to_txt_robust(input_path, txt_path)
@@ -47,6 +60,7 @@ def raptool_task(self, payload):
         else:
             parse_input_path = input_path
 
+        emit_status(task_id, "parsing chemicals")
         # Prepare output CSV path
         output_filename = f"raptool_result_{uuid.uuid4().hex}.csv"
         output_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'outputs'))
@@ -56,6 +70,7 @@ def raptool_task(self, payload):
         # Run RAPtool parse_chemicals
         parse_chemicals(parse_input_path, output_path)
 
+        emit_status(task_id, "publishing result")
         # Publish message event (simple notification)
         message = MessageSchema(role="assistant", content=f"RAPtool parse_chemicals completed. Output saved to {output_filename}.")
         event = {
@@ -79,9 +94,11 @@ def raptool_task(self, payload):
         logger.info("raptool_task completed successfully")
 
         finished_at = Task.mark_finished(task_id)
+        emit_status(task_id, "done")
         return {"done": True, "finished_at": finished_at}
     except Exception as e:
         logger.error(f"Error in raptool_task: {str(e)}", exc_info=True)
+        emit_status(task_id, "error")
         raise
 
 def csv_to_txt_robust(csv_path, txt_path):

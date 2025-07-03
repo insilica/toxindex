@@ -88,11 +88,31 @@ const ChatSession = () => {
     if (!input.trim() || sending) return;
     setSending(true);
     setError(null);
+    // Map selectedModel to workflow_id
+    // 1: ToxIndex RAP probra_task
+    // 2: ToxIndex Vanilla plain_openai_task
+    // 3: ToxIndex Pathway openai_json_schema_task
+    // 4: ToxIndex 4th probra_task
+    // 5: ToxIndex 5th probra_task
+    let workflow_id = 1;
+    if (selectedModel === "toxindex-rap") workflow_id = 1;
+    else if (selectedModel === "toxindex-vanilla") workflow_id = 2;
+    else if (selectedModel === "toxindex-pathway") workflow_id = 3;
+    else if (selectedModel === "toxindex-4th" || selectedModel === "toxindex-5th") {
+      setError("This workflow is not yet supported.");
+      setSending(false);
+      return;
+    }
     try {
-      const res = await fetch(`/api/chat_sessions/${sessionId}/message`, {
+      const res = await fetch('/api/tasks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: input.trim(), environment_id: selectedEnv || undefined, model: selectedModel }),
+        body: JSON.stringify({
+          message: input.trim(),
+          workflow: workflow_id,
+          environment_id: selectedEnv || undefined,
+          sid: sessionId,
+        }),
         credentials: 'include'
       });
       const data = await res.json();
@@ -111,11 +131,17 @@ const ChatSession = () => {
   };
 
   return (
-    <div className="h-screen flex flex-col flex-1" style={{ background: 'linear-gradient(135deg, #101614 0%, #1a2a1a 60%, #1a2320 100%)' }}>
+    <div className="min-h-screen flex flex-col flex-1" style={{ background: 'linear-gradient(135deg, #101614 0%, #1a2a1a 60%, #1a2320 100%)' }}>
       <div className="flex-1 flex flex-col max-w-5xl mx-auto w-full px-4 pt-20 py-0">
+        {/* Chat history box */}
         <div
-          className="w-full max-w-5xl mx-auto px-20 py-0 bg-transparent rounded-lg shadow-inner"
-          style={{ maxHeight: '70vh', overflowY: 'auto', scrollBehavior: 'smooth', background: 'transparent' }}
+          className="flex-1 overflow-y-auto w-full max-w-5xl mx-auto px-20 py-0 bg-transparent rounded-lg shadow-inner"
+          style={{
+            scrollBehavior: 'smooth',
+            background: 'transparent',
+            minHeight: 0, // allow flex child to shrink
+            maxHeight: '75vh', // limit height so only this box scrolls
+          }}
         >
           {loading ? (
             <LoadingSpinner text="Loading messages..." />
@@ -155,7 +181,14 @@ const ChatSession = () => {
                         lineHeight: 1.8,
                       }}
                     >
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
+                      <ReactMarkdown
+                        remarkPlugins={[remarkGfm]}
+                        components={{
+                          td: ({node, ...props}) => <td className="markdown-table-cell" {...props} />
+                        }}
+                      >
+                        {msg.content}
+                      </ReactMarkdown>
                     </div>
                   )}
                 </div>
@@ -172,15 +205,13 @@ const ChatSession = () => {
           )}
         </div>
 
-        <div className="w-full flex justify-center mt-6">
-          <ChatInputBar
-            value={input}
-            onChange={setInput}
-            onSubmit={handleSubmit}
-            uploading={sending}
-            error={error}
-          />
-        </div>
+        <ChatInputBar
+          value={input}
+          onChange={setInput}
+          onSubmit={handleSubmit}
+          uploading={sending}
+          error={error}
+        />
       </div>
     </div>
   );

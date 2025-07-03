@@ -1,0 +1,1 @@
+Hello! How can I assist you with your toxicology or chemical safety research today? If you have a specific chemical or toxicity concern you'd like analyzed, please provide the details, and I'll prepare a comprehensive, evidence-based report for you.

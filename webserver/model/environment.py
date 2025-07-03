@@ -13,7 +13,7 @@ class Environment:
         self.created_at = created_at
 
     def to_dict(self):
-        return {
+        d = {
             "environment_id": self.environment_id,
             "title": self.title,
             "user_id": self.user_id,
@@ -24,6 +24,12 @@ class Environment:
                 else None
             ),
         }
+        # Add task_count and file_count if present (for list views)
+        if hasattr(self, 'task_count'):
+            d["task_count"] = self.task_count
+        if hasattr(self, 'file_count'):
+            d["file_count"] = self.file_count
+        return d
 
     @staticmethod
     def from_row(row):
@@ -52,10 +58,23 @@ class Environment:
     @staticmethod
     def get_environments_by_user(user_id):
         rows = ds.find_all(
-            "SELECT * FROM environments WHERE user_id = %s ORDER BY created_at DESC",
+            """
+            SELECT e.*, 
+                (SELECT COUNT(*) FROM tasks t WHERE t.environment_id = e.environment_id) AS task_count,
+                (SELECT COUNT(*) FROM files f WHERE f.environment_id = e.environment_id) AS file_count
+            FROM environments e
+            WHERE e.user_id = %s
+            ORDER BY e.created_at DESC
+            """,
             (user_id,),
         )
-        return [Environment.from_row(row) for row in rows]
+        envs = []
+        for row in rows:
+            env = Environment.from_row(row)
+            env.task_count = row.get('task_count', 0)
+            env.file_count = row.get('file_count', 0)
+            envs.append(env)
+        return envs
 
     @staticmethod
     def get_environment(environment_id):

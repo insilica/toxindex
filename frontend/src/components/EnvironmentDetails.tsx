@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import FilePreviewModal from './FilePreviewModal';
 import UploadCsvModal from './UploadCsvModal';
-import { FaEye, FaDownload, FaTrash } from 'react-icons/fa';
+import { FaEye, FaDownload, FaTrash, } from 'react-icons/fa';
 import EnvironmentSelector from './shared/EnvironmentSelector';
 import LoadingSpinner from './shared/LoadingSpinner';
 import { useEnvironment } from "../context/EnvironmentContext";
@@ -21,7 +21,6 @@ interface EnvironmentFile {
 }
 
 export const EnvironmentDetails: React.FC = () => {
-  const { env_id } = useParams<{ env_id: string }>();
   const navigate = useNavigate();
   const [env, setEnv] = useState<Environment | null>(null);
   const [files, setFiles] = useState<EnvironmentFile[]>([]);
@@ -40,41 +39,23 @@ export const EnvironmentDetails: React.FC = () => {
     const loadEnvironment = async () => {
       setLoading(true);
       try {
-        // Use the URL param if available, otherwise use selectedEnv prop
-        const targetEnvId = env_id || selectedEnv;
-        if (!targetEnvId || targetEnvId === "__add__" || targetEnvId === "__manage__") {
+        if (selectedEnv === "__add__" || selectedEnv === "__manage__") {
           setLoading(false);
           return;
         }
 
-        // First try to find the environment in the props
-        const foundEnv = environments.find(e => e.environment_id === targetEnvId);
-        if (foundEnv) {
-          setEnv(foundEnv);
-          
-          // Update selectedEnv prop if using URL param
-          if (env_id && setSelectedEnv) {
-            setSelectedEnv(env_id);
-          }
-        } else {
-          // If not found in props, fetch from API
-          const envResponse = await fetch(`/api/environments/${targetEnvId}`, { 
-            credentials: 'include',
-            cache: "no-store"
-          });
-          const envData = await envResponse.json();
-          if (envData.environment) {
-            setEnv(envData.environment);
-            
-            // Update selectedEnv prop if using URL param
-            if (env_id && setSelectedEnv) {
-              setSelectedEnv(env_id);
-            }
-          }
-        }
+        const envResponse = await fetch(`/api/environments/${selectedEnv}`, { 
+          credentials: 'include',
+          cache: "no-store"
+        });
 
+        const envData = await envResponse.json();
+        if (envData.environment) {
+          setEnv(envData.environment);
+        }
+        
         // Fetch files
-        const filesResponse = await fetch(`/api/environments/${targetEnvId}/files`, { 
+        const filesResponse = await fetch(`/api/environments/${selectedEnv}/files`, { 
           credentials: 'include',
           cache: "no-store"
         });
@@ -82,7 +63,7 @@ export const EnvironmentDetails: React.FC = () => {
         setFiles(filesData.files || []);
 
         // Fetch tasks
-        const tasksResponse = await fetch(`/api/tasks?environment_id=${targetEnvId}`, { 
+        const tasksResponse = await fetch(`/api/tasks?environment_id=${selectedEnv}`, { 
           credentials: 'include',
           cache: "no-store"
         });
@@ -96,14 +77,14 @@ export const EnvironmentDetails: React.FC = () => {
     };
 
     loadEnvironment();
-  }, [env_id, selectedEnv, setSelectedEnv, environments]);
+  }, [selectedEnv, setSelectedEnv]);
 
   const handleDelete = async () => {
     if (!window.confirm('Are you sure you want to delete this environment? This cannot be undone.')) return;
     setDeleting(true);
     setDeleteError(null);
     try {
-      const res = await fetch(`/api/environments/${env_id}`, {
+      const res = await fetch(`/api/environments/${selectedEnv}`, {
         method: 'DELETE',
         credentials: 'include',
       });
@@ -328,7 +309,7 @@ export const EnvironmentDetails: React.FC = () => {
         </ul>
       )}
 
-      {(selectedEnv || env_id) && (
+      {(selectedEnv) && (
         <FilePreviewModal
           fileId={previewFileId}
           isOpen={previewOpen}

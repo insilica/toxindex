@@ -7,6 +7,8 @@ interface Environment {
   title: string;
   user_id: string;
   created_at: string;
+  task_count?: number;
+  file_count?: number;
 }
 
 const SettingsEnvironments: React.FC = () => {
@@ -24,6 +26,7 @@ const SettingsEnvironments: React.FC = () => {
     fetch(`/api/environments/${envId}`, {
       method: 'DELETE',
       credentials: 'include',
+      
     })
       .then(res => res.json())
       .then(data => {
@@ -79,6 +82,7 @@ const SettingsEnvironments: React.FC = () => {
             <tr className="bg-transparent">
               <th className="p-2 text-left">Name</th>
               <th className="p-2 text-left">Number of tasks</th>
+              <th className="p-2 text-left">Number of files</th>
               <th className="p-2 text-left">Creator</th>
               <th className="p-2 text-left">Created at</th>
             </tr>
@@ -88,12 +92,13 @@ const SettingsEnvironments: React.FC = () => {
               <tr
                 key={env.environment_id}
                 className={`border-b border-gray-700 transition-colors hover:bg-purple-900/30 cursor-pointer`}
-                onClick={() => navigate(`/environment/${env.environment_id}`)}
+                onClick={() => navigate(`/environments/details?env=${env.environment_id}`)}
               >
                 <td className="py-3 px-4 text-white text-lg font-medium">
                   {env.title}
                 </td>
-                <td className="py-3 px-4 text-white text-lg font-medium">0</td>
+                <td className="py-3 px-4 text-white text-lg font-medium">{env.task_count ?? 0}</td>
+                <td className="py-3 px-4 text-white text-lg font-medium">{env.file_count ?? 0}</td>
                 <td className="py-3 px-4 text-white text-lg font-medium">{env.user_id}</td>
                 <td className="py-3 px-4 text-gray-400 text-sm">
                   {env.created_at && new Date(env.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}

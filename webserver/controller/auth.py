@@ -7,7 +7,7 @@ import flask, flask_login, secrets, datetime, os
 import random
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
-FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:5173')
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://toxindex.com')
 
 ERROR_MESSAGES = [
     "Oops! That combo didn't work. Try again?",

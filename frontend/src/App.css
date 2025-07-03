@@ -3,8 +3,8 @@
   font-size: 1.05rem;
   color: #e5e7eb;
   background: #20232a;
-  border-radius: 8px;
-  padding: 48px;
+  border-radius: 32px;
+  padding: 30px;
   word-break: break-word;
 }
 .markdown-body h1, .prose h1, .prose-invert h1 {
@@ -82,4 +82,11 @@
 }
 .markdown-body tr:nth-child(even), .prose tr:nth-child(even), .prose-invert tr:nth-child(even) {
   background: #20232a;
+}
+
+.markdown-table-cell {
+  max-width: 100px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

@@ -7,7 +7,6 @@ const CreateEnvironmentSettings: React.FC = () => {
   const [description, setDescription] = useState("");
   const [selectedUsers, ] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
   const [typedSharing, setTypedSharing] = useState("");
   const [typingSharing, setTypingSharing] = useState(true);
   const SHARING_PLACEHOLDER = "  Sharing coming soon... 🚧";
@@ -70,7 +69,6 @@ const CreateEnvironmentSettings: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    setSuccess(null);
     if (!title.trim()) {
       setError("Environment name is required.");
       return;
@@ -82,16 +80,19 @@ const CreateEnvironmentSettings: React.FC = () => {
       body: JSON.stringify({ title, description, sharing: selectedUsers }),
     });
     if (res.ok) {
-      setSuccess("Environment created successfully!");
-      refetchEnvironments();
-      setTimeout(() => navigate("/settings/environments"), 1200);
       const data = await res.json();
       if (data.environment_id) {
         setSelectedEnv(data.environment_id);
+        await refetchEnvironments();
+        navigate(`/environment/${data.environment_id}`);
+        return;
+      } else {
+        await refetchEnvironments();
+        navigate("/settings/environments");
+        return;
       }
-    } else {
-      setError("Failed to create environment.");
     }
+    setError("Failed to create environment.");
   };
 
   return (
@@ -181,7 +182,6 @@ const CreateEnvironmentSettings: React.FC = () => {
             `}</style>
           </div>
           {error && <div className="text-red-500 text-sm">{error}</div>}
-          {success && <div className="text-green-500 text-sm">{success}</div>}
           <button
             type="submit"
             className="mt-2 px-6 py-2 rounded-full font-semibold bg-green-600 text-white hover:bg-green-700 transition"

@@ -120,7 +120,8 @@ def redis_listener(name):
                 event_data = event
                 room = f"task_{event_task_id}"
                 logging.info(f"[redis_listener] ({listener_id}) Emitting task_status_update to room {room} with data: {event_data}")
-                socketio.emit("task_status_update", event_data, to=room)
+                # socketio.emit("task_status_update", event_data, to=room)
+                socketio.emit("task_status_update", event_data)
                 logging.info(f"[redis_listener] ({listener_id}) task_status_update sent to {room}")
             if event_type in ("task_message", "task_file"):
                 room = f"task_{task.task_id}"
@@ -142,17 +143,20 @@ def handle_connect(auth):
 # TODO right now I think any user can join any task room
 @socketio.on("join_task_room")
 def handle_join_task_room(data):
+    logging.info(f"JOIN ROOM {data}")
     task_id = data.get("task_id")
     user = flask_login.current_user
 
     # Check authentication
     if not user.is_authenticated:
+        logging.warning(f"[socketio] join_task_room called without authentication by {request.sid}")
         emit("error", {"error": "Authentication required"})
         return
 
     # Check authorization: does this user own the task?
     task = Task.get_task(task_id)
     if not task or task.user_id != user.user_id:
+        logging.warning(f"[socketio] join_task_room called without authorization by {request.sid}")
         emit("error", {"error": "Not authorized to join this task room"})
         return
 
@@ -221,71 +225,71 @@ def api_me():
 def test_alive():
     return "ALIVE"
 
-# API endpoint to trigger probra_task from dashboard chatbox
-@csrf.exempt
-@app.route("/api/run-probra-task", methods=["POST"])
-@flask_login.login_required
-def api_run_probra_task():
-    data = flask.request.get_json()
-    prompt = data.get("prompt")
-    environment_id = data.get("environment_id")
-    user_id = flask_login.current_user.user_id
-    if not prompt:
-        return flask.jsonify({"error": "Missing prompt"}), 400
-    # Always create a new chat session for dashboard submissions
-    session = ChatSession.create_session(environment_id, user_id, title=generate_title(prompt))
-    session_id = session.session_id if session else None
-    # Create a new Task (workflow_id=1 for ToxIndex RAP)
-    title = generate_title(prompt)
-    task = Task.create_task(
-        title=title,
-        user_id=user_id,
-        workflow_id=1,
-        environment_id=environment_id,
-        session_id=session_id,
-    )
-    Task.add_message(task.task_id, user_id, "user", prompt, session_id=session_id)
-    celery_task = probra_task.delay({
-        "payload": prompt,
-        "task_id": task.task_id,
-        "user_id": str(user_id),
-    })
-    Task.update_celery_task_id(task.task_id, celery_task.id)
-    return flask.jsonify({"task_id": task.task_id, "celery_id": celery_task.id, "session_id": session_id})
+# # API endpoint to trigger probra_task from dashboard chatbox
+# @csrf.exempt
+# @app.route("/api/run-probra-task", methods=["POST"])
+# @flask_login.login_required
+# def api_run_probra_task():
+#     data = flask.request.get_json()
+#     prompt = data.get("prompt")
+#     environment_id = data.get("environment_id")
+#     user_id = flask_login.current_user.user_id
+#     if not prompt:
+#         return flask.jsonify({"error": "Missing prompt"}), 400
+#     # Always create a new chat session for dashboard submissions
+#     session = ChatSession.create_session(environment_id, user_id, title=generate_title(prompt))
+#     session_id = session.session_id if session else None
+#     # Create a new Task (workflow_id=1 for ToxIndex RAP)
+#     title = generate_title(prompt)
+#     task = Task.create_task(
+#         title=title,
+#         user_id=user_id,
+#         workflow_id=1,
+#         environment_id=environment_id,
+#         session_id=session_id,
+#     )
+#     Task.add_message(task.task_id, user_id, "user", prompt, session_id=session_id)
+#     celery_task = probra_task.delay({
+#         "payload": prompt,
+#         "task_id": task.task_id,
+#         "user_id": str(user_id),
+#     })
+#     Task.update_celery_task_id(task.task_id, celery_task.id)
+#     return flask.jsonify({"task_id": task.task_id, "celery_id": celery_task.id, "session_id": session_id})
 
 
-@csrf.exempt
-@app.route("/api/run-vanilla-task", methods=["POST"])
-@flask_login.login_required
-def api_run_vanilla_task():
-    data = flask.request.get_json()
-    prompt = data.get("prompt")
-    environment_id = data.get("environment_id")
-    user_id = flask_login.current_user.user_id
-    if not prompt:
-        return flask.jsonify({"error": "Missing prompt"}), 400
-    # Always create a new chat session for dashboard submissions
-    session = ChatSession.create_session(environment_id, user_id, title=generate_title(prompt))
-    session_id = session.session_id if session else None
-    # Create a new Task (workflow_id=2 for ToxIndex Vanilla)
-    title = generate_title(prompt)
-    task = Task.create_task(
-        title=title,
-        user_id=user_id,
-        workflow_id=2,
-        environment_id=environment_id,
-        session_id=session_id,
-    )
-    Task.add_message(task.task_id, user_id, "user", prompt, session_id=session_id)
-    logging.info(f"[api_run_vanilla_task] Queuing plain_openai_task for task_id={task.task_id}, user_id={user_id}")
-    celery_task = plain_openai_task.delay({
-        "payload": prompt,
-        "task_id": task.task_id,
-        "user_id": str(user_id),
-    })
-    logging.info(f"[api_run_vanilla_task] Queued plain_openai_task with celery_id={celery_task.id}")
-    Task.update_celery_task_id(task.task_id, celery_task.id)
-    return flask.jsonify({"task_id": task.task_id, "celery_id": celery_task.id, "session_id": session_id})
+# @csrf.exempt
+# @app.route("/api/run-vanilla-task", methods=["POST"])
+# @flask_login.login_required
+# def api_run_vanilla_task():
+#     data = flask.request.get_json()
+#     prompt = data.get("prompt")
+#     environment_id = data.get("environment_id")
+#     user_id = flask_login.current_user.user_id
+#     if not prompt:
+#         return flask.jsonify({"error": "Missing prompt"}), 400
+#     # Always create a new chat session for dashboard submissions
+#     session = ChatSession.create_session(environment_id, user_id, title=generate_title(prompt))
+#     session_id = session.session_id if session else None
+#     # Create a new Task (workflow_id=2 for ToxIndex Vanilla)
+#     title = generate_title(prompt)
+#     task = Task.create_task(
+#         title=title,
+#         user_id=user_id,
+#         workflow_id=2,
+#         environment_id=environment_id,
+#         session_id=session_id,
+#     )
+#     Task.add_message(task.task_id, user_id, "user", prompt, session_id=session_id)
+#     logging.info(f"[api_run_vanilla_task] Queuing plain_openai_task for task_id={task.task_id}, user_id={user_id}")
+#     celery_task = plain_openai_task.delay({
+#         "payload": prompt,
+#         "task_id": task.task_id,
+#         "user_id": str(user_id),
+#     })
+#     logging.info(f"[api_run_vanilla_task] Queued plain_openai_task with celery_id={celery_task.id}")
+#     Task.update_celery_task_id(task.task_id, celery_task.id)
+#     return flask.jsonify({"task_id": task.task_id, "celery_id": celery_task.id, "session_id": session_id})
 
 # --- ADD catch-all route for React SPA ---
 @app.route('/', defaults={'path': ''})
@@ -307,4 +311,4 @@ if __name__ == "__main__":
             daemon=True,
             name=thread_name,
         ).start()
-    socketio.run(app, host="0.0.0.0", port=6513, debug=False, use_reloader=False) # Always debug=False in prod
+    socketio.run(app, host="0.0.0.0", port=6513, debug=True, use_reloader=True) # Always debug=False in prod

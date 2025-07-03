@@ -92,7 +92,7 @@ function App() {
                   }
                 />
                 <Route
-                  path="/environment/:env_id"
+                  path="/environments/details"
                   element={
                     <ProtectedRoute>
                       <Layout>
