@@ -168,13 +168,12 @@ class Task:
             "INSERT INTO messages (task_id, user_id, role, content, session_id) VALUES (%s, %s, %s, %s, %s)",
             params,
         )
-        return True
 
     @staticmethod
     def update_celery_task_id(task_id, celery_task_id):
         params = (celery_task_id, task_id)
         ds.execute("UPDATE tasks SET celery_task_id = %s WHERE task_id = %s", params)
-        return True
+
 
     @staticmethod
     def get_messages(task_id, user_id):
@@ -206,14 +205,8 @@ class Task:
             "UPDATE tasks SET finished_at = %s, status = 'done' WHERE task_id = %s",
             (finished_at, task_id)
         )
-        # Publish status update to Redis for real-time UI
-        r = redis.Redis()
-        task = Task.get_task(task_id)
-        event = {
-            "type": "task_status_update",
-            "task_id": task.task_id,
-            "data": task.to_dict(),
-        }
-        logging.info(f"[mark_finished] Publishing task_status_update for task_id={task_id}: {event}")
-        r.publish("celery_updates", json.dumps(event, default=str))
         return finished_at
+
+    @staticmethod
+    def set_status(task_id, status):
+        ds.execute("UPDATE tasks SET status = %s WHERE task_id = %s", (status, task_id))

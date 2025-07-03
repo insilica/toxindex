@@ -16,6 +16,17 @@ from webserver.model.task import Task
 
 logger = logging.getLogger(__name__)
 
+def emit_status(task_id, status):
+    Task.set_status(task_id, status)
+    r = redis.Redis()
+    task = Task.get_task(task_id)
+    event = {
+        "type": "task_status_update",
+        "task_id": task.task_id,
+        "data": task.to_dict(),
+    }
+    r.publish("celery_updates", json.dumps(event, default=str))
+
 @celery.task(bind=True)
 def plain_openai_task(self, payload):
     """Call OpenAI with a plain prompt and publish the result."""
@@ -26,12 +37,15 @@ def plain_openai_task(self, payload):
         user_id = payload.get("user_id")
         user_query = payload.get("payload", "Is Gentamicin nephrotoxic?")
         model = "gpt-4"
+        emit_status(task_id, "checking cache")
         cache_key = f"openai_cache:{model}:{hashlib.sha256(user_query.encode()).hexdigest()}"
         cached = r.get(cache_key)
         if cached:
             response_data = json.loads(cached)
             content = response_data["content"]
+            emit_status(task_id, "using cache")
         else:
+            emit_status(task_id, "calling openai")
             client = openai.OpenAI()
             response = client.chat.completions.create(
                 model=model,
@@ -41,7 +55,9 @@ def plain_openai_task(self, payload):
             content = response.choices[0].message.content
             response_data = {"content": content}
             r.set(cache_key, json.dumps(response_data), ex=60*60*24)
+            emit_status(task_id, "openai complete")
 
+        emit_status(task_id, "publishing message")
         message = MessageSchema(role="assistant", content=content)
         event = {
             "type": "task_message",
@@ -71,13 +87,14 @@ def plain_openai_task(self, payload):
         logger.info("plain_openai_task completed successfully")
 
         finished_at = Task.mark_finished(task_id)
-
+        emit_status(task_id, "done")
         return {
             "done": True,
             "finished_at": finished_at,
         }
     except Exception as e:
         logger.error(f"Error in plain_openai_task: {str(e)}", exc_info=True)
+        emit_status(task_id, "error")
         raise
 
 @celery.task(bind=True)
@@ -96,12 +113,15 @@ def openai_json_schema_task(self, payload):
             "Answer the user's question as a JSON object matching the following schema. "
             "Strictly adhere to the structure and required fields.\n\nSchema:\n" + schema_str
         )
+        emit_status(task_id, "checking cache")
         cache_key = f"openai_json_schema_cache:{model}:{hashlib.sha256((user_query+system_prompt).encode()).hexdigest()}"
         cached = r.get(cache_key)
         if cached:
             response_data = json.loads(cached)
             content = response_data["content"]
+            emit_status(task_id, "using cache")
         else:
+            emit_status(task_id, "calling openai")
             client = openai.OpenAI()
             response = client.chat.completions.create(
                 model=model,
@@ -114,7 +134,9 @@ def openai_json_schema_task(self, payload):
             content = response.choices[0].message.content
             response_data = {"content": content}
             r.set(cache_key, json.dumps(response_data), ex=60*60*24)
+            emit_status(task_id, "openai complete")
 
+        emit_status(task_id, "publishing message")
         message = MessageSchema(role="assistant", content=content)
         event = {
             "type": "task_message",
@@ -140,7 +162,10 @@ def openai_json_schema_task(self, payload):
         }
         r.publish("celery_updates", json.dumps(file_event, default=str))
         logger.info("openai_json_schema_task completed successfully")
+        finished_at = Task.mark_finished(task_id)
+        emit_status(task_id, "done")
         return {"done": True}
     except Exception as e:
         logger.error(f"Error in openai_json_schema_task: {str(e)}", exc_info=True)
+        emit_status(task_id, "error")
         raise 
