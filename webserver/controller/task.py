@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, send_file, abort
 import flask_login
 from webserver.model import Task
+from webserver.model import ChatSession
 from webserver.csrf import csrf
 import logging, datetime
 from webserver.util import is_valid_uuid
@@ -49,6 +50,13 @@ def create_task():
     environment_id = task_data.get("environment_id")
     sid = task_data.get("sid")
     created_at = datetime.datetime.now(datetime.timezone.utc)
+
+    # If no session id, create a new session
+    if not sid:
+        
+        session = ChatSession.create_session(environment_id, user_id, title=title)
+        sid = session.session_id if session else None
+
     logging.info(f"Controller: about to create task with created_at={created_at} (type: {type(created_at)})")
     task = Task.create_task(
         title=title,
@@ -58,7 +66,7 @@ def create_task():
         session_id=sid,
         created_at=created_at,
     )
-    Task.add_message(task.task_id, flask_login.current_user.user_id, "user", message)
+    Task.add_message(task.task_id, flask_login.current_user.user_id, "user", message, session_id=sid)
     if workflow_id == 1:
         celery_task = probra_task.delay({
             "payload": message,
@@ -91,6 +99,7 @@ def create_task():
     return jsonify({
         "task_id": task.task_id,
         "celery_id": celery_task.id,
+        "session_id": sid,
         "created_at": task.created_at.strftime("%Y-%m-%d %H:%M:%S") if task.created_at else None,
         "finished_at": task.finished_at.strftime("%Y-%m-%d %H:%M:%S") if hasattr(task, 'finished_at') and task.finished_at else None
     })
