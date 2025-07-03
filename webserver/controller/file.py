@@ -4,8 +4,9 @@ from webserver.model.file import File
 import os, mimetypes, base64, logging
 
 import json
-import markdown
 import pandas as pd
+import csv
+import io
 
 file_bp = Blueprint('files', __name__, url_prefix='/api/files')
 
@@ -46,8 +47,6 @@ def inspect_file(file_id):
                 # Return raw markdown, not HTML
                 return jsonify({'type': 'markdown', 'content': content, 'filename': file.filename, 'mimetype': mimetype})
             elif ext == '.csv':
-                import csv
-                import io
                 reader = csv.reader(io.StringIO(content))
                 rows = list(reader)
                 return jsonify({'type': 'csv', 'content': rows, 'filename': file.filename, 'mimetype': mimetype})

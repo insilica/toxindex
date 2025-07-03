@@ -15,7 +15,7 @@ source scripts/flake/setup_postgres.sh \
   "/nix/store/3pzlrs5nddszkpgasnrcpf4ifrzm76lb-postgresql-15.13/bin"
 
 # Drop and recreate the public schema (dev only!)
-psql -U postgres -d toxindex -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
+# psql -U postgres -d toxindex -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
 
 source scripts/flake/aws_login.sh
 
@@ -35,10 +35,10 @@ export FLASK_DEBUG=0
 export PREFERRED_URL_SCHEME=http
 
 # export SERVER_NAME=localhost:6513
-export SERVER_NAME=18.118.10.140
+export SERVER_NAME=https://toxindex.com
 source .env
 
-export FRONTEND_URL=http://18.118.10.140
+export FRONTEND_URL=https://toxindex.com
 
 # Redis (Redis is running on the same EC2 instance as the webserver)
 export CELERY_BROKER_URL=redis://localhost:6379/0

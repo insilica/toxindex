@@ -1,22 +1,18 @@
-scp services/prod.env toxindex:/mnt/ebs/toxindex/services
-scp services/report/data/cvae.sqlite toxindex:/mnt/ebs/toxindex/services/report/data/cvae.sqlite
+#!/usr/bin/env bash
 
-# zip the entire directory
-zip -r deploy.zip .
+set -e  # Exit on error
 
-# scp the zip file to the server
-scp deploy.zip toxindex:/home/ubuntu
+echo "Pulling latest code..."
+git pull
 
-# ssh into the server
-ssh toxindex
+echo "Building frontend..."
+cd frontend
+npm install
+npm run build
+cd ..
 
-# stop all running containers
-docker stop $(docker ps -a -q)
+echo "Restarting backend and celery services..."
+sudo systemctl restart toxindex-backend
+sudo systemctl restart toxindex-celery
 
-# mv and unzip deploy.zip
-mv ~/deploy.zip /mnt/ebs/toxindex
-cd /mnt/ebs
-
-
-# unzip the file to /mnt/toxindex
-unzip deploy.zip 
+echo "Deployment complete!"

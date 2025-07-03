@@ -1,11 +1,11 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaListAlt, FaPlus, FaArchive, FaUndo } from 'react-icons/fa';
+import { FaListAlt, FaArchive, FaUndo } from 'react-icons/fa';
 import { useEnvironment } from "../context/EnvironmentContext";
-// import { useChatSession } from "../context/ChatSessionContext";
 import { useModel } from "../context/ModelContext";
 import LoadingSpinner from "./shared/LoadingSpinner";
 import { io, Socket } from 'socket.io-client';
+import ChatInputBar from "./shared/ChatInputBar";
 
 interface Task {
   task_id: string;
@@ -32,27 +32,15 @@ const Dashboard = () => {
   const [archivedTasks, setArchivedTasks] = useState<Task[]>([]);
   const [activeTab, setActiveTab] = useState<'tasks' | 'archive'>('tasks');
   const [uploading, setUploading] = useState(false);
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
-  const navigate = useNavigate();
-  // const location = useLocation();
-  const [showUploadModal, setShowUploadModal] = useState(false);
-  const [uploadEnvId, setUploadEnvId] = useState<string>("");
-  const [uploadFile, setUploadFile] = useState<File | null>(null);
-  const [uploadError, setUploadError] = useState<string | null>(null);
-  const [dragActive, setDragActive] = useState(false);
-  const [selectWidth, setSelectWidth] = useState(120); // default min width
-  const selectRef = useRef<HTMLSelectElement>(null);
-  const spanRef = useRef<HTMLSpanElement>(null);
+  const { selectedEnv, refetchEnvironments } = useEnvironment();
+  const { selectedModel } = useModel();
+  const socketRef = useRef<Socket | null>(null);
   const [typedHeading, setTypedHeading] = useState(ENABLE_TYPEWRITER ? "" : TYPEWRITER_TEXT);
   const typewriterTimeoutRef = useRef<number | null>(null);
   const typewriterIntervalRef = useRef<number | null>(null);
-  const { selectedEnv, setSelectedEnv, environments, loadingEnvironments, refetchEnvironments } = useEnvironment();
-  // const { refetchChatSessions } = useChatSession();
-  const { selectedModel } = useModel();
-  const socketRef = useRef<Socket | null>(null);
+  const navigate = useNavigate();
 
   console.log("Dashboard mounted");
-  // console.log("Dashboard location:", location.pathname);
 
   // Fetch environments when component mounts
   useEffect(() => {
@@ -80,12 +68,6 @@ const Dashboard = () => {
       })
       .finally(() => setTasksLoading(false));
   }, [selectedEnv]);
-
-  useEffect(() => {
-    if (spanRef.current) {
-      setSelectWidth(spanRef.current.offsetWidth + 40); // add some padding
-    }
-  }, [selectedEnv, environments]);
 
   useEffect(() => {
     if (!ENABLE_TYPEWRITER) {
@@ -124,6 +106,11 @@ const Dashboard = () => {
     }
     const socket = socketRef.current;
 
+    // Global event logger for debugging
+    socket.onAny((event, ...args) => {
+      console.log('[SocketIO] Event:', event, args);
+    });
+
     // Function to join all active task rooms
     const joinAllRooms = () => {
       activeTasks.forEach(task => {
@@ -155,19 +142,11 @@ const Dashboard = () => {
     return () => {
       socket.off('connect', joinAllRooms);
       socket.off('task_status_update', handler);
+      socket.offAny(); // Remove global event logger
     };
     // Only rerun if activeTasks changes (to re-join rooms)
   }, [activeTasks]);
 
-  const handleDropdownChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    if (e.target.value === "__manage__") {
-      navigate("/settings/environments");
-    } else if (e.target.value === "__add__") {
-      navigate("/settings/environments/create");
-    } else {
-      setSelectedEnv(String(e.target.value || ''));
-    }
-  };
 
   const archiveTask = (task_id: string) => {
     fetch(`/api/tasks/${task_id}/archive`, { method: "POST", credentials: "include", cache: "no-store" })
@@ -189,40 +168,9 @@ const Dashboard = () => {
       });
   };
 
-  const handlePlusClick = () => {
-    setUploadEnvId(selectedEnv || '');
-    setShowUploadModal(true);
-    setUploadFile(null);
-    setUploadError(null);
-  };
-
-  const handleUploadConfirm = async () => {
-    if (!uploadFile) {
-      setUploadError("Please select a file.");
-      return;
-    }
-    setUploading(true);
-    setUploadError(null);
-    const formData = new FormData();
-    formData.append('file', uploadFile);
-    try {
-      const res = await fetch(`/api/environments/${uploadEnvId}/files`, {
-        method: 'POST',
-        credentials: 'include',
-        cache: 'no-store',
-        body: formData,
-      });
-      if (!res.ok) throw new Error('Upload failed');
-      setShowUploadModal(false);
-    } catch (err) {
-      setUploadError('Failed to upload file.');
-    } finally {
-      setUploading(false);
-    }
-  };
-
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setUploading(true);
     setError(null);
     if (!chatInput.trim()) {
       setError("Please enter a question.");
@@ -232,33 +180,32 @@ const Dashboard = () => {
       setError("Please select an environment.");
       return;
     }
-    let endpoint = null;
-    if (selectedModel === "toxindex-rap") {
-      endpoint = "/api/run-probra-task";
-    } else if (selectedModel === "toxindex-vanilla") {
-      endpoint = "/api/run-vanilla-task";
-    } else if (selectedModel === "toxindex-pathway") {
-      setError("ToxIndex Pathway is not yet supported.");
-      return;
-    } else if (selectedModel === "toxindex-4th") {
-      setError("ToxIndex 4th is not yet supported.");
-      return;
-    } else if (selectedModel === "toxindex-5th") {
-      setError("ToxIndex 5th is not yet supported.");
-      return;
-    } else {
-      setError("Unknown model selected.");
+    // Map selectedModel to workflow_id
+    // 1: ToxIndex RAP probra_task
+    // 2: ToxIndex Vanilla plain_openai_task
+    // 3: ToxIndex Pathway openai_json_schema_task
+    // 4: ToxIndex 4th probra_task
+    // 5: ToxIndex 5th probra_task
+
+    let workflow_id = 1;
+    if (selectedModel === "toxindex-rap") workflow_id = 1;
+    else if (selectedModel === "toxindex-vanilla") workflow_id = 2;
+    else if (selectedModel === "toxindex-pathway") workflow_id = 3;
+    else if (selectedModel === "toxindex-4th" || selectedModel === "toxindex-5th") {
+      setError("This workflow is not yet supported.");
+      setUploading(false);
       return;
     }
     setChatInput(""); // clear input
     try {
-      const res = await fetch(endpoint, {
+      const res = await fetch("/api/tasks", {
         method: "POST",
         credentials: "include",
         cache: "no-store",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          prompt: chatInput,
+          message: chatInput,
+          workflow: workflow_id,
           environment_id: selectedEnv,
         }),
       });
@@ -275,6 +222,8 @@ const Dashboard = () => {
       setTasksLoading(false);
     } catch (err) {
       setError("Failed to post task.");
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -355,6 +304,11 @@ const Dashboard = () => {
                     {(task.status !== 'done') && (
                       <span className="ml-2 align-middle inline-block">
                         <LoadingSpinner size="small" text="" showTimer={true} startTime={task.created_at ? new Date(task.created_at).getTime() : undefined} />
+                        {task.status && (
+                          <span className="ml-2 text-xs text-green-300 font-mono" style={{ maxWidth: 120, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {task.status}
+                          </span>
+                        )}
                       </span>
                     )}
 
@@ -472,186 +426,15 @@ const Dashboard = () => {
       </div>
       <div className="flex-1 flex flex-col justify-end">
         <div className="w-full flex justify-center pb-8">
-          <form
-            className="flex flex-col items-center w-full"
-            style={{ maxWidth: '800px' }}
-            onSubmit={e => {
-              e.preventDefault();
-              if (selectedEnv === "__add__" || selectedEnv === "__manage__") return;
-              handleFormSubmit(e);
-            }}
-          >
-            <div className="relative w-full" style={{ maxWidth: '800px', width: '100%' }}>
-              <textarea
-                rows={3}
-                placeholder="Ask me your toxicology question [ Is green tea nephrotoxic? ]"
-                value={chatInput}
-                onChange={e => setChatInput(e.target.value)}
-                onKeyDown={e => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    if (selectedEnv !== "__add__" && selectedEnv !== "__manage__") {
-                      handleFormSubmit(e as any);
-                    }
-                  }
-                }}
-                className="w-full pt-4 pb-4 pr-28 pl-8 text-lg rounded-2xl border border-gray-700 bg-gray-900 bg-opacity-70 text-white resize-none min-h-[80px] shadow-2xl focus:outline-none focus:ring-2 focus:ring-green-400 text-left placeholder:text-left"
-                style={{ minHeight: 80, fontFamily: 'inherit', width: '100%', boxShadow: '0 8px 32px 0 rgba(34,197,94,0.10)' }}
-                disabled={selectedEnv === "__add__" || selectedEnv === "__manage__"}
-              />
-              <div className="absolute right-4 bottom-11 flex items-center space-x-2 z-30">
-                <button
-                  className="w-10 h-10 flex items-center justify-center rounded-full shadow-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-green-400"
-                  style={{ padding: 0, borderRadius: '50%', background: 'rgba(255,255,255,0.7)' }}
-                  title="Upload CSV file"
-                  onClick={handlePlusClick}
-                  disabled={uploading}
-                  type="button"
-                >
-                  <FaPlus className="w-5 h-5 text-black" />
-                </button>
-                <button
-                  type="submit"
-                  className="w-10 h-10 flex items-center justify-center rounded-full shadow-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-green-400"
-                  style={{ padding: 0, borderRadius: '50%', background: 'rgba(255,255,255,0.7)' }}
-                  title="Submit"
-                  disabled={selectedEnv === "__add__" || selectedEnv === "__manage__"}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.2} stroke="black" className="w-5 h-5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                  </svg>
-                </button>
-              </div>
-              <div className="absolute left-4 z-20 flex items-end" style={{ position: 'relative', width: '210px', overflow: 'visible', bottom: '3rem' }}>
-                <div className="relative group" style={{ width: '100%', minWidth: '180px', maxWidth: '210px' }}>
-                  <div className="flex items-center w-full" style={{ position: 'relative', height: '1.7rem', display: 'flex', alignItems: 'center' }}>
-
-                    <span
-                      ref={spanRef}
-                      style={{
-                        position: "absolute",
-                        visibility: "hidden",
-                        whiteSpace: "nowrap",
-                        fontWeight: "bold",
-                        fontSize: "0.875rem",
-                        fontFamily: "inherit",
-                        padding: "0 16px"
-                      }}
-                    >
-                      {selectedEnv === "__add__"
-                        ? "+ Add environment"
-                        : selectedEnv === "__manage__"
-                          ? "⚙ Manage environments"
-                          : (environments ?? []).find(e => e.environment_id === selectedEnv)
-                            ? `env - ${(environments ?? []).find(e => e.environment_id === selectedEnv)?.title}`
-                            : ""}
-                    </span>
-                    <select
-                      ref={selectRef}
-                      className={`font-bold text-white text-sm px-1 py-2 rounded-full appearance-none bg-transparent border-none focus:outline-none transition-all duration-150 group-hover:bg-black group-hover:bg-opacity-60 group-hover:border group-hover:border-gray-700 group-hover:px-4 group-hover:pr-10 group-hover:cursor-pointer focus:bg-black focus:bg-opacity-60 focus:border focus:border-gray-700 focus:px-4 focus:pr-10 w-full ${loadingEnvironments ? 'opacity-50' : ''}`}
-                      style={{
-                        width: `${selectWidth}px`,
-                        minWidth: "50px",
-                        maxWidth: "260px",
-                        height: '1.7rem',
-                        borderRadius: '999px',
-                        position: 'relative',
-                        zIndex: 1,
-                        backgroundColor: 'transparent',
-                        cursor: 'pointer',
-                        paddingRight: '1.5rem',
-                      }}
-                      value={selectedEnv || ''}
-                      onChange={handleDropdownChange}
-                      disabled={loadingEnvironments}
-                    >
-                      {(environments ?? []).length > 0 && (environments ?? []).map(env => (
-                        <option key={env.environment_id} value={env.environment_id} style={{ paddingLeft: '1rem' }}>
-                          {`env - ${env.title}`}
-                        </option>
-                      ))}
-                      <option value="__add__" style={loadingEnvironments ? { opacity: 0.5 } : {}}>
-                        {loadingEnvironments ? '+ Add environment' : '+ Add environment'}
-                      </option>
-                      <option value="__manage__" style={loadingEnvironments ? { opacity: 0.5 } : {}}>&#9881; Manage environments</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </div>
-            {error && <div className="text-red-500 mt-2">{error}</div>}
-          </form>
+          <ChatInputBar
+            value={chatInput}
+            onChange={setChatInput}
+            onSubmit={handleFormSubmit}
+            uploading={uploading}
+            error={error}
+          />
         </div>
       </div>
-
-      {showUploadModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
-          <div className="bg-gray-900 rounded-lg p-6 w-full max-w-md relative">
-            <button
-              className="absolute top-2 right-2 text-gray-400 hover:text-white"
-              onClick={() => setShowUploadModal(false)}
-              disabled={uploading}
-            >
-              ×
-            </button>
-            <h2 className="text-lg font-bold text-white mb-4">Upload CSV File</h2>
-            <label className="block text-white mb-2">Select Environment</label>
-            <select
-              className="w-full p-2 rounded border mb-4 text-white bg-gray-800"
-              value={uploadEnvId}
-              onChange={e => setUploadEnvId(e.target.value)}
-              disabled={uploading}
-            >
-              {(environments ?? []).map(env => (
-                <option key={env.environment_id} value={env.environment_id}>{env.title}</option>
-              ))}
-            </select>
-            {/* Drag and drop zone */}
-            <div
-              onDragOver={e => { e.preventDefault(); setDragActive(true); }}
-              onDragLeave={e => { e.preventDefault(); setDragActive(false); }}
-              onDrop={e => {
-                e.preventDefault();
-                setDragActive(false);
-                if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-                  const file = e.dataTransfer.files[0];
-                  if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
-                    setUploadFile(file);
-                    setUploadError(null);
-                  } else {
-                    setUploadError('Please drop a valid CSV file.');
-                  }
-                }
-              }}
-              onClick={() => fileInputRef.current?.click()}
-              className={`w-full mb-4 p-4 border-2 rounded-lg transition-colors duration-200 ${dragActive ? 'border-green-400 bg-green-900/20' : 'border-dashed border-gray-600 bg-gray-800/40'}`}
-              style={{ textAlign: 'center', color: dragActive ? '#22c55e' : '#fff', cursor: 'pointer' }}
-            >
-              {uploadFile ? (
-                <span>Selected file: <span className="font-semibold text-green-400">{uploadFile.name}</span></span>
-              ) : (
-                <span>Drag and drop your CSV file here, or <span className="underline">click to browse</span>.</span>
-              )}
-            </div>
-            <input
-              type="file"
-              accept=".csv"
-              style={{ display: 'none' }}
-              ref={fileInputRef}
-              onChange={e => setUploadFile(e.target.files?.[0] || null)}
-              disabled={uploading}
-            />
-            {uploadError && <div className="text-red-500 mb-2">{uploadError}</div>}
-            <button
-              className="w-full bg-green-700 text-white py-2 rounded hover:bg-green-800 disabled:opacity-50"
-              onClick={handleUploadConfirm}
-              disabled={uploading}
-            >
-              {uploading ? 'Uploading...' : 'Upload'}
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

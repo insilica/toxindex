@@ -137,8 +137,8 @@ const TaskDetail: React.FC = () => {
   const duration = getDuration(task.created_at, task.finished_at);
 
   return (
-    <div className="max-w-7xl mx-auto p-8 bg-gray-900 rounded-lg shadow text-white mt-12 flex flex-col min-h-[70vh]">
-      <HomeButton className="absolute top-8 left-8" />
+    <div className="mx-auto p-8 bg-gray-900 rounded-lg shadow text-white mt-12 flex flex-col min-h-[70vh] relative" style={{ maxWidth: '85rem' }}>
+      <HomeButton style={{ position: 'absolute', top: 0, left: '-3.5rem' }} />
       <div className="flex flex-row w-full min-h-[60vh]">
         {/* Sidebar: File List */}
         <div className="w-64 pr-6 border-r border-gray-800 flex-shrink-0 overflow-y-auto" style={{ minWidth: 220 }}>
@@ -251,10 +251,23 @@ const TaskDetail: React.FC = () => {
                   <div className="text-gray-400">Loading result...</div>
                 ) : assistantMessage ? (
                   <div
-                    className="prose prose-invert w-full max-w-full"
+                    className="prose prose-invert w-full max-w-full cursor-pointer hover:bg-blue-950/30 transition"
                     style={{ lineHeight: 2, maxHeight: 650, overflowY: 'auto' }}
+                    onClick={() => {
+                      if (task?.session_id) {
+                        navigate(`/chat/session/${task.session_id}?env=${task.environment_id}`);
+                      }
+                    }}
+                    title="Go to chat session"
                   >
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{assistantMessage}</ReactMarkdown>
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        td: ({node, ...props}) => <td className="markdown-table-cell" {...props} />
+                      }}
+                    >
+                      {assistantMessage}
+                    </ReactMarkdown>
                   </div>
                 ) : (
                   <div className="text-gray-400">No assistant message found for this task.</div>
@@ -364,7 +377,7 @@ const TaskDetail: React.FC = () => {
                       paddingBottom: '1px',
                       display: 'inline-block',
                     }}
-                    onClick={() => navigate(`/environment/${task.environment_id}`)}
+                    onClick={() => navigate(`/environments/details?env=${task.environment_id}`)}
                     title="Go to environment"
                     aria-label="Go to environment"
                   >
@@ -392,7 +405,7 @@ const TaskDetail: React.FC = () => {
                       paddingBottom: '1px',
                       display: 'inline-block',
                     }}
-                    onClick={() => navigate(`/chat/session/${task.session_id}`)}
+                    onClick={() => navigate(`/chat/session/${task.session_id}?env=${task.environment_id}`)}
                     title="Go to chat session"
                     aria-label="Go to chat session"
                   >
