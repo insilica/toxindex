@@ -84,7 +84,7 @@ const CreateEnvironmentSettings: React.FC = () => {
       if (data.environment_id) {
         setSelectedEnv(data.environment_id);
         await refetchEnvironments();
-        navigate(`/environment/${data.environment_id}`);
+        navigate(`/environments/details?env=${data.environment_id}`);
         return;
       } else {
         await refetchEnvironments();
