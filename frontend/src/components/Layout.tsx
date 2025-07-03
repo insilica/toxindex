@@ -28,7 +28,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const menuButtonRefs = useRef<{ [key: string]: React.RefObject<HTMLButtonElement> }>({});
 
   // Show back arrow on environment and task detail pages
-  const showBackArrow = location.pathname.startsWith('/environments') || location.pathname.startsWith('/settings');
+  const showBackArrow = location.pathname.startsWith('/environments') || location.pathname.startsWith('/settings') || location.pathname.startsWith('/chat/session');;
   const [isBackHover, setIsBackHover] = useState(false);
 
   useEffect(() => {
