@@ -116,12 +116,10 @@ def redis_listener(name):
                 File.process_event(task, event_data)
             elif event_type == "task_status_update":
                 logging.info(f"[redis_listener] ({listener_id}) Processing task_status_update for task_id={event_task_id}")
-                # For task_status_update, the event itself is the task dict
-                event_data = event
+                # Emit a flat task object, not the event wrapper
                 room = f"task_{event_task_id}"
-                logging.info(f"[redis_listener] ({listener_id}) Emitting task_status_update to room {room} with data: {event_data}")
-                # socketio.emit("task_status_update", event_data, to=room)
-                socketio.emit("task_status_update", event_data)
+                logging.info(f"[redis_listener] ({listener_id}) Emitting task_status_update to room {room} with data: {task.to_dict()}")
+                socketio.emit("task_status_update", task.to_dict(), to=room)
                 logging.info(f"[redis_listener] ({listener_id}) task_status_update sent to {room}")
             if event_type in ("task_message", "task_file"):
                 room = f"task_{task.task_id}"
@@ -165,6 +163,9 @@ def handle_join_task_room(data):
     join_room(room)
     logging.info(f"[socketio] {request.sid} joined room: {room}")
     emit("joined_task_room", {"task_id": task_id})
+    # Emit current status to the joining client
+    logging.info(f"[socketio] Emitting current status for task {task_id} to {request.sid}: {task.to_dict()}")
+    emit("task_status_update", task.to_dict(), room=request.sid)
 
 @socketio.on("join_chat_session")
 def handle_join_chat_session(data):
