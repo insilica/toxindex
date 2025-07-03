@@ -39,6 +39,7 @@ const Dashboard = () => {
   const typewriterTimeoutRef = useRef<number | null>(null);
   const typewriterIntervalRef = useRef<number | null>(null);
   const navigate = useNavigate();
+  const prevTaskIdsRef = useRef<string[]>([]);
 
   console.log("Dashboard mounted");
 
@@ -106,22 +107,31 @@ const Dashboard = () => {
     }
     const socket = socketRef.current;
 
+    // Leave old rooms
+    const prevTaskIds = prevTaskIdsRef.current;
+    const currentTaskIds = activeTasks.map(t => t.task_id);
+
+    prevTaskIds.forEach(id => {
+      if (!currentTaskIds.includes(id)) {
+        console.log('[SocketIO] Leaving task room', id);
+        socket.emit('leave_task_room', { task_id: id });
+      }
+    });
+
+    // Join new rooms
+    currentTaskIds.forEach(id => {
+      if (!prevTaskIds.includes(id)) {
+        console.log('[SocketIO] Joining task room', id);
+        socket.emit('join_task_room', { task_id: id });
+      }
+    });
+
+    prevTaskIdsRef.current = currentTaskIds;
+
     // Global event logger for debugging
     socket.onAny((event, ...args) => {
       console.log('[SocketIO] Event:', event, args);
     });
-
-    // Function to join all active task rooms
-    const joinAllRooms = () => {
-      activeTasks.forEach(task => {
-        console.log('[SocketIO] Joining task room', task.task_id);
-        socket.emit('join_task_room', { task_id: task.task_id });
-      });
-    };
-
-    // Join rooms initially and on connect (reconnect)
-    joinAllRooms();
-    socket.on('connect', joinAllRooms);
 
     // Listen for status updates
     const handler = (data: any) => {
@@ -140,11 +150,13 @@ const Dashboard = () => {
     socket.on('task_status_update', handler);
 
     return () => {
-      socket.off('connect', joinAllRooms);
       socket.off('task_status_update', handler);
       socket.offAny(); // Remove global event logger
+      // Optionally leave all rooms on unmount
+      currentTaskIds.forEach(id => {
+        socket.emit('leave_task_room', { task_id: id });
+      });
     };
-    // Only rerun if activeTasks changes (to re-join rooms)
   }, [activeTasks]);
 
 
