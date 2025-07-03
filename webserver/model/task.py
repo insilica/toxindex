@@ -39,11 +39,11 @@ class Task:
 
     def to_dict(self):
         return {
-            "task_id": self.task_id,
+            "task_id": str(self.task_id),
             "title": self.title,
-            "user_id": self.user_id,
+            "user_id": str(self.user_id) if self.user_id else None,
             "workflow_id": self.workflow_id,
-            "environment_id": self.environment_id,
+            "environment_id": str(self.environment_id) if self.environment_id else None,
             "description": self.description,
             "created_at": (
                 self.created_at.isoformat()
