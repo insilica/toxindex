@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import FilePreviewModal from './FilePreviewModal';
 import { FaComments, FaPlus, FaListAlt, FaFileCsv, FaFileAlt, FaFileCode, FaDatabase, FaFileImage, FaFile, FaEllipsisH } from 'react-icons/fa';
+import { MdKeyboardDoubleArrowLeft } from "react-icons/md";
 import { createPortal } from "react-dom";
 import { useEnvironment } from "../context/EnvironmentContext";
 import { useChatSession } from "../context/ChatSessionContext";
@@ -17,29 +18,35 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const profileRef = useRef<HTMLDivElement>(null);
   const [user, setUser] = useState<{ email?: string; user_id?: string } | null>(null);
   const { selectedModel, setSelectedModel } = useModel();
-  const [environments, setEnvironments] = useState<{ environment_id: string; title: string }[]>([]);
   const [envFiles, setEnvFiles] = useState<{ file_id: string; filename: string }[]>([]);
   const [sidebarPreviewFileId, setSidebarPreviewFileId] = useState<string | null>(null);
   const [sidebarPreviewOpen, setSidebarPreviewOpen] = useState(false);
 
   const { refetchChatSessions, selectedSessionId, setSelectedSessionId, chatSessions} = useChatSession();
-  const { selectedEnv, setSelectedEnv } = useEnvironment(); 
+  const { environments, setEnvironments, selectedEnv, setSelectedEnv } = useEnvironment(); 
   const [openChatMenu, setOpenChatMenu] = useState<string | null>(null);
   const menuButtonRefs = useRef<{ [key: string]: React.RefObject<HTMLButtonElement> }>({});
+
+  // Show back arrow on environment and task detail pages
+  const showBackArrow = location.pathname.startsWith('/environment/');
+  const [isBackHover, setIsBackHover] = useState(false);
 
   useEffect(() => {
     fetch("/api/me", { credentials: "include", cache: "no-store" })
       .then(res => {
-        if (res.status === 200) setAuth(true);
-        else setAuth(false);
+        if (res.status === 200) {
+          setAuth(true);
+          return res.json();
+        } else {
+          setAuth(false);
+          return null;
+        }
       })
-      .catch(() => setAuth(false));
-  }, []);
-
-  useEffect(() => {
-    fetch("/api/me", { credentials: "include", cache: "no-store" })
-      .then(res => res.ok ? res.json() : null)
-      .then(data => setUser(data));
+      .then(data => setUser(data))
+      .catch(() => {
+        setAuth(false);
+        setUser(null);
+      });
   }, []);
 
   useEffect(() => {
@@ -60,48 +67,71 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     }
     fetch(`/api/environments/${selectedEnv}/files`, { credentials: 'include' })
       .then(res => res.json())
-      .then(data => setEnvFiles(data.files || []));
+      .then(data => setEnvFiles(data.files || []))
+      .catch(() => setEnvFiles([]));
   }, [selectedEnv]);
 
-  // Fetch environments and set default selectedEnv
+  // Fetch environments and set default selectedEnv (URL param takes priority)
   useEffect(() => {
     fetch("/api/environments", { credentials: "include" })
       .then(res => res.json())
       .then(data => {
         setEnvironments(data.environments || []);
-        if (data.environments && data.environments.length > 0) {
-          setSelectedEnv(data.environments[0].environment_id);
+        const params = new URLSearchParams(location.search);
+        const envParam = params.get("env");
+        if (
+          data.environments &&
+          data.environments.length > 0 &&
+          envParam &&
+          data.environments.some((e: { environment_id: string }) => e.environment_id === envParam)
+        ) {
+          if (selectedEnv !== envParam) setSelectedEnv(envParam);
+        } else if (data.environments && data.environments.length > 0) {
+          if (selectedEnv !== data.environments[0].environment_id) setSelectedEnv(data.environments[0].environment_id);
         } else {
-          setSelectedEnv("__add__");
+          if (selectedEnv !== "__add__") setSelectedEnv("__add__");
         }
+      })
+      .catch(() => {
+        setEnvironments([]);
+        if (selectedEnv !== "__add__") setSelectedEnv("__add__");
       });
-  }, []);
+  }, [location.search]);
 
   // Robust two-way sync between selectedEnv and the URL
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const envParam = params.get("env");
+    const workflowParam = params.get("workflow");
 
-    // 1. If the URL param is valid and different, update selectedEnv
-    if (
-      environments.length > 0 &&
-      envParam &&
-      environments.some(e => e.environment_id === envParam) &&
-      envParam !== selectedEnv
-    ) {
-      setSelectedEnv(envParam);
-      return; // Don't update URL in this render
-    }
-
-    // 2. If selectedEnv is valid and different from the URL, update the URL
+    // If selectedEnv is set and different from URL, update the URL
     if (
       selectedEnv &&
-      (!envParam || envParam !== selectedEnv)
+      envParam !== selectedEnv
     ) {
       params.set("env", selectedEnv);
       navigate({ search: params.toString() }, { replace: true });
     }
-  }, [environments, selectedEnv, location.search, navigate]);
+
+    // Only set selectedModel from URL if it's not set yet (default is 'toxindex-rap')
+    if (
+      workflowParam &&
+      workflowParam !== selectedModel &&
+      (selectedModel === undefined )
+    ) {
+      setSelectedModel(workflowParam);
+      return;
+    }
+
+    // If selectedModel is set and different from URL, update the URL
+    if (
+      selectedModel &&
+      workflowParam !== selectedModel
+    ) {
+      params.set("workflow", selectedModel);
+      navigate({ search: params.toString() }, { replace: true });
+    }
+  }, [environments, selectedEnv, selectedModel, location.search, navigate, setSelectedEnv, setSelectedModel]);
 
   // Fetch chat sessions (flat, not by environment)
   useEffect(() => {
@@ -188,6 +218,25 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   return (
     <div className="flex w-screen min-h-screen overflow-x-hidden" style={{ fontFamily: 'Inter, Arial, sans-serif', position: 'relative' }}>
+      {showBackArrow && (
+        <button
+          onClick={() => navigate('/')}
+          className={`fixed top-6 transition-all duration-300 z-50`}
+          style={{
+            left: sidebarOpen ? '19rem' : '21rem', // 16rem sidebar + 1rem gap
+            top: sidebarOpen ? '19rem' : '6rem', // 16rem sidebar + 1rem gap
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            padding: 0
+          }}
+          aria-label="Go back"
+          onMouseEnter={() => setIsBackHover(true)}
+          onMouseLeave={() => setIsBackHover(false)}
+        >
+          <MdKeyboardDoubleArrowLeft size={40} color={isBackHover ? '#2563eb' : '#16a34a'} />
+        </button>
+      )}
       {/* Sidebar */}
       <div style={{ position: 'relative' }}>
         <aside
@@ -396,42 +445,6 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             </svg>
           </button>
         )}
-      </div>
-      {/* Model selection dropdown at top left of main app */}
-      <div
-        className="absolute top-0 w-full flex items-start justify-start z-30"
-        style={{
-          left: sidebarOpen || sidebarClosing ? '16rem' : 0,
-          transition: 'left 0.3s cubic-bezier(0.4,0,0.2,1)'
-        }}
-      >
-        <div
-          className=""
-          style={{
-            marginTop: '2rem',
-            marginLeft: sidebarOpen || sidebarClosing ? '2rem' : '3.5rem'
-          }}
-        >
-          <div className="relative inline-block align-middle">
-            <select
-              className="text-white text-lg px-2 py-1 rounded-full border-none bg-transparent appearance-none transition hover:bg-gray-200 hover:bg-opacity-40 focus:bg-gray-200 focus:bg-opacity-40 focus:outline-none pr-8"
-              style={{ minWidth: 120, boxShadow: 'none', background: 'none', cursor: 'pointer' }}
-              value={selectedModel}
-              onChange={e => setSelectedModel(e.target.value)}
-            >
-              <option value="toxindex-rap">ToxIndex RAP</option>
-              <option value="toxindex-pathway">ToxIndex Pathway</option>
-              <option value="toxindex-vanilla">ToxIndex Vanilla</option>
-              <option value="toxindex-4th">ToxIndex 4th</option>
-              <option value="toxindex-5th">ToxIndex 5th</option>
-            </select>
-            <span style={{ pointerEvents: 'none', position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center' }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M7 10l5 5 5-5" />
-              </svg>
-            </span>
-          </div>
-        </div>
       </div>
       {/* User profile button at top right, aligned with others */}
       {auth && (

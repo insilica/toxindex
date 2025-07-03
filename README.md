@@ -67,6 +67,66 @@ cd frontend && npm install
   cd frontend && npm run dev
   ```
 
+  - Create a systemd Service File for backend
+sudo nano /etc/systemd/system/toxindex-backend.service
+
+[Unit]
+Description=Toxindex Backend Service
+After=network.target
+
+[Service]
+# Set your user and working directory
+User=ubuntu
+WorkingDirectory=/home/ubuntu/toxindex
+
+# Activate nix develop environment and run your backend
+ExecStart=/usr/bin/bash -c 'source /home/ubuntu/toxindex/.venv/bin/activate && python -m webserver.app'
+
+# Restart on failure
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+
+- Create a systemd Service File for celery worker
+sudo nano /etc/systemd/system/toxindex-backend.service
+
+[Unit]
+Description=Toxindex Celery Worker
+After=network.target
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu/toxindex
+ExecStart=/usr/bin/bash -c 'cd /home/ubuntu/toxindex && nix develop --command celery -A workflows.celery_worker worker --loglevel=info'
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+
+Reload systemd
+sudo systemctl daemon-reload
+
+Start the Service
+sudo systemctl start toxindex-backend
+sudo systemctl start toxindex-celery
+
+Enable the Service at Boot
+sudo systemctl enable toxindex-backend
+sudo systemctl enable toxindex-celery
+
+Check Status and Logs
+
+Check status:
+sudo systemctl status toxindex-backend
+sudo systemctl status toxindex-celery
+
+View logs:
+journalctl -u toxindex-backend -f
+journalctl -u toxindex-celery -f
+
 ---
 
 ## Production Setup
