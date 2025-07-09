@@ -10,9 +10,8 @@ from webserver.model.message import MessageSchema
 # from webserver.storage import S3FileStorage
 from RAP.toxicity_schema import TOXICITY_SCHEMA
 # Update finished_at in the database
-import datetime
-import webserver.datastore as ds
 from webserver.model.task import Task
+from webserver.data_paths import TMP_ROOT, CHATS_ROOT
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +67,7 @@ def plain_openai_task(self, payload):
         r.publish("celery_updates", json.dumps(event, default=str))
 
         tmp_filename = f"plain_openai_result_{uuid.uuid4().hex}.md"
-        project_tmp_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'tmp'))
+        project_tmp_dir = TMP_ROOT()
         os.makedirs(project_tmp_dir, exist_ok=True)
         tmp_path = os.path.join(project_tmp_dir, tmp_filename)
         with open(tmp_path, 'w', encoding='utf-8') as f:
@@ -146,7 +145,7 @@ def openai_json_schema_task(self, payload):
         r.publish("celery_updates", json.dumps(event, default=str))
 
         tmp_filename = f"openai_json_schema_result_{uuid.uuid4().hex}.json"
-        project_tmp_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'chats'))
+        project_tmp_dir = CHATS_ROOT()
         os.makedirs(project_tmp_dir, exist_ok=True)
         tmp_path = os.path.join(project_tmp_dir, tmp_filename)
         with open(tmp_path, 'w', encoding='utf-8') as f:

@@ -1,1 +1,0 @@
-Hello! How can I assist you today with your toxicology research or chemical toxicity queries? If you’d like a detailed report on a particular chemical or toxicity type, please provide the chemical name and the specific toxicity concern (e.g., hepatotoxicity, neurotoxicity, etc.).

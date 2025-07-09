@@ -1,6 +1,7 @@
 import logging
 import os
 from datetime import datetime
+from webserver.data_paths import LOGS_ROOT
 
 # BD ENC
 print("PGUSER:", os.getenv("PGUSER"))
@@ -10,9 +11,8 @@ print("PGDATABASE:", os.getenv("PGDATABASE"))
 print("PG_SOCKET_DIR:", os.getenv("PG_SOCKET_DIR"))
 
 # Ensure logs directory exists
-os.makedirs(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'logs')), exist_ok=True)
-log_filename = os.path.abspath(os.path.join(
-    os.path.dirname(__file__), '..', 'logs', f'app_{datetime.now().strftime("%Y-%m-%d_%H")}.log'))
+LOGS_ROOT().mkdir(parents=True, exist_ok=True)
+log_filename = LOGS_ROOT() / f'app_{datetime.now().strftime("%Y-%m-%d_%H")}.log'
 
 # Remove print statements and use env vars for Redis URLs
 broker_url = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379/0")
