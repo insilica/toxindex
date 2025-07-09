@@ -3,7 +3,10 @@ import { useParams, useNavigate } from "react-router-dom";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import HomeButton from "./shared/HomeButton";
-import FilePreviewModal from './FilePreviewModal';
+import { FaDownload, FaFile, FaFilePdf, FaFileImage, FaFileExcel, FaFileWord, FaFileAlt, FaFileArchive, FaFileCode, FaFileCsv } from 'react-icons/fa';
+import { MdOutlineTableChart } from 'react-icons/md';
+import FilePreviewModal, { FilePreviewInline } from './shared/FilePreviewModal';
+import { getWorkflowLabelById } from './shared/workflows';
 
 interface Task {
   task_id: string;
@@ -25,6 +28,41 @@ const getDuration = (start?: string, end?: string) => {
   const mins = Math.floor(diff / 60000);
   const secs = Math.floor((diff % 60000) / 1000);
   return `${mins}m ${secs}s`;
+};
+
+// Helper to get icon by extension
+const getFileIcon = (filename: string) => {
+  const ext = filename.split('.').pop()?.toLowerCase();
+  if (!ext) return <FaFile className="inline-block mr-1 w-4 h-4 align-text-bottom text-gray-400" />;
+
+  if (["pdf"].includes(ext)) {
+    return <FaFilePdf className="inline-block mr-1 w-4 h-4 align-text-bottom text-red-400" />;
+  }
+  if (["jpg", "jpeg", "png", "gif", "bmp", "svg"].includes(ext)) {
+    return <FaFileImage className="inline-block mr-1 w-4 h-4 align-text-bottom text-orange-300" />;
+  }
+  if (["parquet"].includes(ext)) {
+    return <MdOutlineTableChart className="inline-block mr-1 w-4 h-4 align-text-bottom text-gray-200" />;
+  }
+  if (["xls", "xlsx"].includes(ext)) {
+    return <FaFileExcel className="inline-block mr-1 w-4 h-4 align-text-bottom text-green-400" />;
+  }
+  if (["csv"].includes(ext)) {
+    return <FaFileCsv className="inline-block mr-1 w-4 h-4 align-text-bottom text-green-400" />;
+  }
+  if (["doc", "docx"].includes(ext)) {
+    return <FaFileWord className="inline-block mr-1 w-4 h-4 align-text-bottom text-blue-400" />;
+  }
+  if (["txt"].includes(ext)) {
+    return <FaFileAlt className="inline-block mr-1 w-4 h-4 align-text-bottom text-gray-300" />;
+  }
+  if (["zip", "rar", "tar", "gz"].includes(ext)) {
+    return <FaFileArchive className="inline-block mr-1 w-4 h-4 align-text-bottom text-orange-400" />;
+  }
+  if (["js", "ts", "py", "json", "sh", "java", "cpp", "c", "cs", "rb"].includes(ext)) {
+    return <FaFileCode className="inline-block mr-1 w-4 h-4 align-text-bottom text-purple-400" />;
+  }
+  return <FaFile className="inline-block mr-1 w-4 h-4 align-text-bottom text-gray-400" />;
 };
 
 const TaskDetail: React.FC = () => {
@@ -78,9 +116,9 @@ const TaskDetail: React.FC = () => {
         if (!res.ok) throw new Error('Failed to fetch messages');
         const data = await res.json();
         if (data.messages && Array.isArray(data.messages)) {
-          const assistantMsg = data.messages.find((m: any) => m.role === "assistant");
-          if (assistantMsg) {
-            setAssistantMessage(assistantMsg.content);
+          const assistantMessages = data.messages.filter((m: any) => m.role === "assistant");
+          if (assistantMessages.length > 0) {
+            setAssistantMessage(assistantMessages[assistantMessages.length - 1].content);
             return;
           }
         }
@@ -131,25 +169,35 @@ const TaskDetail: React.FC = () => {
     }
   }, [task]);
 
+  // Find the latest two files by created_at (assuming taskFiles is sorted DESC by created_at)
+  const latestFiles = taskFiles.slice(0, 2);
+
   if (loading) return <div className="text-white p-8">Loading...</div>;
   if (!task) return <div className="text-white p-8">Task not found.</div>;
 
   const duration = getDuration(task.created_at, task.finished_at);
 
   return (
-    <div className="mx-auto p-8 bg-gray-900 rounded-lg shadow text-white mt-12 flex flex-col min-h-[70vh] relative" style={{ maxWidth: '85rem' }}>
-      <HomeButton style={{ position: 'absolute', top: 0, left: '-3.5rem' }} />
+    <div className="pl-8 pr-8 pt-4 pb-4 bg-neutral-800 text-neutral-200 flex flex-col min-h-screen w-full" style={{ minHeight: '100vh' }}>
+      <div className="flex items-center gap-4 px-4 py-4 border-b-2 border-gray-600 mb-6">
+        <HomeButton />
+        <span className="text-neutral-600 text-xl font-light mx-2">|</span>
+        <span className="text-lg font-semibold text-white">{task.title}</span>
+        <span className="text-neutral-400 ml-4 text-sm">
+          {task.created_at ? new Date(task.created_at).toLocaleString() : "Unknown date"}
+        </span>
+      </div>
       <div className="flex flex-row w-full min-h-[60vh]">
         {/* Sidebar: File List */}
-        <div className="w-64 pr-6 border-r border-gray-800 flex-shrink-0 overflow-y-auto" style={{ minWidth: 220 }}>
+        <div className="w-64 pr-6 border-r border-neutral-800 flex-shrink-0 overflow-y-auto" style={{ minWidth: 220 }}>
           <div className="mb-6">
-            <div className="mb-2 font-semibold text-green-300">Output files for this Task:</div>
+            <div className="mb-2 font-semibold text-neutral-200">Output files for this Task:</div>
             {taskFiles.length === 0 ? (
               <div className="text-gray-400 mb-2">No files for this task.</div>
             ) : (
-              <ul className="mb-2">
+              <ul className="mb-6">
                 {(() => {
-                  const maxFilenameLength = 30;
+                  const maxFilenameLength = 34;
                   const truncate = (name: string) => {
                     if (name.length <= maxFilenameLength) return name;
                     const startLen = maxFilenameLength - 10;
@@ -158,46 +206,48 @@ const TaskDetail: React.FC = () => {
                     return `${name.slice(0, startLen)}...${ext}`;
                   };
                   return taskFiles.map(f => (
-                    <li key={f.file_id} className="flex items-center space-x-2">
+                    <li key={f.file_id} className="flex items-center space-x-3 mb-0.5">
                       <button
-                        className="text-blue-400 underline hover:text-blue-300 cursor-pointer bg-transparent border-none p-0 m-0"
+                        className="text-neutral-200 hover:text-blue-300 cursor-pointer bg-transparent border-none p-0 m-0"
                         title={f.filename}
                         style={{
                           background: 'none',
-                          fontSize: '12px',
+                          fontSize: '14px',
                           lineHeight: '1',
-                          padding: '0',
+                          padding: '1px',
                           border: 'none',
                           height: '20px',
                           minHeight: 'unset',
+                          fontWeight: 'normal',
                         }}
                         onClick={() => {
                           setPreviewFileId(f.file_id);
                           setPreviewOpen(true);
                         }}
                       >
+                        {getFileIcon(f.filename)}
                         {truncate(f.filename)}
                       </button>
-                      <a
+                      {/* <a
                         href={`/api/tasks/${f.task_id}/files/${f.file_id}/download`}
                         className="ml-2 px-1 py-1 text-gray-300 bg-transparent hover:bg-green-400/10 hover:border-green-300 hover:text-green-200 rounded-full text-xs font-semibold flex items-center gap-1 transition focus:outline-none focus:ring-2 focus:ring-green-400/50"
                         title={`Download ${f.filename}`}
                         download
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 mr-1"><path d="M9 3.75a1 1 0 0 1 2 0v6.19l1.72-1.72a1 1 0 1 1 1.42 1.42l-3.43 3.43a1 1 0 0 1-1.42 0l-3.43-3.43a1 1 0 1 1 1.42-1.42L9 9.94V3.75ZM4.25 15a.75.75 0 0 1 .75-.75h10a.75.75 0 0 1 0 1.5H5a.75.75 0 0 1-.75-.75Z" /></svg>
-                      </a>
+                        <FaDownload className="w-4 h-4" />
+                      </a> */}
                     </li>
                   ));
                 })()}
               </ul>
             )}
-            <div className="mb-2 font-semibold text-blue-300">Available files for this Environment:</div>
+            <div className="mb-2 font-semibold text-neutral-200">Uploaded files:</div>
             {envFiles.length === 0 ? (
-              <div className="text-gray-400">No files for this environment.</div>
+              <div className="text-neutral-400">No files for this environment.</div>
             ) : (
               <ul>
                 {(() => {
-                  const maxFilenameLength = 30;
+                  const maxFilenameLength = 34;
                   const truncate = (name: string) => {
                     if (name.length <= maxFilenameLength) return name;
                     const startLen = maxFilenameLength - 10;
@@ -206,34 +256,36 @@ const TaskDetail: React.FC = () => {
                     return `${name.slice(0, startLen)}...${ext}`;
                   };
                   return envFiles.map(f => (
-                    <li key={f.file_id} className="flex items-center space-x-2">
+                    <li key={f.file_id} className="flex items-center space-x-2 mb-0.5">
                       <button
-                        className="text-blue-400 underline hover:text-blue-300 cursor-pointer bg-transparent border-none p-0 m-0"
+                        className="text-neutral-200 hover:text-blue-300 cursor-pointer bg-transparent border-none p-0 m-0"
                         title={f.filename}
                         style={{
                           background: 'none',
-                          fontSize: '12px',
+                          fontSize: '14px',
                           lineHeight: '1',
                           padding: '0',
                           border: 'none',
                           height: '20px',
                           minHeight: 'unset',
+                          fontWeight: 'normal',
                         }}
                         onClick={() => {
                           setPreviewFileId(f.file_id);
                           setPreviewOpen(true);
                         }}
                       >
+                        {getFileIcon(f.filename)}
                         {truncate(f.filename)}
                       </button>
-                      <a
+                      {/* <a
                         href={`/api/environments/${f.environment_id}/files/${f.file_id}/download`}
                         className="ml-2 px-0 py-1 text-gray-300 bg-transparent hover:bg-green-400/10 hover:border-green-300 hover:text-green-200 rounded-full text-xs font-semibold flex items-center gap-1 transition focus:outline-none focus:ring-2 focus:ring-green-400/50"
                         title={`Download ${f.filename}`}
                         download
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 mr-1"><path d="M9 3.75a1 1 0 0 1 2 0v6.19l1.72-1.72a1 1 0 1 1 1.42 1.42l-3.43 3.43a1 1 0 0 1-1.42 0l-3.43-3.43a1 1 0 1 1 1.42-1.42L9 9.94V3.75ZM4.25 15a.75.75 0 0 1 .75-.75h10a.75.75 0 0 1 0 1.5H5a.75.75 0 0 1-.75-.75Z" /></svg>
-                      </a>
+                        <FaDownload className="w-4 h-4" />
+                      </a> */}
                     </li>
                   ));
                 })()}
@@ -245,71 +297,56 @@ const TaskDetail: React.FC = () => {
         <div className="flex-1 flex flex-col items-center justify-center w-full pl-8">
           {/* Tab content */}
           <div className="flex-1 flex flex-col items-center justify-center w-full">
-            {/* {activeTab === 'MDrender' && (   */}
-              <div className="w-full max-w-full bg-gray-800 rounded-lg p-6 shadow-inner">
+              <div className="w-full max-w-full bg-neutral-800 rounded-lg p-6 shadow-inner">
                 {messageLoading ? (
                   <div className="text-gray-400">Loading result...</div>
                 ) : assistantMessage ? (
-                  <div
-                    className="prose prose-invert w-full max-w-full cursor-pointer hover:bg-blue-950/30 transition"
-                    style={{ lineHeight: 2, maxHeight: 650, overflowY: 'auto' }}
-                    onClick={() => {
-                      if (task?.session_id) {
-                        navigate(`/chat/session/${task.session_id}?env=${task.environment_id}`);
-                      }
-                    }}
-                    title="Go to chat session"
-                  >
-                    <ReactMarkdown
-                      remarkPlugins={[remarkGfm]}
-                      components={{
-                        td: ({node, ...props}) => <td className="markdown-table-cell" {...props} />
+                  <>
+                    {latestFiles.length > 0 && latestFiles.map((file, idx) => (
+                      <div key={file.file_id} className="mb-4 flex flex-col gap-2">
+                        <div className="flex items-center gap-4">
+                          <span className="text-neutral-100 font-semibold">Latest file{latestFiles.length > 1 ? ` #${idx + 1}` : ''}:</span>
+                          <span className="text-neutral-300 font-mono text-sm">{file.filename}</span>
+                          <a
+                            href={`/api/tasks/${file.task_id}/files/${file.file_id}/download`}
+                            className="ml-2 px-2 py-1 text-gray-300 bg-transparent hover:bg-green-400/10 hover:border-green-300 hover:text-green-200 rounded-full text-xs font-semibold flex items-center gap-1 transition focus:outline-none focus:ring-2 focus:ring-green-400/50"
+                            title={`Download ${file.filename}`}
+                            download
+                          >
+                            <FaDownload className="w-3 h-3" />
+                          </a>
+                        </div>
+                        <div className="border-b border-gray-700 my-2"></div>
+                        {!file.filename.toLowerCase().endsWith('.md') && (
+                          <FilePreviewInline fileId={file.file_id} />
+                        )}
+                      </div>
+                    ))}
+                    <div
+                      className="prose prose-invert w-full max-w-full cursor-pointer hover:bg-blue-950/30 transition"
+                      style={{ lineHeight: 2, maxHeight: 650, overflowY: 'auto' }}
+                      onClick={() => {
+                        if (task?.session_id) {
+                          navigate(`/chat/session/${task.session_id}?env=${task.environment_id}`);
+                        }
                       }}
+                      title="Go to chat session"
                     >
-                      {assistantMessage}
-                    </ReactMarkdown>
-                  </div>
+                      <ReactMarkdown
+                        remarkPlugins={[remarkGfm]}
+                        components={{
+                          td: ({node, ...props}) => <td className="markdown-table-cell" {...props} />
+                        }}
+                      >
+                        {assistantMessage}
+                      </ReactMarkdown>
+                    </div>
+                  </>
                 ) : (
                   <div className="text-gray-400">No assistant message found for this task.</div>
                 )}
               </div>
-            {/* )} */}
-            {/* {activeTab === 'MDraw' && (
-              <div className="w-full max-w-full bg-gray-800 rounded-lg p-6 shadow-inner">
-                <div className="text-lg font-semibold mb-2">Raw Markdown</div>
-                <pre
-                  style={{
-                    whiteSpace: 'pre-wrap',
-                    wordBreak: 'break-all',
-                    textAlign: 'left',
-                    color: '#a3e635',
-                    background: 'transparent',
-                    fontSize: '1.1em',
-                    maxHeight: 650,
-                    overflowY: 'auto'
-                  }}
-                >
-                  {assistantMessage}
-                </pre>
-              </div>
-            )}
-            {activeTab === 'JsonSchema' && (
-              <div
-                className="w-full max-w-full bg-gray-800 rounded-lg p-6 shadow-inner"
-              >
-                <div className="text-lg font-semibold mb-2">Toxicity Schema</div>
-                <pre style={{
-                  textAlign: 'left',
-                  color: '#a3e635',
-                  background: 'transparent',
-                  fontSize: '1.1em',
-                  maxHeight: 650,
-                  overflowY: 'auto'
-                }}>
-                  {toxicitySchema ? JSON.stringify(toxicitySchema, null, 2) : "Loading..."}
-                </pre>
-              </div>
-            )} */}
+
           </div>
         </div>
       </div>
@@ -318,7 +355,7 @@ const TaskDetail: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-0 text-base overflow-x-auto min-w-0 w-full">
             <div className="flex items-center space-x-2">
               <span className="font-semibold text-gray-300">Tool:</span>
-              <span>{task.workflow_id === 1 ? "ToxIndex RAP" : task.workflow_id === 2 ? "ToxIndex Vanilla" : task.workflow_id ?? <span className="text-gray-400">Unknown</span>}</span>
+              <span>{getWorkflowLabelById(task.workflow_id ?? 0) ?? <span className="text-gray-400">Unknown</span>}</span>
             </div>
             <div className="flex items-center space-x-2 min-w-0 w-full">
               <span className="font-semibold text-gray-300 whitespace-nowrap">Executed by user:</span>

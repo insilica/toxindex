@@ -41,7 +41,12 @@ tmp/
 result 
 uploads/
 uploads
-
+cache/
+cache
+chats/
+chats
+outputs/
+outputs
 # Uncomment to ignore VSCode settings (if user-specific)
 # .vscode/
 
@@ -59,5 +64,5 @@ Thumbs.db
 # Editor
 .vscode/
 .idea/
-# Test scripts
-/test_api_me.sh
+
+
