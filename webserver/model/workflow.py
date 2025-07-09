@@ -1,9 +1,14 @@
 import webserver.datastore as ds
 import logging
-import datetime
 import json
 
 class Workflow:
+    """
+    Workflow model - stores metadata about available workflow types.
+    This is primarily used as a lookup table for workflow titles, descriptions,
+    and initial prompts. Actual workflow execution is handled by the Task model
+    and Celery tasks.
+    """
     def __init__(self, workflow_id, title, user_id, description=None, initial_prompt=None, created_at=None):
         self.workflow_id = workflow_id
         self.title = title
@@ -60,32 +65,20 @@ class Workflow:
         else:
             rows = ds.find_all("SELECT * FROM workflows WHERE user_id = %s ORDER BY created_at DESC", (user_id,))
         return [Workflow.from_row(row) for row in rows]
-
-    @staticmethod
-    def add_message(workflow_id, user_id, role, content):
-        params = (workflow_id, user_id, role, content)
-        ds.execute("INSERT INTO messages (workflow_id, user_id, role, content) VALUES (%s, %s, %s, %s)", params)
-        return True
-
-    @staticmethod
-    def get_messages(workflow_id, user_id):
-        # Check if the workflow belongs to the user
-        workflow = ds.find("SELECT * FROM workflows WHERE workflow_id = %s AND user_id = %s", 
-                      (workflow_id, user_id))
-        if not workflow:
-            return []
-        
-        rows = ds.find_all("SELECT * FROM messages WHERE workflow_id = %s ORDER BY created_at ASC", 
-                          (workflow_id,))
-        return [{"role": row['role'], "content": row['content'], "created_at": row['created_at'].strftime('%Y-%m-%d %H:%M:%S')} 
-                for row in rows]
     
     @staticmethod
     def load_default_workflows():
+        """
+        Load default workflows from JSON file into the database.
+        This ensures default workflows are always available even if the database is reset.
+        """
         with open('resources/default_workflows.json', 'r') as f:
             for w in json.load(f)['workflows']:
                 if not ds.find("SELECT 1 FROM workflows WHERE workflow_id = %s", (w['workflow_id'],)):
-                    del w['workflow_id']
-                    Workflow.create_workflow(**w)
+                    # Filter out fields not accepted by create_workflow
+                    create_fields = {k: v for k, v in w.items() if k in ['title', 'description', 'initial_prompt']}
+                    Workflow.create_workflow(**create_fields)
                 else:
-                    Workflow.update_workflow(**w)
+                    # Filter out fields not accepted by update_workflow
+                    update_fields = {k: v for k, v in w.items() if k in ['title', 'description', 'initial_prompt']}
+                    Workflow.update_workflow(w['workflow_id'], **update_fields)

@@ -41,4 +41,5 @@ celery.config_from_object(celery_config)
 import workflows.probra # noqa: F401
 import workflows.plain_openai_tasks # noqa: F401
 import workflows.raptool_task # noqa: F401
+import workflows.pathway_analysis_task # noqa: F401
 

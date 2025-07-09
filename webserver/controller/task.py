@@ -7,9 +7,7 @@ import logging, datetime
 from webserver.util import is_valid_uuid
 from webserver import datastore as ds
 from webserver.ai_service import generate_title
-from workflows.plain_openai_tasks import plain_openai_task, openai_json_schema_task
-from workflows.probra import probra_task
-from workflows.raptool_task import raptool_task
+from webserver.controller.task_router import route_task
 from webserver.model.file import File
 import os
 
@@ -68,36 +66,7 @@ def create_task():
         created_at=created_at,
     )
     Task.add_message(task.task_id, flask_login.current_user.user_id, "user", message, session_id=sid)
-    if workflow_id == 1:
-        celery_task = probra_task.delay({
-            "payload": message,
-            "task_id": task.task_id,
-            "user_id": str(user_id),
-        })
-    elif workflow_id == 2:
-        celery_task = plain_openai_task.delay({
-            "payload": message,
-            "task_id": task.task_id,
-            "user_id": str(user_id),
-        })
-    elif workflow_id == 3:
-        celery_task = openai_json_schema_task.delay({
-            "payload": message,
-            "task_id": task.task_id,
-            "user_id": str(user_id),
-        })
-    elif workflow_id == 4:
-        celery_task = raptool_task.delay({
-            "payload": file_id,
-            "task_id": task.task_id,
-            "user_id": str(user_id),     
-        })
-    else:
-        celery_task = probra_task.delay({
-            "payload": message,
-            "task_id": task.task_id,
-            "user_id": str(user_id),
-        })
+    celery_task = route_task(workflow_id, task.task_id, str(user_id), message, file_id)
     Task.update_celery_task_id(task.task_id, celery_task.id)
     return jsonify({
         "task_id": task.task_id,

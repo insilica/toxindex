@@ -27,6 +27,8 @@ from webserver.controller.task import task_bp
 from webserver.controller.chat import chat_bp
 from webserver.controller.auth import auth_bp
 from webserver.controller.file import file_bp
+from webserver.controller.workflow import workflow_bp
+from webserver.controller.admin import admin_bp
 from webserver.csrf import csrf
 from webserver.socketio import socketio
 from webserver.controller.user import user_bp
@@ -185,6 +187,8 @@ app.register_blueprint(file_bp)
 app.register_blueprint(auth_bp)
 app.register_blueprint(user_bp)
 app.register_blueprint(schema_bp)
+app.register_blueprint(workflow_bp)
+app.register_blueprint(admin_bp)
 
 # ICONS ======================================================================
 @app.route("/favicon.ico")
@@ -204,23 +208,6 @@ def log_tab_switch():
     timestamp = data.get('timestamp')
     logging.info(f"[Tab Switch] User switched to tab '{tab}' for task_id={task_id} at {timestamp}")
     return flask.jsonify({'status': 'ok'})
-
-@app.route("/api/me", methods=["GET"])
-def api_me():
-    logging.warning(f"current_user: {flask_login.current_user}")
-    logging.warning(f"is_authenticated: {flask_login.current_user.is_authenticated}")
-    if not flask_login.current_user.is_authenticated:
-        response = make_response(jsonify({"error": "Not authenticated"}), 401)
-    else:
-        response = make_response(jsonify({
-            "user_id": flask_login.current_user.user_id,
-            "email": flask_login.current_user.email,
-        }))
-    # Prevent caching
-    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
-    response.headers["Pragma"] = "no-cache"
-    response.headers["Expires"] = "0"
-    return response
 
 @app.route("/test-alive")
 def test_alive():

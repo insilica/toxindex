@@ -1,5 +1,12 @@
 -- V1__init.sql
 
+CREATE TABLE user_groups (
+    group_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(255) NOT NULL UNIQUE,
+    description TEXT,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE users (
     user_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     email VARCHAR(255) NOT NULL UNIQUE,
@@ -7,6 +14,7 @@ CREATE TABLE users (
     token VARCHAR(255),
     stripe_customer_id VARCHAR(255),
     email_verified BOOLEAN DEFAULT FALSE,
+    group_id UUID REFERENCES user_groups(group_id) ON DELETE SET NULL,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -25,6 +33,14 @@ CREATE TABLE workflows (
     user_id UUID REFERENCES users(user_id) ON DELETE SET NULL,
     initial_prompt TEXT,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE workflow_group_access (
+    access_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    workflow_id INTEGER REFERENCES workflows(workflow_id) ON DELETE CASCADE,
+    group_id UUID REFERENCES user_groups(group_id) ON DELETE CASCADE,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(workflow_id, group_id)
 );
 
 CREATE TABLE environments (
@@ -80,13 +96,12 @@ CREATE TABLE messages (
     session_id UUID REFERENCES chat_sessions(session_id) ON DELETE CASCADE
 );
 
--- Insert default workflows
-INSERT INTO workflows (workflow_id, title, description)
-VALUES
-  (1, 'ToxRAP', 'Default workflow'),
-  (2, 'ToxDirect', 'Vanilla workflow'),
-  (3, 'ToxJson', 'JSON schema workflow')
-ON CONFLICT (workflow_id) DO NOTHING;
+-- Insert default user groups
+INSERT INTO user_groups (group_id, name, description) VALUES
+    ('00000000-0000-0000-0000-000000000001', 'admin', 'Administrators with full access'),
+    ('00000000-0000-0000-0000-000000000002', 'researcher', 'Researchers with access to analysis workflows'),
+    ('00000000-0000-0000-0000-000000000003', 'basic', 'Basic users with limited access')
+ON CONFLICT (name) DO NOTHING;
 
 -- Insert assistant user for system messages
 INSERT INTO users (user_id, email, hashpw, token, stripe_customer_id)
@@ -95,4 +110,4 @@ VALUES (
   'assistant@test.com',
   '', '', ''
 )
-ON CONFLICT (user_id) DO NOTHING; 
+ON CONFLICT (user_id) DO NOTHING;

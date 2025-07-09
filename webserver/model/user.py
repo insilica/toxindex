@@ -9,13 +9,14 @@ import logging
 
 class User(flask_login.UserMixin):
   
-  def __init__(self, user_id, email, token, hashpw, stripe_customer_id, email_verified=False):
+  def __init__(self, user_id, email, token, hashpw, stripe_customer_id, email_verified=False, created_at=None):
     self.user_id = user_id
     self.email = email
     self.token = token
     self.hashpw = hashpw
     self.stripe_customer_id = stripe_customer_id
     self.email_verified = email_verified
+    self.created_at = created_at
     self.name = email.split('@')[0] if '@' in email else email
 
   def is_authenticated(self):
@@ -47,7 +48,8 @@ class User(flask_login.UserMixin):
       row['token'], 
       row['hashpw'], 
       row['stripe_customer_id'],
-      row.get('email_verified', False)  # Get email_verified with default False
+      row.get('email_verified', False),  # Get email_verified with default False
+      row.get('created_at') # Get created_at with default None
     )
 
   @staticmethod
@@ -69,9 +71,16 @@ class User(flask_login.UserMixin):
       hashpw = generate_password_hash(password)
       token = User.make_token()
       user_id = uuid.uuid4()
-      params = (user_id, email, hashpw, token, stripe_customer_id)
+      
+      # Get the basic group ID
+      basic_group = ds.find("SELECT group_id FROM user_groups WHERE name = 'basic'")
+      if not basic_group:
+        logging.error("[User.create_datastore_customer] Basic group not found")
+        raise ValueError("Basic user group not found")
+      
+      params = (user_id, email, hashpw, token, stripe_customer_id, basic_group['group_id'])
       logging.info(f"[User.create_datastore_customer] Params: {params}")
-      ds.execute("INSERT INTO users (user_id, email, hashpw, token, stripe_customer_id) values (%s,%s,%s,%s,%s)", params)
+      ds.execute("INSERT INTO users (user_id, email, hashpw, token, stripe_customer_id, group_id) values (%s,%s,%s,%s,%s,%s)", params)
     except Exception as e:
       logging.error(f"[User.create_datastore_customer] Exception: {e}", exc_info=True)
   

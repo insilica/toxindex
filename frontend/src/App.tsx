@@ -18,6 +18,8 @@ import TaskDetail from './components/TaskDetail';
 import UserProfile from './components/UserProfile';
 import ForgotPasswordPage from './components/ForgotPasswordPage';
 import ResetPasswordPage from './components/ResetPasswordPage';
+import AdminRoute from './components/admin/AdminRoute';
+import UserGroupManager from './components/admin/UserGroupManager';
 import { EnvironmentProvider } from "./context/EnvironmentContext";
 import { ChatSessionProvider } from "./context/ChatSessionContext";
 import { ModelProvider } from "./context/ModelContext";
@@ -113,6 +115,20 @@ function App() {
                 />
                 <Route path="/task/:task_id" element={<TaskDetail />} />
                 <Route path="/user/:user_id" element={<UserProfile />} />
+                
+                {/* Admin routes */}
+                <Route
+                  path="/admin/users"
+                  element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <AdminRoute>
+                          <UserGroupManager />
+                        </AdminRoute>
+                      </Layout>
+                    </ProtectedRoute>
+                  }
+                />
               </Routes>
             </Router>
           </EnvironmentProvider>

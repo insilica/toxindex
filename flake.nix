@@ -33,9 +33,6 @@
             export PATH=$(echo $PATH | tr ':' '\n' | grep -v '\.nvm' | paste -sd: -)
             hash -r
 
-            # Source your fullstack environment setup (Postgres, Redis, AWS, etc.)
-            source scripts/flake/shellhook.sh
-
             export PYTHONPATH=$PWD:$PYTHONPATH
 
             if [ -f .env ]; then
@@ -54,13 +51,19 @@
             else
               source .venv/bin/activate
             fi
-            unset PYTHONPATH
             
             export LD_LIBRARY_PATH="${pkgs.zlib.out}/lib:${pkgs.stdenv.cc.cc.lib}/lib:$LD_LIBRARY_PATH"
             # force eventlet to use the system resolver instead of DNS monkey patching
             export EVENTLET_NO_GREENDNS=yes 
             echo "Python packages in uv venv:"
             uv pip list
+
+            # Source your fullstack environment setup (Postgres, Redis, AWS, etc.)
+            # This runs after the virtual environment is set up so Python scripts can access packages
+            source scripts/flake/shellhook.sh
+
+            # Unset PYTHONPATH after shellhook runs to avoid conflicts
+            unset PYTHONPATH
 
             # Pathway tool below
             # Run or reuse the Blazegraph container
