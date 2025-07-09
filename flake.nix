@@ -61,6 +61,32 @@
             export EVENTLET_NO_GREENDNS=yes 
             echo "Python packages in uv venv:"
             uv pip list
+
+            # Pathway tool below
+            # Run or reuse the Blazegraph container
+            if ! docker ps -a --format '{{.Names}}' | grep -q '^blazegraph$'; then
+              docker run --name blazegraph \
+                -d -p 8889:8080 \
+                lyrasis/blazegraph:2.1.5
+            else
+              docker start blazegraph 2>/dev/null || true
+            fi
+
+            # Wait for Blazegraph to start listening
+            until curl -s http://localhost:8889/bigdata/namespace/kb/sparql -o /dev/null; do
+              printf '.'; sleep 1
+            done
+            echo "Blazegraph up—loading TTL files"
+
+            # Add data from WikiPathways/AOP-Wiki
+            curl -X POST \
+              -H "Content-Type: text/turtle" \
+              --data-binary @pathway_data/wikipathways.ttl \
+              http://localhost:8889/bigdata/namespace/kb/sparql
+            curl -X POST \
+              -H "Content-Type: text/turtle" \
+              --data-binary @pathway_data/AOPWikiRDF.ttl \
+              http://localhost:8889/bigdata/namespace/kb/sparql
           '';
         };
       }
