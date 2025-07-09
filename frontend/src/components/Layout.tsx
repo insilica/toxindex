@@ -1,12 +1,13 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import FilePreviewModal from './FilePreviewModal';
+import FilePreviewModal from './shared/FilePreviewModal';
 import { FaComments, FaPlus, FaListAlt, FaFileCsv, FaFileAlt, FaFileCode, FaDatabase, FaFileImage, FaFile, FaEllipsisH } from 'react-icons/fa';
-import { MdKeyboardDoubleArrowLeft } from "react-icons/md";
 import { createPortal } from "react-dom";
 import { useEnvironment } from "../context/EnvironmentContext";
 import { useChatSession } from "../context/ChatSessionContext";
 import { useModel } from "../context/ModelContext";
+import logoUrl from '../assets/logo.svg';
+import HomeButton from "./shared/HomeButton";
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   console.log("Layout mounted");
   const navigate = useNavigate();
@@ -219,23 +220,18 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <div className="flex w-screen min-h-screen overflow-x-hidden" style={{ fontFamily: 'Inter, Arial, sans-serif', position: 'relative' }}>
       {showBackArrow && (
-        <button
-          onClick={() => navigate('/')}
-          className={`fixed top-6 transition-all duration-300 z-50`}
+        <HomeButton
+          className="fixed top-6 transition-all duration-300 z-50"
           style={{
-            left: sidebarOpen ? '19rem' : '21rem', // 16rem sidebar + 1rem gap
-            top: sidebarOpen ? '19rem' : '6rem', // 16rem sidebar + 1rem gap
-            background: 'none',
+            left: sidebarOpen ? '35rem' : '27rem',
+            top: sidebarOpen ? '5rem' : '5rem',
             border: 'none',
-            cursor: 'pointer',
             padding: 0
           }}
+          color="#16a34a"
+          hoverColor="#2563eb"
           aria-label="Go back"
-          onMouseEnter={() => setIsBackHover(true)}
-          onMouseLeave={() => setIsBackHover(false)}
-        >
-          <MdKeyboardDoubleArrowLeft size={40} color={isBackHover ? '#2563eb' : '#16a34a'} />
-        </button>
+        />
       )}
       {/* Sidebar */}
       <div style={{ position: 'relative' }}>
@@ -281,7 +277,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 <button
                   onClick={() => navigate('/')}
                   className="inline-flex items-center justify-center rounded-full focus:outline-none"
-                  style={{ background: 'black', cursor: 'pointer', width: '44px', height: '44px', minWidth: '44px', minHeight: '44px', padding: 0, display: 'flex', alignSelf: 'flex-start', marginBottom: 0 }}
+                  style={{ background: 'none', cursor: 'pointer', width: '44px', height: '44px', minWidth: '44px', minHeight: '44px', padding: 0, display: 'flex', alignSelf: 'flex-start', marginBottom: 0 }}
                   title="Go to homepage"
                 >
                   <span style={{ fontSize: '1.7rem', fontWeight: 900, color: '#22c55e' }}>T</span>
@@ -312,7 +308,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 <button
                   onClick={() => navigate('/')}
                   className="inline-flex items-center justify-center rounded-full focus:outline-none"
-                  style={{ background: 'black', cursor: 'pointer', width: '44px', height: '44px', minWidth: '44px', minHeight: '44px', padding: 0, display: 'flex', alignSelf: 'flex-start' }}
+                  style={{ background: 'none', cursor: 'pointer', width: '44px', height: '44px', minWidth: '44px', minHeight: '44px', padding: 0, display: 'flex', alignSelf: 'flex-start' }}
                   title="Go to homepage"
                 >
                   <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -435,14 +431,19 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         {/* Open sidebar button */}
         {!sidebarOpen && !sidebarClosing && (
           <button
-            className="fixed left-2 z-50 w-9 h-9 flex items-center justify-center rounded-full text-gray-300 hover:text-green-400 shadow transition"
-            style={{ top: '2rem', minWidth: '36px', minHeight: '36px', padding: 0, position: 'fixed', background: 'none', paddingLeft: 10}}
+            className="fixed left-2 z-50 w-9 h-9 flex items-center justify-center rounded-full text-gray-300 hover:text-green-400 shadow transition group"
+            style={{ top: '2rem', minWidth: '36px', minHeight: '36px', padding: 0, position: 'fixed', background: 'none', paddingLeft: 10 }}
             onClick={() => setSidebarOpen(true)}
             title="Open sidebar"
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
+            <span className="absolute w-9 h-9 flex items-center justify-center transition-opacity duration-200 opacity-100 group-hover:opacity-0">
+              <img src={logoUrl} alt="Toxindex logo" width={32} height={32} style={{ display: 'block' }} />
+            </span>
+            <span className="absolute w-9 h-9 flex items-center justify-center transition-opacity duration-200 opacity-0 group-hover:opacity-100">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </span>
           </button>
         )}
       </div>
@@ -491,7 +492,13 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       
       {/* Main Content */}
       <main className="flex-1 flex items-center justify-center h-screen">
-        {children}
+        {/* {children} */}
+        {(
+          React.isValidElement(children) &&
+          ((children.type as any).displayName === "EnvironmentDetails" || (children.type as any).name === "EnvironmentDetails")
+        )
+          ? React.cloneElement(children as React.ReactElement<any>, { paddingClass: sidebarOpen ? "px-90" : "px-125" })
+          : children}
       </main>
       <FilePreviewModal
         fileId={sidebarPreviewFileId}

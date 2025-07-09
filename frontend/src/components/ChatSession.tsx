@@ -7,6 +7,7 @@ import { useModel } from "../context/ModelContext";
 import ChatInputBar from './shared/ChatInputBar';
 import { io, Socket } from 'socket.io-client';
 import LoadingSpinner from './shared/LoadingSpinner';
+import { getWorkflowId } from './shared/workflows';
 
 let mountCount = 0;
 
@@ -21,6 +22,8 @@ const ChatSession = () => {
   const socketRef = useRef<Socket | null>(null);
   const { selectedEnv } = useEnvironment();
   const { selectedModel } = useModel();
+  const [fileId, setFileId] = useState<string | undefined>(undefined);
+  const [fileName, setFileName] = useState<string | undefined>(undefined);
 
   console.log("ChatSession mounted", sessionId);
 
@@ -86,19 +89,15 @@ const ChatSession = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || sending) return;
+    const workflow_id = getWorkflowId(selectedModel);
+    // Block submit if workflow 4 and no file selected
+    if (workflow_id === 4 && !fileId) {
+      setError("You must select a file for this workflow.");
+      return;
+    }
     setSending(true);
     setError(null);
-    // Map selectedModel to workflow_id
-    // 1: ToxIndex RAP probra_task
-    // 2: ToxIndex Vanilla plain_openai_task
-    // 3: ToxIndex Pathway openai_json_schema_task
-    // 4: ToxIndex 4th probra_task
-    // 5: ToxIndex 5th probra_task
-    let workflow_id = 1;
-    if (selectedModel === "toxindex-rap") workflow_id = 1;
-    else if (selectedModel === "toxindex-vanilla") workflow_id = 2;
-    else if (selectedModel === "toxindex-pathway") workflow_id = 3;
-    else if (selectedModel === "toxindex-4th" || selectedModel === "toxindex-5th") {
+    if (workflow_id === 0) {
       setError("This workflow is not yet supported.");
       setSending(false);
       return;
@@ -112,6 +111,7 @@ const ChatSession = () => {
           workflow: workflow_id,
           environment_id: selectedEnv || undefined,
           sid: sessionId,
+          file_id: fileId,
         }),
         credentials: 'include'
       });
@@ -121,6 +121,8 @@ const ChatSession = () => {
       } else {
         setMessages(prev => [...prev, { content: input.trim(), role: 'user' }]);
         setInput('');
+        setFileId(undefined);
+        setFileName(undefined);
       }
     } catch (error) {
       setError('Error sending message.');
@@ -204,14 +206,29 @@ const ChatSession = () => {
             </>
           )}
         </div>
-
-        <ChatInputBar
-          value={input}
-          onChange={setInput}
-          onSubmit={handleSubmit}
-          uploading={sending}
-          error={error}
-        />
+        {/* Selected file display above input bar, left-aligned */}
+        <div className="w-full flex flex-col items-center pb-8">
+          <div style={{ width: '100%', maxWidth: 800 }}>
+            {fileId && (
+              <div className="bg-gray-900/10 text-green-200 px-3 py-0 rounded-full text-sm font-medium flex items-center gap-1 mb-2" style={{ minHeight: 40 }}>
+                <span className="font-mono font-semibold text-base z-13">Selected file:</span>
+                <span className="font-mono truncate max-w-xs text-base z-13">{fileName ? (fileName.length > 24 ? fileName.slice(0, 20) + '...' : fileName) : fileId.slice(0, 10) + '...'}</span>
+                <button onClick={() => { setFileId(undefined); setFileName(undefined); }} className="ml-0 text-red-300 hover:text-red-500 z-13" title="Clear file">×</button>
+              </div>
+            )}
+            <ChatInputBar
+              value={input}
+              onChange={setInput}
+              onSubmit={handleSubmit}
+              uploading={sending}
+              error={error}
+              onFilePick={(id: string, name?: string) => {
+                setFileId(id);
+                setFileName(name);
+              }}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

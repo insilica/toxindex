@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { FaTimes } from 'react-icons/fa';
-import { useEnvironment } from "../context/EnvironmentContext";
+import { useEnvironment } from "../../context/EnvironmentContext";
 
 interface Environment {
   environment_id: string;
@@ -35,8 +35,9 @@ const UploadCsvModal: React.FC<UploadCsvModalProps> = ({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (!file.name.toLowerCase().endsWith('.csv')) {
-        setError('Please select a CSV file');
+      const allowed = ['.csv', '.txt', '.xlsx', '.parquet', '.mat', '.png', '.jpeg', '.jpg', '.heic', '.pickle', '.npy'];
+      if (!allowed.some(ext => file.name.toLowerCase().endsWith(ext))) {
+        setError('Please select a supported file type: CSV, TXT, XLSX, PARQUET, MAT, PNG, JPEG, JPG, HEIC, PICKLE, NPY');
         setSelectedFile(null);
         return;
       }
@@ -60,8 +61,9 @@ const UploadCsvModal: React.FC<UploadCsvModalProps> = ({
     setDragActive(false);
     const file = e.dataTransfer.files?.[0];
     if (file) {
-      if (!file.name.toLowerCase().endsWith('.csv')) {
-        setError('Please select a CSV file');
+      const allowed = ['.csv', '.txt', '.xlsx', '.parquet', '.mat', '.png', '.jpeg', '.jpg', '.heic', '.pickle', '.npy'];
+      if (!allowed.some(ext => file.name.toLowerCase().endsWith(ext))) {
+        setError('Please select a supported file type: CSV, TXT, XLSX, PARQUET, MAT, PNG, JPEG, JPG, HEIC, PICKLE, NPY');
         setSelectedFile(null);
         return;
       }
@@ -117,7 +119,7 @@ const UploadCsvModal: React.FC<UploadCsvModalProps> = ({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-gray-900 rounded-lg p-6 max-w-md w-full mx-4">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-white">Upload CSV File</h2>
+          <h2 className="text-xl font-semibold text-white">Upload File to an Environment</h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-white transition-colors"
@@ -145,7 +147,7 @@ const UploadCsvModal: React.FC<UploadCsvModalProps> = ({
           </div>
 
           <div className="mb-4">
-            <label className="block text-gray-300 mb-2">CSV File</label>
+            <label className="block text-gray-300 mb-2">File</label>
             <div
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
@@ -162,12 +164,13 @@ const UploadCsvModal: React.FC<UploadCsvModalProps> = ({
                 </span>
               ) : (
                 <span>
-                  Drag and drop your CSV file here, or <span className="underline">click to browse</span>.
+                  Drag and drop your file here, or <span className="underline">click to browse</span>.<br />
+                  <span className="text-xs text-gray-400">Supported: CSV, TXT, XLSX, PARQUET, MAT, PNG, JPEG, JPG, HEIC, PICKLE, NPY</span>
                 </span>
               )}
               <input
                 type="file"
-                accept=".csv"
+                accept=".csv,.txt,.xlsx,.parquet,.mat,.png,.jpeg,.jpg,.heic,.pickle,.npy"
                 style={{ display: 'none' }}
                 ref={fileInputRef}
                 onChange={handleFileChange}
