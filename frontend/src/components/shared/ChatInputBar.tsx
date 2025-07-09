@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { FaPlus } from 'react-icons/fa';
 import EnvironmentSelector from './EnvironmentSelector';
-import UploadCsvModal from '../UploadCsvModal';
+import UploadCsvModal from './UploadCsvModal';
 import { useEnvironment } from "../../context/EnvironmentContext";
 import WorkflowSelector from './WorkflowSelector';
+import { FolderSearch } from 'lucide-react';
+import FilePickerModal from './FilePickerModal';
 
 interface ChatInputBarProps {
   value: string;
@@ -13,6 +15,7 @@ interface ChatInputBarProps {
   error?: string | null;
   placeholder?: string;
   disabled?: boolean;
+  onFilePick?: (fileId: string, fileName?: string) => void;
 }
 
 const ChatInputBar: React.FC<ChatInputBarProps> = ({
@@ -22,8 +25,10 @@ const ChatInputBar: React.FC<ChatInputBarProps> = ({
   uploading = false,
   error,
   placeholder = 'Ask me your toxicology question [ Is green tea nephrotoxic? ]',
+  onFilePick,
 }) => {
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showFilePicker, setShowFilePicker] = useState(false);
   const { environments, selectedEnv } = useEnvironment();
 
   const handleUploadClick = () => {
@@ -32,7 +37,7 @@ const ChatInputBar: React.FC<ChatInputBarProps> = ({
 
   return (
     <>
-      <div className="w-full z-10 bg-opacity-10 flex justify-center" style={{ padding: 0 }}>
+      <div className="w-full z-9 bg-opacity-10 flex justify-center" style={{ padding: 0 }}>
         <form className="flex flex-col items-center w-full" style={{ maxWidth: '800px' }} onSubmit={onSubmit}>
           <div className="relative w-full" style={{ maxWidth: '800px', width: '100%' }}>
             <textarea
@@ -50,7 +55,17 @@ const ChatInputBar: React.FC<ChatInputBarProps> = ({
               style={{ minHeight: 80, fontFamily: 'inherit', width: '100%', boxShadow: '0 8px 32px 0 rgba(34,197,94,0.10)' }}
               disabled={uploading}
             />
-            <div className="absolute right-4 bottom-14 flex items-center space-x-2 z-30">
+            <div className="absolute right-4 bottom-14 flex items-center space-x-2 z-10">
+              <button
+                className="w-10 h-10 flex items-center justify-center rounded-full shadow-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-green-400"
+                style={{ padding: 0, borderRadius: '50%', background: 'rgba(255,255,255,0.7)' }}
+                title="Pick a file from environment"
+                onClick={e => { e.preventDefault(); setShowFilePicker(true); }}
+                disabled={uploading}
+                type="button"
+              >
+                <FolderSearch className="w-5 h-5 text-black" />
+              </button>
               <button
                 className="w-10 h-10 flex items-center justify-center rounded-full shadow-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-green-400"
                 style={{ padding: 0, borderRadius: '50%', background: 'rgba(255,255,255,0.7)' }}
@@ -73,7 +88,7 @@ const ChatInputBar: React.FC<ChatInputBarProps> = ({
                 </svg>
               </button>
             </div>
-            <div className="absolute left-4 z-20 flex items-end gap-2" style={{ position: 'relative', width: '420px', overflow: 'visible', bottom: '3rem' }}>
+            <div className="absolute left-4 z-10 flex items-end gap-2" style={{ position: 'relative', width: '420px', overflow: 'visible', bottom: '3rem' }}>
               <EnvironmentSelector/>
               <WorkflowSelector />
             </div>
@@ -87,6 +102,16 @@ const ChatInputBar: React.FC<ChatInputBarProps> = ({
         environments={environments}
         defaultEnvId={selectedEnv || undefined}
         onUploadSuccess={() => setShowUploadModal(false)}
+      />
+      <FilePickerModal
+        open={showFilePicker}
+        onClose={() => setShowFilePicker(false)}
+        environmentId={selectedEnv}
+        environments={environments}
+        onPick={(fileId: string, fileName?: string) => {
+          setShowFilePicker(false);
+          onFilePick?.(fileId, fileName);
+        }}
       />
     </>
   );

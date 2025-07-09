@@ -1,18 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useModel } from '../../context/ModelContext';
 import { FaHammer } from 'react-icons/fa';
+import { WORKFLOWS } from './workflows';
 
 interface WorkflowSelectorProps {
   className?: string;
 }
-
-const WORKFLOWS = [
-  { id: 'toxindex-rap', label: 'ToxIndex RAP' },
-  { id: 'toxindex-vanilla', label: 'ToxIndex Vanilla' },
-  { id: 'toxindex-pathway', label: 'ToxIndex Pathway' },
-  { id: 'toxindex-4th', label: 'ToxIndex 4th' },
-  { id: 'toxindex-5th', label: 'ToxIndex 5th' },
-];
 
 const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({ className = '' }) => {
   const selectRef = useRef<HTMLSelectElement>(null);
