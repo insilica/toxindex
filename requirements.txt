@@ -1,29 +1,25 @@
+# BACKEND ===============================================================
+email_validator==2.1.0.post1
+Flask-SocketIO==5.3.6
+gunicorn==21.2.0
+eventlet==0.33.3
+celery
+redis
 Flask==3.0.0
 python-dotenv==1.1.0
-stripe==4.2.0
 requests
 flask-login
 Flask-WTF==1.2.1
-sendgrid==6.10.0
-gunicorn==21.2.0
-psycopg2-binary==2.9.9
-
-# WEBSERVER ===============================================================
-email_validator==2.1.0.post1
-
-# UPLOAD SERVICE ==========================================================
-# boto3==1.34.70 # 1.34.19
-# botocore==1.34.70 # 1.34.19
-# s3transfer==0.10.0
-openai>=1.68.2,<2.0.0
 
 # FRONTEND ================================================================
 markdown
 
 # ADDITIONAL PACKAGES ======================================================
-celery
-redis
+openai>=1.68.2,<2.0.0
+sendgrid==6.10.0
+psycopg2-binary==2.9.9
 pandas
+stripe==4.2.0
 annotated-types
 rdkit
 rapidfuzz
@@ -54,35 +50,5 @@ git+ssh://git@github.com/toxindex/RAP.git
 git+ssh://git@github.com/toxindex/RAPtool.git
 
 # PATHWAY ANALYSIS ================================================================
-#git+ssh://git@github.com/toxindex/pathway_analysis_tool.git
-protobuf
 py4cytoscape
-rdflib==7.1.4
-# rdflib_hdt==3.1 # C++ build error
-tqdm
-urllib3
-networkx
-biobricks
-
-# SERVING
-Flask-SocketIO==5.3.6
-# gevent==23.9.1
-# gevent-websocket==0.10.1
-gunicorn==21.2.0
-eventlet==0.33.3
-
-# biobricks==0.3.9
-# networkx==3.4.2
-# #numpy==2.2.6
-# #pandas==2.2.3
-# protobuf==6.31.0
-# py4cytoscape==1.12.0
-# #pydantic==2.11.5
-# #python-dotenv==1.1.0
-# #rapidfuzz==3.13.0
-# rdflib==7.1.4
-# rdflib_hdt==3.1
-# #Requests==2.32.3
-# #tenacity==9.1.2
-# tqdm==4.67.1
-# urllib3==2.4.0
+git+ssh://git@github.com/toxindex/pathway_analysis_tool.git#egg=pathway_analysis_tool
