@@ -15,11 +15,19 @@ source scripts/flake/setup_postgres.sh \
   "/nix/store/3pzlrs5nddszkpgasnrcpf4ifrzm76lb-postgresql-15.13/bin"
 
 # Drop and recreate the public schema (dev only!)
-# psql -U postgres -d toxindex -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
+psql -U postgres -d toxindex -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
 
 source scripts/flake/aws_login.sh
 
 source scripts/flake/run_flyway.sh
+
+# Seed default workflows from JSON
+echo "Seeding default workflows..."
+python3 scripts/seed_workflows.py
+
+# Set up default admin user
+echo "Setting up default admin user..."
+python3 scripts/setup_default_admin.py
 
 source scripts/flake/start_redis.sh
 

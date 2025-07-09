@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import FilePreviewModal from './shared/FilePreviewModal';
-import { FaComments, FaPlus, FaListAlt, FaFileCsv, FaFileAlt, FaFileCode, FaDatabase, FaFileImage, FaFile, FaEllipsisH } from 'react-icons/fa';
+import { FaComments, FaPlus, FaListAlt, FaFileCsv, FaFileAlt, FaFileCode, FaDatabase, FaFileImage, FaFile, FaEllipsisH, FaUsers, FaCog, FaServer, FaShieldAlt, FaUser, FaSignOutAlt } from 'react-icons/fa';
 import { createPortal } from "react-dom";
 import { useEnvironment } from "../context/EnvironmentContext";
 import { useChatSession } from "../context/ChatSessionContext";
 import { useModel } from "../context/ModelContext";
+import { useAdmin } from "../hooks/useAdmin";
 import logoUrl from '../assets/logo.svg';
 import HomeButton from "./shared/HomeButton";
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -27,13 +28,14 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { environments, setEnvironments, selectedEnv, setSelectedEnv } = useEnvironment(); 
   const [openChatMenu, setOpenChatMenu] = useState<string | null>(null);
   const menuButtonRefs = useRef<{ [key: string]: React.RefObject<HTMLButtonElement> }>({});
+  const { isAdmin } = useAdmin();
 
   // Show back arrow on environment and task detail pages
   const showBackArrow = location.pathname.startsWith('/environments') || location.pathname.startsWith('/settings') || location.pathname.startsWith('/chat/session');;
-  const [isBackHover, setIsBackHover] = useState(false);
+  // const [isBackHover, setIsBackHover] = useState(false);
 
   useEffect(() => {
-    fetch("/api/me", { credentials: "include", cache: "no-store" })
+    fetch("/api/users/me", { credentials: "include", cache: "no-store" })
       .then(res => {
         if (res.status === 200) {
           setAuth(true);
@@ -150,10 +152,20 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   // Settings sidebar logic
   const isSettings = location.pathname.startsWith("/settings");
-  let settingsSection: 'general' | 'environments' | 'data-controls' = 'general';
+  const isAdminPage = location.pathname.startsWith("/admin");
+  const isGeneralSettings = location.pathname === "/settings/general";
+  let settingsSection: 'general' | 'environments' | 'data-controls' | 'admin' = 'general';
   if (location.pathname === "/settings/environments") settingsSection = 'environments';
   else if (location.pathname === "/settings/data-controls") settingsSection = 'data-controls';
   else if (location.pathname === "/settings/general") settingsSection = 'general';
+  else if (location.pathname === "/admin/users") settingsSection = 'admin';
+
+  // Open sidebar by default on general settings page
+  useEffect(() => {
+    if (isGeneralSettings && !sidebarOpen && !sidebarClosing) {
+      setSidebarOpen(true);
+    }
+  }, [isGeneralSettings, sidebarOpen, sidebarClosing]);
 
   // Create a new chat session (flat)
   const handleNewChat = async () => {
@@ -236,32 +248,32 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       {/* Sidebar */}
       <div style={{ position: 'relative' }}>
         <aside
-          className={`bg-black shadow-sm flex flex-col justify-between min-h-screen relative transition-all duration-300 ease-in-out ${sidebarOpen ? 'w-64 opacity-100' : 'w-0 opacity-0 pointer-events-none'}`}
+          className={`bg-black shadow-sm flex flex-col justify-between min-h-screen relative transition-all duration-500 ease-in-out ${(sidebarOpen || sidebarClosing) ? 'w-64 opacity-100' : 'w-0 opacity-0 pointer-events-none'}`}
           style={{ overflow: 'hidden', position: 'relative', zIndex: 40, padding: 0, margin: 0, borderRight: 'none' }}
         >
           {/* Close button */}
-          {sidebarOpen && (
+          {(sidebarOpen || sidebarClosing) && (
             <button
-              className={`absolute transition-all duration-300 w-9 h-9 flex items-center justify-center rounded-full text-gray-300 hover:text-green-400 shadow`}
+              className={`absolute transition-all duration-500 w-9 h-9 flex items-center justify-center rounded-full text-gray-300 hover:text-green-400 shadow`}
               style={{
                 background: 'none',
                 top: '2rem',
+                right: '1.5rem',
                 zIndex: 50,
                 minWidth: '36px',
                 minHeight: '36px',
                 padding: 0,
-                right: sidebarOpen && !sidebarClosing ? '1.5rem' : 'auto',
-                left: (!sidebarOpen || sidebarClosing) ? '0.5rem' : 'auto',
                 opacity: sidebarOpen || sidebarClosing ? 1 : 0,
                 pointerEvents: sidebarOpen || sidebarClosing ? 'auto' : 'none',
-                transition: 'all 0.6s cubic-bezier(0.4,0,0.2,1)'
+                transform: sidebarOpen && !sidebarClosing ? 'translateX(0)' : 'translateX(-12rem)',
+                transition: 'all 0.5s cubic-bezier(0.4,0,0.2,1)'
               }}
               onClick={() => {
                 setSidebarClosing(true);
+                setSidebarOpen(false);
                 setTimeout(() => {
-                  setSidebarOpen(false);
                   setSidebarClosing(false);
-                }, 300);
+                }, 500);
               }}
               title="Collapse sidebar"
             >
@@ -271,7 +283,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             </button>
           )}
           {/* Settings sidebar */}
-          {isSettings ? (
+          {(isSettings || isAdminPage) ? (
             <>
               <div style={{ marginTop: '1.7rem', marginLeft: '1.2rem', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                 <button
@@ -280,25 +292,46 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                   style={{ background: 'none', cursor: 'pointer', width: '44px', height: '44px', minWidth: '44px', minHeight: '44px', padding: 0, display: 'flex', alignSelf: 'flex-start', marginBottom: 0 }}
                   title="Go to homepage"
                 >
-                  <span style={{ fontSize: '1.7rem', fontWeight: 900, color: '#22c55e' }}>T</span>
+                  <img src={logoUrl} alt="Toxindex logo" width={32} height={32} style={{ display: 'block' }} />
                 </button>
-                <span style={{ fontSize: '1.2rem', fontWeight: 600, color: '#fff', letterSpacing: '0.5px', marginLeft: 10, marginTop: 18, marginBottom: 16, display: 'block' }}>Settings</span>
+                <span style={{ fontSize: '1.2rem', fontWeight: 600, color: '#fff', letterSpacing: '0.5px', marginLeft: 10, marginTop: 18, marginBottom: 16, display: 'block' }}>
+                  Settings
+                </span>
                 <nav className="flex flex-col gap-2 w-full">
                   <button
                     className={`settings-link py-1 pl-2 pr-2 rounded transition text-left text-sm ${settingsSection === 'general' ? 'bg-green-700 text-white font-bold' : 'text-gray-200'}`}
                     style={{ background: settingsSection === 'general' ? undefined : 'none', minHeight: '32px', fontSize: '0.95rem', paddingLeft: 14, width: '90%', maxWidth: 210, marginLeft: 2 }}
                     onClick={() => navigate('/settings/general')}
-                  >General</button>
+                  >
+                    <FaCog className="inline mr-2" />
+                    General
+                  </button>
                   <button
                     className={`settings-link py-1 pl-2 pr-2 rounded transition text-left text-sm ${settingsSection === 'environments' ? 'bg-green-700 text-white font-bold' : 'text-gray-200'}`}
                     style={{ background: settingsSection === 'environments' ? undefined : 'none', minHeight: '32px', fontSize: '0.95rem', paddingLeft: 14, width: '90%', maxWidth: 210, marginLeft: 2 }}
                     onClick={() => navigate('/settings/environments')}
-                  >Environments</button>
+                  >
+                    <FaServer className="inline mr-2" />
+                    Environments
+                  </button>
                   <button
                     className={`settings-link py-1 pl-2 pr-2 rounded transition text-left text-sm ${settingsSection === 'data-controls' ? 'bg-green-700 text-white font-bold' : 'text-gray-200'}`}
                     style={{ background: settingsSection === 'data-controls' ? undefined : 'none', minHeight: '32px', fontSize: '0.95rem', paddingLeft: 14, width: '90%', maxWidth: 210, marginLeft: 2 }}
                     onClick={() => navigate('/settings/data-controls')}
-                  >Data controls</button>
+                  >
+                    <FaShieldAlt className="inline mr-2" />
+                    Data controls
+                  </button>
+                  {isAdmin && (
+                    <button
+                      className={`settings-link py-1 pl-2 pr-2 rounded transition text-left text-sm ${settingsSection === 'admin' ? 'bg-green-700 text-white font-bold' : 'text-gray-200'}`}
+                      style={{ background: settingsSection === 'admin' ? undefined : 'none', minHeight: '32px', fontSize: '0.95rem', paddingLeft: 14, width: '90%', maxWidth: 210, marginLeft: 2 }}
+                      onClick={() => navigate('/admin/users')}
+                    >
+                      <FaUsers className="inline mr-2" />
+                      Admin
+                    </button>
+                  )}
                 </nav>
               </div>
             </>
@@ -311,10 +344,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                   style={{ background: 'none', cursor: 'pointer', width: '44px', height: '44px', minWidth: '44px', minHeight: '44px', padding: 0, display: 'flex', alignSelf: 'flex-start' }}
                   title="Go to homepage"
                 >
-                  <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="44" height="44" rx="10" fill="black"/>
-                    <text x="22" y="32" textAnchor="middle" fontSize="28" fontWeight="bold" fill="#16a34a" fontFamily="Arial, sans-serif">T</text>
-                  </svg>
+                  <img src={logoUrl} alt="Toxindex logo" width={32} height={32} style={{ display: 'block' }} />
                 </button>
               </div>
               {/* Environment Files List - always show if environment is selected */}
@@ -431,8 +461,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         {/* Open sidebar button */}
         {!sidebarOpen && !sidebarClosing && (
           <button
-            className="fixed left-2 z-50 w-9 h-9 flex items-center justify-center rounded-full text-gray-300 hover:text-green-400 shadow transition group"
-            style={{ top: '2rem', minWidth: '36px', minHeight: '36px', padding: 0, position: 'fixed', background: 'none', paddingLeft: 10 }}
+            className="fixed z-50 w-9 h-9 flex items-center justify-center rounded-full text-gray-300 hover:text-green-400 shadow transition group"
+            style={{ top: '1.95rem', left: '1.45rem', minWidth: '32px', minHeight: '32px', position: 'fixed', background: 'none', padding: 0 }}
             onClick={() => setSidebarOpen(true)}
             title="Open sidebar"
           >
@@ -462,27 +492,42 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             </svg>
           </button>
           {profileOpen && (
-            <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-2 text-gray-900 border border-gray-200">
-              <div className="px-4 py-2 border-b border-gray-100 text-sm">
-                {user?.user_id ? (
-                  <button
-                    onClick={() => {
-                      navigate(`/user/${user.user_id}`);
-                      setProfileOpen(false);
-                    }}
-                    className="font-medium text-green-700 underline hover:text-green-500 transition-colors cursor-pointer w-full text-left"
-                    style={{ background: 'none', border: 'none', padding: 0 }}
-                  >
-                    {user.email || "Logged in"}
-                  </button>
-                ) : (
-                  <div className="font-medium">{user?.email || "Logged in"}</div>
-                )}
-              </div>
+            <div className="absolute right-0 mt-2 w-56 bg-neutral-200 rounded-lg shadow-lg py-2 text-gray-900 border border-gray-200">
+              {user?.user_id ? (
+                <button
+                  onClick={() => {
+                    navigate(`/user/${user.user_id}`);
+                    setProfileOpen(false);
+                  }}
+                  className="font-medium text-neutral-900 hover:text-green-500 transition-colors cursor-pointer w-full text-left px-4 py-2 border-b border-gray-100 text-sm"
+                  style={{ background: 'none', border: 'none' }}
+                >
+                  <FaUser className="inline mr-2" />
+                  {user.email || "Logged in"}
+                </button>
+              ) : (
+                <div className="font-medium flex items-center px-4 py-2 border-b border-gray-100 text-sm">
+                  <FaUser className="inline mr-2" />
+                  {user?.email || "Logged in"}
+                </div>
+              )}
+              <button
+                onClick={() => {
+                  navigate('/settings/general');
+                  setProfileOpen(false);
+                }}
+                className="w-full text-left hover:text-purple-500 px-4 py-2 text-gray-900 text-sm"
+                style={{ background: 'none', border: 'none' }}
+              >
+                <FaCog className="inline mr-2" />
+                Settings
+              </button>
               <button
                 onClick={handleLogout}
-                className="w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600 text-sm"
+                className="w-full text-left hover:text-red-500 px-4 py-2 text-gray-900 text-sm"
+                style={{ background: 'none', border: 'none' }}
               >
+                <FaSignOutAlt className="inline mr-2" />
                 Logout
               </button>
             </div>

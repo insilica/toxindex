@@ -110,13 +110,19 @@ const LoginForm: React.FC = () => {
           filter: drop-shadow(0 0 8px #f87171);
           transition: color 0.2s, filter 0.2s;
         }
+        .login-button-normal {
+          background: linear-gradient(to right,rgb(242, 234, 214),rgb(183, 193, 207)) !important;
+          color:rgb(49, 50, 51) !important;
+          border: 2px solid #6b7280 !important;
+        }
         .login-error-shake {
           animation: shake 0.6s cubic-bezier(0.4,0,0.2,1) 0s 5;
           background: linear-gradient(90deg, #f87171 0%, #dc2626 100%) !important;
           color: #fff !important;
+          border: 2px solid #f87171 !important;
         }
         .enlarge-on-error {
-          transform: scale(1.35);
+          transform: scale(1.3);
           transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
         }
       `}</style>
@@ -130,7 +136,7 @@ const LoginForm: React.FC = () => {
         }}
       >
         <FaLock
-          className={`text-5xl mb-4 drop-shadow-lg animate-bounce-slow${errorAnim ? ' lock-error' : ' text-green-400'}`}
+          className={`text-5xl mb-4 drop-shadow-lg animate-bounce-slow${errorAnim ? ' lock-error' : ' text-sky-200'}`}
         />
         <h2 className="text-3xl font-extrabold mb-2 text-white tracking-tight" style={{ minHeight: 44 }}>
           {typed}
@@ -167,7 +173,7 @@ const LoginForm: React.FC = () => {
           </div>
           <button
             type="submit"
-            className={`w-full bg-gradient-to-r from-green-500 to-green-700 text-white py-3 rounded-lg font-bold shadow-lg hover:from-green-600 hover:to-green-800 transition disabled:opacity-50${errorAnim ? ' login-error-shake' : ''}`}
+            className={`login-button-normal py-3 px-6 rounded-lg font-bold shadow-lg hover:from-gray-600 hover:to-gray-700 transition-all duration-200 disabled:opacity-50${errorAnim ? ' login-error-shake' : ''}`}
             disabled={loading}
           >
             {loading ? 'Logging in...' : 'Login'}
@@ -176,18 +182,21 @@ const LoginForm: React.FC = () => {
         <div className="flex flex-row justify-between w-full mt-6">
           <Link
             to="/register"
-            className={`text-green-400 hover:underline text-sm font-semibold px-4 py-2 rounded-lg transition hover:bg-green-900/30${errorAnim ? ' enlarge-on-error' : ''}`}
+            className={`text-neutral-100 hover:underline text-sm font-semibold px-4 py-2 rounded-lg transition hover:bg-green-900/30${errorAnim ? ' enlarge-on-error' : ''}`}
           >
             Create Account
           </Link>
           <Link
             to="/forgot_password"
-            className={`text-green-400 hover:underline text-sm font-semibold px-4 py-2 rounded-lg transition hover:bg-green-900/30${errorAnim ? ' enlarge-on-error' : ''}`}
+            className={`text-neutral-100 hover:underline text-sm font-semibold px-4 py-2 rounded-lg transition hover:bg-green-900/30${errorAnim ? ' enlarge-on-error' : ''}`}
           >
             Forgot Password?
           </Link>
         </div>
       </div>
+      <footer className="absolute bottom-0 left-0 right-0 p-4 text-center text-neutral-100 text-sm">
+        <span className="text-green-400 font-black">TOXINDEX</span> Copyright © Insilica. All Rights Reserved.
+      </footer>
     </div>
   );
 };
