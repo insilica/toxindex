@@ -6,6 +6,9 @@ import { useModel } from "../context/ModelContext";
 import LoadingSpinner from "./shared/LoadingSpinner";
 import { io, Socket } from 'socket.io-client';
 import ChatInputBar from "./shared/ChatInputBar";
+import { getWorkflowId, getWorkflowLabelById } from './shared/workflows';
+import { FaHammer } from 'react-icons/fa';
+import { RiDeleteBin6Line } from 'react-icons/ri';
 
 interface Task {
   task_id: string;
@@ -16,6 +19,7 @@ interface Task {
   session_id?: string;
   status?: string; // e.g., 'processing', 'done'
   finished_at?: string;
+  workflow_id: number;
 }
 
 // const TYPEWRITER_TEXT = "Is it toxic, or just misunderstood? Let's break it down!";
@@ -40,6 +44,8 @@ const Dashboard = () => {
   const typewriterIntervalRef = useRef<number | null>(null);
   const navigate = useNavigate();
   const prevTaskIdsRef = useRef<string[]>([]);
+  const [fileId, setFileId] = useState<string | undefined>(undefined);
+  const [fileName, setFileName] = useState<string | undefined>(undefined);
 
   console.log("Dashboard mounted");
 
@@ -186,24 +192,22 @@ const Dashboard = () => {
     setError(null);
     if (!chatInput.trim()) {
       setError("Please enter a question.");
+      setUploading(false);
       return;
     }
     if (!selectedEnv || selectedEnv === "__add__" || selectedEnv === "__manage__") {
       setError("Please select an environment.");
+      setUploading(false);
       return;
     }
-    // Map selectedModel to workflow_id
-    // 1: ToxIndex RAP probra_task
-    // 2: ToxIndex Vanilla plain_openai_task
-    // 3: ToxIndex Pathway openai_json_schema_task
-    // 4: ToxIndex 4th probra_task
-    // 5: ToxIndex 5th probra_task
 
-    let workflow_id = 1;
-    if (selectedModel === "toxindex-rap") workflow_id = 1;
-    else if (selectedModel === "toxindex-vanilla") workflow_id = 2;
-    else if (selectedModel === "toxindex-pathway") workflow_id = 3;
-    else if (selectedModel === "toxindex-4th" || selectedModel === "toxindex-5th") {
+    const workflow_id = getWorkflowId(selectedModel);
+    if (workflow_id === 4 && !fileId) {
+      setError("You must select a file for this workflow.");
+      setUploading(false);
+      return;
+    }
+    if (workflow_id === 0) {
       setError("This workflow is not yet supported.");
       setUploading(false);
       return;
@@ -219,6 +223,7 @@ const Dashboard = () => {
           message: chatInput,
           workflow: workflow_id,
           environment_id: selectedEnv,
+          file_id: fileId,
         }),
       });
       if (!res.ok) throw new Error("Failed to create task");
@@ -232,6 +237,8 @@ const Dashboard = () => {
       setActiveTasks(tasksData.active_tasks || []);
       setArchivedTasks(tasksData.archived_tasks || []);
       setTasksLoading(false);
+      setFileId(undefined);
+      setFileName(undefined);
     } catch (err) {
       setError("Failed to post task.");
     } finally {
@@ -287,15 +294,17 @@ const Dashboard = () => {
                   <div
                     className="flex items-center min-w-0 gap-3 cursor-pointer"
                     style={{ flex: '1 1 0%', minWidth: 0 }}
-                    onClick={() => task.status === 'done' && navigate(`/task/${task.task_id}`)}
+                    onClick={() => (task.status === 'done' || task.status === 'error') && navigate(`/task/${task.task_id}`)}
                     tabIndex={0}
                     role="button"
                     onKeyDown={e => {
-                      if (task.status === 'processing'&& (e.key === 'Enter' || e.key === ' ')) navigate(`/task/${task.task_id}`);
+                      if ((task.status === 'done' || task.status === 'error') && (e.key === 'Enter' || e.key === ' ')) {
+                        navigate(`/task/${task.task_id}`);
+                      }
                     }}
                   >
                     <span
-                      className="text-white text-left font-medium truncate"
+                      className="text-white text-left font-medium flex items-center gap-2 flex-nowrap min-w-0"
                       style={{
                         background: 'none',
                         fontSize: '.95rem',
@@ -306,16 +315,31 @@ const Dashboard = () => {
                         boxShadow: 'none',
                         outline: 'none',
                         border: 'none',
-                        maxWidth: 180
+                        maxWidth: 260
                       }}
                       title={task.title}
                     >
-                      {task.title}
+                      <span className="truncate min-w-0" style={{maxWidth: 140, display: 'inline-block', verticalAlign: 'middle'}}>{task.title}</span>
+                      <span className="ml-2 text-xs text-blue-300 font-mono flex items-center gap-1 flex-nowrap" title="Tool used" style={{whiteSpace: 'nowrap'}}>
+                        <FaHammer className="inline-block mr-1 text-blue-400 align-middle text-base" />
+                        {getWorkflowLabelById(task.workflow_id)}
+                      </span>
                     </span>
 
-                    {(task.status !== 'done') && (
-                      <span className="ml-2 align-middle inline-block">
-                        <LoadingSpinner size="small" text="" showTimer={true} startTime={task.created_at ? new Date(task.created_at).getTime() : undefined} />
+                    {task.status === 'error' ? (
+                      <span className="ml-2 text-sm text-red-400 font-mono" title="Task failed">
+                        &#9888; Error
+                      </span>
+                    ) : (task.status !== 'done') && (
+                      <span className="ml-2 flex items-center">
+                        <LoadingSpinner 
+                          size="small" 
+                          text="" 
+                          showTimer={true} 
+                          startTime={task.created_at ? new Date(task.created_at).getTime() : undefined} 
+                          workflowId={task.workflow_id}
+                          status={task.status}
+                        />
                         {task.status && (
                           <span className="ml-2 text-xs text-green-300 font-mono" style={{ maxWidth: 120, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                             {task.status}
@@ -407,18 +431,22 @@ const Dashboard = () => {
                       if (e.key === 'Enter' || e.key === ' ') navigate(`/task/${task.task_id}`);
                     }}
                   >
-                    <span className="text-gray-300">
-                      {task.title}
+                    <span className="text-gray-300 flex items-center gap-2 flex-nowrap min-w-0">
+                      <span className="truncate min-w-0" style={{maxWidth: 140, display: 'inline-block', verticalAlign: 'middle'}}>{task.title}</span>
+                      <span className="ml-2 text-xs text-blue-300 font-mono flex items-center gap-1 flex-nowrap" title="Tool used" style={{whiteSpace: 'nowrap'}}>
+                        <FaHammer className="inline-block mr-1 text-blue-400 align-middle text-base" />
+                        {getWorkflowLabelById(task.workflow_id)}
+                      </span>
                       <span className="ml-2 text-xs text-gray-400">
                         <span className="font-bold text-gray-500">Archived - </span>{' task initially created at: '}
                         {task.created_at &&
                           new Date(task.created_at).toLocaleString(undefined, {
-                            month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true
+                            month: 'short', day: 'numeric'
                           })}
                       </span>
                     </span>
                   </div>
-                  <div className="w-32" />
+                  <div className="w-12" />
                   <button
                     onClick={e => {
                       e.stopPropagation();
@@ -437,14 +465,47 @@ const Dashboard = () => {
         )}
       </div>
       <div className="flex-1 flex flex-col justify-end">
-        <div className="w-full flex justify-center pb-8">
-          <ChatInputBar
-            value={chatInput}
-            onChange={setChatInput}
-            onSubmit={handleFormSubmit}
-            uploading={uploading}
-            error={error}
-          />
+        <div className="w-full flex flex-col items-center pb-8">
+          <div style={{ width: '100%', maxWidth: 800 }}>
+            {fileId && (
+              <div className="bg-gray-900/10 text-green-200 px-3 py-0 rounded-full text-sm font-medium flex items-center gap-1 mb-2" style={{ minHeight: 40 }}>
+                <span className="font-mono font-semibold text-base z-13">Selected file:</span>
+                <span className="font-mono truncate max-w-xs text-base z-13">
+                  {fileName
+                    ? (() => {
+                        if (fileName.length > 24) {
+                          const extMatch = fileName.match(/(\.[^./\\]+)$/);
+                          const ext = extMatch ? extMatch[1] : '';
+                          const base = fileName.slice(0, 20);
+                          return base + '...' + ext;
+                        } else {
+                          return fileName;
+                        }
+                      })()
+                    : fileId.slice(0, 10) + '...'}
+                </span>
+                <button
+                  onClick={() => { setFileId(undefined); setFileName(undefined); }}
+                  className="ml-0 text-red-300 hover:text-red-500 p-1 bg-transparent border-none outline-none focus:outline-none"
+                  style={{ background: 'none', border: 'none', outline: 'none', boxShadow: 'none', padding: 4, margin: 0 }}
+                  title="Clear file"
+                >
+                  <RiDeleteBin6Line className="w-6 h-6" />
+                </button>
+              </div>
+            )}
+            <ChatInputBar
+              value={chatInput}
+              onChange={setChatInput}
+              onSubmit={handleFormSubmit}
+              uploading={uploading}
+              error={error}
+              onFilePick={(id: string, name?: string) => {
+                setFileId(id);
+                setFileName(name);
+              }}
+            />
+          </div>
         </div>
       </div>
     </div>

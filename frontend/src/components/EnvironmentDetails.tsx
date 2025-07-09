@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import FilePreviewModal from './FilePreviewModal';
-import UploadCsvModal from './UploadCsvModal';
+import FilePreviewModal from './shared/FilePreviewModal';
+import UploadCsvModal from './shared/UploadCsvModal';
 import { FaEye, FaDownload, FaTrash, } from 'react-icons/fa';
 import EnvironmentSelector from './shared/EnvironmentSelector';
 import LoadingSpinner from './shared/LoadingSpinner';
@@ -20,7 +20,11 @@ interface EnvironmentFile {
   upload_date: string;
 }
 
-export const EnvironmentDetails: React.FC = () => {
+interface EnvironmentDetailsProps {
+  paddingClass?: string;
+}
+
+export const EnvironmentDetails: React.FC<EnvironmentDetailsProps> = ({ paddingClass = "px-90" }) => {
   const navigate = useNavigate();
   const [env, setEnv] = useState<Environment | null>(null);
   const [files, setFiles] = useState<EnvironmentFile[]>([]);
@@ -146,7 +150,10 @@ export const EnvironmentDetails: React.FC = () => {
   );
 
   return (
-    <div className="w-full h-full min-h-screen pt-24 px-100 pb-12 text-white flex flex-col" style={{ background: 'linear-gradient(135deg, #1a1426 0%, #2a1a2a 60%, #231a23 100%)' }}>
+    <div
+      className={`w-full h-full min-h-screen pt-24 pb-12 text-white flex flex-col ${paddingClass}`}
+      style={{ background: 'linear-gradient(135deg, #1a1426 0%, #2a1a2a 60%, #231a23 100%)' }}
+    >
       <div className="flex items-center justify-between mb-2">
         <EnvironmentSelector/>
         <button

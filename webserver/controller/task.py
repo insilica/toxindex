@@ -9,6 +9,7 @@ from webserver import datastore as ds
 from webserver.ai_service import generate_title
 from workflows.plain_openai_tasks import plain_openai_task, openai_json_schema_task
 from workflows.probra import probra_task
+from workflows.raptool_task import raptool_task
 from webserver.model.file import File
 import os
 
@@ -49,11 +50,11 @@ def create_task():
     workflow_id = int(task_data.get("workflow", 1))
     environment_id = task_data.get("environment_id")
     sid = task_data.get("sid")
+    file_id = task_data.get("file_id")
     created_at = datetime.datetime.now(datetime.timezone.utc)
 
     # If no session id, create a new session
     if not sid:
-        
         session = ChatSession.create_session(environment_id, user_id, title=title)
         sid = session.session_id if session else None
 
@@ -70,28 +71,30 @@ def create_task():
     if workflow_id == 1:
         celery_task = probra_task.delay({
             "payload": message,
-            "sid": sid,
             "task_id": task.task_id,
             "user_id": str(user_id),
         })
     elif workflow_id == 2:
         celery_task = plain_openai_task.delay({
             "payload": message,
-            "sid": sid,
             "task_id": task.task_id,
             "user_id": str(user_id),
         })
     elif workflow_id == 3:
         celery_task = openai_json_schema_task.delay({
             "payload": message,
-            "sid": sid,
             "task_id": task.task_id,
             "user_id": str(user_id),
+        })
+    elif workflow_id == 4:
+        celery_task = raptool_task.delay({
+            "payload": file_id,
+            "task_id": task.task_id,
+            "user_id": str(user_id),     
         })
     else:
         celery_task = probra_task.delay({
             "payload": message,
-            "sid": sid,
             "task_id": task.task_id,
             "user_id": str(user_id),
         })
