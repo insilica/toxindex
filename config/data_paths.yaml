@@ -1,0 +1,52 @@
+# Data directory configuration for toxindex
+# This file centralizes all data path definitions to avoid hardcoding
+
+# Base data directory (relative to project root)
+data_root: "data"
+
+# Subdirectories within data/
+directories:
+  # Temporary files (short-lived, can be cleaned up)
+  tmp: "tmp"
+  
+  # Persistent analysis outputs (CSVs, Parquet files, PNGs, etc.)
+  outputs: "outputs"
+  
+  # Chat logs and session data
+  chats: "chats"
+  
+  # Function caches (can be regenerated)
+  cache: "cache"
+  
+  # Application logs
+  logs: "logs"
+  
+  # File uploads
+  uploads: "uploads"
+  
+  # Sessions (user-specific data)
+  sessions: "sessions"
+
+# Full path definitions (computed from data_root + directories)
+paths:
+  # Base data directory
+  data: "${data_root}"
+  
+  # Individual subdirectories
+  tmp: "${data_root}/${directories.tmp}"
+  outputs: "${data_root}/${directories.outputs}"
+  chats: "${data_root}/${directories.chats}"
+  cache: "${data_root}/${directories.cache}"
+  logs: "${data_root}/${directories.logs}"
+  uploads: "${data_root}/${directories.uploads}"
+  sessions: "${data_root}/${directories.sessions}"
+
+# Cache subdirectories
+cache_subdirs:
+  chemprop_predictions: "function_cache/chemprop_predictions_cache"
+  parse_chemicals: "function_cache/parse_chemicals"
+
+# Session subdirectories
+session_subdirs:
+  chats: "sessions/chats"
+  uploads: "sessions/uploads" 

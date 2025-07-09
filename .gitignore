@@ -37,16 +37,7 @@ report.json
 
 # Ignore result/output directories
 result/
-tmp/
-result 
-uploads/
-uploads
-cache/
-cache
-chats/
-chats
-outputs/
-outputs
+data/
 # Uncomment to ignore VSCode settings (if user-specific)
 # .vscode/
 

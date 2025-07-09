@@ -33,6 +33,7 @@ from webserver.csrf import csrf
 from webserver.socketio import socketio
 from webserver.controller.user import user_bp
 from webserver.controller.schema import schema_bp
+from webserver.data_paths import LOGS_ROOT
 
 dotenv.load_dotenv()
 
@@ -49,8 +50,8 @@ logging.info(f"WTF_CSRF_ENABLED: {app.config.get('WTF_CSRF_ENABLED', 'not set')}
 
 socketio.init_app(app)
 
-os.makedirs('logs', exist_ok=True)
-log_filename = f"logs/app_{datetime.now().strftime('%Y-%m-%d_%H')}.log"
+LOGS_ROOT().mkdir(exist_ok=True)
+log_filename = LOGS_ROOT() / f"app_{datetime.now().strftime('%Y-%m-%d_%H')}.log"
 
 # Configure logging to output to file with detailed formatting
 logging.basicConfig(

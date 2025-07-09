@@ -11,6 +11,7 @@ import hashlib
 # import datetime
 # import webserver.datastore as ds
 from webserver.model.task import Task
+from webserver.data_paths import TMP_ROOT
 
 from RAP.tool_deeptox import deeptox_agent
 
@@ -59,7 +60,7 @@ def probra_task(self, payload):
         r.publish("celery_updates", json.dumps(event, default=str))
 
         tmp_filename = f"probra_result_{uuid.uuid4().hex}.md"
-        project_tmp_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'tmp'))
+        project_tmp_dir = TMP_ROOT()
         os.makedirs(project_tmp_dir, exist_ok=True)
         tmp_path = os.path.join(project_tmp_dir, tmp_filename)
 

@@ -14,13 +14,9 @@ from raptool.predict_chemicals import predict_chemicals
 from raptool.select_feature import select_feature
 from raptool.build_heatmap import build_heatmap
 from raptool.build_stripchart import build_stripchart
-import pathlib
+from webserver.data_paths import OUTPUTS_ROOT
 
 logger = logging.getLogger(__name__)
-
-# Always resolve outputs relative to project root
-PROJECT_ROOT = pathlib.Path(__file__).resolve().parent.parent
-OUTPUTS_ROOT = PROJECT_ROOT / "outputs"
 
 def emit_status(task_id, status):
     Task.set_status(task_id, status)

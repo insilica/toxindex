@@ -1,21 +1,16 @@
 import redis
 import json
 import os
-import uuid
 import logging
-import pathlib
 from workflows.celery_worker import celery
 from webserver.model.message import MessageSchema
 from webserver.model.task import Task
 from webserver.model.file import File
 from pathway_analysis_tool.annotate_pathway import save_pathway
 import pandas as pd
+from webserver.data_paths import OUTPUTS_ROOT
 
 logger = logging.getLogger(__name__)
-
-# Always resolve outputs relative to project root
-PROJECT_ROOT = pathlib.Path(__file__).resolve().parent.parent
-OUTPUTS_ROOT = PROJECT_ROOT / "outputs"
 
 def emit_status(task_id, status):
     Task.set_status(task_id, status)
