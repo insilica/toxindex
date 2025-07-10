@@ -21,7 +21,7 @@
             pkgs.postgresql_15
             pkgs.postgresql_jdbc
             pkgs.redis
-            pkgs.awscli2
+            pkgs.google-cloud-sdk
             pkgs.gcc
             pkgs.zlib 
             pkgs.nodejs
