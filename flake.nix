@@ -14,7 +14,7 @@
       {
         devShells.default = pkgs.mkShell {
           buildInputs = [
-            pkgs.python310
+            pkgs.python312
             pkgs.uv
             pkgs.git
             pkgs.flyway
@@ -31,6 +31,9 @@
             # Unset NVM to avoid conflicts with Nix-provided node
             unset NVM_DIR
             export PATH=$(echo $PATH | tr ':' '\n' | grep -v '\.nvm' | paste -sd: -)
+            export LANG=C.UTF-8
+            export LC_ALL=C.UTF-8
+            export LD_LIBRARY_PATH="${pkgs.zlib.out}/lib:${pkgs.stdenv.cc.cc.lib}/lib:$LD_LIBRARY_PATH"
             hash -r
 
             export PYTHONPATH=$PWD:$PYTHONPATH
@@ -44,15 +47,13 @@
               echo "Warning: .env file not found"
             fi
 
-            if [ ! -d .venv ]; then
-              uv venv
-              source .venv/bin/activate
-              GIT_CLONE_PROTECTION_ACTIVE=false uv pip install -r requirements.txt
-            else
-              source .venv/bin/activate
-            fi
+            # Set up Python environment
+            [ ! -d .venv ] && uv venv --python ${pkgs.python312}/bin/python3.12
+            source .venv/bin/activate
             
-            export LD_LIBRARY_PATH="${pkgs.zlib.out}/lib:${pkgs.stdenv.cc.cc.lib}/lib:$LD_LIBRARY_PATH"
+            # Sync dependencies (idempotent)
+            GIT_CLONE_PROTECTION_ACTIVE=false uv sync
+            
             # force eventlet to use the system resolver instead of DNS monkey patching
             export EVENTLET_NO_GREENDNS=yes 
             echo "Python packages in uv venv:"
@@ -82,14 +83,14 @@
             echo "Blazegraph up—loading TTL files"
 
             # Add data from WikiPathways/AOP-Wiki
-            curl -X POST \
-              -H "Content-Type: text/turtle" \
-              --data-binary @pathway_data/wikipathways.ttl \
-              http://localhost:8889/bigdata/namespace/kb/sparql
-            curl -X POST \
-              -H "Content-Type: text/turtle" \
-              --data-binary @pathway_data/AOPWikiRDF.ttl \
-              http://localhost:8889/bigdata/namespace/kb/sparql
+            # curl -X POST \
+            #  -H "Content-Type: text/turtle" \
+            #  --data-binary @pathway_data/wikipathways.ttl \
+            #  http://localhost:8889/bigdata/namespace/kb/sparql
+            # curl -X POST \
+            #  -H "Content-Type: text/turtle" \
+            #  --data-binary @pathway_data/AOPWikiRDF.ttl \
+            #  http://localhost:8889/bigdata/namespace/kb/sparql
           '';
         };
       }

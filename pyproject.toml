@@ -1,0 +1,71 @@
+[project]
+name = "toxindex"
+version = "0.1.0"
+description = "Toxindex fullstack environment"
+authors = [{ name = "Your Name", email = "you@example.com" }]
+dependencies = [
+  "email-validator==2.1.0.post1",
+  "Flask-SocketIO==5.3.6",
+  "gunicorn==21.2.0",
+  "gevent==24.2.1",
+  "gevent-websocket==0.10.1",
+  "celery",
+  "redis",
+  "Flask==3.0.0",
+  "python-dotenv==1.1.0",
+  "requests",
+  "flask-login",
+  "Flask-WTF==1.2.1",
+  "markdown",
+  "openai>=1.68.2,<2.0.0",
+  "sendgrid==6.10.0",
+  "psycopg2-binary==2.9.9",
+  "pandas",
+  "stripe==4.2.0",
+  "annotated-types",
+  "rdkit",
+  "rapidfuzz",
+  "aiohttp",
+  "tenacity",
+  "pyarrow",
+  "fastparquet",
+  "seaborn",
+  "matplotlib",
+  "scikit-learn",
+  "cython",
+  "blosc2",
+  "langchain",
+  "langchain-openai",
+  "langchain-community",
+  "langchain-core",
+  "langgraph",
+  "agno",
+  "typing-extensions",
+  "idna",
+  "pubchempy",
+  "httpx",
+  "duckduckgo-search",
+  "pydantic",
+  "sqlalchemy",
+  "numpy",
+  "py4cytoscape",
+  "RAP @ git+ssh://git@github.com/toxindex/RAP.git",
+  "RAPtool @ git+ssh://git@github.com/toxindex/RAPtool.git",
+  "pathway_analysis_tool @ git+ssh://git@github.com/toxindex/pathway_analysis_tool.git"
+]
+
+requires-python = ">=3.12"
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["webserver", "workflows"]  # Only include the Python packages
+include-package-data = true
+
+[tool.setuptools.package-data]
+webserver = ["templates/**", "static/**"]
+
+[tool.uv]
+dev-dependencies = []
