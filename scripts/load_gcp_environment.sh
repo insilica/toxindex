@@ -1,139 +1,92 @@
 #!/usr/bin/env bash
 
-if [ "$#" -ne 2 ]; then
-    echo "Usage: $0 <gcp-project> <secret-name>"
+# Simple GCP secret loader
+# Usage: ./load_gcp_environment.sh [secret-name]
+
+# Embedded GCP project ID
+GCP_PROJECT="873471276793"
+
+if [ "$#" -gt 1 ]; then
+    echo "Usage: $0 [secret-name]"
+    echo "  If secret-name is omitted, loads all secrets from the project"
     exit 1
 fi
 
-GCP_PROJECT="$1"
-SECRET_NAME="$2"
+SECRET_NAME="${1:-}"
 
-echo "[load-gcp-secret] Using GCP_PROJECT=$GCP_PROJECT"
+# Clear the .env file at the start
+> .env
 
-# Check if GCP project is configured
-if [ -z "$GCP_PROJECT" ]; then
-    echo "[load-gcp-secret] WARNING: No GCP project configured. Skipping secret loading."
-    exit 0
-fi
-
-# Check if gcloud is available
-if ! command -v gcloud &> /dev/null; then
-    echo "[load-gcp-secret] WARNING: gcloud CLI not found. Skipping secret loading."
-    exit 0
-fi
-
-# Function to try fetching secret with current auth
-try_fetch_secret() {
-    local project="$1"
-    local secret="$2"
+if [ -z "$SECRET_NAME" ]; then
+    echo "🔐 Loading all secrets from project '$GCP_PROJECT'..."
     
-    echo "[load-gcp-secret] Attempting to fetch secret '$secret' from project '$project'..."
+    # Get list of all secrets
+    SECRETS=$(gcloud secrets list --project="$GCP_PROJECT" --format="value(name)")
     
-    # Try to fetch the secret
-    SECRET_VALUE=$(gcloud secrets versions access latest \
-      --project "$project" \
-      --secret "$secret" 2>&1)
-    
-    local exit_code=$?
-    
-    if [ $exit_code -eq 0 ]; then
-        echo "[load-gcp-secret] Successfully fetched secret!"
-        return 0
-    else
-        echo "[load-gcp-secret] Failed to fetch secret: $SECRET_VALUE"
-        return $exit_code
+    if [ -z "$SECRETS" ]; then
+        echo "❌ No secrets found in project"
+        exit 1
     fi
-}
-
-# Function to try fetching secret with Application Default Credentials
-try_fetch_secret_with_adc() {
-    local project="$1"
-    local secret="$2"
     
-    echo "[load-gcp-secret] Attempting to fetch secret with Application Default Credentials..."
+    # Count total secrets for progress
+    TOTAL_SECRETS=$(echo "$SECRETS" | wc -l)
+    CURRENT=0
     
-    # Create a temporary gcloud configuration for ADC
-    local temp_config="temp_adc_config_$$"
-    
-    # Create temporary config
-    gcloud config configurations create "$temp_config" --no-activate >/dev/null 2>&1
-    
-    # Configure the temp config to use ADC
-    gcloud config set auth/use_application_default_credentials true --configuration="$temp_config" >/dev/null 2>&1
-    gcloud config set project "$project" --configuration="$temp_config" >/dev/null 2>&1
-    
-    # Try to fetch the secret using the temp config
-    SECRET_VALUE=$(gcloud secrets versions access latest \
-      --secret "$secret" \
-      --configuration="$temp_config" 2>&1)
-    
-    local exit_code=$?
-    
-    # Clean up temporary config
-    gcloud config configurations delete "$temp_config" --quiet >/dev/null 2>&1
-    
-    if [ $exit_code -eq 0 ]; then
-        echo "[load-gcp-secret] Successfully fetched secret with ADC!"
-        return 0
-    else
-        echo "[load-gcp-secret] Failed to fetch secret with ADC: $SECRET_VALUE"
-        return $exit_code
-    fi
-}
-
-# Check if we're authenticated with any method
-AUTH_METHOD=""
-if gcloud auth list --filter=status:ACTIVE --format="value(account)" | grep -q .; then
-    AUTH_METHOD="service_account"
-    echo "[load-gcp-secret] Using service account authentication"
-elif gcloud auth application-default print-access-token >/dev/null 2>&1; then
-    AUTH_METHOD="application_default"
-    echo "[load-gcp-secret] Using application default credentials"
-else
-    echo "[load-gcp-secret] WARNING: No GCP authentication found. Skipping secret loading."
-    exit 0
-fi
-
-# Try to fetch the secret
-if try_fetch_secret "$GCP_PROJECT" "$SECRET_NAME"; then
-    # Success! Parse and export the secret
-    echo "$SECRET_VALUE" | jq -r 'to_entries[] | "export \(.key)=\(.value)"' > .env
-    
-    # Load into current shell
-    set -a
-    source .env
-    set +a
-    
-    echo "[load-gcp-secret] Loaded $(jq length <<< "$SECRET_VALUE") keys into environment."
-else
-    # Check if it's an authentication scope issue
-    if echo "$SECRET_VALUE" | grep -q "ACCESS_TOKEN_SCOPE_INSUFFICIENT"; then
-        echo "[load-gcp-secret] This appears to be an authentication scope issue on GCP VM."
-        echo "[load-gcp-secret] The VM's service account has insufficient scopes for Secret Manager."
-        echo "[load-gcp-secret] Attempting to use application default credentials..."
+    # Load each secret sequentially - GCP does not support multiple secrets being loaded at once
+    for secret in $SECRETS; do
+        CURRENT=$((CURRENT + 1))
+        echo "📥 Loading secret ($CURRENT/$TOTAL_SECRETS): $secret"
         
-        # Check if ADC is already set up
-        if gcloud auth application-default print-access-token >/dev/null 2>&1; then
-            echo "[load-gcp-secret] Application default credentials are already set up"
-            if try_fetch_secret_with_adc "$GCP_PROJECT" "$SECRET_NAME"; then
-                # Success with ADC! Parse and export the secret
-                echo "$SECRET_VALUE" | jq -r 'to_entries[] | "export \(.key)=\(.value)"' > .env
-                
-                # Load into current shell
-                set -a
-                source .env
-                set +a
-                
-                echo "[load-gcp-secret] Loaded $(jq length <<< "$SECRET_VALUE") keys into environment using ADC."
+        SECRET_VALUE=$(gcloud secrets versions access latest \
+          --project "$GCP_PROJECT" \
+          --secret "$secret" 2>/dev/null)
+        
+        if [ $? -eq 0 ] && [ -n "$SECRET_VALUE" ]; then
+            # Check if it's JSON or single value
+            if echo "$SECRET_VALUE" | jq . >/dev/null 2>&1; then
+                # JSON secret - export each key/value
+                echo "$SECRET_VALUE" | jq -r 'to_entries[] | "export \(.key)=\(.value)"' >> .env
+                echo "✅ Loaded $(jq length <<< "$SECRET_VALUE") variables from $secret"
             else
-                echo "[load-gcp-secret] Still failed to fetch secret with application default credentials"
-                echo "[load-gcp-secret] Error: $SECRET_VALUE"
+                # Single value secret
+                echo "export $secret=\"$SECRET_VALUE\"" >> .env
+                echo "✅ Loaded single value: $secret"
             fi
         else
-            echo "[load-gcp-secret] Application default credentials not set up. Please run:"
-            echo "[load-gcp-secret]   gcloud auth application-default login"
+            echo "❌ Failed to load secret: $secret"
+        fi
+    done
+    
+    # Source the .env file after all secrets are loaded
+    if [ -s .env ]; then
+        set -a && source .env && set +a
+        echo "🎉 Finished loading all secrets"
+    else
+        echo "⚠️  No secrets were loaded successfully"
+    fi
+else
+    echo "🔐 Loading secret '$SECRET_NAME' from project '$GCP_PROJECT'..."
+    
+    # Fetch the secret
+    SECRET_VALUE=$(gcloud secrets versions access latest \
+      --project "$GCP_PROJECT" \
+      --secret "$SECRET_NAME")
+    
+    if [ $? -eq 0 ]; then
+        # Check if it's JSON or single value
+        if echo "$SECRET_VALUE" | jq . >/dev/null 2>&1; then
+            # JSON secret - export each key/value
+            echo "$SECRET_VALUE" | jq -r 'to_entries[] | "export \(.key)=\(.value)"' > .env
+            set -a && source .env && set +a
+            echo "✅ Loaded $(jq length <<< "$SECRET_VALUE") environment variables"
+        else
+            # Single value secret
+            echo "export $SECRET_NAME=\"$SECRET_VALUE\"" > .env
+            export "$SECRET_NAME"="$SECRET_VALUE"
+            echo "✅ Loaded single value: $SECRET_NAME"
         fi
     else
-        echo "[load-gcp-secret] Failed to fetch secret. Error: $SECRET_VALUE"
+        echo "❌ Failed to load secret"
+        exit 1
     fi
 fi 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaUsers, FaUserCog, FaTrash, FaEdit, FaSave, FaTimes, FaHammer, FaCheck, FaTimes as FaX } from 'react-icons/fa';
+import { FaUsers, FaUserCog, FaTrash, FaEdit, FaSave, FaTimes, FaHammer} from 'react-icons/fa';
 
 interface User {
   user_id: string;
