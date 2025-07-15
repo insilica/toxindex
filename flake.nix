@@ -2,7 +2,7 @@
   description = "toxindex fullstack devShell with venv and GitHub SSH Python deps";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
@@ -14,7 +14,7 @@
       {
         devShells.default = pkgs.mkShell {
           buildInputs = [
-            pkgs.python310
+            pkgs.python312
             pkgs.uv
             pkgs.git
             pkgs.flyway
@@ -25,38 +25,35 @@
             pkgs.gcc
             pkgs.zlib 
             pkgs.nodejs
+            pkgs.gh
           ];
 
           shellHook = ''
-            # Unset NVM to avoid conflicts with Nix-provided node
+            # Remove NVM from PATH to avoid conflicts
+            export PATH=$(echo "$PATH" | tr ':' '\n' | grep -v '\.nvm' | paste -sd:)
             unset NVM_DIR
-            export PATH=$(echo $PATH | tr ':' '\n' | grep -v '\.nvm' | paste -sd: -)
+
+            # Set locale and library paths
+            export LANG=C.UTF-8
+            export LC_ALL=C.UTF-8
+            export LD_LIBRARY_PATH="${pkgs.zlib.out}/lib:${pkgs.stdenv.cc.cc.lib}/lib:$LD_LIBRARY_PATH"
+
+            # Ensure GitHub CLI is authenticated
+            if ! gh auth status >/dev/null 2>&1; then
+              echo "Please run: gh auth login"
+              exit 1
+            fi
+
+            export PYTHONPATH="$PWD:$PYTHONPATH"
             hash -r
 
-            export PYTHONPATH=$PWD:$PYTHONPATH
-
-            if [ -f .env ]; then
-              echo "Found .env file"
-              set -a
-              source .env
-              set +a
-            else
-              echo "Warning: .env file not found"
+            # Sync dependencies
+            GIT_CLONE_PROTECTION_ACTIVE=false uv sync
+            if [ $? -ne 0 ]; then
+              echo "Error: 'uv sync' failed. Please check your dependencies."
+              exit 1
             fi
-
-            if [ ! -d .venv ]; then
-              uv venv
-              source .venv/bin/activate
-              GIT_CLONE_PROTECTION_ACTIVE=false uv pip install -r requirements.txt
-            else
-              source .venv/bin/activate
-            fi
-            
-            export LD_LIBRARY_PATH="${pkgs.zlib.out}/lib:${pkgs.stdenv.cc.cc.lib}/lib:$LD_LIBRARY_PATH"
-            # force eventlet to use the system resolver instead of DNS monkey patching
-            export EVENTLET_NO_GREENDNS=yes 
-            echo "Python packages in uv venv:"
-            uv pip list
+            source .venv/bin/activate
 
             # Source your fullstack environment setup (Postgres, Redis, AWS, etc.)
             # This runs after the virtual environment is set up so Python scripts can access packages
@@ -81,15 +78,18 @@
             done
             echo "Blazegraph up—loading TTL files"
 
+            # install npm dependencies in frontend
+            (cd frontend && npm install)
+
             # Add data from WikiPathways/AOP-Wiki
-            curl -X POST \
-              -H "Content-Type: text/turtle" \
-              --data-binary @pathway_data/wikipathways.ttl \
-              http://localhost:8889/bigdata/namespace/kb/sparql
-            curl -X POST \
-              -H "Content-Type: text/turtle" \
-              --data-binary @pathway_data/AOPWikiRDF.ttl \
-              http://localhost:8889/bigdata/namespace/kb/sparql
+            # curl -X POST \
+            #  -H "Content-Type: text/turtle" \
+            #  --data-binary @pathway_data/wikipathways.ttl \
+            #  http://localhost:8889/bigdata/namespace/kb/sparql
+            # curl -X POST \
+            #  -H "Content-Type: text/turtle" \
+            #  --data-binary @pathway_data/AOPWikiRDF.ttl \
+            #  http://localhost:8889/bigdata/namespace/kb/sparql
           '';
         };
       }
