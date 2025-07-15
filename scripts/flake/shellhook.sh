@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-export SKIP_AWS_SECRET_LOADING=false
-
 OLD_OPTS=$(set +o)
 set -euo pipefail
 
