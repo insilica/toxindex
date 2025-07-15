@@ -15,8 +15,6 @@ source scripts/flake/setup_postgres.sh \
 # Drop and recreate the public schema (dev only!)
 psql -U postgres -d toxindex -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
 
-source scripts/flake/aws_login.sh
-
 source scripts/flake/run_flyway.sh
 
 # Seed default workflows from JSON
@@ -29,7 +27,7 @@ python3 scripts/setup_default_admin.py
 
 source scripts/flake/start_redis.sh
 
-source scripts/load_environment.sh "$AWS_PROFILE" "insilica/toxindex+dev-secret"
+source scripts/load_gcp_environment.sh 
 
 eval "$OLD_OPTS"
 
