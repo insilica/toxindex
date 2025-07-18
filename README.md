@@ -161,10 +161,10 @@ sudo apt install nginx
 
 - Set permissions to expose frontend static files to Nginx:
   ```sh
-  sudo chown -R ubuntu:www-data /home/ubuntu/toxindex/frontend/dist
-  sudo chmod -R 755 /home/ubuntu/toxindex/frontend/dist
-  sudo chmod -R o+rx /home/ubuntu/toxindex/frontend/dist
-  sudo chmod o+x /home/ubuntu
+  sudo chown -R ubuntu:www-data /home/kyu/toxindex/frontend/dist
+  sudo chmod -R 755 /home/kyu/toxindex/frontend/dist
+  sudo chmod -R o+rx /home/kyu/toxindex/frontend/dist
+  sudo chmod o+x /home/kyu
   ```
 
 - Reload Nginx:
@@ -181,11 +181,11 @@ After=network.target
 
 [Service]
 # Set your user and working directory
-User=ubuntu
-WorkingDirectory=/home/ubuntu/toxindex
+User=kyu
+WorkingDirectory=/home/kyu/toxindex
 
 # Activate nix develop environment and run your backend
-ExecStart=/usr/bin/bash -c 'source /home/ubuntu/toxindex/.venv/bin/activate && python -m webserver.app'
+ExecStart=/usr/bin/bash -c 'source /home/kyu/toxindex/.venv/bin/activate && python -m webserver.app'
 
 # Restart on failure
 Restart=on-failure
@@ -194,17 +194,21 @@ RestartSec=5
 [Install]
 WantedBy=multi-user.target
 
+
+
+
 - Create a systemd Service File for celery worker
-sudo nano /etc/systemd/system/toxindex-backend.service
+sudo nano /etc/systemd/system/toxindex-celery.service
 
 [Unit]
 Description=Toxindex Celery Worker
 After=network.target
 
 [Service]
-User=ubuntu
-WorkingDirectory=/home/ubuntu/toxindex
-ExecStart=/usr/bin/bash -c 'cd /home/ubuntu/toxindex && nix develop --command celery -A workflows.celery_worker worker --loglevel=info'
+User=kyu
+WorkingDirectory=/home/kyu/toxindex
+Environment="PATH=/home/kyu/.nix-profile/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+ExecStart=/usr/bin/bash -c 'cd /home/kyu/toxindex && nix develop --command celery -A workflows.celery_worker worker --loglevel=info'
 Restart=on-failure
 RestartSec=5
 

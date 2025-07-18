@@ -59,3 +59,12 @@ Thumbs.db
 .idea/
 
 
+RAP/
+RAPtool/
+pathway_analysis_tool/
+
+
+tmp/data.db
+toxindex.egg-info/
+
+
