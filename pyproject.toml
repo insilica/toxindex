@@ -48,10 +48,7 @@ dependencies = [
   "pydantic",
   "sqlalchemy",
   "numpy",
-  "py4cytoscape",
-  "RAP @ git+ssh://git@github.com/toxindex/RAP.git",
-  "RAPtool @ git+ssh://git@github.com/toxindex/RAPtool.git",
-  "pathway_analysis_tool @ git+ssh://git@github.com/toxindex/pathway_analysis_tool.git"
+  "py4cytoscape"
 ]
 
 requires-python = ">=3.12"

@@ -1,0 +1,4 @@
+-e ./RAP
+-e ./RAPtool
+-e ./pathway_analysis_tool
+. 
