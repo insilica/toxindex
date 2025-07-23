@@ -48,7 +48,8 @@ dependencies = [
   "pydantic",
   "sqlalchemy",
   "numpy",
-  "py4cytoscape"
+  "py4cytoscape",
+  "langchain-google-community"
 ]
 
 requires-python = ">=3.12"

@@ -8,12 +8,12 @@ from webserver.model.message import MessageSchema
 from webserver.model.task import Task
 import pandas as pd
 from webserver.model.file import File
-from raptool.parse_chemicals import parse_chemicals
-from raptool.categorize_chemicals import categorize_chemicals
-from raptool.predict_chemicals import predict_chemicals
-from raptool.select_feature import select_feature
-from raptool.build_heatmap import build_heatmap
-from raptool.build_stripchart import build_stripchart
+from RAPtool.parse_chemicals import parse_chemicals
+from RAPtool.categorize_chemicals import categorize_chemicals
+from RAPtool.predict_chemicals import predict_chemicals
+from RAPtool.select_feature import select_feature
+from RAPtool.build_heatmap import build_heatmap
+from RAPtool.build_stripchart import build_stripchart
 from webserver.data_paths import OUTPUTS_ROOT
 
 logger = logging.getLogger(__name__)

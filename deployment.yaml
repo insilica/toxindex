@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: toxindex-app
+  namespace: toxindex-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: toxindex-app
+  template:
+    metadata:
+      labels:
+        app: toxindex-app
+    spec:
+      serviceAccountName: toxindex-app-sa
+      containers:
+      - name: app
+        image: nginx
+        ports:
+        - containerPort: 80 
