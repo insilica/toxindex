@@ -17,7 +17,10 @@ logger = logging.getLogger(__name__)
 
 def emit_status(task_id, status):
     Task.set_status(task_id, status)
-    r = redis.Redis()
+    r = redis.Redis(
+        host=os.environ.get("REDIS_HOST", "localhost"),
+        port=int(os.environ.get("REDIS_PORT", "6379"))
+    )
     task = Task.get_task(task_id)
     event = {
         "type": "task_status_update",
@@ -31,7 +34,10 @@ def plain_openai_task(self, payload):
     """Call OpenAI with a plain prompt and publish the result."""
     try:
         logger.info(f"[ToxDirect] Running plain_openai_task for task_id={payload.get('task_id')}, user_id={payload.get('user_id')}, payload={payload}")
-        r = redis.Redis()
+        r = redis.Redis(
+            host=os.environ.get("REDIS_HOST", "localhost"),
+            port=int(os.environ.get("REDIS_PORT", "6379"))
+        )
         task_id = payload.get("task_id")
         user_id = payload.get("user_id")
         user_query = payload.get("payload", "Is Gentamicin nephrotoxic?")
@@ -101,7 +107,10 @@ def openai_json_schema_task(self, payload):
     """Call OpenAI with a prompt instructing output as JSON matching TOXICITY_SCHEMA."""
     try:
         logger.info(f"[ToxJson] Running openai_json_schema_task for task_id={payload.get('task_id')}, user_id={payload.get('user_id')}, payload={payload}")
-        r = redis.Redis()
+        r = redis.Redis(
+            host=os.environ.get("REDIS_HOST", "localhost"),
+            port=int(os.environ.get("REDIS_PORT", "6379"))
+        )
         task_id = payload.get("task_id")
         user_id = payload.get("user_id")
         user_query = payload.get("payload", "Is Gentamicin nephrotoxic?")

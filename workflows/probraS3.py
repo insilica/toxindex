@@ -30,7 +30,10 @@ def probra_task(self, payload):
     """Example background task that emits progress messages and uploads a file."""
     try:
         logger.info(f"Starting probra task with payload: {payload}")
-        r = redis.Redis()
+        r = redis.Redis(
+            host=os.environ.get("REDIS_HOST", "localhost"),
+            port=int(os.environ.get("REDIS_PORT", "6379"))
+        )
         task_id = payload.get("task_id")
         user_id = payload.get("user_id")
 

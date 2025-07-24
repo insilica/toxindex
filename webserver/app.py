@@ -83,6 +83,7 @@ def redis_listener(name):
     pubsub.subscribe("celery_updates")
     logging.info(f"[redis_listener] ({listener_id}) Started Redis listener thread: {name}")
     for redis_message in pubsub.listen():
+        logging.info(f"[redis_listener] ({listener_id}) Received message: {redis_message}")
         logging.debug(f"[redis_listener] ({listener_id}) Raw redis_message: {redis_message}")
         if redis_message["type"] != "message":
             continue
@@ -209,6 +210,11 @@ def log_tab_switch():
     timestamp = data.get('timestamp')
     logging.info(f"[Tab Switch] User switched to tab '{tab}' for task_id={task_id} at {timestamp}")
     return flask.jsonify({'status': 'ok'})
+
+@app.route("/api/healthz")
+def healthz():
+    app.logger.debug("Health check")
+    return "ok", 200
 
 @app.route("/test-alive")
 def test_alive():

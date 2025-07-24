@@ -1,0 +1,21 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: seed-and-admin-setup
+  namespace: toxindex-app
+spec:
+  template:
+    spec:
+      containers:
+      - name: backend
+        image: us-docker.pkg.dev/toxindex/toxindex-backend/backend:latest
+        command: ["/bin/bash", "-c"]
+        args:
+          - |
+            set -e
+            python scripts/seed_workflows.py
+            python scripts/setup_default_admin.py
+        envFrom:
+        - secretRef:
+            name: backend-secrets
+      restartPolicy: Never 

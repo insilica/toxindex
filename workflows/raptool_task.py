@@ -20,7 +20,10 @@ logger = logging.getLogger(__name__)
 
 def emit_status(task_id, status):
     Task.set_status(task_id, status)
-    r = redis.Redis()
+    r = redis.Redis(
+        host=os.environ.get("REDIS_HOST", "localhost"),
+        port=int(os.environ.get("REDIS_PORT", "6379"))
+    )
     task = Task.get_task(task_id)
     event = {
         "type": "task_status_update",
@@ -34,7 +37,10 @@ def raptool_task(self, payload):
     """Run RAPtool parse_chemicals on an uploaded file and publish the result."""
     try:
         logger.info(f"[RAPtool] Running raptool_task for task_id={payload.get('task_id')}, user_id={payload.get('user_id')}, payload={payload}")
-        r = redis.Redis()
+        r = redis.Redis(
+            host=os.environ.get("REDIS_HOST", "localhost"),
+            port=int(os.environ.get("REDIS_PORT", "6379"))
+        )
         task_id = payload.get("task_id")
         user_id = payload.get("user_id")
         file_id = payload.get("payload")

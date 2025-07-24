@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: './', // <-- Ensures relative asset paths for GCS
+  base: '/', // <-- Ensures absolute asset paths from project root
   plugins: [react(), tailwindcss()],
   server: {
     proxy: {

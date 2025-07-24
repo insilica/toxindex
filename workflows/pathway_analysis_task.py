@@ -14,7 +14,10 @@ logger = logging.getLogger(__name__)
 
 def emit_status(task_id, status):
     Task.set_status(task_id, status)
-    r = redis.Redis()
+    r = redis.Redis(
+        host=os.environ.get("REDIS_HOST", "localhost"),
+        port=int(os.environ.get("REDIS_PORT", "6379"))
+    )
     task = Task.get_task(task_id)
     event = {
         "type": "task_status_update",
@@ -28,7 +31,10 @@ def pathway_analysis_task(self, payload):
     """Run pathway analysis using pathway_analysis_tool on uploaded data."""
     try:
         logger.info(f"[Pathway Analysis] Running pathway_analysis_task for task_id={payload.get('task_id')}, user_id={payload.get('user_id')}, payload={payload}")
-        r = redis.Redis()
+        r = redis.Redis(
+            host=os.environ.get("REDIS_HOST", "localhost"),
+            port=int(os.environ.get("REDIS_PORT", "6379"))
+        )
         task_id = payload.get("task_id")
         user_id = payload.get("user_id")
         pathway_id = payload.get("pathway_id", "WP3657")  # Default to a common pathway

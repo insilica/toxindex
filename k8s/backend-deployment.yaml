@@ -25,6 +25,16 @@ spec:
             - secretRef:
                 name: backend-secrets
           env:
+          livenessProbe:
+            httpGet:
+              path: /api/healthz
+              port: 6513
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /api/healthz
+              port: 6513
+            periodSeconds: 30
       volumes:
       volumes: 
 ---
@@ -34,12 +44,12 @@ metadata:
   name: backend
   namespace: toxindex-app
   annotations:
-    cloud.google.com/neg: '{"exposed_ports": {"80":{}}}'
+    cloud.google.com/neg: '{"exposed_ports": {"6513":{}}}'
 spec:
   type: ClusterIP
   selector:
     app: backend
   ports:
     - protocol: TCP
-      port: 80
+      port: 6513
       targetPort: 6513 

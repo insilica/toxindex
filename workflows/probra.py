@@ -24,7 +24,10 @@ def get_pydantic_serializer(obj):
 def emit_status(task_id, status):
     logger.info(f"[emit_status] {task_id} -> {status}")
     Task.set_status(task_id, status)
-    r = redis.Redis()
+    r = redis.Redis(
+        host=os.environ.get("REDIS_HOST", "localhost"),
+        port=int(os.environ.get("REDIS_PORT", "6379"))
+    )
     task = Task.get_task(task_id)
     event = {
         "type": "task_status_update",
@@ -39,7 +42,10 @@ def probra_task(self, payload):
     """Example background task that emits progress messages and uploads a file."""
     try:
         logger.info(f"Starting probra task with payload: {payload}")
-        r = redis.Redis()
+        r = redis.Redis(
+            host=os.environ.get("REDIS_HOST", "localhost"),
+            port=int(os.environ.get("REDIS_PORT", "6379"))
+        )
         task_id = payload.get("task_id")
         user_id = payload.get("user_id")
 
@@ -73,6 +79,7 @@ def probra_task(self, payload):
             "task_id": task_id,
         }
         r.publish("celery_updates", json.dumps(event, default=str))
+        logger.info(f"Published task_message event to Redis for task_id={task_id}")
 
         tmp_filename = f"probra_result_{uuid.uuid4().hex}.md"
         project_tmp_dir = CHATS_ROOT()
