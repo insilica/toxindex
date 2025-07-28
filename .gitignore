@@ -68,3 +68,4 @@ tmp/data.db
 toxindex.egg-info/
 
 
+k8s/backend-secrets.yaml
