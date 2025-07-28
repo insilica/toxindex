@@ -1,0 +1,74 @@
+steps:
+  # Install Node.js
+  - name: 'gcr.io/cloud-builders/npm'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+        apt-get install -y nodejs
+        npm --version
+        node --version
+
+  # Install dependencies
+  - name: 'gcr.io/cloud-builders/npm'
+    args: ['ci']
+    dir: 'frontend'
+
+  # Build the frontend
+  - name: 'gcr.io/cloud-builders/npm'
+    args: ['run', 'build']
+    dir: 'frontend'
+    env:
+      - 'CI=false'
+
+  # Sync to GCS bucket
+  - name: 'gcr.io/cloud-builders/gsutil'
+    args: [
+      '-m', 'rsync', '-r', '-d',
+      'frontend/dist/',
+      'gs://toxindex-react/'
+    ]
+
+  # Set cache control headers
+  - name: 'gcr.io/cloud-builders/gsutil'
+    args: [
+      '-m', 'setmeta',
+      '-h', 'Cache-Control:no-store',
+      'gs://toxindex-react/**'
+    ]
+
+  # Invalidate CDN cache
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args: [
+      'compute', 'url-maps', 'invalidate-cdn-cache',
+      'frontend-url-map',
+      '--path', '/*'
+    ]
+
+  # Verify deployment
+  - name: 'gcr.io/cloud-builders/gsutil'
+    args: ['ls', 'gs://toxindex-react/']
+    id: 'list-files'
+
+  - name: 'gcr.io/cloud-builders/gsutil'
+    args: ['cat', 'gs://toxindex-react/index.html']
+    id: 'verify-index'
+
+  - name: 'gcr.io/cloud-builders/gsutil'
+    args: ['ls', 'gs://toxindex-react/static/js/']
+    id: 'verify-js'
+
+# Build options
+options:
+  logging: CLOUD_LOGGING_ONLY
+  machineType: 'E2_HIGHCPU_8'
+  diskSizeGb: '50'
+  env:
+    - 'NODE_ENV=production'
+
+# Substitutions
+substitutions:
+  _GCS_BUCKET: 'toxindex-react'
+  _CDN_URL_MAP: 'frontend-url-map'
+  _BRANCH: 'gke' 

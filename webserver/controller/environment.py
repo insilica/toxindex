@@ -86,21 +86,67 @@ def upload_file(env_id):
     file = request.files['file']
     if file.filename == '':
         return jsonify({'error': 'No selected file'}), 400
+    
     from werkzeug.utils import secure_filename
+    import tempfile
+    import uuid
+    from webserver.storage import GCSFileStorage
+    
     filename = secure_filename(file.filename)
-    upload_dir = os.path.join(os.path.dirname(__file__), '..', '..', 'uploads')
-    os.makedirs(upload_dir, exist_ok=True)
-    file_path = os.path.join(upload_dir, filename)
-    file.save(file_path)
     user_id = flask_login.current_user.user_id
-    File.create_file(
-        task_id=None,
-        user_id=user_id,
-        filename=filename,
-        filepath=file_path,
-        environment_id=env_id
-    )
-    return jsonify({'success': True, 'filename': filename})
+    
+    # Check for duplicate file before saving
+    files = File.get_files_by_environment(env_id)
+    duplicate = any(f.filename == filename for f in files)
+    if duplicate:
+        logging.warning(f"Duplicate file upload attempted: {filename} for environment {env_id} by user {user_id}")
+        return jsonify({'error': 'A file with this name already exists in this environment.'}), 409
+    
+    try:
+        # Create temporary file
+        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+            file.save(temp_file.name)
+            temp_path = temp_file.name
+        
+        # Upload to GCS
+        gcs_storage = GCSFileStorage()
+        gcs_path = f"environments/{env_id}/files/{uuid.uuid4()}_{filename}"
+        
+        # Determine content type
+        content_type = file.content_type or 'application/octet-stream'
+        
+        # Upload to GCS
+        gcs_storage.upload_file(temp_path, gcs_path, content_type)
+        
+        # Clean up temporary file
+        os.unlink(temp_path)
+        
+        # Store file record in database
+        File.create_file(
+            task_id=None,
+            user_id=user_id,
+            filename=filename,
+            filepath=gcs_path,  # Store GCS path instead of local path
+            environment_id=env_id
+        )
+        
+        # Invalidate related caches
+        from webserver.cache_manager import cache_manager
+        cache_manager.invalidate_file_caches(gcs_path)
+        cache_manager.invalidate_query_caches("get_files_by_environment")
+        
+        logging.info(f"Uploaded file: {filename} for environment {env_id} by user {user_id} to GCS: {gcs_path}")
+        return jsonify({'success': True, 'filename': filename})
+        
+    except Exception as e:
+        # Clean up temporary file if it exists
+        if 'temp_path' in locals():
+            try:
+                os.unlink(temp_path)
+            except:
+                pass
+        logging.error(f"Failed to upload file {filename} to GCS: {e}")
+        return jsonify({'error': 'Failed to upload file to cloud storage'}), 500
 
 @env_bp.route('/<env_id>/files/<file_id>', methods=['GET'])
 @flask_login.login_required
@@ -122,12 +168,32 @@ def delete_file(env_id, file_id):
         file = File.get_file(file_id)
         if not file or str(file.environment_id) != str(env_id):
             return jsonify({'success': False, 'error': 'File not found'}), 404
-        try:
-            if file.filepath and os.path.exists(file.filepath):
+        
+        # Delete from GCS if it's a GCS path
+        if file.filepath and file.filepath.startswith('environments/'):
+            try:
+                from webserver.storage import GCSFileStorage
+                gcs_storage = GCSFileStorage()
+                gcs_storage.delete_file(file.filepath)
+                logging.info(f"Deleted file from GCS: {file.filepath}")
+            except Exception as e:
+                logging.warning(f"Failed to remove file from GCS: {e}")
+        # Delete from local disk if it's a local path
+        elif file.filepath and os.path.exists(file.filepath):
+            try:
                 os.remove(file.filepath)
-        except Exception as e:
-            logging.warning(f"Failed to remove file from disk: {e}")
+                logging.info(f"Deleted file from local disk: {file.filepath}")
+            except Exception as e:
+                logging.warning(f"Failed to remove file from disk: {e}")
+        
         File.delete_file(file_id, flask_login.current_user.user_id)
+        
+        # Invalidate related caches
+        from webserver.cache_manager import cache_manager
+        if file.filepath:
+            cache_manager.invalidate_file_caches(file.filepath)
+        cache_manager.invalidate_query_caches("get_files_by_environment")
+        
         return jsonify({'success': True})
     except Exception as e:
         logging.error(f"Failed to delete file {file_id}: {e}")
@@ -197,6 +263,43 @@ def download_file(env_id, file_id):
     if not is_valid_uuid(env_id) or not is_valid_uuid(file_id):
         return jsonify({'error': 'Invalid environment or file ID'}), 400
     file = File.get_file(file_id)
-    if not file or not file.filepath or not os.path.exists(file.filepath) or str(file.environment_id) != str(env_id):
+    if not file or not file.filepath or str(file.environment_id) != str(env_id):
         return abort(404)
-    return send_file(file.filepath, as_attachment=True, download_name=file.filename)
+    
+    # Handle GCS files
+    if file.filepath.startswith('environments/'):
+        try:
+            from webserver.storage import GCSFileStorage
+            import tempfile
+            
+            gcs_storage = GCSFileStorage()
+            
+            # Create temporary file
+            with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+                temp_path = temp_file.name
+            
+            # Download from GCS
+            gcs_storage.download_file(file.filepath, temp_path)
+            
+            # Send file and clean up
+            response = send_file(temp_path, as_attachment=True, download_name=file.filename)
+            
+            # Clean up temp file after response is sent
+            @response.call_on_close
+            def cleanup():
+                try:
+                    os.unlink(temp_path)
+                except:
+                    pass
+            
+            return response
+            
+        except Exception as e:
+            logging.error(f"Failed to download file from GCS: {e}")
+            return abort(404)
+    
+    # Handle local files
+    elif os.path.exists(file.filepath):
+        return send_file(file.filepath, as_attachment=True, download_name=file.filename)
+    else:
+        return abort(404)

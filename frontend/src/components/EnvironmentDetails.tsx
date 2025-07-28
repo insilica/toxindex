@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import FilePreviewModal from './shared/FilePreviewModal';
-import UploadCsvModal from './shared/UploadCsvModal';
+import UploadFileModal from './shared/UploadFileModal';
 import { FaEye, FaDownload, FaTrash, } from 'react-icons/fa';
 import EnvironmentSelector from './shared/EnvironmentSelector';
 import LoadingSpinner from './shared/LoadingSpinner';
@@ -325,7 +325,7 @@ export const EnvironmentDetails: React.FC<EnvironmentDetailsProps> = ({ paddingC
       )}
       
       {showUploadModal && (
-        <UploadCsvModal
+        <UploadFileModal
           open={showUploadModal}
           onClose={() => setShowUploadModal(false)}
           environments={environments}

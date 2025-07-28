@@ -26,7 +26,38 @@ def inspect_file(file_id):
     # Optionally, check user ownership here if needed
     if not file.filepath:
         return jsonify({'error': 'File not found'}), 404
-    if not os.path.exists(file.filepath):
+    
+    # Handle GCS files with caching
+    if file.filepath.startswith('environments/') or file.filepath.startswith('tasks/'):
+        try:
+            from webserver.cache_manager import cache_manager
+            
+            # Try to get content from cache first
+            content = cache_manager.get_file_content(file.filepath)
+            if content:
+                # Use cached content for processing
+                temp_path = None
+            else:
+                # Cache miss - download from GCS
+                from webserver.storage import GCSFileStorage
+                import tempfile
+                
+                gcs_storage = GCSFileStorage()
+                
+                # Create temporary file
+                with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+                    temp_path = temp_file.name
+                
+                # Download from GCS
+                gcs_storage.download_file(file.filepath, temp_path)
+                file.filepath = temp_path  # Use temp path for processing
+                
+        except Exception as e:
+            logging.error(f"Failed to download file from GCS: {e}")
+            return jsonify({'error': 'File not found'}), 404
+    
+    # Handle local files
+    elif not os.path.exists(file.filepath):
         return jsonify({'error': 'File not found'}), 404
     ext = os.path.splitext(file.filename)[1].lower()
     mimetype, _ = mimetypes.guess_type(file.filename)
@@ -76,6 +107,58 @@ def inspect_file(file_id):
 @flask_login.login_required
 def download_file(file_id):
     file = File.get_file(file_id)
-    if not file or not file.filepath or not os.path.exists(file.filepath):
+    if not file or not file.filepath:
         return abort(404)
-    return send_file(file.filepath, as_attachment=True, download_name=file.filename) 
+    
+    # Handle GCS files with caching
+    if file.filepath.startswith('environments/') or file.filepath.startswith('tasks/'):
+        try:
+            from webserver.storage import GCSFileStorage
+            from webserver.cache_manager import cache_manager
+            import tempfile
+            import hashlib
+            
+            gcs_storage = GCSFileStorage()
+            
+            # Get file metadata for ETag
+            metadata = cache_manager.get_file_metadata(file.filepath)
+            etag = metadata.get('md5_hash', '') if metadata else ''
+            
+            # Create temporary file
+            with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+                temp_path = temp_file.name
+            
+            # Download from GCS
+            gcs_storage.download_file(file.filepath, temp_path)
+            
+            # Send file with caching headers
+            response = send_file(temp_path, as_attachment=True, download_name=file.filename)
+            
+            # Add HTTP caching headers
+            response.headers['Cache-Control'] = 'public, max-age=3600'  # 1 hour
+            if etag:
+                response.headers['ETag'] = f'"{etag}"'
+            if metadata and metadata.get('created'):
+                response.headers['Last-Modified'] = metadata['created'].strftime('%a, %d %b %Y %H:%M:%S GMT')
+            
+            # Clean up temp file after response is sent
+            @response.call_on_close
+            def cleanup():
+                try:
+                    os.unlink(temp_path)
+                except:
+                    pass
+            
+            return response
+            
+        except Exception as e:
+            logging.error(f"Failed to download file from GCS: {e}")
+            return abort(404)
+    
+    # Handle local files
+    elif os.path.exists(file.filepath):
+        response = send_file(file.filepath, as_attachment=True, download_name=file.filename)
+        response.headers['Cache-Control'] = 'public, max-age=3600'  # 1 hour
+        return response
+    else:
+        return abort(404) 

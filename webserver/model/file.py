@@ -95,6 +95,7 @@ class File:
         return markdown.markdown(text, extensions=["extra", "tables"])
 
     @staticmethod
+    @cache_query_result("get_files_by_environment")
     def get_files_by_environment(environment_id):
         rows = ds.find_all(
             "SELECT * FROM files WHERE environment_id = %s ORDER BY created_at DESC",
@@ -103,6 +104,7 @@ class File:
         return [File.from_row(row) for row in rows]
 
     @staticmethod
+    @cache_query_result("get_file")
     def get_file(file_id):
         row = ds.find("SELECT * FROM files WHERE file_id = %s", (file_id,))
         return File.from_row(row) if row else None

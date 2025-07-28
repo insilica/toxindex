@@ -1,0 +1,266 @@
+# Google Cloud Monitoring Dashboard Configuration for ToxIndex
+# Apply with: gcloud monitoring dashboards create --config-from-file=monitoring/dashboard.yaml
+
+displayName: "ToxIndex Application Health Dashboard"
+gridLayout:
+  columns: "2"
+  widgets:
+    # ===== POD HEALTH =====
+    - title: "Pod Health Status"
+      xyChart:
+        dataSets:
+          - timeSeriesQuery:
+              timeSeriesFilter:
+                filter: 'metric.type="kubernetes.io/pod/volume/total_bytes"'
+                secondaryAggregation:
+                  alignmentPeriod: 300s
+                  crossSeriesReducer: REDUCE_MEAN
+                  groupByFields:
+                    - resource.labels.pod_name
+              unitOverride: "BYTES"
+        thresholds:
+          - color: RED
+            direction: ABOVE
+            value: 0.8
+        timeshiftDuration: "0s"
+        yAxis:
+          label: "Pod Count"
+          scale: LINEAR
+
+    # ===== CPU USAGE =====
+    - title: "CPU Usage by Pod"
+      xyChart:
+        dataSets:
+          - timeSeriesQuery:
+              timeSeriesFilter:
+                filter: 'metric.type="kubernetes.io/container/cpu/core_usage"'
+                secondaryAggregation:
+                  alignmentPeriod: 60s
+                  crossSeriesReducer: REDUCE_MEAN
+                  groupByFields:
+                    - resource.labels.pod_name
+              unitOverride: "CORES"
+        thresholds:
+          - color: YELLOW
+            direction: ABOVE
+            value: 0.5
+          - color: RED
+            direction: ABOVE
+            value: 0.8
+        timeshiftDuration: "0s"
+        yAxis:
+          label: "CPU Cores"
+          scale: LINEAR
+
+    # ===== MEMORY USAGE =====
+    - title: "Memory Usage by Pod"
+      xyChart:
+        dataSets:
+          - timeSeriesQuery:
+              timeSeriesFilter:
+                filter: 'metric.type="kubernetes.io/container/memory/used_bytes"'
+                secondaryAggregation:
+                  alignmentPeriod: 60s
+                  crossSeriesReducer: REDUCE_MEAN
+                  groupByFields:
+                    - resource.labels.pod_name
+              unitOverride: "BYTES"
+        thresholds:
+          - color: YELLOW
+            direction: ABOVE
+            value: 536870912  # 512MB
+          - color: RED
+            direction: ABOVE
+            value: 1073741824  # 1GB
+        timeshiftDuration: "0s"
+        yAxis:
+          label: "Memory (Bytes)"
+          scale: LINEAR
+
+    # ===== NETWORK TRAFFIC =====
+    - title: "Network Traffic"
+      xyChart:
+        dataSets:
+          - timeSeriesQuery:
+              timeSeriesFilter:
+                filter: 'metric.type="kubernetes.io/pod/network/received_bytes_count"'
+                secondaryAggregation:
+                  alignmentPeriod: 60s
+                  crossSeriesReducer: REDUCE_MEAN
+                  groupByFields:
+                    - resource.labels.pod_name
+              unitOverride: "BYTES"
+        thresholds:
+          - color: YELLOW
+            direction: ABOVE
+            value: 1048576  # 1MB
+        timeshiftDuration: "0s"
+        yAxis:
+          label: "Received Bytes"
+          scale: LINEAR
+
+    # ===== APPLICATION HEALTH =====
+    - title: "Application Health Checks"
+      scorecard:
+        timeSeriesQuery:
+          timeSeriesFilter:
+            filter: 'metric.type="custom.googleapis.com/health_check_status"'
+            secondaryAggregation:
+              alignmentPeriod: 300s
+              crossSeriesReducer: REDUCE_MEAN
+        thresholds:
+          - color: GREEN
+            direction: ABOVE
+            value: 0.9
+          - color: YELLOW
+            direction: ABOVE
+            value: 0.7
+          - color: RED
+            direction: ABOVE
+            value: 0.5
+
+    # ===== ERROR RATE =====
+    - title: "HTTP Error Rate"
+      xyChart:
+        dataSets:
+          - timeSeriesQuery:
+              timeSeriesFilter:
+                filter: 'metric.type="custom.googleapis.com/http_requests_total" AND metric.labels.status_code=~"5.*"'
+                secondaryAggregation:
+                  alignmentPeriod: 60s
+                  crossSeriesReducer: REDUCE_RATE
+        thresholds:
+          - color: YELLOW
+            direction: ABOVE
+            value: 0.01  # 1% error rate
+          - color: RED
+            direction: ABOVE
+            value: 0.05  # 5% error rate
+        timeshiftDuration: "0s"
+        yAxis:
+          label: "Error Rate"
+          scale: LINEAR
+
+    # ===== RESPONSE TIME =====
+    - title: "Response Time"
+      xyChart:
+        dataSets:
+          - timeSeriesQuery:
+              timeSeriesFilter:
+                filter: 'metric.type="custom.googleapis.com/http_request_duration_seconds"'
+                secondaryAggregation:
+                  alignmentPeriod: 60s
+                  crossSeriesReducer: REDUCE_MEAN
+        thresholds:
+          - color: YELLOW
+            direction: ABOVE
+            value: 1.0  # 1 second
+          - color: RED
+            direction: ABOVE
+            value: 5.0  # 5 seconds
+        timeshiftDuration: "0s"
+        yAxis:
+          label: "Response Time (seconds)"
+          scale: LINEAR
+
+    # ===== CELERY WORKERS =====
+    - title: "Celery Worker Status"
+      scorecard:
+        timeSeriesQuery:
+          timeSeriesFilter:
+            filter: 'metric.type="custom.googleapis.com/celery_worker_count"'
+            secondaryAggregation:
+              alignmentPeriod: 300s
+              crossSeriesReducer: REDUCE_MEAN
+        thresholds:
+          - color: GREEN
+            direction: ABOVE
+            value: 1
+          - color: RED
+            direction: BELOW
+            value: 1
+
+    # ===== DATABASE CONNECTIONS =====
+    - title: "Database Connections"
+      xyChart:
+        dataSets:
+          - timeSeriesQuery:
+              timeSeriesFilter:
+                filter: 'metric.type="custom.googleapis.com/database_connections"'
+                secondaryAggregation:
+                  alignmentPeriod: 60s
+                  crossSeriesReducer: REDUCE_MEAN
+        thresholds:
+          - color: YELLOW
+            direction: ABOVE
+            value: 10
+          - color: RED
+            direction: ABOVE
+            value: 20
+        timeshiftDuration: "0s"
+        yAxis:
+          label: "Active Connections"
+          scale: LINEAR
+
+    # ===== REDIS MEMORY =====
+    - title: "Redis Memory Usage"
+      xyChart:
+        dataSets:
+          - timeSeriesQuery:
+              timeSeriesFilter:
+                filter: 'metric.type="custom.googleapis.com/redis_memory_usage"'
+                secondaryAggregation:
+                  alignmentPeriod: 60s
+                  crossSeriesReducer: REDUCE_MEAN
+        thresholds:
+          - color: YELLOW
+            direction: ABOVE
+            value: 536870912  # 512MB
+          - color: RED
+            direction: ABOVE
+            value: 1073741824  # 1GB
+        timeshiftDuration: "0s"
+        yAxis:
+          label: "Memory Usage (Bytes)"
+          scale: LINEAR
+
+    # ===== GCS OPERATIONS =====
+    - title: "GCS Operations"
+      xyChart:
+        dataSets:
+          - timeSeriesQuery:
+              timeSeriesFilter:
+                filter: 'metric.type="custom.googleapis.com/gcs_operations_total"'
+                secondaryAggregation:
+                  alignmentPeriod: 60s
+                  crossSeriesReducer: REDUCE_RATE
+        thresholds:
+          - color: YELLOW
+            direction: ABOVE
+            value: 100  # 100 operations per minute
+        timeshiftDuration: "0s"
+        yAxis:
+          label: "Operations per Second"
+          scale: LINEAR
+
+    # ===== CUSTOM METRICS SUMMARY =====
+    - title: "Application Metrics Summary"
+      text:
+        content: |
+          ## ToxIndex Application Health
+          
+          ### Health Checks
+          - Database: {{#if database_healthy}}✅ Healthy{{else}}❌ Unhealthy{{/if}}
+          - Redis: {{#if redis_healthy}}✅ Healthy{{else}}❌ Unhealthy{{/if}}
+          - GCS: {{#if gcs_healthy}}✅ Healthy{{else}}❌ Unhealthy{{/if}}
+          - Celery: {{#if celery_healthy}}✅ Healthy{{else}}❌ Unhealthy{{/if}}
+          
+          ### Performance
+          - Response Time: {{response_time}}ms
+          - Error Rate: {{error_rate}}%
+          - Active Users: {{active_users}}
+          
+          ### Resources
+          - CPU Usage: {{cpu_usage}}%
+          - Memory Usage: {{memory_usage}}%
+          - Disk Usage: {{disk_usage}}% 

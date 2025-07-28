@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { FaPlus } from 'react-icons/fa';
 import EnvironmentSelector from './EnvironmentSelector';
-import UploadCsvModal from './UploadCsvModal';
+import UploadFileModal from './UploadFileModal';
 import { useEnvironment } from "../../context/EnvironmentContext";
 import WorkflowSelector from './WorkflowSelector';
 import { FolderSearch } from 'lucide-react';
@@ -69,7 +69,7 @@ const ChatInputBar: React.FC<ChatInputBarProps> = ({
               <button
                 className="w-10 h-10 flex items-center justify-center rounded-full shadow-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-green-400"
                 style={{ padding: 0, borderRadius: '50%', background: 'rgba(255,255,255,0.7)' }}
-                title="Upload CSV file"
+                title="Upload file"
                 onClick={e => { e.preventDefault(); handleUploadClick(); }}
                 disabled={uploading}
                 type="button"
@@ -96,7 +96,7 @@ const ChatInputBar: React.FC<ChatInputBarProps> = ({
           {error && <div className="text-red-500 mt-2">{error}</div>}
         </form>
       </div>
-      <UploadCsvModal
+      <UploadFileModal
         open={showUploadModal}
         onClose={() => setShowUploadModal(false)}
         environments={environments}

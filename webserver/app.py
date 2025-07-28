@@ -34,6 +34,7 @@ from webserver.socketio import socketio
 from webserver.controller.user import user_bp
 from webserver.controller.schema import schema_bp
 from webserver.data_paths import LOGS_ROOT
+from webserver.health_checker import health_checker
 
 dotenv.load_dotenv()
 
@@ -78,7 +79,10 @@ logging.info(f"DB ENV (Flask startup): PGHOST={os.getenv('PGHOST')}, PGPORT={os.
 def redis_listener(name):
     
     listener_id = uuid.uuid4().hex[:8]
-    r = redis.Redis()
+    r = redis.Redis(
+        host=os.environ.get("REDIS_HOST", "localhost"),
+        port=int(os.environ.get("REDIS_PORT", "6379"))
+    )
     pubsub = r.pubsub()
     pubsub.subscribe("celery_updates")
     logging.info(f"[redis_listener] ({listener_id}) Started Redis listener thread: {name}")
@@ -211,80 +215,118 @@ def log_tab_switch():
     logging.info(f"[Tab Switch] User switched to tab '{tab}' for task_id={task_id} at {timestamp}")
     return flask.jsonify({'status': 'ok'})
 
+
 @app.route("/api/healthz")
 def healthz():
-    app.logger.debug("Health check")
+    """Basic health check endpoint."""
+    app.logger.debug("Basic health check")
     return "ok", 200
+
+@app.route("/api/health")
+def comprehensive_health():
+    """Comprehensive health check endpoint."""
+    try:
+        # Run all health checks
+        results = health_checker.run_all_checks()
+        
+        # Determine overall status
+        overall_status, http_status = health_checker.get_overall_status(results)
+        
+        # Prepare response
+        response = {
+            'status': overall_status,
+            'http_status': http_status,
+            'checks': results,
+            'timestamp': datetime.now().isoformat()
+        }
+        
+        # Add cache headers for health checks
+        response_obj = jsonify(response)
+        response_obj.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response_obj.headers['Pragma'] = 'no-cache'
+        response_obj.headers['Expires'] = '0'
+        
+        return response_obj, http_status
+        
+    except Exception as e:
+        app.logger.error(f"Health check failed: {e}")
+        return jsonify({
+            'status': 'error',
+            'message': f'Health check failed: {str(e)}',
+            'timestamp': datetime.now().isoformat()
+        }), 503
+
+@app.route("/api/health/ready")
+def readiness_probe():
+    """Kubernetes readiness probe endpoint."""
+    try:
+        # Only check critical services for readiness
+        critical_checks = {
+            'database': health_checker._check_database,
+            'redis': health_checker._check_redis,
+        }
+        
+        results = {}
+        for check_name, check_func in critical_checks.items():
+            try:
+                result = check_func()
+                results[check_name] = result
+            except Exception as e:
+                results[check_name] = {
+                    'status': 'error',
+                    'message': str(e),
+                    'timestamp': datetime.now().isoformat()
+                }
+        
+        # Check if all critical services are healthy
+        all_healthy = all(
+            result.get('status') == 'healthy' 
+            for result in results.values()
+        )
+        
+        if all_healthy:
+            return jsonify({
+                'status': 'ready',
+                'message': 'All critical services are ready',
+                'timestamp': datetime.now().isoformat()
+            }), 200
+        else:
+            return jsonify({
+                'status': 'not_ready',
+                'message': 'Critical services are not ready',
+                'checks': results,
+                'timestamp': datetime.now().isoformat()
+            }), 503
+            
+    except Exception as e:
+        app.logger.error(f"Readiness probe failed: {e}")
+        return jsonify({
+            'status': 'not_ready',
+            'message': f'Readiness probe failed: {str(e)}',
+            'timestamp': datetime.now().isoformat()
+        }), 503
+
+@app.route("/api/health/live")
+def liveness_probe():
+    """Kubernetes liveness probe endpoint."""
+    try:
+        # Simple check that the application is responding
+        return jsonify({
+            'status': 'alive',
+            'message': 'Application is alive',
+            'timestamp': datetime.now().isoformat()
+        }), 200
+    except Exception as e:
+        app.logger.error(f"Liveness probe failed: {e}")
+        return jsonify({
+            'status': 'dead',
+            'message': f'Application is not responding: {str(e)}',
+            'timestamp': datetime.now().isoformat()
+        }), 503
 
 @app.route("/test-alive")
 def test_alive():
     return "ALIVE"
-
-# # API endpoint to trigger probra_task from dashboard chatbox
-# @csrf.exempt
-# @app.route("/api/run-probra-task", methods=["POST"])
-# @flask_login.login_required
-# def api_run_probra_task():
-#     data = flask.request.get_json()
-#     prompt = data.get("prompt")
-#     environment_id = data.get("environment_id")
-#     user_id = flask_login.current_user.user_id
-#     if not prompt:
-#         return flask.jsonify({"error": "Missing prompt"}), 400
-#     # Always create a new chat session for dashboard submissions
-#     session = ChatSession.create_session(environment_id, user_id, title=generate_title(prompt))
-#     session_id = session.session_id if session else None
-#     # Create a new Task (workflow_id=1 for ToxIndex RAP)
-#     title = generate_title(prompt)
-#     task = Task.create_task(
-#         title=title,
-#         user_id=user_id,
-#         workflow_id=1,
-#         environment_id=environment_id,
-#         session_id=session_id,
-#     )
-#     Task.add_message(task.task_id, user_id, "user", prompt, session_id=session_id)
-#     celery_task = probra_task.delay({
-#         "payload": prompt,
-#         "task_id": task.task_id,
-#         "user_id": str(user_id),
-#     })
-#     Task.update_celery_task_id(task.task_id, celery_task.id)
-#     return flask.jsonify({"task_id": task.task_id, "celery_id": celery_task.id, "session_id": session_id})
-
-
-# @csrf.exempt
-# @app.route("/api/run-vanilla-task", methods=["POST"])
-# @flask_login.login_required
-# def api_run_vanilla_task():
-#     data = flask.request.get_json()
-#     prompt = data.get("prompt")
-#     environment_id = data.get("environment_id")
-#     user_id = flask_login.current_user.user_id
-#     if not prompt:
-#         return flask.jsonify({"error": "Missing prompt"}), 400
-#     # Always create a new chat session for dashboard submissions
-#     session = ChatSession.create_session(environment_id, user_id, title=generate_title(prompt))
-#     session_id = session.session_id if session else None
-#     # Create a new Task (workflow_id=2 for ToxIndex Vanilla)
-#     title = generate_title(prompt)
-#     task = Task.create_task(
-#         title=title,
-#         user_id=user_id,
-#         workflow_id=2,
-#         environment_id=environment_id,
-#         session_id=session_id,
-#     )
-#     Task.add_message(task.task_id, user_id, "user", prompt, session_id=session_id)
-#     logging.info(f"[api_run_vanilla_task] Queuing plain_openai_task for task_id={task.task_id}, user_id={user_id}")
-#     celery_task = plain_openai_task.delay({
-#         "payload": prompt,
-#         "task_id": task.task_id,
-#         "user_id": str(user_id),
-#     })
-#     logging.info(f"[api_run_vanilla_task] Queued plain_openai_task with celery_id={celery_task.id}")
-#     Task.update_celery_task_id(task.task_id, celery_task.id)
-#     return flask.jsonify({"task_id": task.task_id, "celery_id": celery_task.id, "session_id": session_id})
 
 # --- ADD catch-all route for React SPA ---
 @app.route('/', defaults={'path': ''})
@@ -295,15 +337,16 @@ def serve_react_app(path):
         abort(404)
     return send_from_directory(app.static_folder, 'index.html')
 
+# --- Start Redis listener thread on every process startup (not just when run as __main__) ---
+thread_name = f"RedisListenerThread-{uuid.uuid4().hex[:8]}"
+threading.Thread(
+    target=redis_listener,
+    args=(thread_name,),
+    daemon=True,
+    name=thread_name,
+).start()
+# This ensures the listener runs in both dev (python app.py) and prod (gunicorn/uwsgi/etc)
+
 # LAUNCH =====================================================================
 if __name__ == "__main__":
-    # Only start the listener in the reloader child process (not parent)
-    if os.environ.get("WERKZEUG_RUN_MAIN") == "true" or not app.debug:
-        thread_name = f"RedisListenerThread-{uuid.uuid4().hex[:8]}"
-        threading.Thread(
-            target=redis_listener,
-            args=(thread_name,),
-            daemon=True,
-            name=thread_name,
-        ).start()
     socketio.run(app, host="0.0.0.0", port=6513, debug=False, use_reloader=False) # Always debug=False in prod

@@ -4,15 +4,18 @@ import os
 import uuid
 import logging
 import pydantic
+import tempfile
+from pathlib import Path
 from workflows.celery_worker import celery
 from webserver.model.message import MessageSchema
 import hashlib
 from webserver.model.task import Task
-from webserver.data_paths import CHATS_ROOT
+from webserver.storage import GCSFileStorage
+from webserver.cache_manager import cache_manager
 
 from RAP.tool_deeptox import deeptox_agent
 
-logging.getLogger().info("probra.py module loaded")
+logging.getLogger().info("probra_gcs.py module loaded")
 logger = logging.getLogger(__name__)
 
 def get_pydantic_serializer(obj):
@@ -37,9 +40,8 @@ def emit_status(task_id, status):
     r.publish("celery_updates", json.dumps(event, default=str))
 
 @celery.task(bind=True)
-# async def probra_task(self, payload):
 def probra_task(self, payload):
-    """Example background task that emits progress messages and uploads a file."""
+    """GCS-enabled background task that emits progress messages and uploads files to GCS."""
     try:
         logger.info(f"Starting probra task with payload: {payload}")
         r = redis.Redis(
@@ -81,29 +83,47 @@ def probra_task(self, payload):
         r.publish("celery_updates", json.dumps(event, default=str))
         logger.info(f"Published task_message event to Redis for task_id={task_id}")
 
+        emit_status(task_id, "uploading file to GCS")
+        # Create temporary file and upload to GCS
         tmp_filename = f"probra_result_{uuid.uuid4().hex}.md"
-        project_tmp_dir = CHATS_ROOT()
-        os.makedirs(project_tmp_dir, exist_ok=True)
-        tmp_path = os.path.join(project_tmp_dir, tmp_filename)
-
-        logger.info(f"File creating in tmp: {tmp_path} for task {task_id}")
-        with open(tmp_path, 'w', encoding='utf-8') as f:
-            f.write(response_content)
-        logger.info(f"File created in tmp: {tmp_path} for task {task_id}")
-
-        emit_status(task_id, "file created")
-        # S3 upload removed; only local file creation remains
-        file_event = {
-            "type": "task_file",
-            "task_id": task_id,
-            "data": {
-                "user_id": user_id,
-                "filename": tmp_filename,
-                "filepath": tmp_path,  # Use filepath for local file path
-            },
-        }
         
-        r.publish("celery_updates", json.dumps(file_event, default=str))
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False, encoding='utf-8') as temp_file:
+            temp_path = temp_file.name
+            temp_file.write(response_content)
+        
+        try:
+            # Upload to GCS
+            gcs_storage = GCSFileStorage()
+            gcs_path = f"tasks/{task_id}/{tmp_filename}"
+            
+            # Upload file to GCS
+            gcs_storage.upload_file(temp_path, gcs_path, content_type='text/markdown')
+            
+            # Cache the content for future access
+            cache_manager.cache_file_content(gcs_path, response_content)
+            
+            logger.info(f"File uploaded to GCS: {gcs_path}")
+            
+            emit_status(task_id, "file uploaded")
+            # Publish file event with GCS path
+            file_event = {
+                "type": "task_file",
+                "task_id": task_id,
+                "data": {
+                    "user_id": user_id,
+                    "filename": tmp_filename,
+                    "filepath": gcs_path,  # Use GCS path instead of local path
+                },
+            }
+            
+            r.publish("celery_updates", json.dumps(file_event, default=str))
+            
+        finally:
+            # Clean up temporary file
+            try:
+                os.unlink(temp_path)
+            except Exception as e:
+                logger.warning(f"Failed to clean up temp file {temp_path}: {e}")
 
         finished_at = Task.mark_finished(task_id)
         emit_status(task_id, "done")
@@ -112,4 +132,4 @@ def probra_task(self, payload):
     except Exception as e:
         logger.error(f"Error in probra_task: {str(e)}", exc_info=True)
         emit_status(task_id, "error")
-        raise  # Re-raise the exception so Celery knows the task failed
+        raise  # Re-raise the exception so Celery knows the task failed 

@@ -1,0 +1,60 @@
+# Cloud Build Triggers Configuration
+# Apply with: gcloud builds triggers import --source=cloudbuild-triggers.yaml
+
+# Backend Trigger
+- name: "backend-deploy"
+  description: "Deploy backend to GKE when backend files change"
+  triggerTemplate:
+    projectId: "toxindex"
+    repoName: "toxindex"
+    branchName: "gke"
+    dir: "."
+    includedFiles:
+      - "webserver/**"
+      - "workflows/**"
+      - "pyproject.toml"
+      - "Dockerfile"
+      - "cloudbuild.yaml"
+  filename: "cloudbuild.yaml"
+  substitutions:
+    _REGISTRY: "us-docker.pkg.dev"
+    _IMAGE_NAME: "toxindex-backend/backend"
+    _CLUSTER_NAME: "toxindex-gke"
+    _REGION: "us-east4"
+    _NAMESPACE: "toxindex-app"
+
+# Frontend Trigger
+- name: "frontend-deploy"
+  description: "Deploy frontend to GCS when frontend files change"
+  triggerTemplate:
+    projectId: "toxindex"
+    repoName: "toxindex"
+    branchName: "gke"
+    dir: "."
+    includedFiles:
+      - "frontend/**"
+      - "package.json"
+      - "package-lock.json"
+      - "cloudbuild-frontend.yaml"
+  filename: "cloudbuild-frontend.yaml"
+  substitutions:
+    _GCS_BUCKET: "toxindex-react"
+    _CDN_URL_MAP: "frontend-url-map"
+
+# Full Stack Trigger
+- name: "full-stack-deploy"
+  description: "Deploy both frontend and backend on any change"
+  triggerTemplate:
+    projectId: "toxindex"
+    repoName: "toxindex"
+    branchName: "gke"
+    dir: "."
+  filename: "cloudbuild-fullstack.yaml"
+  substitutions:
+    _REGISTRY: "us-docker.pkg.dev"
+    _IMAGE_NAME: "toxindex-backend/backend"
+    _CLUSTER_NAME: "toxindex-gke"
+    _REGION: "us-east4"
+    _NAMESPACE: "toxindex-app"
+    _GCS_BUCKET: "toxindex-react"
+    _CDN_URL_MAP: "frontend-url-map" 

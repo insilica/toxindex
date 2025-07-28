@@ -1,0 +1,131 @@
+steps:
+  # Build the Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'build',
+      '-t', 'us-docker.pkg.dev/$PROJECT_ID/toxindex-backend/backend:$COMMIT_SHA',
+      '-t', 'us-docker.pkg.dev/$PROJECT_ID/toxindex-backend/backend:latest',
+      '.'
+    ]
+
+  # Push the Docker image to Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'us-docker.pkg.dev/$PROJECT_ID/toxindex-backend/backend:$COMMIT_SHA']
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'us-docker.pkg.dev/$PROJECT_ID/toxindex-backend/backend:latest']
+
+  # Get GKE credentials
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args: [
+      'container', 'clusters', 'get-credentials',
+      'toxindex-gke',
+      '--region=us-east4',
+      '--project=$PROJECT_ID'
+    ]
+
+  # Update backend deployment
+  - name: 'gcr.io/cloud-builders/kubectl'
+    args: [
+      'set', 'image', 'deployment/backend',
+      'backend=us-docker.pkg.dev/$PROJECT_ID/toxindex-backend/backend:latest',
+      '-n', 'toxindex-app'
+    ]
+    env:
+      - 'CLOUDSDK_COMPUTE_REGION=us-east4'
+      - 'CLOUDSDK_CONTAINER_CLUSTER=toxindex-gke'
+
+  # Restart backend deployment
+  - name: 'gcr.io/cloud-builders/kubectl'
+    args: [
+      'rollout', 'restart', 'deployment/backend',
+      '-n', 'toxindex-app'
+    ]
+    env:
+      - 'CLOUDSDK_COMPUTE_REGION=us-east4'
+      - 'CLOUDSDK_CONTAINER_CLUSTER=toxindex-gke'
+
+  # Wait for backend rollout
+  - name: 'gcr.io/cloud-builders/kubectl'
+    args: [
+      'rollout', 'status', 'deployment/backend',
+      '-n', 'toxindex-app'
+    ]
+    env:
+      - 'CLOUDSDK_COMPUTE_REGION=us-east4'
+      - 'CLOUDSDK_CONTAINER_CLUSTER=toxindex-gke'
+
+  # Restart Celery worker
+  - name: 'gcr.io/cloud-builders/kubectl'
+    args: [
+      'rollout', 'restart', 'deployment/celery-worker',
+      '-n', 'toxindex-app'
+    ]
+    env:
+      - 'CLOUDSDK_COMPUTE_REGION=us-east4'
+      - 'CLOUDSDK_CONTAINER_CLUSTER=toxindex-gke'
+
+  # Wait for Celery worker rollout
+  - name: 'gcr.io/cloud-builders/kubectl'
+    args: [
+      'rollout', 'status', 'deployment/celery-worker',
+      '-n', 'toxindex-app'
+    ]
+    env:
+      - 'CLOUDSDK_COMPUTE_REGION=us-east4'
+      - 'CLOUDSDK_CONTAINER_CLUSTER=toxindex-gke'
+
+  # Verify deployment
+  - name: 'gcr.io/cloud-builders/kubectl'
+    args: [
+      'wait', '--for=condition=ready', 'pod',
+      '-l', 'app=backend',
+      '-n', 'toxindex-app',
+      '--timeout=300s'
+    ]
+    env:
+      - 'CLOUDSDK_COMPUTE_REGION=us-east4'
+      - 'CLOUDSDK_CONTAINER_CLUSTER=toxindex-gke'
+
+  # Show deployment status
+  - name: 'gcr.io/cloud-builders/kubectl'
+    args: [
+      'get', 'pods',
+      '-n', 'toxindex-app',
+      '-l', 'app=backend'
+    ]
+    env:
+      - 'CLOUDSDK_COMPUTE_REGION=us-east4'
+      - 'CLOUDSDK_CONTAINER_CLUSTER=toxindex-gke'
+
+  - name: 'gcr.io/cloud-builders/kubectl'
+    args: [
+      'get', 'pods',
+      '-n', 'toxindex-app',
+      '-l', 'app=celery-worker'
+    ]
+    env:
+      - 'CLOUDSDK_COMPUTE_REGION=us-east4'
+      - 'CLOUDSDK_CONTAINER_CLUSTER=toxindex-gke'
+
+# Store images in Artifact Registry
+images:
+  - 'us-docker.pkg.dev/$PROJECT_ID/toxindex-backend/backend:$COMMIT_SHA'
+  - 'us-docker.pkg.dev/$PROJECT_ID/toxindex-backend/backend:latest'
+
+# Build options
+options:
+  logging: CLOUD_LOGGING_ONLY
+  machineType: 'E2_HIGHCPU_8'
+  diskSizeGb: '100'
+  env:
+    - 'DOCKER_BUILDKIT=1'
+
+# Substitutions
+substitutions:
+  _REGISTRY: 'us-docker.pkg.dev'
+  _IMAGE_NAME: 'toxindex-backend/backend'
+  _CLUSTER_NAME: 'toxindex-gke'
+  _REGION: 'us-east4'
+  _NAMESPACE: 'toxindex-app'
+  _BRANCH: 'gke' 

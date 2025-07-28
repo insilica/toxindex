@@ -1,0 +1,242 @@
+import redis
+import hashlib
+import json
+import logging
+import os
+import time
+from typing import Optional, Any, Dict, List
+from functools import wraps
+from webserver.storage import GCSFileStorage
+
+logger = logging.getLogger(__name__)
+
+class CacheManager:
+    """Comprehensive cache manager for GCS files, database queries, and task results."""
+    
+    def __init__(self):
+        self.redis_client = redis.Redis(
+            host=os.environ.get("REDIS_HOST", "localhost"),
+            port=int(os.environ.get("REDIS_PORT", "6379")),
+            decode_responses=True
+        )
+        self.gcs_storage = GCSFileStorage()
+        
+        # Cache TTLs (in seconds)
+        self.FILE_CONTENT_TTL = 3600  # 1 hour
+        self.METADATA_TTL = 300       # 5 minutes
+        self.TASK_RESULT_TTL = 86400  # 24 hours
+        self.QUERY_TTL = 300          # 5 minutes
+    
+    def _get_md5_hash(self, content: str) -> str:
+        """Generate MD5 hash for content."""
+        return hashlib.md5(content.encode('utf-8')).hexdigest()
+    
+    def _get_cache_key(self, prefix: str, identifier: str) -> str:
+        """Generate consistent cache key."""
+        return f"{prefix}:{identifier}"
+    
+    # File Content Caching
+    def get_file_content(self, gcs_path: str) -> Optional[str]:
+        """Get file content from cache or GCS."""
+        try:
+            # Get file metadata first
+            metadata = self.get_file_metadata(gcs_path)
+            if not metadata:
+                return None
+            
+            md5_hash = metadata.get('md5_hash')
+            if not md5_hash:
+                return None
+            
+            cache_key = self._get_cache_key("gcs_file", md5_hash)
+            cached_content = self.redis_client.get(cache_key)
+            
+            if cached_content:
+                logger.info(f"Cache HIT for file content: {gcs_path}")
+                return cached_content
+            
+            # Cache miss - download from GCS
+            logger.info(f"Cache MISS for file content: {gcs_path}")
+            with self.gcs_storage.download_file(gcs_path, "/tmp/temp_download") as temp_path:
+                with open(temp_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                
+                # Cache the content
+                self.redis_client.setex(cache_key, self.FILE_CONTENT_TTL, content)
+                logger.info(f"Cached file content: {gcs_path}")
+                return content
+                
+        except Exception as e:
+            logger.error(f"Error getting file content for {gcs_path}: {e}")
+            return None
+    
+    def cache_file_content(self, gcs_path: str, content: str) -> None:
+        """Cache file content."""
+        try:
+            md5_hash = self._get_md5_hash(content)
+            cache_key = self._get_cache_key("gcs_file", md5_hash)
+            self.redis_client.setex(cache_key, self.FILE_CONTENT_TTL, content)
+            logger.info(f"Cached file content: {gcs_path}")
+        except Exception as e:
+            logger.error(f"Error caching file content for {gcs_path}: {e}")
+    
+    # File Metadata Caching
+    def get_file_metadata(self, gcs_path: str) -> Optional[Dict]:
+        """Get file metadata from cache or GCS."""
+        try:
+            md5_hash = self._get_md5_hash(gcs_path)
+            cache_key = self._get_cache_key("gcs_metadata", md5_hash)
+            cached_metadata = self.redis_client.get(cache_key)
+            
+            if cached_metadata:
+                logger.info(f"Cache HIT for file metadata: {gcs_path}")
+                return json.loads(cached_metadata)
+            
+            # Cache miss - get from GCS
+            logger.info(f"Cache MISS for file metadata: {gcs_path}")
+            metadata = self.gcs_storage.get_file_metadata(gcs_path)
+            
+            if metadata:
+                self.redis_client.setex(cache_key, self.METADATA_TTL, json.dumps(metadata))
+                logger.info(f"Cached file metadata: {gcs_path}")
+            
+            return metadata
+            
+        except Exception as e:
+            logger.error(f"Error getting file metadata for {gcs_path}: {e}")
+            return None
+    
+    # Database Query Caching
+    def cache_query(self, method: str, args: tuple, result: Any) -> None:
+        """Cache database query results."""
+        try:
+            args_hash = self._get_md5_hash(str(args))
+            cache_key = self._get_cache_key("file_query", f"{method}:{args_hash}")
+            self.redis_client.setex(cache_key, self.QUERY_TTL, json.dumps(result))
+            logger.info(f"Cached query result: {method}")
+        except Exception as e:
+            logger.error(f"Error caching query result: {e}")
+    
+    def get_cached_query(self, method: str, args: tuple) -> Optional[Any]:
+        """Get cached database query result."""
+        try:
+            args_hash = self._get_md5_hash(str(args))
+            cache_key = self._get_cache_key("file_query", f"{method}:{args_hash}")
+            cached_result = self.redis_client.get(cache_key)
+            
+            if cached_result:
+                logger.info(f"Cache HIT for query: {method}")
+                return json.loads(cached_result)
+            
+            logger.info(f"Cache MISS for query: {method}")
+            return None
+            
+        except Exception as e:
+            logger.error(f"Error getting cached query: {e}")
+            return None
+    
+    # Task Result Caching
+    def get_task_result(self, filepath: str, task_id: str) -> Optional[Dict]:
+        """Get cached task result."""
+        try:
+            cache_key = self._get_cache_key("task_result", f"{filepath}:{task_id}")
+            cached_result = self.redis_client.get(cache_key)
+            
+            if cached_result:
+                logger.info(f"Cache HIT for task result: {task_id}")
+                return json.loads(cached_result)
+            
+            logger.info(f"Cache MISS for task result: {task_id}")
+            return None
+            
+        except Exception as e:
+            logger.error(f"Error getting cached task result: {e}")
+            return None
+    
+    def cache_task_result(self, filepath: str, task_id: str, result: Dict) -> None:
+        """Cache task result."""
+        try:
+            cache_key = self._get_cache_key("task_result", f"{filepath}:{task_id}")
+            self.redis_client.setex(cache_key, self.TASK_RESULT_TTL, json.dumps(result))
+            logger.info(f"Cached task result: {task_id}")
+        except Exception as e:
+            logger.error(f"Error caching task result: {e}")
+    
+    # Smart Cache Invalidation
+    def invalidate_file_caches(self, gcs_path: str) -> None:
+        """Invalidate all caches related to a file."""
+        try:
+            # Invalidate file content cache
+            metadata = self.get_file_metadata(gcs_path)
+            if metadata and metadata.get('md5_hash'):
+                content_cache_key = self._get_cache_key("gcs_file", metadata['md5_hash'])
+                self.redis_client.delete(content_cache_key)
+            
+            # Invalidate metadata cache
+            md5_hash = self._get_md5_hash(gcs_path)
+            metadata_cache_key = self._get_cache_key("gcs_metadata", md5_hash)
+            self.redis_client.delete(metadata_cache_key)
+            
+            # Invalidate related task results
+            pattern = f"task_result:{gcs_path}:*"
+            keys = self.redis_client.keys(pattern)
+            if keys:
+                self.redis_client.delete(*keys)
+            
+            logger.info(f"Invalidated caches for file: {gcs_path}")
+            
+        except Exception as e:
+            logger.error(f"Error invalidating file caches: {e}")
+    
+    def invalidate_query_caches(self, method: str = None) -> None:
+        """Invalidate database query caches."""
+        try:
+            if method:
+                pattern = f"file_query:{method}:*"
+            else:
+                pattern = "file_query:*"
+            
+            keys = self.redis_client.keys(pattern)
+            if keys:
+                self.redis_client.delete(*keys)
+                logger.info(f"Invalidated query caches: {method or 'all'}")
+                
+        except Exception as e:
+            logger.error(f"Error invalidating query caches: {e}")
+    
+    # Cache Statistics
+    def get_cache_stats(self) -> Dict:
+        """Get cache statistics."""
+        try:
+            stats = {
+                'file_content_keys': len(self.redis_client.keys("gcs_file:*")),
+                'metadata_keys': len(self.redis_client.keys("gcs_metadata:*")),
+                'query_keys': len(self.redis_client.keys("file_query:*")),
+                'task_result_keys': len(self.redis_client.keys("task_result:*")),
+                'total_memory': self.redis_client.info()['used_memory_human']
+            }
+            return stats
+        except Exception as e:
+            logger.error(f"Error getting cache stats: {e}")
+            return {}
+
+# Global cache manager instance
+cache_manager = CacheManager()
+
+# Decorator for caching database queries
+def cache_query_result(method: str):
+    """Decorator to cache database query results."""
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            # Try to get from cache first
+            cached_result = cache_manager.get_cached_query(method, args)
+            if cached_result is not None:
+                return cached_result
+            
+            # Execute function and cache result
+            result = func(*args, **kwargs)
+            cache_manager.cache_query(method, args, result)
+            return result
+        return wrapper
+    return decorator 

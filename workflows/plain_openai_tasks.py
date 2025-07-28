@@ -5,13 +5,14 @@ import uuid
 import logging
 import openai
 import hashlib
+import tempfile
+from pathlib import Path
 from workflows.celery_worker import celery
 from webserver.model.message import MessageSchema
-# from webserver.storage import S3FileStorage
 from RAP.toxicity_schema import TOXICITY_SCHEMA
-# Update finished_at in the database
 from webserver.model.task import Task
-from webserver.data_paths import TMP_ROOT, CHATS_ROOT
+from webserver.storage import GCSFileStorage
+from webserver.cache_manager import cache_manager
 
 logger = logging.getLogger(__name__)
 
@@ -31,9 +32,9 @@ def emit_status(task_id, status):
 
 @celery.task(bind=True)
 def plain_openai_task(self, payload):
-    """Call OpenAI with a plain prompt and publish the result."""
+    """GCS-enabled OpenAI task that uploads results to GCS."""
     try:
-        logger.info(f"[ToxDirect] Running plain_openai_task for task_id={payload.get('task_id')}, user_id={payload.get('user_id')}, payload={payload}")
+        logger.info(f"[ToxDirect GCS] Running plain_openai_task for task_id={payload.get('task_id')}, user_id={payload.get('user_id')}, payload={payload}")
         r = redis.Redis(
             host=os.environ.get("REDIS_HOST", "localhost"),
             port=int(os.environ.get("REDIS_PORT", "6379"))
@@ -69,26 +70,51 @@ def plain_openai_task(self, payload):
             "data": message.model_dump(),
             "task_id": task_id,
         }
-        logger.info(f"[plain_openai_task] Publishing message event: {event}")
+                    logger.info(f"[plain_openai_task] Publishing message event: {event}")
         r.publish("celery_updates", json.dumps(event, default=str))
 
+        emit_status(task_id, "uploading file to GCS")
+        # Create temporary file and upload to GCS
         tmp_filename = f"plain_openai_result_{uuid.uuid4().hex}.md"
-        project_tmp_dir = TMP_ROOT()
-        os.makedirs(project_tmp_dir, exist_ok=True)
-        tmp_path = os.path.join(project_tmp_dir, tmp_filename)
-        with open(tmp_path, 'w', encoding='utf-8') as f:
-            f.write(content)
-        file_event = {
-            "type": "task_file",
-            "task_id": task_id,
-            "data": {
-                "user_id": user_id,
-                "filename": tmp_filename,
-                "filepath": tmp_path,
-            },
-        }
-        logger.info(f"[plain_openai_task] Publishing file event: {file_event}")
-        r.publish("celery_updates", json.dumps(file_event, default=str))
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False, encoding='utf-8') as temp_file:
+            temp_path = temp_file.name
+            temp_file.write(content)
+        
+        try:
+            # Upload to GCS
+            gcs_storage = GCSFileStorage()
+            gcs_path = f"tasks/{task_id}/{tmp_filename}"
+            
+            # Upload file to GCS
+            gcs_storage.upload_file(temp_path, gcs_path, content_type='text/markdown')
+            
+            # Cache the content for future access
+            cache_manager.cache_file_content(gcs_path, content)
+            
+            logger.info(f"File uploaded to GCS: {gcs_path}")
+            
+            emit_status(task_id, "file uploaded")
+            # Publish file event with GCS path
+            file_event = {
+                "type": "task_file",
+                "task_id": task_id,
+                "data": {
+                    "user_id": user_id,
+                    "filename": tmp_filename,
+                    "filepath": gcs_path,  # Use GCS path instead of local path
+                },
+            }
+            logger.info(f"[plain_openai_task] Publishing file event: {file_event}")
+            r.publish("celery_updates", json.dumps(file_event, default=str))
+            
+        finally:
+            # Clean up temporary file
+            try:
+                os.unlink(temp_path)
+            except Exception as e:
+                logger.warning(f"Failed to clean up temp file {temp_path}: {e}")
+        
         logger.info("plain_openai_task completed successfully")
 
         finished_at = Task.mark_finished(task_id)
@@ -104,9 +130,9 @@ def plain_openai_task(self, payload):
 
 @celery.task(bind=True)
 def openai_json_schema_task(self, payload):
-    """Call OpenAI with a prompt instructing output as JSON matching TOXICITY_SCHEMA."""
+    """GCS-enabled OpenAI JSON schema task that uploads results to GCS."""
     try:
-        logger.info(f"[ToxJson] Running openai_json_schema_task for task_id={payload.get('task_id')}, user_id={payload.get('user_id')}, payload={payload}")
+        logger.info(f"[ToxJson GCS] Running openai_json_schema_task for task_id={payload.get('task_id')}, user_id={payload.get('user_id')}, payload={payload}")
         r = redis.Redis(
             host=os.environ.get("REDIS_HOST", "localhost"),
             port=int(os.environ.get("REDIS_PORT", "6379"))
@@ -118,11 +144,13 @@ def openai_json_schema_task(self, payload):
         schema_str = json.dumps(TOXICITY_SCHEMA, indent=2)
         system_prompt = (
             "You are a toxicology research assistant. "
-            "Answer the user's question as a JSON object matching the following schema. "
-            "Strictly adhere to the structure and required fields.\n\nSchema:\n" + schema_str
+            "Answer the user's question about chemical toxicity in JSON format matching this schema:\n"
+            f"{schema_str}\n\n"
+            "Provide a detailed analysis with evidence from scientific literature."
         )
+        
         emit_status(task_id, "checking cache")
-        cache_key = f"openai_json_schema_cache:{model}:{hashlib.sha256((user_query+system_prompt).encode()).hexdigest()}"
+        cache_key = f"openai_json_cache:{model}:{hashlib.sha256(user_query.encode()).hexdigest()}"
         cached = r.get(cache_key)
         if cached:
             response_data = json.loads(cached)
@@ -135,9 +163,9 @@ def openai_json_schema_task(self, payload):
                 model=model,
                 messages=[
                     {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_query},
+                    {"role": "user", "content": user_query}
                 ],
-                temperature=0.0,
+                temperature=0.7,
             )
             content = response.choices[0].message.content
             response_data = {"content": content}
@@ -151,28 +179,59 @@ def openai_json_schema_task(self, payload):
             "data": message.model_dump(),
             "task_id": task_id,
         }
+                    logger.info(f"[openai_json_schema_task] Publishing message event: {event}")
         r.publish("celery_updates", json.dumps(event, default=str))
 
-        tmp_filename = f"openai_json_schema_result_{uuid.uuid4().hex}.json"
-        project_tmp_dir = CHATS_ROOT()
-        os.makedirs(project_tmp_dir, exist_ok=True)
-        tmp_path = os.path.join(project_tmp_dir, tmp_filename)
-        with open(tmp_path, 'w', encoding='utf-8') as f:
-            f.write(content)
-        file_event = {
-            "type": "task_file",
-            "task_id": task_id,
-            "data": {
-                "user_id": user_id,
-                "filename": tmp_filename,
-                "filepath": tmp_path,
-            },
-        }
-        r.publish("celery_updates", json.dumps(file_event, default=str))
+        emit_status(task_id, "uploading file to GCS")
+        # Create temporary file and upload to GCS
+        tmp_filename = f"openai_json_result_{uuid.uuid4().hex}.json"
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False, encoding='utf-8') as temp_file:
+            temp_path = temp_file.name
+            temp_file.write(content)
+        
+        try:
+            # Upload to GCS
+            gcs_storage = GCSFileStorage()
+            gcs_path = f"tasks/{task_id}/{tmp_filename}"
+            
+            # Upload file to GCS
+            gcs_storage.upload_file(temp_path, gcs_path, content_type='application/json')
+            
+            # Cache the content for future access
+            cache_manager.cache_file_content(gcs_path, content)
+            
+            logger.info(f"File uploaded to GCS: {gcs_path}")
+            
+            emit_status(task_id, "file uploaded")
+            # Publish file event with GCS path
+            file_event = {
+                "type": "task_file",
+                "task_id": task_id,
+                "data": {
+                    "user_id": user_id,
+                    "filename": tmp_filename,
+                    "filepath": gcs_path,  # Use GCS path instead of local path
+                },
+            }
+            logger.info(f"[openai_json_schema_task] Publishing file event: {file_event}")
+            r.publish("celery_updates", json.dumps(file_event, default=str))
+            
+        finally:
+            # Clean up temporary file
+            try:
+                os.unlink(temp_path)
+            except Exception as e:
+                logger.warning(f"Failed to clean up temp file {temp_path}: {e}")
+        
         logger.info("openai_json_schema_task completed successfully")
+
         finished_at = Task.mark_finished(task_id)
         emit_status(task_id, "done")
-        return {"done": True}
+        return {
+            "done": True,
+            "finished_at": finished_at,
+        }
     except Exception as e:
         logger.error(f"Error in openai_json_schema_task: {str(e)}", exc_info=True)
         emit_status(task_id, "error")

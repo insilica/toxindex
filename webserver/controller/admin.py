@@ -5,6 +5,7 @@ from webserver.model.user_group import UserGroup
 from webserver.util import is_valid_uuid
 import webserver.datastore as ds
 from webserver.csrf import csrf
+from webserver.cache_manager import cache_manager
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/api/admin')
 
@@ -292,3 +293,36 @@ def revoke_workflow_access(group_id, workflow_id):
     except Exception as e:
         logging.error(f"Error revoking workflow access: {e}")
         return jsonify({"error": "Failed to revoke workflow access"}), 500 
+
+@admin_bp.route('/cache/stats', methods=['GET'])
+@flask_login.login_required
+def get_cache_stats():
+    """Get cache statistics for monitoring."""
+    try:
+        stats = cache_manager.get_cache_stats()
+        return jsonify({
+            'success': True,
+            'cache_stats': stats
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@admin_bp.route('/cache/clear', methods=['POST'])
+@flask_login.login_required
+def clear_cache():
+    """Clear all caches (admin only)."""
+    try:
+        # Clear all cache keys
+        cache_manager.redis_client.flushdb()
+        return jsonify({
+            'success': True,
+            'message': 'All caches cleared'
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500 
