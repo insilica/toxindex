@@ -161,19 +161,19 @@ steps:
       - '-c'
       - |
         # Get backend service URL
-        BACKEND_URL=$(kubectl get svc backend -n toxindex-app -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-        if [ -z "$BACKEND_URL" ]; then
+        BACKEND_SVC_URL=$(kubectl get svc backend -n toxindex-app -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+        if [ -z "$BACKEND_SVC_URL" ]; then
           echo "Backend service not accessible via LoadBalancer, using cluster IP"
-          BACKEND_URL=$(kubectl get svc backend -n toxindex-app -o jsonpath='{.spec.clusterIP}')
+          BACKEND_SVC_URL=$(kubectl get svc backend -n toxindex-app -o jsonpath='{.spec.clusterIP}')
         fi
         
-        echo "Testing backend health at: $BACKEND_URL:6513"
+        echo "Testing backend health at: $BACKEND_SVC_URL:6513"
         
         # Test basic health check
-        curl -f --max-time 30 "http://$BACKEND_URL:6513/api/healthz" || exit 1
+        curl -f --max-time 30 "http://$BACKEND_SVC_URL:6513/api/healthz" || exit 1
         
         # Test comprehensive health check
-        HEALTH_RESPONSE=$(curl -s --max-time 60 "http://$BACKEND_URL:6513/api/health")
+        HEALTH_RESPONSE=$(curl -s --max-time 60 "http://$BACKEND_SVC_URL:6513/api/health")
         echo "Health check response: $HEALTH_RESPONSE"
         
         # Parse health check status
@@ -279,13 +279,13 @@ steps:
         echo "Testing critical application functions..."
         
         # Get backend service URL
-        BACKEND_URL=$(kubectl get svc backend -n toxindex-app -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-        if [ -z "$BACKEND_URL" ]; then
-          BACKEND_URL=$(kubectl get svc backend -n toxindex-app -o jsonpath='{.spec.clusterIP}')
+        BACKEND_SVC_URL=$(kubectl get svc backend -n toxindex-app -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+        if [ -z "$BACKEND_SVC_URL" ]; then
+          BACKEND_SVC_URL=$(kubectl get svc backend -n toxindex-app -o jsonpath='{.spec.clusterIP}')
         fi
         
         # Test database connectivity (via health check)
-        DB_HEALTH=$(curl -s "http://$BACKEND_URL:6513/api/health" | jq -r '.checks.database.status')
+        DB_HEALTH=$(curl -s "http://$BACKEND_SVC_URL:6513/api/health" | jq -r '.checks.database.status')
         if [ "$DB_HEALTH" != "healthy" ]; then
           echo "❌ Database connectivity test failed: $DB_HEALTH"
           exit 1
@@ -293,7 +293,7 @@ steps:
         echo "✅ Database connectivity verified"
         
         # Test Redis connectivity
-        REDIS_HEALTH=$(curl -s "http://$BACKEND_URL:6513/api/health" | jq -r '.checks.redis.status')
+        REDIS_HEALTH=$(curl -s "http://$BACKEND_SVC_URL:6513/api/health" | jq -r '.checks.redis.status')
         if [ "$REDIS_HEALTH" != "healthy" ]; then
           echo "❌ Redis connectivity test failed: $REDIS_HEALTH"
           exit 1
@@ -301,7 +301,7 @@ steps:
         echo "✅ Redis connectivity verified"
         
         # Test GCS connectivity
-        GCS_HEALTH=$(curl -s "http://$BACKEND_URL:6513/api/health" | jq -r '.checks.gcs.status')
+        GCS_HEALTH=$(curl -s "http://$BACKEND_SVC_URL:6513/api/health" | jq -r '.checks.gcs.status')
         if [ "$GCS_HEALTH" != "healthy" ]; then
           echo "❌ GCS connectivity test failed: $GCS_HEALTH"
           exit 1
@@ -309,7 +309,7 @@ steps:
         echo "✅ GCS connectivity verified"
         
         # Test Celery worker status
-        CELERY_HEALTH=$(curl -s "http://$BACKEND_URL:6513/api/health" | jq -r '.checks.celery.status')
+        CELERY_HEALTH=$(curl -s "http://$BACKEND_SVC_URL:6513/api/health" | jq -r '.checks.celery.status')
         if [ "$CELERY_HEALTH" != "healthy" ] && [ "$CELERY_HEALTH" != "warning" ]; then
           echo "❌ Celery worker test failed: $CELERY_HEALTH"
           exit 1
