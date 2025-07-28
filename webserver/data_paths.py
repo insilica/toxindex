@@ -1,8 +1,9 @@
 """
 Data path configuration utility for toxindex.
 
-This module provides centralized access to data directory paths
-defined in config/data_paths.yaml to avoid hardcoding paths throughout the codebase.
+This module provides centralized access to data directory paths and cloud service configurations.
+Most data is now stored in cloud services (Redis, Cloud SQL, GCS), with only logs and 
+temporary files stored locally.
 """
 
 import os
@@ -12,7 +13,7 @@ from typing import Dict, Any, Optional
 
 
 class DataPaths:
-    """Centralized data path configuration manager."""
+    """Centralized data path and cloud service configuration manager."""
     
     def __init__(self, config_file: str = "config/data_paths.yaml"):
         """
@@ -106,6 +107,8 @@ class DataPaths:
         """
         Get a cache subdirectory path.
         
+        Note: Most caching is now handled by Redis. This is for local file caches only.
+        
         Args:
             cache_type: Key from cache_subdirs section
             
@@ -121,6 +124,8 @@ class DataPaths:
     def get_session_path(self, session_type: str) -> Path:
         """
         Get a session subdirectory path.
+        
+        Note: Most session data is now stored in Cloud SQL. This is for local files only.
         
         Args:
             session_type: Key from session_subdirs section
@@ -143,6 +148,45 @@ class DataPaths:
             key: str(self.project_root / path)
             for key, path in self.config['resolved_paths'].items()
         }
+    
+    def get_cloud_config(self) -> Dict[str, Any]:
+        """
+        Get cloud service configuration.
+        
+        Returns:
+            Dictionary with cloud service configurations
+        """
+        return self.config.get('cloud_services', {})
+    
+    def get_redis_config(self) -> Dict[str, Any]:
+        """
+        Get Redis configuration.
+        
+        Returns:
+            Dictionary with Redis connection details
+        """
+        cloud_config = self.get_cloud_config()
+        return cloud_config.get('redis', {})
+    
+    def get_gcs_config(self) -> Dict[str, Any]:
+        """
+        Get Google Cloud Storage configuration.
+        
+        Returns:
+            Dictionary with GCS configuration
+        """
+        cloud_config = self.get_cloud_config()
+        return cloud_config.get('gcs', {})
+    
+    def get_sql_config(self) -> Dict[str, Any]:
+        """
+        Get Cloud SQL configuration.
+        
+        Returns:
+            Dictionary with Cloud SQL configuration
+        """
+        cloud_config = self.get_cloud_config()
+        return cloud_config.get('cloud_sql', {})
 
 
 # Global instance for easy access
@@ -183,32 +227,121 @@ def get_session_path(session_type: str) -> Path:
     return get_data_paths().get_session_path(session_type)
 
 
+def get_redis_config() -> Dict[str, Any]:
+    """Get Redis configuration."""
+    return get_data_paths().get_redis_config()
+
+
+def get_gcs_config() -> Dict[str, Any]:
+    """Get GCS configuration."""
+    return get_data_paths().get_gcs_config()
+
+
+def get_sql_config() -> Dict[str, Any]:
+    """Get Cloud SQL configuration."""
+    return get_data_paths().get_sql_config()
+
+
 # Common path constants for easy access
+# Note: Most data is now in cloud services, these are for local files only
+
 def OUTPUTS_ROOT() -> Path:
-    """Get the outputs directory path."""
+    """
+    Get the outputs directory path.
+    
+    Note: Most outputs are now stored in GCS. This is for local temporary outputs only.
+    """
     return get_path('outputs')
 
 
 def TMP_ROOT() -> Path:
-    """Get the temporary files directory path."""
+    """
+    Get the temporary files directory path.
+    
+    Used for temporary files during processing that need to be cleaned up.
+    """
     return get_path('tmp')
 
 
 def CHATS_ROOT() -> Path:
-    """Get the chats directory path."""
+    """
+    Get the chats directory path.
+    
+    Note: Chat data is now stored in Cloud SQL. This is for local logs only.
+    """
     return get_path('chats')
 
 
 def CACHE_ROOT() -> Path:
-    """Get the cache directory path."""
+    """
+    Get the cache directory path.
+    
+    Note: Most caching is now handled by Redis. This is for local file caches only.
+    """
     return get_path('cache')
 
 
 def LOGS_ROOT() -> Path:
-    """Get the logs directory path."""
+    """
+    Get the logs directory path.
+    
+    Application logs are still stored locally for debugging and monitoring.
+    """
     return get_path('logs')
 
 
 def UPLOADS_ROOT() -> Path:
-    """Get the uploads directory path."""
-    return get_path('uploads') 
+    """
+    Get the uploads directory path.
+    
+    Note: File uploads are now stored in GCS. This is for local temporary processing only.
+    """
+    return get_path('uploads')
+
+
+# Cloud service configuration functions
+
+def get_redis_host() -> str:
+    """Get Redis host from environment or config."""
+    return os.environ.get("REDIS_HOST", "localhost")
+
+
+def get_redis_port() -> int:
+    """Get Redis port from environment or config."""
+    return int(os.environ.get("REDIS_PORT", "6379"))
+
+
+def get_gcs_bucket() -> str:
+    """Get GCS bucket name from environment or config."""
+    return os.environ.get("GCS_BUCKET_NAME", "toxindex-uploads")
+
+
+def get_database_url() -> str:
+    """Get database connection URL from environment."""
+    # Cloud SQL connection details
+    host = os.environ.get("PGHOST")
+    port = os.environ.get("PGPORT", "5432")
+    database = os.environ.get("PGDATABASE")
+    user = os.environ.get("PGUSER")
+    password = os.environ.get("PGPASSWORD")
+    
+    if all([host, database, user, password]):
+        return f"postgresql://{user}:{password}@{host}:{port}/{database}"
+    else:
+        raise ValueError("Database connection details not properly configured")
+
+
+def get_cloud_services_summary() -> Dict[str, str]:
+    """
+    Get a summary of cloud services configuration.
+    
+    Returns:
+        Dictionary with service names and their status
+    """
+    return {
+        "database": "Cloud SQL (PostgreSQL)",
+        "cache": "Redis Memorystore",
+        "file_storage": f"GCS Bucket: {get_gcs_bucket()}",
+        "logs": "Local filesystem",
+        "temp_files": "Local filesystem"
+    } 

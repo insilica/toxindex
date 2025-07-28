@@ -109,7 +109,15 @@ const Dashboard = () => {
   // Socket.IO setup for real-time task status updates
   useEffect(() => {
     if (!socketRef.current) {
-      socketRef.current = io('/', { withCredentials: true });
+      socketRef.current = io('/', {
+        withCredentials: true,
+        transports: ['polling'],
+        transportOptions: {
+          polling: {
+            timeout: 30000 // 30 seconds
+          }
+        }
+      });
     }
     const socket = socketRef.current;
 

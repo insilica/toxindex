@@ -35,7 +35,15 @@ const ChatSession = () => {
   useEffect(() => {
     // Only create the socket once
     if (!socketRef.current) {
-      socketRef.current = io('/', { withCredentials: true });
+      socketRef.current = io('/', {
+        withCredentials: true,
+        transports: ['polling'],
+        transportOptions: {
+          polling: {
+            timeout: 30000 // 30 seconds
+          }
+        }
+      });
     }
     return () => {
       socketRef.current?.disconnect();
