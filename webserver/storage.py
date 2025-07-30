@@ -187,8 +187,8 @@ class GCSFileStorage:
                 'name': blob.name,
                 'size': blob.size,
                 'content_type': blob.content_type,
-                'created': blob.time_created,
-                'updated': blob.updated,
+                'created': blob.time_created.isoformat() if blob.time_created else None,
+                'updated': blob.updated.isoformat() if blob.updated else None,
                 'md5_hash': blob.md5_hash
             }
         except NotFound:

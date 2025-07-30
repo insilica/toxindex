@@ -118,7 +118,16 @@ class CacheManager:
         try:
             args_hash = self._get_md5_hash(str(args))
             cache_key = self._get_cache_key("file_query", f"{method}:{args_hash}")
-            self.redis_client.setex(cache_key, self.QUERY_TTL, json.dumps(result))
+            
+            # Handle objects that have to_dict() method (like File objects)
+            if isinstance(result, list) and result and hasattr(result[0], 'to_dict'):
+                serializable_result = [obj.to_dict() for obj in result]
+            elif hasattr(result, 'to_dict'):
+                serializable_result = result.to_dict()
+            else:
+                serializable_result = result
+                
+            self.redis_client.setex(cache_key, self.QUERY_TTL, json.dumps(serializable_result))
             logger.info(f"Cached query result: {method}")
         except Exception as e:
             logger.error(f"Error caching query result: {e}")
@@ -132,7 +141,19 @@ class CacheManager:
             
             if cached_result:
                 logger.info(f"Cache HIT for query: {method}")
-                return json.loads(cached_result)
+                deserialized = json.loads(cached_result)
+                
+                # Handle special cases where we need to reconstruct objects
+                if method == "get_files_by_environment" and isinstance(deserialized, list):
+                    # Reconstruct File objects from cached dictionaries
+                    from webserver.model.file import File
+                    return [File.from_row(file_dict) for file_dict in deserialized]
+                elif method == "get_file" and isinstance(deserialized, dict):
+                    # Reconstruct File object from cached dictionary
+                    from webserver.model.file import File
+                    return File.from_row(deserialized)
+                else:
+                    return deserialized
             
             logger.info(f"Cache MISS for query: {method}")
             return None
