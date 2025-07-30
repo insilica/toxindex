@@ -4,7 +4,6 @@ import { FaListAlt, FaArchive, FaUndo } from 'react-icons/fa';
 import { useEnvironment } from "../context/EnvironmentContext";
 import { useModel } from "../context/ModelContext";
 import LoadingSpinner from "./shared/LoadingSpinner";
-import { io, Socket } from 'socket.io-client';
 import { useSocket } from '../context/SocketContext';
 import ChatInputBar from "./shared/ChatInputBar";
 import { getWorkflowId, getWorkflowLabelById } from './shared/workflows';
@@ -39,7 +38,7 @@ const Dashboard = () => {
   const [uploading, setUploading] = useState(false);
   const { selectedEnv, refetchEnvironments } = useEnvironment();
   const { selectedModel } = useModel();
-  const socketRef = useRef<Socket | null>(null);
+  const { socket, isConnected } = useSocket();
   const [typedHeading, setTypedHeading] = useState(ENABLE_TYPEWRITER ? "" : TYPEWRITER_TEXT);
   const typewriterTimeoutRef = useRef<number | null>(null);
   const typewriterIntervalRef = useRef<number | null>(null);
@@ -109,7 +108,6 @@ const Dashboard = () => {
 
   // Socket.IO setup for real-time task status updates
   useEffect(() => {
-    const { socket, isConnected } = useSocket();
     
     if (!socket) return;
 

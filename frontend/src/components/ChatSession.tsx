@@ -6,7 +6,6 @@ import { useEnvironment } from "../context/EnvironmentContext";
 import { useModel } from "../context/ModelContext";
 import ChatInputBar from './shared/ChatInputBar';
 import HomeButton from './shared/HomeButton';
-import { Socket } from 'socket.io-client';
 import LoadingSpinner from './shared/LoadingSpinner';
 import { getWorkflowId } from './shared/workflows';
 import { useSocket } from '../context/SocketContext';
