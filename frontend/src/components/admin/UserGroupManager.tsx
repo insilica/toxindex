@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FaUsers, FaUserCog, FaTrash, FaEdit, FaSave, FaTimes, FaHammer} from 'react-icons/fa';
+import HomeButton from '../shared/HomeButton';
 
 interface User {
   user_id: string;
@@ -85,44 +86,28 @@ const UserGroupManager: React.FC = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [usersResponse, groupsResponse] = await Promise.all([
+      const [usersResponse, groupsResponse, workflowAccessResponse] = await Promise.all([
         fetch('/api/admin/users'),
-        fetch('/api/admin/groups')
+        fetch('/api/admin/groups'),
+        fetch('/api/admin/workflow-access')
       ]);
 
-      if (!usersResponse.ok || !groupsResponse.ok) {
+      if (!usersResponse.ok || !groupsResponse.ok || !workflowAccessResponse.ok) {
         throw new Error('Failed to load data');
       }
 
       const usersData = await usersResponse.json();
       const groupsData = await groupsResponse.json();
+      const workflowAccessData = await workflowAccessResponse.json();
 
       setUsers(usersData.users);
       setGroups(groupsData.groups);
-
-      // Load workflow access data (this includes all workflows)
-      await loadWorkflowAccess();
+      setWorkflowAccess(workflowAccessData.access_matrix);
+      setWorkflows(workflowAccessData.workflows || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const loadWorkflowAccess = async () => {
-    try {
-      const response = await fetch('/api/admin/workflow-access');
-      if (!response.ok) {
-        throw new Error('Failed to load workflow access data');
-      }
-      
-      const data = await response.json();
-      console.log('Workflow access data:', data);
-      setWorkflowAccess(data.access_matrix);
-      // Set workflows from the admin endpoint (includes all workflows)
-      setWorkflows(data.workflows || []);
-    } catch (err) {
-      console.error('Failed to load workflow access:', err);
     }
   };
 
@@ -245,7 +230,7 @@ const UserGroupManager: React.FC = () => {
         <div>{error}</div>
         <button 
           onClick={() => setError(null)}
-          className="mt-2 px-3 py-1 bg-red-700 rounded hover:bg-red-800"
+          className="mt-2 px-3 py-1 !bg-red-700 rounded hover:!bg-red-800"
         >
           Dismiss
         </button>
@@ -254,7 +239,7 @@ const UserGroupManager: React.FC = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
+    <div className="max-w-6xl mx-auto p-6 relative" style={{ paddingLeft: '8rem' }}>
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-3">
           <FaUsers className="text-blue-400" />
@@ -269,8 +254,8 @@ const UserGroupManager: React.FC = () => {
           onClick={() => setActiveTab('users')}
           className={`px-6 py-3 font-medium rounded-t-lg transition-colors ${
             activeTab === 'users'
-              ? 'bg-gray-800 text-white border-b-2 border-blue-400'
-              : 'text-gray-400 hover:text-white hover:bg-gray-700'
+              ? '!bg-blue-600 text-white border-b-2 border-blue-400'
+              : '!text-gray-200 hover:!text-white !bg-gray-700'
           }`}
         >
           <FaUsers className="inline mr-2" />
@@ -280,8 +265,8 @@ const UserGroupManager: React.FC = () => {
           onClick={() => setActiveTab('workflows')}
           className={`px-6 py-3 font-medium rounded-t-lg transition-colors ${
             activeTab === 'workflows'
-              ? 'bg-gray-800 text-white border-b-2 border-blue-400'
-              : 'text-gray-400 hover:text-white hover:bg-gray-700'
+              ? '!bg-blue-600 text-white border-b-2 border-blue-400'
+              : '!text-gray-200 hover:!text-white !bg-gray-700'
           }`}
         >
           <FaHammer className="inline mr-2" />
@@ -301,9 +286,10 @@ const UserGroupManager: React.FC = () => {
               </h2>
               <button
                 onClick={() => setShowCreateForm(true)}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
+                className="!bg-blue-600 hover:!bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
               >
-                Create Group
+                <FaUserCog />
+                Create New Group
               </button>
             </div>
 
@@ -318,8 +304,8 @@ const UserGroupManager: React.FC = () => {
                       type="text"
                       value={newGroup.name}
                       onChange={(e) => setNewGroup({ ...newGroup, name: e.target.value })}
-                      className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-md text-white focus:outline-none focus:border-blue-500"
-                      placeholder="Enter group name"
+                      placeholder="Group name"
+                      className="w-full px-3 py-2 !bg-gray-600 border border-gray-500 rounded-md text-white focus:outline-none focus:border-blue-500"
                     />
                   </div>
                   <div>
@@ -328,8 +314,8 @@ const UserGroupManager: React.FC = () => {
                       type="text"
                       value={newGroup.description}
                       onChange={(e) => setNewGroup({ ...newGroup, description: e.target.value })}
-                      className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-md text-white focus:outline-none focus:border-blue-500"
-                      placeholder="Enter description"
+                      placeholder="Group description"
+                      className="w-full px-3 py-2 !bg-gray-600 border border-gray-500 rounded-md text-white focus:outline-none focus:border-blue-500"
                     />
                   </div>
                 </div>
@@ -337,17 +323,17 @@ const UserGroupManager: React.FC = () => {
                   <button
                     onClick={createGroup}
                     disabled={!newGroup.name.trim()}
-                    className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center gap-2"
+                    className="!bg-green-600 hover:!bg-green-700 disabled:!bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center gap-2"
                   >
                     <FaSave />
-                    Create
+                    Create Group
                   </button>
                   <button
                     onClick={() => {
                       setShowCreateForm(false);
                       setNewGroup({ name: '', description: '' });
                     }}
-                    className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
+                    className="!bg-gray-600 hover:!bg-gray-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
                   >
                     <FaTimes />
                     Cancel
@@ -427,10 +413,10 @@ const UserGroupManager: React.FC = () => {
                         <select
                           value={groups.find(g => g.name === user.group_name)?.group_id || ''}
                           onChange={(e) => updateUserGroup(user.user_id, e.target.value)}
-                          className="bg-gray-600 border border-gray-500 rounded px-2 py-1 text-white text-sm focus:outline-none focus:border-blue-500"
+                          className="!bg-gray-600 border border-gray-500 rounded px-2 py-1 text-white text-sm focus:outline-none focus:border-blue-500"
                         >
                           {groups.map((group) => (
-                            <option key={group.group_id} value={group.group_id}>
+                            <option key={group.group_id} value={group.group_id} className="!bg-gray-800 !text-white">
                               {group.name}
                             </option>
                           ))}
@@ -499,8 +485,8 @@ const UserGroupManager: React.FC = () => {
                               onClick={() => toggleWorkflowAccess(group.group_id, workflow.workflow_id, hasAccess)}
                               className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors border-2 ${
                                 hasAccess
-                                  ? 'bg-green-600 hover:bg-green-700 text-white border-green-500'
-                                  : 'bg-gray-700 hover:bg-gray-600 text-gray-300 border-gray-500'
+                                  ? '!bg-green-600 hover:!bg-green-700 text-white border-green-500'
+                                  : '!bg-gray-700 hover:!bg-gray-600 text-gray-300 border-gray-500'
                               }`}
                               title={`${hasAccess ? 'Revoke' : 'Grant'} access for ${group.name}`}
                             >
@@ -523,6 +509,23 @@ const UserGroupManager: React.FC = () => {
           )}
         </div>
       )}
+      
+      {/* Home button positioned relative to admin content */}
+      <div 
+        className="absolute transition-all duration-300 z-50"
+        style={{
+          left: '2rem',
+          top: '1.5rem',
+          border: 'none',
+          padding: 0
+        }}
+      >
+        <HomeButton
+          color="#16a34a"
+          hoverColor="#2563eb"
+          aria-label="Go back"
+        />
+      </div>
     </div>
   );
 };
@@ -546,7 +549,8 @@ const GroupEditForm: React.FC<GroupEditFormProps> = ({ group, onSave, onCancel }
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-md text-white focus:outline-none focus:border-blue-500"
+          placeholder="Group name"
+          className="w-full px-3 py-2 !bg-gray-600 border border-gray-500 rounded-md text-white focus:outline-none focus:border-blue-500"
         />
       </div>
       <div className="mb-3">
@@ -555,21 +559,22 @@ const GroupEditForm: React.FC<GroupEditFormProps> = ({ group, onSave, onCancel }
           type="text"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-md text-white focus:outline-none focus:border-blue-500"
+          placeholder="Group description"
+          className="w-full px-3 py-2 !bg-gray-600 border border-gray-500 rounded-md text-white focus:outline-none focus:border-blue-500"
         />
       </div>
       <div className="flex gap-2">
         <button
           onClick={() => onSave(name, description)}
           disabled={!name.trim()}
-          className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white px-3 py-1 rounded text-sm flex items-center gap-1"
+          className="!bg-green-600 hover:!bg-green-700 disabled:!bg-gray-600 text-white px-3 py-1 rounded text-sm flex items-center gap-1"
         >
           <FaSave />
           Save
         </button>
         <button
           onClick={onCancel}
-          className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-sm flex items-center gap-1"
+          className="!bg-gray-600 hover:!bg-gray-700 text-white px-3 py-1 rounded text-sm flex items-center gap-1"
         >
           <FaTimes />
           Cancel

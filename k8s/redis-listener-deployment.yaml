@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-listener
+  namespace: toxindex-app
+  labels:
+    app: redis-listener
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis-listener
+  template:
+    metadata:
+      labels:
+        app: redis-listener
+    spec:
+      containers:
+      - name: redis-listener
+        image: us-docker.pkg.dev/toxindex/toxindex-backend/backend:latest  # Use the correct image
+        command: ["python", "redis_listener_standalone.py"]
+        env:
+        - name: REDIS_HOST
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: REDIS_HOST
+        - name: REDIS_PORT
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: REDIS_PORT
+        - name: PGHOST
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: PGHOST
+        - name: PGPORT
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: PGPORT
+        - name: PGDATABASE
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: PGDATABASE
+        - name: PGUSER
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: PGUSER
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: PGPASSWORD
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+ 

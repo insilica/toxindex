@@ -1,6 +1,7 @@
 import React, {useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useEnvironment } from "../context/EnvironmentContext";
+import HomeButton from './shared/HomeButton';
 
 interface Environment {
   environment_id: string;
@@ -45,7 +46,7 @@ const SettingsEnvironments: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col items-center min-h-screen min-w-full w-full h-screen pt-16" style={{ background: 'linear-gradient(135deg, #1a1426 0%, #2a1a2a 60%, #231a23 100%)' }}>
+    <div className="max-w-6xl mx-auto p-6 relative" style={{ paddingLeft: '8rem' }}>
       <div className="w-full max-w-3xl p-8 rounded shadow-lg" style={{ background: 'rgba(0,0,0,0.15)' }}>
         {/* Title and Add Button Row */}
         <div className="flex items-center justify-between mb-4">
@@ -156,6 +157,23 @@ const SettingsEnvironments: React.FC = () => {
             </div>
           </div>
         )}
+      </div>
+      
+      {/* Home button positioned relative to settings content */}
+      <div 
+        className="absolute transition-all duration-300 z-50"
+        style={{
+          left: '2rem',
+          top: '1.5rem',
+          border: 'none',
+          padding: 0
+        }}
+      >
+        <HomeButton
+          color="#16a34a"
+          hoverColor="#2563eb"
+          aria-label="Go back"
+        />
       </div>
     </div>
   );

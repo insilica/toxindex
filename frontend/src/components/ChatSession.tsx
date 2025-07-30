@@ -5,9 +5,11 @@ import remarkGfm from 'remark-gfm';
 import { useEnvironment } from "../context/EnvironmentContext";
 import { useModel } from "../context/ModelContext";
 import ChatInputBar from './shared/ChatInputBar';
-import { io, Socket } from 'socket.io-client';
+import HomeButton from './shared/HomeButton';
+import { Socket } from 'socket.io-client';
 import LoadingSpinner from './shared/LoadingSpinner';
 import { getWorkflowId } from './shared/workflows';
+import { useSocket } from '../context/SocketContext';
 
 let mountCount = 0;
 
@@ -19,11 +21,11 @@ const ChatSession = () => {
   const [input, setInput] = useState('');
   const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const socketRef = useRef<Socket | null>(null);
   const { selectedEnv } = useEnvironment();
   const { selectedModel } = useModel();
   const [fileId, setFileId] = useState<string | undefined>(undefined);
   const [fileName, setFileName] = useState<string | undefined>(undefined);
+  const { socket, isConnected } = useSocket();
 
   console.log("ChatSession mounted", sessionId);
 
@@ -33,42 +35,27 @@ const ChatSession = () => {
   }, []);
 
   useEffect(() => {
-    // Only create the socket once
-    if (!socketRef.current) {
-      socketRef.current = io('/', {
-        withCredentials: true,
-        transports: ['polling'],
-        transportOptions: {
-          polling: {
-            timeout: 30000 // 30 seconds
-          }
-        }
-      });
+    if (!socket || !sessionId) return;
+
+    // Only join room if socket is connected
+    if (isConnected) {
+      // Join the room
+      console.log('[SocketIO] Emitting join_chat_session', sessionId);
+      socket.emit('join_chat_session', { session_id: sessionId });
     }
-    return () => {
-      socketRef.current?.disconnect();
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!socketRef.current || !sessionId) return;
-
-    // Join the room
-    console.log('[SocketIO] Emitting join_chat_session', sessionId);
-    socketRef.current.emit('join_chat_session', { session_id: sessionId });
 
     // Handler for new_message
     const handler = (msg: any) => {
       console.log('[SocketIO] Received new_message:', msg);
       setMessages(prev => [...prev, msg]);
     };
-    socketRef.current.on('new_message', handler);
+    socket.on('new_message', handler);
 
     // Cleanup handler only (not the socket)
     return () => {
-      socketRef.current?.off('new_message', handler);
+      socket.off('new_message', handler);
     };
-  }, [sessionId]);
+  }, [sessionId, socket, isConnected]);
 
   useEffect(() => {
     if (!sessionId) return;
@@ -141,7 +128,7 @@ const ChatSession = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col flex-1" style={{ background: 'linear-gradient(135deg, #101614 0%, #1a2a1a 60%, #1a2320 100%)' }}>
+    <div className="min-h-screen flex flex-col flex-1 relative" style={{ background: 'linear-gradient(135deg, #101614 0%, #1a2a1a 60%, #1a2320 100%)' }}>
       <div className="flex-1 flex flex-col max-w-5xl mx-auto w-full px-4 pt-20 py-0">
         {/* Chat history box */}
         <div
@@ -215,7 +202,7 @@ const ChatSession = () => {
           )}
         </div>
         {/* Selected file display above input bar, left-aligned */}
-        <div className="w-full flex flex-col items-center pb-8">
+        <div className="w-full flex flex-col items-center pb-8 relative">
           <div style={{ width: '100%', maxWidth: 800 }}>
             {fileId && (
               <div className="bg-gray-900/10 text-green-200 px-3 py-0 rounded-full text-sm font-medium flex items-center gap-1 mb-2" style={{ minHeight: 40 }}>
@@ -234,6 +221,23 @@ const ChatSession = () => {
                 setFileId(id);
                 setFileName(name);
               }}
+            />
+          </div>
+          
+          {/* Home button positioned relative to page */}
+          <div 
+            className="absolute transition-all duration-300 z-50"
+            style={{
+              left: '2rem',
+              top: '1.5rem',
+              border: 'none',
+              padding: 0
+            }}
+          >
+            <HomeButton
+              color="#16a34a"
+              hoverColor="#2563eb"
+              aria-label="Go back"
             />
           </div>
         </div>

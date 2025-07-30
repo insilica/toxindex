@@ -23,117 +23,120 @@ import UserGroupManager from './components/admin/UserGroupManager';
 import { EnvironmentProvider } from "./context/EnvironmentContext";
 import { ChatSessionProvider } from "./context/ChatSessionContext";
 import { ModelProvider } from "./context/ModelContext";
+import { SocketProvider } from "./context/SocketContext";
 
 function App() {
   console.log("App mounted");
   return (
     <div className="w-screen h-screen min-h-screen min-w-full">
-      <ModelProvider>
-        <ChatSessionProvider>
-          <EnvironmentProvider>
-            <Router>
-              <Routes>
-                {/* Public routes: no Layout */}
-                <Route path="/login" element={<LoginForm />} />
-                <Route path="/register" element={<RegisterForm />} />
-                <Route path="/verify/:token" element={<VerifyPage />} />
-                <Route path="/policies/terms-of-use/" element={<TermsPrivacy />} />
-                <Route path="/policies/privacy-policy/" element={<TermsPrivacy />} />
-                <Route path="/forgot_password" element={<ForgotPasswordPage />} />
-                <Route path="/reset_password/:token" element={<ResetPasswordPage />} />
+      <SocketProvider>
+        <ModelProvider>
+          <ChatSessionProvider>
+            <EnvironmentProvider>
+              <Router>
+                <Routes>
+                  {/* Public routes: no Layout */}
+                  <Route path="/login" element={<LoginForm />} />
+                  <Route path="/register" element={<RegisterForm />} />
+                  <Route path="/verify/:token" element={<VerifyPage />} />
+                  <Route path="/policies/terms-of-use/" element={<TermsPrivacy />} />
+                  <Route path="/policies/privacy-policy/" element={<TermsPrivacy />} />
+                  <Route path="/forgot_password" element={<ForgotPasswordPage />} />
+                  <Route path="/reset_password/:token" element={<ResetPasswordPage />} />
 
-                {/* Protected routes: with Layout */}
-                <Route
-                  path="/"
-                  element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <Dashboard />
-                      </Layout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/settings/general"
-                  element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <Settings/>
-                      </Layout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/settings/data-controls"
-                  element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <SettingsDataControls />
-                      </Layout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/settings/environments"
-                  element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <SettingsEnvironments />
-                      </Layout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/settings/environments/create"
-                  element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <CreateEnvironmentSettings />
-                      </Layout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/environments/details"
-                  element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <EnvironmentDetails />
-                      </Layout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/chat/session/:sessionId"
-                  element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <ChatSession />
-                      </Layout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route path="/task/:task_id" element={<TaskDetail />} />
-                <Route path="/user/:user_id" element={<UserProfile />} />
-                
-                {/* Admin routes */}
-                <Route
-                  path="/admin/users"
-                  element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <AdminRoute>
-                          <UserGroupManager />
-                        </AdminRoute>
-                      </Layout>
-                    </ProtectedRoute>
-                  }
-                />
-              </Routes>
-            </Router>
-          </EnvironmentProvider>
-        </ChatSessionProvider>
-      </ModelProvider>
+                  {/* Protected routes: with Layout */}
+                  <Route
+                    path="/"
+                    element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <Dashboard />
+                        </Layout>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/settings/general"
+                    element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <Settings/>
+                        </Layout>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/settings/data-controls"
+                    element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <SettingsDataControls />
+                        </Layout>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/settings/environments"
+                    element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <SettingsEnvironments />
+                        </Layout>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/settings/environments/create"
+                    element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <CreateEnvironmentSettings />
+                        </Layout>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/environments/details"
+                    element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <EnvironmentDetails />
+                        </Layout>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/chat/session/:sessionId"
+                    element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <ChatSession />
+                        </Layout>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route path="/task/:task_id" element={<TaskDetail />} />
+                  <Route path="/user/:user_id" element={<UserProfile />} />
+                  
+                  {/* Admin routes */}
+                  <Route
+                    path="/admin/users"
+                    element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <AdminRoute>
+                            <UserGroupManager />
+                          </AdminRoute>
+                        </Layout>
+                      </ProtectedRoute>
+                    }
+                  />
+                </Routes>
+              </Router>
+            </EnvironmentProvider>
+          </ChatSessionProvider>
+        </ModelProvider>
+      </SocketProvider>
     </div>
   );
 }

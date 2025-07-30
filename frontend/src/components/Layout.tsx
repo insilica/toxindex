@@ -8,7 +8,7 @@ import { useChatSession } from "../context/ChatSessionContext";
 import { useModel } from "../context/ModelContext";
 import { useAdmin } from "../hooks/useAdmin";
 import logoUrl from '../assets/logo.svg';
-import HomeButton from "./shared/HomeButton";
+
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   console.log("Layout mounted");
   const navigate = useNavigate();
@@ -31,7 +31,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAdmin } = useAdmin();
 
   // Show back arrow on environment and task detail pages
-  const showBackArrow = location.pathname.startsWith('/environments') || location.pathname.startsWith('/settings') || location.pathname.startsWith('/chat/session');;
+  // const showBackArrow = location.pathname.startsWith('/environments') || location.pathname.startsWith('/settings') || location.pathname.startsWith('/chat/session');
   // const [isBackHover, setIsBackHover] = useState(false);
 
   useEffect(() => {
@@ -165,7 +165,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     if (isGeneralSettings && !sidebarOpen && !sidebarClosing) {
       setSidebarOpen(true);
     }
-  }, [isGeneralSettings, sidebarOpen, sidebarClosing]);
+  }, [isGeneralSettings]); // Remove sidebarOpen and sidebarClosing from dependencies
 
   // Create a new chat session (flat)
   const handleNewChat = async () => {
@@ -231,20 +231,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   return (
     <div className="flex w-screen min-h-screen overflow-x-hidden" style={{ fontFamily: 'Inter, Arial, sans-serif', position: 'relative' }}>
-      {showBackArrow && (
-        <HomeButton
-          className="fixed top-6 transition-all duration-300 z-50"
-          style={{
-            left: sidebarOpen ? '35rem' : '27rem',
-            top: sidebarOpen ? '5rem' : '5rem',
-            border: 'none',
-            padding: 0
-          }}
-          color="#16a34a"
-          hoverColor="#2563eb"
-          aria-label="Go back"
-        />
-      )}
+
       {/* Sidebar */}
       <div style={{ position: 'relative' }}>
         <aside
@@ -299,7 +286,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 </span>
                 <nav className="flex flex-col gap-2 w-full">
                   <button
-                    className={`settings-link py-1 pl-2 pr-2 rounded transition text-left text-sm ${settingsSection === 'general' ? 'bg-green-700 text-white font-bold' : 'text-gray-200'}`}
+                    className={`settings-link py-1 pl-2 pr-2 rounded transition text-left text-sm ${settingsSection === 'general' ? '!bg-green-700 text-white font-bold' : 'text-gray-200'}`}
                     style={{ background: settingsSection === 'general' ? undefined : 'none', minHeight: '32px', fontSize: '0.95rem', paddingLeft: 14, width: '90%', maxWidth: 210, marginLeft: 2 }}
                     onClick={() => navigate('/settings/general')}
                   >
@@ -307,7 +294,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                     General
                   </button>
                   <button
-                    className={`settings-link py-1 pl-2 pr-2 rounded transition text-left text-sm ${settingsSection === 'environments' ? 'bg-green-700 text-white font-bold' : 'text-gray-200'}`}
+                    className={`settings-link py-1 pl-2 pr-2 rounded transition text-left text-sm ${settingsSection === 'environments' ? '!bg-green-700 text-white font-bold' : 'text-gray-200'}`}
                     style={{ background: settingsSection === 'environments' ? undefined : 'none', minHeight: '32px', fontSize: '0.95rem', paddingLeft: 14, width: '90%', maxWidth: 210, marginLeft: 2 }}
                     onClick={() => navigate('/settings/environments')}
                   >
@@ -315,7 +302,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                     Environments
                   </button>
                   <button
-                    className={`settings-link py-1 pl-2 pr-2 rounded transition text-left text-sm ${settingsSection === 'data-controls' ? 'bg-green-700 text-white font-bold' : 'text-gray-200'}`}
+                    className={`settings-link py-1 pl-2 pr-2 rounded transition text-left text-sm ${settingsSection === 'data-controls' ? '!bg-green-700 text-white font-bold' : 'text-gray-200'}`}
                     style={{ background: settingsSection === 'data-controls' ? undefined : 'none', minHeight: '32px', fontSize: '0.95rem', paddingLeft: 14, width: '90%', maxWidth: 210, marginLeft: 2 }}
                     onClick={() => navigate('/settings/data-controls')}
                   >
@@ -324,7 +311,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                   </button>
                   {isAdmin && (
                     <button
-                      className={`settings-link py-1 pl-2 pr-2 rounded transition text-left text-sm ${settingsSection === 'admin' ? 'bg-green-700 text-white font-bold' : 'text-gray-200'}`}
+                      className={`settings-link py-1 pl-2 pr-2 rounded transition text-left text-sm ${settingsSection === 'admin' ? '!bg-green-700 text-white font-bold' : 'text-gray-200'}`}
                       style={{ background: settingsSection === 'admin' ? undefined : 'none', minHeight: '32px', fontSize: '0.95rem', paddingLeft: 14, width: '90%', maxWidth: 210, marginLeft: 2 }}
                       onClick={() => navigate('/admin/users')}
                     >
@@ -482,7 +469,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         <div style={{ position: 'absolute', top: '2rem', right: '2.5rem', zIndex: 40 }} ref={profileRef}>
           <button
             onClick={() => setProfileOpen(v => !v)}
-            className="w-11 h-11 flex items-center justify-center rounded-full bg-gray-900 bg-opacity-60 text-white hover:bg-gray-800 focus:outline-none shadow"
+            className="w-11 h-11 flex items-center justify-center rounded-full !bg-gray-900 !bg-opacity-10 text-white hover:!bg-gray-800 focus:outline-none shadow"
             style={{ padding: 0 }}
             title="User profile"
           >
@@ -536,7 +523,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       )}
       
       {/* Main Content */}
-      <main className="flex-1 flex items-center justify-center h-screen">
+      <main className="flex-1 flex items-center justify-center h-screen !bg-gray-900 relative">
         {/* {children} */}
         {(
           React.isValidElement(children) &&
@@ -544,6 +531,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         )
           ? React.cloneElement(children as React.ReactElement<any>, { paddingClass: sidebarOpen ? "px-90" : "px-125" })
           : children}
+        
+
       </main>
       <FilePreviewModal
         fileId={sidebarPreviewFileId}

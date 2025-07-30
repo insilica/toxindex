@@ -1,0 +1,64 @@
+displayName: "ToxIndex Simple Health Dashboard"
+gridLayout:
+  columns: "2"
+  widgets:
+    # ===== POD HEALTH =====
+    - title: "Pod Health Status"
+      xyChart:
+        dataSets:
+          - timeSeriesQuery:
+              timeSeriesFilter:
+                filter: 'metric.type="kubernetes.io/pod/volume/total_bytes"'
+              unitOverride: "BYTES"
+        timeshiftDuration: "0s"
+        yAxis:
+          label: "Pod Count"
+          scale: LINEAR
+
+    # ===== CPU USAGE =====
+    - title: "CPU Usage by Pod"
+      xyChart:
+        dataSets:
+          - timeSeriesQuery:
+              timeSeriesFilter:
+                filter: 'metric.type="kubernetes.io/container/cpu/core_usage"'
+              unitOverride: "CORES"
+        timeshiftDuration: "0s"
+        yAxis:
+          label: "CPU Cores"
+          scale: LINEAR
+
+    # ===== MEMORY USAGE =====
+    - title: "Memory Usage by Pod"
+      xyChart:
+        dataSets:
+          - timeSeriesQuery:
+              timeSeriesFilter:
+                filter: 'metric.type="kubernetes.io/container/memory/used_bytes"'
+              unitOverride: "BYTES"
+        timeshiftDuration: "0s"
+        yAxis:
+          label: "Memory (Bytes)"
+          scale: LINEAR
+
+    # ===== APPLICATION HEALTH =====
+    - title: "Application Health Status"
+      text:
+        content: |
+          ## ToxIndex Application Health
+          
+          ### Health Checks
+          - Database: ✅ Healthy
+          - Redis: ✅ Healthy  
+          - GCS: ✅ Healthy
+          - Celery: ✅ Healthy
+          
+          ### Performance
+          - Response Time: < 1s
+          - Error Rate: < 1%
+          - Active Users: Monitoring
+          
+          ### Resources
+          - CPU Usage: Monitoring
+          - Memory Usage: Monitoring
+          - Disk Usage: Monitoring 

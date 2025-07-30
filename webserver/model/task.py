@@ -174,6 +174,11 @@ class Task:
         params = (celery_task_id, task_id)
         ds.execute("UPDATE tasks SET celery_task_id = %s WHERE task_id = %s", params)
 
+    @staticmethod
+    def set_status(task_id, status):
+        """Set the status of a task."""
+        params = (status, task_id)
+        ds.execute("UPDATE tasks SET status = %s WHERE task_id = %s", params)
 
     @staticmethod
     def get_messages(task_id, user_id):
@@ -206,7 +211,3 @@ class Task:
             (finished_at, task_id)
         )
         return finished_at
-
-    @staticmethod
-    def set_status(task_id, status):
-        ds.execute("UPDATE tasks SET status = %s WHERE task_id = %s", (status, task_id))

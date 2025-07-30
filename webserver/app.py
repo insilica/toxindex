@@ -149,7 +149,7 @@ def handle_connect(auth):
 # TODO right now I think any user can join any task room
 @socketio.on("join_task_room")
 def handle_join_task_room(data):
-    logging.info(f"JOIN ROOM {data}")
+    logging.info(f"[socketio] join_task_room called with data: {data}")
     task_id = data.get("task_id")
     user = flask_login.current_user
 
@@ -162,7 +162,7 @@ def handle_join_task_room(data):
     # Check authorization: does this user own the task?
     task = Task.get_task(task_id)
     if not task or task.user_id != user.user_id:
-        logging.warning(f"[socketio] join_task_room called without authorization by {request.sid}")
+        logging.warning(f"[socketio] join_task_room called without authorization by {request.sid} for task {task_id}")
         emit("error", {"error": "Not authorized to join this task room"})
         return
 
@@ -177,13 +177,39 @@ def handle_join_task_room(data):
 
 @socketio.on("join_chat_session")
 def handle_join_chat_session(data):
+    logging.info(f"[socketio] join_chat_session called with data: {data}")
     session_id = data.get("session_id")
     if not session_id:
         logging.warning(f"[socketio] join_chat_session called without session_id by {request.sid}")
+        emit("error", {"error": "session_id is required"})
         return
-    join_room(f"chat_session_{session_id}")
+    
+    # Check if user is authenticated
+    user = flask_login.current_user
+    if not user.is_authenticated:
+        logging.warning(f"[socketio] join_chat_session called without authentication by {request.sid}")
+        emit("error", {"error": "Authentication required"})
+        return
+    
+    room = f"chat_session_{session_id}"
+    logging.info(f"[socketio] {request.sid} joining room: {room}")
+    join_room(room)
     logging.info(f"[socketio] {request.sid} joined chat_session_{session_id}")
     emit("joined_chat_session", {"session_id": session_id}, room=request.sid)
+
+@socketio.on("leave_task_room")
+def handle_leave_task_room(data):
+    logging.info(f"[socketio] leave_task_room called with data: {data}")
+    task_id = data.get("task_id")
+    if task_id:
+        room = f"task_{task_id}"
+        logging.info(f"[socketio] {request.sid} leaving room: {room}")
+        # Note: Flask-SocketIO doesn't have a direct leave_room method for clients
+        # The room will be cleaned up automatically when the client disconnects
+
+@socketio.on("disconnect")
+def handle_disconnect():
+    logging.info(f"[socketio] Client disconnected: {request.sid}")
 
 # Register Blueprints for modularized API endpoints
 app.register_blueprint(env_bp)
@@ -333,19 +359,16 @@ def test_alive():
 @app.route('/<path:path>')
 def serve_react_app(path):
     # Only serve index.html for non-API, non-static routes
-    if path.startswith('api/') or path.startswith('static/') or path.startswith('uploads/'):
+    # Don't intercept API routes that are already defined
+    if path.startswith('static/') or path.startswith('uploads/'):
         abort(404)
     return send_from_directory(app.static_folder, 'index.html')
 
-# --- Start Redis listener thread on every process startup (not just when run as __main__) ---
-thread_name = f"RedisListenerThread-{uuid.uuid4().hex[:8]}"
-threading.Thread(
-    target=redis_listener,
-    args=(thread_name,),
-    daemon=True,
-    name=thread_name,
-).start()
-# This ensures the listener runs in both dev (python app.py) and prod (gunicorn/uwsgi/etc)
+# --- Redis listener is now in a separate deployment ---
+# The main app no longer starts Redis listeners
+# This prevents duplicate listeners across multiple web pods
+
+logging.info("Redis listener disabled - using separate deployment for background processing")
 
 # LAUNCH =====================================================================
 if __name__ == "__main__":

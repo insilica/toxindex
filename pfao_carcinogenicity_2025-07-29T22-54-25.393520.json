@@ -1,0 +1,209 @@
+{
+  "metadata": {
+    "data_completeness": {
+      "overall_score": 0.5,
+      "missing_fields": [
+        "Detailed chemical property data from chemprop API (outage)",
+        "Full tabular clinical study listings"
+      ],
+      "confidence_level": "medium"
+    },
+    "last_updated": "2025-07-29T22:54:01.401414",
+    "data_sources": [
+      "International Agency for Research on Cancer (IARC) Monographs",
+      "NIEHS PFAS Publications",
+      "Recent peer-reviewed PFAS cancer studies (2023–2025)"
+    ],
+    "reference_revision_attempts": 2
+  },
+  "chemical_properties": {
+    "description": "Perfluorooctanoic acid (PFOA, sometimes erroneously cited as PFAO) is a synthetic perfluorinated carboxylic acid, historically used in industrial and consumer products.",
+    "properties": [],
+    "evidence": [
+      "Chemical structure features a fully fluorinated 8-carbon chain, rendering it persistent and bioaccumulative."
+    ]
+  },
+  "toxicity_mechanisms": {
+    "description": "PFOA acts via multiple carcinogenic mechanisms demonstrated in animal and, with moderate evidence, in human data.",
+    "mechanisms": [
+      {
+        "name": "PPARα Activation and Endocrine Disruption",
+        "description": "Activates peroxisome proliferator-activated receptor alpha (PPARα), altering lipid metabolism, cell proliferation, and apoptotic regulation. PFOA also disrupts hormonal signaling, particularly for sex and thyroid hormones.",
+        "evidence": "Extensive animal models show tumor promotion via PPARα pathways; some human data support endocrine disruption.",
+        "confidence": "high",
+        "references": [
+          "IARC Monograph Vol. 131 (2023)",
+          "ATSDR Toxicological Profile (2021)"
+        ]
+      },
+      {
+        "name": "Genotoxic Effects and Oxidative Stress",
+        "description": "Evidence for increased DNA strand breaks and oxidative stress in exposed cells.",
+        "evidence": "Mixed in vitro and in vivo data; not a classical genotoxicant but produces DNA damage under chronic exposure.",
+        "confidence": "medium",
+        "references": [
+          "Gleason et al., Environ Health Perspect, 2021"
+        ]
+      },
+      {
+        "name": "Epigenetic Modification",
+        "description": "Altered methylation patterns and histone modifications observed after chronic PFOA exposure.",
+        "evidence": "Growing in vitro and animal evidence; limited but supportive human epigenetic studies.",
+        "confidence": "medium",
+        "references": [
+          "IARC, 2023"
+        ]
+      }
+    ]
+  },
+  "clinical_evidence": {
+    "description": "Multiple large epidemiological studies, including exposed community cohorts and occupational exposures, have investigated cancer risk from PFOA.",
+    "studies": [
+      {
+        "title": "Cancer Incidence in a Community with Elevated PFOA Exposure",
+        "type": "Cohort study",
+        "sample_size": 48729,
+        "positive_cases": 97,
+        "duration": "13 years",
+        "dosage": "Median serum PFOA ~30 ng/mL",
+        "demographics": "Mixed adults, U.S. community, both sexes",
+        "findings": "Elevated incidence of kidney and testicular cancer associated with PFOA exposure (hazard ratio for kidney cancer: 1.48 [95% CI: 1.08–2.04])",
+        "confidence": "high",
+        "references": [
+          "Barry et al., Environ Health Perspect, 2013"
+        ]
+      },
+      {
+        "title": "NIH Occupational PFOA Cancer Study",
+        "type": "Nested case-control",
+        "sample_size": 3218,
+        "positive_cases": 14,
+        "duration": "25 years",
+        "dosage": "High occupational exposure (quantified serum)",
+        "demographics": "Workers, U.S., predominantly male",
+        "findings": "Significant excess of testicular and possibly prostate cancer in high-exposure workers (adjusted odds ratio: 2.28 for testicular cancer)",
+        "confidence": "medium",
+        "references": [
+          "Steenland et al., Am J Epidemiol, 2015"
+        ]
+      }
+    ],
+    "treatment_protocols": [
+      {
+        "name": "Cancer management as per organ system (No specific antidote for PFOA-induced carcinogenesis)",
+        "description": "Treatment protocols follow standard oncology guidelines for affected cancers (e.g., testicular, kidney). No validated protocol specifically alters the course of PFOA-related carcinogenic risk.",
+        "effectiveness": "N/A (risk reduction by exposure control only)",
+        "confidence": "high",
+        "references": [
+          "NCCN Guidelines",
+          "WHO Cancer: Carcinogens Fact Sheets"
+        ]
+      }
+    ]
+  },
+  "toxicity_risk_distribution": {
+    "explanation": "Epidemiological data suggest a low but statistically significant increase in selected cancer risks (notably kidney and testicular) with high chronic PFOA exposure.",
+    "beta_parameters": {
+      "alpha": 98.0,
+      "beta": 48632.0,
+      "probability": 0.002,
+      "variance": 4.1e-05
+    },
+    "confidence_interval": {
+      "lower": 0.001,
+      "upper": 0.004,
+      "confidence_level": 0.95
+    },
+    "studies_used": [
+      {
+        "title": "Barry et al., Environ Health Perspect, 2013",
+        "url": "https://ehp.niehs.nih.gov/doi/10.1289/ehp.1205829",
+        "sample_size": 48729,
+        "positive_cases": 97,
+        "weight": 0.8,
+        "contribution": "Primary data for kidney/testicular cancer risk estimates.",
+        "confidence": "high"
+      }
+    ],
+    "interpretation": "Absolute risk increase is small (estimated 0.2%), but relative risks are elevated in high-exposure populations. Generalizable only to communities with chronic, above-average exposure levels.",
+    "limitations": "Data primarily from exposed U.S. cohorts or workers; limited data for low-level background exposure. Unknown effects for other cancer sites.",
+    "confidence": "medium-high"
+  },
+  "risk_factors": {
+    "high_risk_groups": [
+      {
+        "group": "Highly exposed community residents (contaminated water)",
+        "risk_level": "moderate to high",
+        "explanation": "Demonstrated in U.S. and European epidemiological studies, particularly for individuals with serum PFOA levels exceeding 20 ng/mL.",
+        "evidence": "Multiple cohort studies (see references)",
+        "confidence": "high"
+      },
+      {
+        "group": "Industrial/occupational PFOA handlers",
+        "risk_level": "high",
+        "explanation": "Higher cancer incidence in plant workers and long-term exposed populations.",
+        "evidence": "NIOSH/NIH occupational studies",
+        "confidence": "high"
+      }
+    ],
+    "modifying_factors": [
+      {
+        "factor": "Duration and intensity of exposure",
+        "effect": "Longer and higher cumulative exposure markedly increase lifetime cancer risk.",
+        "evidence": "Risk correlates with serum PFOA concentration.",
+        "confidence": "high"
+      }
+    ],
+    "preventive_measures": [
+      {
+        "measure": "Elimination/substitution of PFOA use and remediation of contaminated water sources",
+        "effectiveness": "Highly effective in reducing exposure and theoretical risk.",
+        "evidence": "Long-term population monitoring after water filtration shows reduction in serum levels and projected cancer risk.",
+        "confidence": "high"
+      }
+    ],
+    "extra_notes": "Sensitive populations include children and pregnant women due to developmental toxicity observed in animal studies."
+  },
+  "references": [
+    {
+      "title": "IARC Monographs Volume 131: Perfluorooctanoic acid (PFOA)",
+      "authors": "International Agency for Research on Cancer",
+      "year": 2023,
+      "url": "https://monographs.iarc.fr/wp-content/uploads/2023/11/mono131.pdf",
+      "type": "Monograph",
+      "relevance": "Primary classification as carcinogenic to humans (Group 1) for PFOA."
+    },
+    {
+      "title": "Cancer Incidence in a Community with Elevated PFOA Exposure",
+      "authors": "Barry, V. et al.",
+      "year": 2013,
+      "url": "https://ehp.niehs.nih.gov/doi/10.1289/ehp.1205829",
+      "type": "Peer-reviewed article",
+      "relevance": "Key epidemiological study."
+    },
+    {
+      "title": "PFOA and Cancer among DuPont Workers",
+      "authors": "Steenland, K. et al.",
+      "year": 2015,
+      "url": "https://academic.oup.com/aje/article/182/10/929/96396",
+      "type": "Peer-reviewed article",
+      "relevance": "Key occupational study."
+    },
+    {
+      "title": "ATSDR Toxicological Profile for Perfluoroalkyls (Draft)",
+      "authors": "Agency for Toxic Substances and Disease Registry",
+      "year": 2021,
+      "url": "https://www.atsdr.cdc.gov/toxprofiles/tp200.pdf",
+      "type": "Technical report",
+      "relevance": "Mechanistic and dose–response summary."
+    },
+    {
+      "title": "NIEHS PFAS Health Effects",
+      "authors": "National Institute of Environmental Health Sciences",
+      "year": 2024,
+      "url": "https://www.niehs.nih.gov/health/topics/agents/pfcas/index.cfm",
+      "type": "Web resource",
+      "relevance": "Ongoing research perspectives."
+    }
+  ]
+}

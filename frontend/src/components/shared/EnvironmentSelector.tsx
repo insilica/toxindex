@@ -104,14 +104,14 @@ const EnvironmentSelector: React.FC<EnvironmentSelectorProps> = ({
         disabled={loadingEnvironments}
       >
         {(environments ?? []).length > 0 && (environments ?? []).map(env => (
-          <option key={env.environment_id} value={env.environment_id} style={{ paddingLeft: '1rem' }}>
+          <option key={env.environment_id} value={env.environment_id} className="!bg-gray-800 !text-white" style={{ paddingLeft: '1rem' }}>
             {env.title}
           </option>
         ))}
-        <option value="__add__" style={loadingEnvironments ? { opacity: 0.5 } : {}}>
+        <option value="__add__" className="!bg-gray-800 !text-white" style={loadingEnvironments ? { opacity: 0.5 } : {}}>
           {loadingEnvironments ? '+ Add environment' : '+ Add environment'}
         </option>
-        <option value="__manage__" style={loadingEnvironments ? { opacity: 0.5 } : {}}>&#9881; Manage environments</option>
+        <option value="__manage__" className="!bg-gray-800 !text-white" style={loadingEnvironments ? { opacity: 0.5 } : {}}>&#9881; Manage environments</option>
       </select>
       <span
         className="pointer-events-none absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 group-hover:opacity-100 group-focus-within:opacity-100 opacity-0 transition-opacity duration-150"

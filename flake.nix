@@ -44,42 +44,62 @@
               exit 1
             fi
 
+            # Ensure we're using the Nix-provided Python
             export PYTHONPATH="$PWD:$PYTHONPATH"
             hash -r
 
-            # Sync dependencies
-            GIT_CLONE_PROTECTION_ACTIVE=false uv sync
+            # Check Python version before proceeding
+            echo "Using Python: $(which python3)"
+            echo "Python version: $(python3 --version)"
+
+            # Remove existing .venv if it exists
+            if [ -d ".venv" ]; then
+              echo "Removing existing .venv..."
+              rm -rf .venv
+            fi
+
+            # Create new venv with Nix Python explicitly
+            echo "Creating new virtual environment with Python 3.12..."
+            python3 -m venv .venv
+            source .venv/bin/activate
+
+            # Verify we're using the right Python
+            echo "Virtual environment Python: $(which python)"
+            echo "Virtual environment Python version: $(python --version)"
+            
+            # Sync dependencies with explicit Python version
+            echo "Syncing dependencies..."
+            GIT_CLONE_PROTECTION_ACTIVE=false uv sync --python python3
             if [ $? -ne 0 ]; then
               echo "Error: 'uv sync' failed. Please check your dependencies."
               exit 1
             fi
-            source .venv/bin/activate
 
             # Source your fullstack environment setup (Postgres, Redis, AWS, etc.)
             # This runs after the virtual environment is set up so Python scripts can access packages
-            source scripts/flake/shellhook.sh
+            # source scripts/flake/shellhook.sh
 
             # Unset PYTHONPATH after shellhook runs to avoid conflicts
             unset PYTHONPATH
 
             # Pathway tool below
             # Run or reuse the Blazegraph container
-            if ! docker ps -a --format '{{.Names}}' | grep -q '^blazegraph$'; then
-              docker run --name blazegraph \
-                -d -p 8889:8080 \
-                lyrasis/blazegraph:2.1.5
-            else
-              docker start blazegraph 2>/dev/null || true
-            fi
+            #if ! docker ps -a --format '{{.Names}}' | grep -q '^blazegraph$'; then
+            #  docker run --name blazegraph \
+            #    -d -p 8889:8080 \
+            #    lyrasis/blazegraph:2.1.5
+            #else
+            #  docker start blazegraph 2>/dev/null || true
+            #fi
 
             # Wait for Blazegraph to start listening
-            until curl -s http://localhost:8889/bigdata/namespace/kb/sparql -o /dev/null; do
-              printf '.'; sleep 1
-            done
-            echo "Blazegraph up—loading TTL files"
+            #until curl -s http://localhost:8889/bigdata/namespace/kb/sparql -o /dev/null; do
+            #  printf '.'; sleep 1
+            #done
+            #echo "Blazegraph up—loading TTL files"
 
             # install npm dependencies in frontend
-            (cd frontend && npm install)
+            # (cd frontend && npm install)
 
             # Add data from WikiPathways/AOP-Wiki
             # curl -X POST \

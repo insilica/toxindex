@@ -10,6 +10,8 @@ from webserver.ai_service import generate_title
 from webserver.controller.task_router import route_task
 from webserver.model.file import File
 import os
+from webserver.storage import GCSFileStorage
+import tempfile
 
 task_bp = Blueprint('tasks', __name__, url_prefix='/api/tasks')
 
@@ -130,6 +132,36 @@ def download_task_file(task_id, file_id):
     if not is_valid_uuid(task_id) or not is_valid_uuid(file_id):
         return jsonify({'error': 'Invalid task or file ID'}), 400
     file = File.get_file(file_id)
-    if not file or not file.filepath or not os.path.exists(file.filepath) or str(file.task_id) != str(task_id):
+    if not file or not file.filepath or str(file.task_id) != str(task_id):
         return abort(404)
-    return send_file(file.filepath, as_attachment=True, download_name=file.filename) 
+    # Handle GCS files
+    if file.filepath.startswith('tasks/'):
+        try:
+            gcs_storage = GCSFileStorage()
+            # Create temporary file
+            with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+                temp_path = temp_file.name
+            # Download from GCS
+            gcs_storage.download_file(file.filepath, temp_path)
+            # Send file and clean up
+            response = send_file(temp_path, as_attachment=True, download_name=file.filename)
+            
+            # Clean up temp file after response is sent
+            @response.call_on_close
+            def cleanup():
+                try:
+                    os.unlink(temp_path)
+                except:
+                    pass
+            
+            return response
+            
+        except Exception as e:
+            logging.error(f"Failed to download file from GCS: {e}")
+            return abort(404)
+    
+    # Handle local files
+    elif os.path.exists(file.filepath):
+        return send_file(file.filepath, as_attachment=True, download_name=file.filename)
+    else:
+        return abort(404) 

@@ -7,5 +7,10 @@ socketio = SocketIO(
     cors_allowed_origins=["https://www.toxindex.com"],
     logger=False,
     engineio_logger=False,
-    manage_session=False
+    manage_session=False,
+    # Optimize polling settings
+    ping_timeout=60,
+    ping_interval=25,
+    max_http_buffer_size=1e6,
+    async_mode='gevent'
 ) 

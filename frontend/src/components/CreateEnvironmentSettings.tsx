@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useEnvironment } from "../context/EnvironmentContext";
+import HomeButton from './shared/HomeButton';
 
 const CreateEnvironmentSettings: React.FC = () => {
   const [title, setTitle] = useState("");
@@ -96,8 +97,7 @@ const CreateEnvironmentSettings: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col items-center min-h-screen min-w-full w-full h-screen pt-52" 
-    style={{ background: 'linear-gradient(135deg, #1a1426 0%, #2a1a2a 60%, #231a23 100%)' }}>
+    <div className="max-w-6xl mx-auto p-6 relative" style={{ paddingLeft: '8rem' }}>
       <div className="w-full max-w-lg p-8 rounded shadow-lg" style={{ background: 'rgba(0,0,0,0.15)' }}>
         <h1 className="font-bold text-white mb-6" style={{ fontSize: '1rem' }}>Create Environment</h1>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -184,11 +184,28 @@ const CreateEnvironmentSettings: React.FC = () => {
           {error && <div className="text-red-500 text-sm">{error}</div>}
           <button
             type="submit"
-            className="mt-2 px-6 py-2 rounded-full font-semibold bg-green-600 text-white hover:bg-green-700 transition"
+            className="mt-2 px-6 py-2 rounded-full font-semibold !bg-green-600 !text-white !hover:bg-green-700 transition"
           >
             Create
           </button>
         </form>
+      </div>
+      
+      {/* Home button positioned relative to settings content */}
+      <div 
+        className="absolute transition-all duration-300 z-50"
+        style={{
+          left: '2rem',
+          top: '1.5rem',
+          border: 'none',
+          padding: 0
+        }}
+      >
+        <HomeButton
+          color="#16a34a"
+          hoverColor="#2563eb"
+          aria-label="Go back"
+        />
       </div>
     </div>
   );

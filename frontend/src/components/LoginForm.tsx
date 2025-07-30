@@ -14,6 +14,20 @@ const LoginForm: React.FC = () => {
   const [errorAnim, setErrorAnim] = useState(false);
   const navigate = useNavigate();
 
+  // Check if user is already authenticated and redirect if so
+  useEffect(() => {
+    fetch("/api/users/me", { credentials: "include", cache: "no-store" })
+      .then(res => {
+        if (res.status === 200) {
+          // User is already logged in, redirect to home
+          navigate('/');
+        }
+      })
+      .catch(() => {
+        // User is not authenticated, continue with login form
+      });
+  }, [navigate]);
+
   useEffect(() => {
     let i = 0;
     setTyped('');

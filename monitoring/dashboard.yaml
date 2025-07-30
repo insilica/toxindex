@@ -128,7 +128,7 @@ gridLayout:
                 filter: 'metric.type="custom.googleapis.com/http_requests_total" AND metric.labels.status_code=~"5.*"'
                 secondaryAggregation:
                   alignmentPeriod: 60s
-                  crossSeriesReducer: REDUCE_RATE
+                  crossSeriesReducer: REDUCE_MEAN
         thresholds:
           - color: YELLOW
             direction: ABOVE
@@ -233,7 +233,7 @@ gridLayout:
                 filter: 'metric.type="custom.googleapis.com/gcs_operations_total"'
                 secondaryAggregation:
                   alignmentPeriod: 60s
-                  crossSeriesReducer: REDUCE_RATE
+                  crossSeriesReducer: REDUCE_MEAN
         thresholds:
           - color: YELLOW
             direction: ABOVE

@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify
-from RAP.toxicity_schema import TOXICITY_SCHEMA
+from webserver.tools.toxicity_schema import TOXICITY_SCHEMA
 from webserver.csrf import csrf
 
 schema_bp = Blueprint('schema', __name__, url_prefix='/api/schema')

@@ -5,15 +5,11 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args: [
       'build',
-      '-t', 'us-docker.pkg.dev/$PROJECT_ID/toxindex-backend/backend:$COMMIT_SHA',
       '-t', 'us-docker.pkg.dev/$PROJECT_ID/toxindex-backend/backend:latest',
       '.'
     ]
 
   # Push the Docker image to Artifact Registry
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'us-docker.pkg.dev/$PROJECT_ID/toxindex-backend/backend:$COMMIT_SHA']
-
   - name: 'gcr.io/cloud-builders/docker'
     args: ['push', 'us-docker.pkg.dev/$PROJECT_ID/toxindex-backend/backend:latest']
 
@@ -161,30 +157,30 @@ steps:
       - '-c'
       - |
         # Get backend service URL
-        BACKEND_SVC_URL=$(kubectl get svc backend -n toxindex-app -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-        if [ -z "$BACKEND_SVC_URL" ]; then
+        BACKEND_SVC_URL=$$(kubectl get svc backend -n toxindex-app -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+        if [ -z "$$BACKEND_SVC_URL" ]; then
           echo "Backend service not accessible via LoadBalancer, using cluster IP"
-          BACKEND_SVC_URL=$(kubectl get svc backend -n toxindex-app -o jsonpath='{.spec.clusterIP}')
+          BACKEND_SVC_URL=$$(kubectl get svc backend -n toxindex-app -o jsonpath='{.spec.clusterIP}')
         fi
         
-        echo "Testing backend health at: $BACKEND_SVC_URL:6513"
+        echo "Testing backend health at: $$BACKEND_SVC_URL:6513"
         
         # Test basic health check
-        curl -f --max-time 30 "http://$BACKEND_SVC_URL:6513/api/healthz" || exit 1
+        curl -f --max-time 30 "http://$$BACKEND_SVC_URL:6513/api/healthz" || exit 1
         
         # Test comprehensive health check
-        HEALTH_RESPONSE=$(curl -s --max-time 60 "http://$BACKEND_SVC_URL:6513/api/health")
-        echo "Health check response: $HEALTH_RESPONSE"
+        HEALTH_RESPONSE=$$(curl -s --max-time 60 "http://$$BACKEND_SVC_URL:6513/api/health")
+        echo "Health check response: $$HEALTH_RESPONSE"
         
         # Parse health check status
-        HEALTH_STATUS=$(echo "$HEALTH_RESPONSE" | jq -r '.status')
-        if [ "$HEALTH_STATUS" != "healthy" ]; then
-          echo "❌ Health check failed: $HEALTH_STATUS"
-          echo "Full response: $HEALTH_RESPONSE"
+        HEALTH_STATUS=$$(echo "$$HEALTH_RESPONSE" | jq -r '.status')
+        if [ "$$HEALTH_STATUS" != "healthy" ]; then
+          echo "❌ Health check failed: $$HEALTH_STATUS"
+          echo "Full response: $$HEALTH_RESPONSE"
           exit 1
         fi
         
-        echo "✅ Health check passed: $HEALTH_STATUS"
+        echo "✅ Health check passed: $$HEALTH_STATUS"
     env:
       - 'CLOUDSDK_COMPUTE_REGION=us-east4'
       - 'CLOUDSDK_CONTAINER_CLUSTER=toxindex-gke'
@@ -198,17 +194,17 @@ steps:
         # Test frontend CDN
         FRONTEND_URL="https://your-frontend-domain.com"  # Replace with your actual domain
         
-        echo "Testing frontend at: $FRONTEND_URL"
+        echo "Testing frontend at: $$FRONTEND_URL"
         
         # Test frontend accessibility
-        FRONTEND_RESPONSE=$(curl -s --max-time 30 "$FRONTEND_URL")
-        if [ $? -ne 0 ]; then
+        FRONTEND_RESPONSE=$$(curl -s --max-time 30 "$$FRONTEND_URL")
+        if [ $$? -ne 0 ]; then
           echo "❌ Frontend not accessible"
           exit 1
         fi
         
         # Check if it's a valid HTML response
-        if echo "$FRONTEND_RESPONSE" | grep -q "<!DOCTYPE html\|<html"; then
+        if echo "$$FRONTEND_RESPONSE" | grep -q "<!DOCTYPE html\|<html"; then
           echo "✅ Frontend is accessible and serving HTML"
         else
           echo "❌ Frontend response is not valid HTML"
@@ -227,7 +223,7 @@ steps:
         sleep 60  # Wait for metrics to be collected
         
         # Get the project number for monitoring API
-        PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID --format='value(projectNumber)')
+        PROJECT_NUMBER=$$(gcloud projects describe $PROJECT_ID --format='value(projectNumber)')
         
         # Check if pods are reporting metrics
         echo "Checking pod metrics in Cloud Monitoring..."
@@ -249,9 +245,9 @@ steps:
         echo "Verifying application metrics collection..."
         
         # Check if our application pods are reporting metrics
-        POD_METRICS=$(gcloud monitoring metrics list --filter="metric.type:kubernetes.io/pod AND resource.labels.pod_name:backend" --limit=1)
+        POD_METRICS=$$(gcloud monitoring metrics list --filter="metric.type:kubernetes.io/pod AND resource.labels.pod_name:backend" --limit=1)
         
-        if [ -z "$POD_METRICS" ]; then
+        if [ -z "$$POD_METRICS" ]; then
           echo "❌ No pod metrics found for backend pods"
           exit 1
         fi
@@ -259,9 +255,9 @@ steps:
         echo "✅ Pod metrics are being collected"
         
         # Check container metrics
-        CONTAINER_METRICS=$(gcloud monitoring metrics list --filter="metric.type:kubernetes.io/container" --limit=1)
+        CONTAINER_METRICS=$$(gcloud monitoring metrics list --filter="metric.type:kubernetes.io/container" --limit=1)
         
-        if [ -z "$CONTAINER_METRICS" ]; then
+        if [ -z "$$CONTAINER_METRICS" ]; then
           echo "❌ No container metrics found"
           exit 1
         fi
@@ -279,39 +275,39 @@ steps:
         echo "Testing critical application functions..."
         
         # Get backend service URL
-        BACKEND_SVC_URL=$(kubectl get svc backend -n toxindex-app -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-        if [ -z "$BACKEND_SVC_URL" ]; then
-          BACKEND_SVC_URL=$(kubectl get svc backend -n toxindex-app -o jsonpath='{.spec.clusterIP}')
+        BACKEND_SVC_URL=$$(kubectl get svc backend -n toxindex-app -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+        if [ -z "$$BACKEND_SVC_URL" ]; then
+          BACKEND_SVC_URL=$$(kubectl get svc backend -n toxindex-app -o jsonpath='{.spec.clusterIP}')
         fi
         
         # Test database connectivity (via health check)
-        DB_HEALTH=$(curl -s "http://$BACKEND_SVC_URL:6513/api/health" | jq -r '.checks.database.status')
-        if [ "$DB_HEALTH" != "healthy" ]; then
-          echo "❌ Database connectivity test failed: $DB_HEALTH"
+        DB_HEALTH=$$(curl -s "http://$$BACKEND_SVC_URL:6513/api/health" | jq -r '.checks.database.status')
+        if [ "$$DB_HEALTH" != "healthy" ]; then
+          echo "❌ Database connectivity test failed: $$DB_HEALTH"
           exit 1
         fi
         echo "✅ Database connectivity verified"
         
         # Test Redis connectivity
-        REDIS_HEALTH=$(curl -s "http://$BACKEND_SVC_URL:6513/api/health" | jq -r '.checks.redis.status')
-        if [ "$REDIS_HEALTH" != "healthy" ]; then
-          echo "❌ Redis connectivity test failed: $REDIS_HEALTH"
+        REDIS_HEALTH=$$(curl -s "http://$$BACKEND_SVC_URL:6513/api/health" | jq -r '.checks.redis.status')
+        if [ "$$REDIS_HEALTH" != "healthy" ]; then
+          echo "❌ Redis connectivity test failed: $$REDIS_HEALTH"
           exit 1
         fi
         echo "✅ Redis connectivity verified"
         
         # Test GCS connectivity
-        GCS_HEALTH=$(curl -s "http://$BACKEND_SVC_URL:6513/api/health" | jq -r '.checks.gcs.status')
-        if [ "$GCS_HEALTH" != "healthy" ]; then
-          echo "❌ GCS connectivity test failed: $GCS_HEALTH"
+        GCS_HEALTH=$$(curl -s "http://$$BACKEND_SVC_URL:6513/api/health" | jq -r '.checks.gcs.status')
+        if [ "$$GCS_HEALTH" != "healthy" ]; then
+          echo "❌ GCS connectivity test failed: $$GCS_HEALTH"
           exit 1
         fi
         echo "✅ GCS connectivity verified"
         
         # Test Celery worker status
-        CELERY_HEALTH=$(curl -s "http://$BACKEND_SVC_URL:6513/api/health" | jq -r '.checks.celery.status')
-        if [ "$CELERY_HEALTH" != "healthy" ] && [ "$CELERY_HEALTH" != "warning" ]; then
-          echo "❌ Celery worker test failed: $CELERY_HEALTH"
+        CELERY_HEALTH=$$(curl -s "http://$$BACKEND_SVC_URL:6513/api/health" | jq -r '.checks.celery.status')
+        if [ "$$CELERY_HEALTH" != "healthy" ] && [ "$$CELERY_HEALTH" != "warning" ]; then
+          echo "❌ Celery worker test failed: $$CELERY_HEALTH"
           exit 1
         fi
         echo "✅ Celery worker status verified"
@@ -329,7 +325,7 @@ steps:
         echo ""
         echo "✅ Backend Deployment:"
         echo "   - Image: us-docker.pkg.dev/$PROJECT_ID/toxindex-backend/backend:latest"
-        echo "   - Pods: $(kubectl get pods -n toxindex-app -l app=backend --no-headers | wc -l) running"
+        echo "   - Pods: $$(kubectl get pods -n toxindex-app -l app=backend --no-headers | wc -l) running"
         echo "   - Health: Verified via comprehensive health checks"
         echo ""
         echo "✅ Frontend Deployment:"
@@ -352,7 +348,6 @@ steps:
 
 # Store images in Artifact Registry
 images:
-  - 'us-docker.pkg.dev/$PROJECT_ID/toxindex-backend/backend:$COMMIT_SHA'
   - 'us-docker.pkg.dev/$PROJECT_ID/toxindex-backend/backend:latest'
 
 # Build options
@@ -364,13 +359,4 @@ options:
     - 'DOCKER_BUILDKIT=1'
     - 'NODE_ENV=production'
 
-# Substitutions
-substitutions:
-  _REGISTRY: 'us-docker.pkg.dev'
-  _IMAGE_NAME: 'toxindex-backend/backend'
-  _CLUSTER_NAME: 'toxindex-gke'
-  _REGION: 'us-east4'
-  _NAMESPACE: 'toxindex-app'
-  _GCS_BUCKET: 'toxindex-react'
-  _CDN_URL_MAP: 'frontend-url-map'
-  _BRANCH: 'gke' 
+ 

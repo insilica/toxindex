@@ -110,7 +110,7 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({ className = '' }) =
         onFocus={() => setFocused(true)}
       >
         {workflows.map(w => (
-          <option key={w.frontend_id} value={w.frontend_id} style={{ paddingLeft: '1rem' }}>
+          <option key={w.frontend_id} value={w.frontend_id} className="!bg-gray-800 !text-white" style={{ paddingLeft: '1rem' }}>
             {w.label}
           </option>
         ))}

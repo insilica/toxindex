@@ -122,7 +122,7 @@ const UploadFileModal: React.FC<UploadFileModalProps> = ({
           <h2 className="text-xl font-semibold text-white">Upload File to an Environment</h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-white transition-colors"
+            className="!bg-gray-800 !text-gray-400 hover:text-white transition-colors"
           >
             <FaTimes />
           </button>
@@ -134,12 +134,12 @@ const UploadFileModal: React.FC<UploadFileModalProps> = ({
             <select
               value={selectedEnv}
               onChange={(e) => setSelectedEnv(e.target.value)}
-              className="w-full bg-gray-800 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full bg-gray-800 !bg-gray-800 text-white !text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
               required
             >
-              <option value="">Select an environment</option>
+              <option value="" className="!bg-gray-800 !text-white">Select an environment</option>
               {environments.map((env) => (
-                <option key={env.environment_id} value={env.environment_id}>
+                <option key={env.environment_id} value={env.environment_id} className="!bg-gray-800 !text-white">
                   {env.title}
                 </option>
               ))}
@@ -187,14 +187,14 @@ const UploadFileModal: React.FC<UploadFileModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="mr-2 px-4 py-2 text-gray-300 hover:text-white transition-colors"
+              className="mr-2 px-4 py-2 !bg-gray-800 !text-gray-300 !hover:text-white transition-colors"
               disabled={uploading}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className={`px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors ${
+              className={`px-4 py-2 !bg-gray-800 !text-gray-300 rounded !hover:bg-gray-700 transition-colors ${
                 uploading ? 'opacity-50 cursor-not-allowed' : ''
               }`}
               disabled={uploading}

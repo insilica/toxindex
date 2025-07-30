@@ -197,7 +197,7 @@ const TaskDetail: React.FC = () => {
             ) : (
               <ul className="mb-6">
                 {(() => {
-                  const maxFilenameLength = 34;
+                  const maxFilenameLength = 32;
                   const truncate = (name: string) => {
                     if (name.length <= maxFilenameLength) return name;
                     const startLen = maxFilenameLength - 10;
@@ -247,7 +247,7 @@ const TaskDetail: React.FC = () => {
             ) : (
               <ul>
                 {(() => {
-                  const maxFilenameLength = 34;
+                  const maxFilenameLength = 32;
                   const truncate = (name: string) => {
                     if (name.length <= maxFilenameLength) return name;
                     const startLen = maxFilenameLength - 10;

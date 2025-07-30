@@ -5,6 +5,7 @@ import { useEnvironment } from "../context/EnvironmentContext";
 import { useModel } from "../context/ModelContext";
 import LoadingSpinner from "./shared/LoadingSpinner";
 import { io, Socket } from 'socket.io-client';
+import { useSocket } from '../context/SocketContext';
 import ChatInputBar from "./shared/ChatInputBar";
 import { getWorkflowId, getWorkflowLabelById } from './shared/workflows';
 import { FaHammer } from 'react-icons/fa';
@@ -108,44 +109,40 @@ const Dashboard = () => {
 
   // Socket.IO setup for real-time task status updates
   useEffect(() => {
-    if (!socketRef.current) {
-      socketRef.current = io('/', {
-        withCredentials: true,
-        transports: ['polling'],
-        transportOptions: {
-          polling: {
-            timeout: 30000 // 30 seconds
-          }
+    const { socket, isConnected } = useSocket();
+    
+    if (!socket) return;
+
+    // Only manage rooms if socket is connected
+    if (isConnected) {
+      // Leave old rooms
+      const prevTaskIds = prevTaskIdsRef.current;
+      const currentTaskIds = activeTasks.map(t => t.task_id);
+
+      prevTaskIds.forEach(id => {
+        if (!currentTaskIds.includes(id)) {
+          console.log('[SocketIO] Leaving task room', id);
+          socket.emit('leave_task_room', { task_id: id });
         }
       });
+
+      // Join new rooms
+      currentTaskIds.forEach(id => {
+        if (!prevTaskIds.includes(id)) {
+          console.log('[SocketIO] Joining task room', id);
+          socket.emit('join_task_room', { task_id: id });
+        }
+      });
+
+      prevTaskIdsRef.current = currentTaskIds;
     }
-    const socket = socketRef.current;
 
-    // Leave old rooms
-    const prevTaskIds = prevTaskIdsRef.current;
-    const currentTaskIds = activeTasks.map(t => t.task_id);
-
-    prevTaskIds.forEach(id => {
-      if (!currentTaskIds.includes(id)) {
-        console.log('[SocketIO] Leaving task room', id);
-        socket.emit('leave_task_room', { task_id: id });
-      }
-    });
-
-    // Join new rooms
-    currentTaskIds.forEach(id => {
-      if (!prevTaskIds.includes(id)) {
-        console.log('[SocketIO] Joining task room', id);
-        socket.emit('join_task_room', { task_id: id });
-      }
-    });
-
-    prevTaskIdsRef.current = currentTaskIds;
-
-    // Global event logger for debugging
-    socket.onAny((event, ...args) => {
-      console.log('[SocketIO] Event:', event, args);
-    });
+    // Global event logger for debugging (only in development)
+    if (import.meta.env.DEV) {
+      socket.onAny((event: string, ...args: any[]) => {
+        console.log('[SocketIO] Event:', event, args);
+      });
+    }
 
     // Listen for status updates
     const handler = (data: any) => {
@@ -165,11 +162,10 @@ const Dashboard = () => {
 
     return () => {
       socket.off('task_status_update', handler);
-      socket.offAny(); // Remove global event logger
-      // Optionally leave all rooms on unmount
-      currentTaskIds.forEach(id => {
-        socket.emit('leave_task_room', { task_id: id });
-      });
+      if (import.meta.env.DEV) {
+        socket.offAny(); // Remove global event logger
+      }
+      // Don't leave rooms on cleanup - let the server handle it
     };
   }, [activeTasks]);
 
@@ -404,7 +400,7 @@ const Dashboard = () => {
                         e.stopPropagation();
                         archiveTask(task.task_id);
                       }}
-                      className="ml-2 flex items-center justify-center w-7 h-7 rounded-full bg-purple-800 hover:bg-purple-700 active:bg-purple-900 text-white transition border-none shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-400 hover:ring-2 hover:ring-purple-400"
+                      className="ml-2 flex items-center justify-center w-7 h-7 rounded-full !bg-gray-700 hover:bg-gray-600 active:bg-gray-800 text-white transition border-none shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-400 hover:ring-2 hover:ring-gray-400"
                       style={{ padding: 0, borderRadius: '50%', fontSize: '1.1rem', border: 'none', outline: 'none', boxShadow: 'none', cursor: 'pointer' }}
                       title="Archive task"
                     >

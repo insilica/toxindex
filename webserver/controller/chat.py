@@ -5,8 +5,6 @@ from webserver.csrf import csrf
 from webserver.util import is_valid_uuid
 from webserver.model.chat_session import ChatSession 
 import logging
-from flask_socketio import join_room
-from webserver.socketio import socketio
 
 chat_bp = Blueprint('chat_sessions', __name__, url_prefix='/api/chat_sessions')
 
@@ -60,13 +58,4 @@ def create_chat_session():
     session = ChatSession.create_session(environment_id, user_id, title)
     if not session:
         return jsonify({'error': 'Failed to create chat session'}), 500
-    return jsonify(session.to_dict())
-
-# Add a socketio event to join a chat session room
-@socketio.on('join_chat_session')
-def handle_join_chat_session(data):
-    print(f"[SocketIO] Received join_chat_session: {data}, sid: {request.sid}")
-    session_id = data.get('session_id')
-    room = f"chat_session_{session_id}"
-    logging.info(f"[SocketIO] Client {request.sid} joined room: {room}")
-    join_room(room) 
+    return jsonify(session.to_dict()) 

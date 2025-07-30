@@ -1,5 +1,6 @@
 import logging
 import webserver.datastore as ds
+from webserver.cache_manager import cache_query_result
 
 class File:
     def __init__(self, file_id, task_id, user_id, filename, filepath, created_at, environment_id=None):
@@ -56,6 +57,7 @@ class File:
             logging.info(f"[File.create_file] Successfully inserted file for task_id={task_id}, environment_id={environment_id}, filename={filename}")
         except Exception as e:
             logging.error(f"[File.create_file] Failed to insert file for task_id={task_id}, environment_id={environment_id}, filename={filename}: {e}")
+            raise
 
     @staticmethod  
     def process_event(task, event_data):
@@ -125,4 +127,6 @@ class File:
             (task_id,)
         )
         return [File.from_row(row) for row in rows]
+
+
 
