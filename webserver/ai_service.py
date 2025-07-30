@@ -47,6 +47,17 @@ def convert_pydantic_to_markdown(model_data: Dict[str, Any], original_query: str
             google_api_key=os.environ.get("GEMINI_API_KEY")
         )
         
+        # Convert Pydantic model to dict if it's not already a dict
+        if hasattr(model_data, 'model_dump'):
+            # It's a Pydantic model, convert to dict
+            serializable_data = model_data.model_dump()
+        elif hasattr(model_data, 'dict'):
+            # It's a Pydantic model (older version), convert to dict
+            serializable_data = model_data.dict()
+        else:
+            # It's already a dict or other serializable type
+            serializable_data = model_data
+        
         # Create a comprehensive prompt for conversion
         prompt = f"""
         You are an expert scientific writer tasked with converting structured toxicity assessment data into a comprehensive, well-formatted markdown report.
@@ -54,7 +65,7 @@ def convert_pydantic_to_markdown(model_data: Dict[str, Any], original_query: str
         Original Query: {original_query}
         
         Structured Data:
-        {json.dumps(model_data, indent=2, ensure_ascii=False)}
+        {json.dumps(serializable_data, indent=2, ensure_ascii=False)}
         
         Please convert this structured data into a comprehensive markdown report with the following structure:
         
@@ -100,18 +111,41 @@ def convert_pydantic_to_markdown(model_data: Dict[str, Any], original_query: str
         
     except Exception as e:
         # Fallback: create a basic markdown report
-        return f"""
-        # Chemical Toxicity Assessment Report
+        try:
+            # Try to convert to dict for the fallback as well
+            if hasattr(model_data, 'model_dump'):
+                serializable_data = model_data.model_dump()
+            elif hasattr(model_data, 'dict'):
+                serializable_data = model_data.dict()
+            else:
+                serializable_data = model_data
+                
+            return f"""
+            # Chemical Toxicity Assessment Report
 
-        ## Error in Conversion
-        The structured data could not be converted to markdown due to an error: {str(e)}
+            ## Error in Conversion
+            The structured data could not be converted to markdown due to an error: {str(e)}
 
-        ## Original Query
-        {original_query}
+            ## Original Query
+            {original_query}
 
-        ## Structured Data
-        ```json
-        {json.dumps(model_data, indent=2, ensure_ascii=False)}
-        ```
-        """
+            ## Structured Data
+            ```json
+            {json.dumps(serializable_data, indent=2, ensure_ascii=False)}
+            ```
+            """
+        except Exception as fallback_error:
+            return f"""
+            # Chemical Toxicity Assessment Report
+
+            ## Error in Conversion
+            The structured data could not be converted to markdown due to an error: {str(e)}
+            Additional error in fallback: {str(fallback_error)}
+
+            ## Original Query
+            {original_query}
+
+            ## Structured Data
+            Unable to serialize the data structure.
+            """
 
