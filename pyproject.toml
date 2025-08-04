@@ -51,12 +51,14 @@ dependencies = [
   "numpy",
   "py4cytoscape",
   "langchain-google-community",
+  "langchain-core",
   "google-genai",
   "langchain-google-genai",
   "bs4",
   "jsonschema",
   "psutil>=5.9.0",
-  "google-cloud-monitoring>=2.0.0"
+  "google-cloud-monitoring>=2.0.0",
+  "flask-cors"
 ]
 
 requires-python = ">=3.12"

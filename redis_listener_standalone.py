@@ -37,6 +37,38 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
+def create_minimal_task_dict(task):
+    """Create a minimal task dictionary to reduce payload size"""
+    if not task:
+        return None
+    
+    task_dict = task.to_dict()
+    # Only include essential fields to reduce payload size
+    minimal_task = {
+        "task_id": task_dict.get("task_id"),
+        "status": task_dict.get("status"),
+        "title": task_dict.get("title"),
+        "created_at": task_dict.get("created_at"),
+        "user_id": task_dict.get("user_id")
+    }
+    return minimal_task
+
+def create_minimal_message_dict(msg):
+    """Create a minimal message dictionary to reduce payload size"""
+    if not msg:
+        return None
+    
+    msg_dict = msg.to_dict()
+    # Only include essential fields to reduce payload size
+    minimal_msg = {
+        "message_id": msg_dict.get("message_id"),
+        "task_id": msg_dict.get("task_id"),
+        "role": msg_dict.get("role"),
+        "content": msg_dict.get("content"),
+        "created_at": msg_dict.get("created_at")
+    }
+    return minimal_msg
+
 def redis_listener_standalone():
     """Standalone Redis listener that processes Celery events"""
     listener_id = uuid.uuid4().hex[:8]

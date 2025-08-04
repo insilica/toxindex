@@ -16,7 +16,7 @@ from webserver.tools.deeptox_agent import deeptox_agent
 from webserver.tools.toxicity_models import ChemicalToxicityAssessment
 from webserver.ai_service import convert_pydantic_to_markdown
 
-logging.getLogger().info("probra_gcs.py module loaded")
+logging.getLogger().info("probra.py module loaded")
 logger = logging.getLogger(__name__)
 
 
@@ -83,6 +83,10 @@ def probra_task(self, payload):
                 # Fallback for string response
                 original_response = {"content": response.content}
             
+            # Ensure original_response is always serializable
+            if isinstance(original_response, ChemicalToxicityAssessment):
+                original_response = original_response.model_dump()
+            
             # Convert to markdown
             emit_status(task_id, "converting to markdown")
             response_content = convert_pydantic_to_markdown(
@@ -114,13 +118,17 @@ def probra_task(self, payload):
         # Create JSON file
         json_filename = f"probra_result_{uuid.uuid4().hex}.json"
         json_content = ""
+        
+        # Ensure original_response is always a dict before JSON serialization
         if isinstance(original_response, ChemicalToxicityAssessment):
-            json_content = json.dumps(original_response.model_dump(), indent=2, ensure_ascii=False)
+            response_dict = original_response.model_dump()
         elif isinstance(original_response, dict):
-            json_content = json.dumps(original_response, indent=2, ensure_ascii=False)
+            response_dict = original_response
         else:
             # Fallback: create minimal JSON
-            json_content = json.dumps({"message": "Analysis completed", "content": str(original_response)}, indent=2)
+            response_dict = {"message": "Analysis completed", "content": str(original_response)}
+        
+        json_content = json.dumps(response_dict, indent=2, ensure_ascii=False)
         
         # Create Markdown file
         md_filename = f"probra_result_{uuid.uuid4().hex}.md"

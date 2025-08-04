@@ -66,6 +66,8 @@ cd frontend && npm install
 - Start Celery worker:
   ```sh
   celery -A workflows.celery_worker worker --loglevel=info
+
+  set -a && source .env && set +a && celery -A workflows.celery_worker worker --loglevel=info
   ```
 - Start frontend:
   ```sh

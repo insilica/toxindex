@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 import flask_login
 import logging
 from webserver.model.user_group import UserGroup
+from webserver.model.system_settings import SystemSettings
 from webserver.util import is_valid_uuid
 import webserver.datastore as ds
 from webserver.csrf import csrf
@@ -24,6 +25,144 @@ def require_admin():
         wrapper.__name__ = f.__name__
         return wrapper
     return decorator
+
+# ============================================================================
+# SYSTEM SETTINGS ENDPOINTS
+# ============================================================================
+
+@admin_bp.route('/settings', methods=['GET'])
+@flask_login.login_required
+@require_admin()
+def get_system_settings():
+    """Get all system settings"""
+    try:
+        settings = SystemSettings.get_all_settings()
+        return jsonify({
+            'success': True,
+            'settings': [setting.to_dict() for setting in settings]
+        })
+    except Exception as e:
+        logging.error(f"Error getting system settings: {e}")
+        return jsonify({'error': 'Failed to get system settings'}), 500
+
+@admin_bp.route('/settings/<setting_key>', methods=['GET'])
+@flask_login.login_required
+@require_admin()
+def get_system_setting(setting_key):
+    """Get a specific system setting"""
+    try:
+        value = SystemSettings.get_setting(setting_key)
+        if value is None:
+            return jsonify({'error': 'Setting not found'}), 404
+        
+        return jsonify({
+            'success': True,
+            'setting_key': setting_key,
+            'setting_value': value
+        })
+    except Exception as e:
+        logging.error(f"Error getting system setting {setting_key}: {e}")
+        return jsonify({'error': 'Failed to get system setting'}), 500
+
+@admin_bp.route('/settings/<setting_key>', methods=['PUT'])
+@flask_login.login_required
+@require_admin()
+def update_system_setting(setting_key):
+    """Update a system setting"""
+    try:
+        data = request.get_json()
+        if not data or 'setting_value' not in data:
+            return jsonify({'error': 'setting_value is required'}), 400
+        
+        value = data['setting_value']
+        description = data.get('description')
+        
+        # Validate session timeout settings
+        if setting_key in ['session_timeout_minutes', 'session_warning_minutes', 'session_refresh_interval_minutes']:
+            try:
+                int_value = int(value)
+                if int_value <= 0:
+                    return jsonify({'error': f'{setting_key} must be a positive integer'}), 400
+                
+                # Additional validation for session settings
+                if setting_key == 'session_timeout_minutes' and int_value < 15:
+                    return jsonify({'error': 'Session timeout must be at least 15 minutes'}), 400
+                if setting_key == 'session_warning_minutes' and int_value >= int_value:
+                    return jsonify({'error': 'Warning time must be less than timeout time'}), 400
+            except ValueError:
+                return jsonify({'error': f'{setting_key} must be a valid integer'}), 400
+        
+        success = SystemSettings.set_setting(setting_key, value, description)
+        if success:
+            return jsonify({
+                'success': True,
+                'message': f'Setting {setting_key} updated successfully'
+            })
+        else:
+            return jsonify({'error': 'Failed to update setting'}), 500
+    except Exception as e:
+        logging.error(f"Error updating system setting {setting_key}: {e}")
+        return jsonify({'error': 'Failed to update system setting'}), 500
+
+@admin_bp.route('/settings/session', methods=['GET'])
+@flask_login.login_required
+@require_admin()
+def get_session_settings():
+    """Get session-related settings"""
+    try:
+        settings = {
+            'session_timeout_minutes': SystemSettings.get_setting_int('session_timeout_minutes', 60),
+            'session_warning_minutes': SystemSettings.get_setting_int('session_warning_minutes', 5),
+            'session_refresh_interval_minutes': SystemSettings.get_setting_int('session_refresh_interval_minutes', 30)
+        }
+        return jsonify({
+            'success': True,
+            'settings': settings
+        })
+    except Exception as e:
+        logging.error(f"Error getting session settings: {e}")
+        return jsonify({'error': 'Failed to get session settings'}), 500
+
+@admin_bp.route('/settings/session', methods=['PUT'])
+@flask_login.login_required
+@require_admin()
+def update_session_settings():
+    """Update session-related settings"""
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'Request body is required'}), 400
+        
+        # Validate and update each setting
+        updates = {}
+        for key in ['session_timeout_minutes', 'session_warning_minutes', 'session_refresh_interval_minutes']:
+            if key in data:
+                try:
+                    value = int(data[key])
+                    if value <= 0:
+                        return jsonify({'error': f'{key} must be a positive integer'}), 400
+                    updates[key] = value
+                except ValueError:
+                    return jsonify({'error': f'{key} must be a valid integer'}), 400
+        
+        # Validate session timeout vs warning time
+        if 'session_timeout_minutes' in updates and 'session_warning_minutes' in updates:
+            if updates['session_warning_minutes'] >= updates['session_timeout_minutes']:
+                return jsonify({'error': 'Warning time must be less than timeout time'}), 400
+        
+        # Apply updates
+        for key, value in updates.items():
+            success = SystemSettings.set_setting(key, value)
+            if not success:
+                return jsonify({'error': f'Failed to update {key}'}), 500
+        
+        return jsonify({
+            'success': True,
+            'message': 'Session settings updated successfully'
+        })
+    except Exception as e:
+        logging.error(f"Error updating session settings: {e}")
+        return jsonify({'error': 'Failed to update session settings'}), 500
 
 # ============================================================================
 # USER MANAGEMENT ENDPOINTS

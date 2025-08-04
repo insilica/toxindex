@@ -7,18 +7,25 @@ import uuid
 import threading
 import logging
 import json
-from datetime import datetime
+import warnings
+from datetime import datetime, timedelta
 import redis
+
+# Suppress specific warnings from third-party libraries
+warnings.filterwarnings("ignore", message=".*is not.*int.*literal.*", category=SyntaxWarning)
+warnings.filterwarnings("ignore", message=".*invalid escape sequence.*", category=SyntaxWarning)
 # Third-party imports
 import dotenv
 import flask
 import flask_login
 from flask_socketio import emit, join_room
 from flask import request, send_from_directory, abort, make_response, jsonify
+from flask_cors import CORS
 
 # Local imports
 from webserver.login_manager import login_manager as LM
 from webserver.model import Task, Workflow, Message, File, ChatSession
+from webserver.model.system_settings import SystemSettings
 from webserver.ai_service import generate_title
 from workflows.plain_openai_tasks import plain_openai_task
 from workflows.probra import probra_task
@@ -29,6 +36,7 @@ from webserver.controller.auth import auth_bp
 from webserver.controller.file import file_bp
 from webserver.controller.workflow import workflow_bp
 from webserver.controller.admin import admin_bp
+from webserver.controller.health import health_bp
 from webserver.csrf import csrf
 from webserver.socketio import socketio
 from webserver.controller.user import user_bp
@@ -46,8 +54,63 @@ app.config["PREFERRED_URL_SCHEME"] = os.environ.get("PREFERRED_URL_SCHEME")
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.secret_key = os.environ.get("FLASK_APP_SECRET_KEY")
 
+# Session timeout configuration (dynamic from database)
+session_timeout_minutes = SystemSettings.get_setting_int('session_timeout_minutes', 60)
+app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=session_timeout_minutes)
+app.config["SESSION_COOKIE_SECURE"] = True
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+
+# CSRF Configuration
+# Detect environment and configure CSRF appropriately
+is_development = (
+    os.environ.get('FLASK_ENV') == 'development' or 
+    os.environ.get('FLASK_DEBUG') == '1'
+)
+is_localhost = (
+    os.environ.get('PREFERRED_URL_SCHEME', 'https') == 'http'
+)
+
+# Initialize CORS only in development
+if is_development or is_localhost:
+    # Only enable CORS in development
+    try:
+        from flask_cors import CORS
+        CORS(app, 
+             origins=[
+                 "http://localhost:5173",
+                 "http://localhost:3000"
+             ], 
+             supports_credentials=True,
+             allow_headers=["Content-Type", "Authorization", "X-Requested-With"],
+             methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+             expose_headers=["Content-Type", "Authorization"]
+        )
+        logging.info("CORS enabled for development environment")
+    except ImportError:
+        logging.warning("Flask-CORS not installed, CORS disabled")
+else:
+    logging.info("CORS disabled for production environment")
+
+app.config["WTF_CSRF_TIME_LIMIT"] = 3600  # 1 hour
+
+# Configure SSL settings based on environment
+if is_development or is_localhost:
+    # Local development: Allow HTTP, disable SSL strict
+    app.config["WTF_CSRF_ENABLED"] = False
+    app.config["WTF_CSRF_SSL_STRICT"] = False
+    app.config["SESSION_COOKIE_SECURE"] = False  # Allow HTTP cookies
+    logging.info(f"CSRF configured for development environment (is_development={is_development}, is_localhost={is_localhost})")
+else:
+    # Production: Require HTTPS, enable SSL strict
+    app.config["WTF_CSRF_ENABLED"] = True
+    app.config["WTF_CSRF_SSL_STRICT"] = True
+    app.config["SESSION_COOKIE_SECURE"] = True  # Require HTTPS cookies
+    logging.info(f"CSRF configured for production environment (is_development={is_development}, is_localhost={is_localhost})")
+
 logging.info(f"SECRET_KEY: {app.secret_key}")
 logging.info(f"WTF_CSRF_ENABLED: {app.config.get('WTF_CSRF_ENABLED', 'not set')}")
+logging.info(f"Session timeout: {app.config['PERMANENT_SESSION_LIFETIME']} (from database: {session_timeout_minutes} minutes)")
 
 socketio.init_app(app)
 
@@ -75,141 +138,135 @@ csrf.init_app(app)
 
 logging.info(f"DB ENV (Flask startup): PGHOST={os.getenv('PGHOST')}, PGPORT={os.getenv('PGPORT')}, PGDATABASE={os.getenv('PGDATABASE')}, PGUSER={os.getenv('PGUSER')}, PGPASSWORD={os.getenv('PGPASSWORD')}")
 
-# REDIS PUB/SUB BACKGROUND LISTENER ==========================================
-def redis_listener(name):
-    
-    listener_id = uuid.uuid4().hex[:8]
-    r = redis.Redis(
-        host=os.environ.get("REDIS_HOST", "localhost"),
-        port=int(os.environ.get("REDIS_PORT", "6379"))
-    )
-    pubsub = r.pubsub()
-    pubsub.subscribe("celery_updates")
-    logging.info(f"[redis_listener] ({listener_id}) Started Redis listener thread: {name}")
-    for redis_message in pubsub.listen():
-        logging.info(f"[redis_listener] ({listener_id}) Received message: {redis_message}")
-        logging.debug(f"[redis_listener] ({listener_id}) Raw redis_message: {redis_message}")
-        if redis_message["type"] != "message":
-            continue
-        try:
-            raw_data = redis_message["data"]
-            if isinstance(raw_data, bytes):
-                raw_data = raw_data.decode()
-            event = json.loads(raw_data)
-            logging.info(f"[redis_listener] ({listener_id}) Redis event: {event}")
-            event_type = event.get("type")
-            event_task_id = event.get("task_id")
-            event_data = event.get("data")
-            if event_task_id is None or event_data is None:
-                logging.warning(f"[redis_listener] ({listener_id}) Redis event missing required fields: event_type={event_type}, task_id={event_task_id}, data={event_data}")
-                continue
-            if event_type not in ("task_message", "task_file", "task_status_update"):
-                logging.debug(f"[redis_listener] ({listener_id}) Ignoring event_type={event_type}")
-                continue
-            task = Task.get_task(event_task_id)
-            if not task:
-                logging.warning(f"[redis_listener] ({listener_id}) No task found for task_id={event_task_id}")
-                continue
-            if event_type == "task_message":
-                logging.info(f"[redis_listener] ({listener_id}) Processing task_message for task_id={event_task_id}")
-                msg = Message.process_event(task, event_data)
-                # Emit to chat session room if possible
-                if msg and getattr(task, 'session_id', None):
-                    chat_room = f"chat_session_{task.session_id}"
-                    logging.info(f"[redis_listener] ({listener_id}) Emitting new_message to room {chat_room} with message: {msg.to_dict()}")
-                    socketio.emit('new_message', msg.to_dict(), to=chat_room)
-                    logging.info(f"[redis_listener] ({listener_id}) new_message sent to {chat_room}")
-            elif event_type == "task_file":
-                logging.info(f"[redis_listener] ({listener_id}) Processing task_file for task_id={event_task_id}")
-                File.process_event(task, event_data)
-            elif event_type == "task_status_update":
-                logging.info(f"[redis_listener] ({listener_id}) Processing task_status_update for task_id={event_task_id}")
-                # Emit a flat task object, not the event wrapper
-                room = f"task_{event_task_id}"
-                logging.info(f"[redis_listener] ({listener_id}) Emitting task_status_update to room {room} with data: {task.to_dict()}")
-                socketio.emit("task_status_update", task.to_dict(), to=room)
-                logging.info(f"[redis_listener] ({listener_id}) task_status_update sent to {room}")
-            if event_type in ("task_message", "task_file"):
-                room = f"task_{task.task_id}"
-                logging.info(f"[redis_listener] ({listener_id}) Emitting {event_type} to room {room} with data: {event_data}")
-                socketio.emit(event_type, event_data, to=room)
-                logging.info(f"[redis_listener] ({listener_id}) {event_type} sent to {room}")
-        except json.JSONDecodeError:
-            logging.error(f"[redis_listener] ({listener_id}) Failed to decode Redis message as JSON.")
-        except Exception as e:
-            logging.error(f"[redis_listener] ({listener_id}) Redis listener error: {e}", exc_info=True)
-
 # SOCKETIO HANDLERS ==========================================================
 @socketio.on("connect")
 def handle_connect(auth):
-    logging.info(f"[socketio] Client connected: {request.sid}")
-    emit("connected", {"sid": request.sid})
+    try:
+        logging.info(f"[socketio] Client connected: {request.sid}")
+        # Don't require authentication for initial connection
+        # Authentication will be checked when joining specific rooms
+        emit("connected", {"sid": request.sid})
+    except Exception as e:
+        logging.error(f"[socketio] Error in connect handler: {e}")
+        emit("error", {"error": "Connection failed"})
 
+@socketio.on_error()
+def error_handler(e):
+    """Global error handler for Socket.IO events."""
+    error_str = str(e)
+    logging.error(f"[socketio] Socket.IO error: {error_str}")
+    
+    # Handle specific payload errors
+    if "Too many packets in payload" in error_str:
+        logging.warning(f"[socketio] Payload size exceeded for {request.sid}, reducing data size")
+        try:
+            emit("error", {"error": "Payload too large, reducing data size"})
+        except:
+            pass  # Don't emit if we can't
+    elif "Payload decode error" in error_str:
+        logging.warning(f"[socketio] Payload decode error for {request.sid}")
+        try:
+            emit("error", {"error": "Invalid payload format"})
+        except:
+            pass
+    else:
+        try:
+            emit("error", {"error": "An error occurred"})
+        except:
+            pass  # Don't emit if we can't
+
+@socketio.on("disconnect")
+def handle_disconnect(data=None):
+    try:
+        logging.info(f"[socketio] Client disconnected: {request.sid}")
+    except Exception as e:
+        logging.error(f"[socketio] Error in disconnect handler: {e}")
 
 # TODO right now I think any user can join any task room
 @socketio.on("join_task_room")
 def handle_join_task_room(data):
-    logging.info(f"[socketio] join_task_room called with data: {data}")
-    task_id = data.get("task_id")
-    user = flask_login.current_user
+    try:
+        logging.info(f"[socketio] join_task_room called with data: {data}")
+        task_id = data.get("task_id")
+        user = flask_login.current_user
 
-    # Check authentication
-    if not user.is_authenticated:
-        logging.warning(f"[socketio] join_task_room called without authentication by {request.sid}")
-        emit("error", {"error": "Authentication required"})
-        return
+        # Check authentication
+        if not user.is_authenticated:
+            logging.warning(f"[socketio] join_task_room called without authentication by {request.sid}")
+            emit("error", {"error": "Authentication required"})
+            return
 
-    # Check authorization: does this user own the task?
-    task = Task.get_task(task_id)
-    if not task or task.user_id != user.user_id:
-        logging.warning(f"[socketio] join_task_room called without authorization by {request.sid} for task {task_id}")
-        emit("error", {"error": "Not authorized to join this task room"})
-        return
+        # Check authorization: does this user own the task?
+        task = Task.get_task(task_id)
+        if not task or task.user_id != user.user_id:
+            logging.warning(f"[socketio] join_task_room called without authorization by {request.sid} for task {task_id}")
+            emit("error", {"error": "Not authorized to join this task room"})
+            return
 
-    room = f"task_{task_id}"
-    logging.info(f"[socketio] {request.sid} joining room: {room}")
-    join_room(room)
-    logging.info(f"[socketio] {request.sid} joined room: {room}")
-    emit("joined_task_room", {"task_id": task_id})
-    # Emit current status to the joining client
-    logging.info(f"[socketio] Emitting current status for task {task_id} to {request.sid}: {task.to_dict()}")
-    emit("task_status_update", task.to_dict(), room=request.sid)
+        room = f"task_{task_id}"
+        logging.info(f"[socketio] {request.sid} joining room: {room}")
+        join_room(room)
+        logging.info(f"[socketio] {request.sid} joined room: {room}")
+        emit("joined_task_room", {"task_id": task_id})
+        
+        # Send minimal task status to avoid payload issues
+        try:
+            task_dict = task.to_dict()
+            # Remove potentially large fields to reduce payload size
+            minimal_task = {
+                "task_id": task_dict.get("task_id"),
+                "status": task_dict.get("status"),
+                "title": task_dict.get("title"),
+                "created_at": task_dict.get("created_at")
+            }
+            logging.info(f"[socketio] Emitting minimal task status for task {task_id} to {request.sid}")
+            emit("task_status_update", minimal_task, room=request.sid)
+        except Exception as e:
+            logging.error(f"[socketio] Error sending task status: {e}")
+            emit("error", {"error": "Failed to send task status"})
+            
+    except Exception as e:
+        logging.error(f"[socketio] Error in join_task_room handler: {e}")
+        emit("error", {"error": "Failed to join task room"})
 
 @socketio.on("join_chat_session")
 def handle_join_chat_session(data):
-    logging.info(f"[socketio] join_chat_session called with data: {data}")
-    session_id = data.get("session_id")
-    if not session_id:
-        logging.warning(f"[socketio] join_chat_session called without session_id by {request.sid}")
-        emit("error", {"error": "session_id is required"})
-        return
-    
-    # Check if user is authenticated
-    user = flask_login.current_user
-    if not user.is_authenticated:
-        logging.warning(f"[socketio] join_chat_session called without authentication by {request.sid}")
-        emit("error", {"error": "Authentication required"})
-        return
-    
-    room = f"chat_session_{session_id}"
-    logging.info(f"[socketio] {request.sid} joining room: {room}")
-    join_room(room)
-    logging.info(f"[socketio] {request.sid} joined chat_session_{session_id}")
-    emit("joined_chat_session", {"session_id": session_id}, room=request.sid)
+    try:
+        logging.info(f"[socketio] join_chat_session called with data: {data}")
+        session_id = data.get("session_id")
+        if not session_id:
+            logging.warning(f"[socketio] join_chat_session called without session_id by {request.sid}")
+            emit("error", {"error": "session_id is required"})
+            return
+        
+        # Check if user is authenticated
+        user = flask_login.current_user
+        if not user.is_authenticated:
+            logging.warning(f"[socketio] join_chat_session called without authentication by {request.sid}")
+            emit("error", {"error": "Authentication required"})
+            return
+        
+        room = f"chat_session_{session_id}"
+        logging.info(f"[socketio] {request.sid} joining room: {room}")
+        join_room(room)
+        logging.info(f"[socketio] {request.sid} joined chat_session_{session_id}")
+        emit("joined_chat_session", {"session_id": session_id}, room=request.sid)
+    except Exception as e:
+        logging.error(f"[socketio] Error in join_chat_session handler: {e}")
+        emit("error", {"error": "Failed to join chat session"})
 
 @socketio.on("leave_task_room")
 def handle_leave_task_room(data):
-    logging.info(f"[socketio] leave_task_room called with data: {data}")
-    task_id = data.get("task_id")
-    if task_id:
-        room = f"task_{task_id}"
-        logging.info(f"[socketio] {request.sid} leaving room: {room}")
-        # Note: Flask-SocketIO doesn't have a direct leave_room method for clients
-        # The room will be cleaned up automatically when the client disconnects
-
-@socketio.on("disconnect")
-def handle_disconnect():
-    logging.info(f"[socketio] Client disconnected: {request.sid}")
+    try:
+        logging.info(f"[socketio] leave_task_room called with data: {data}")
+        task_id = data.get("task_id")
+        if task_id:
+            room = f"task_{task_id}"
+            logging.info(f"[socketio] {request.sid} leaving room: {room}")
+            # Note: Flask-SocketIO doesn't have a direct leave_room method for clients
+            # The room will be cleaned up automatically when the client disconnects
+    except Exception as e:
+        logging.error(f"[socketio] Error in leave_task_room handler: {e}")
 
 # Register Blueprints for modularized API endpoints
 app.register_blueprint(env_bp)
@@ -221,6 +278,33 @@ app.register_blueprint(user_bp)
 app.register_blueprint(schema_bp)
 app.register_blueprint(workflow_bp)
 app.register_blueprint(admin_bp)
+app.register_blueprint(health_bp)
+
+# SESSION TIMEOUT MIDDLEWARE =================================================
+@app.before_request
+def check_session_timeout():
+    """Check if user session has expired and log them out if necessary."""
+    if flask_login.current_user.is_authenticated:
+        # Get current session timeout from database
+        session_timeout_minutes = SystemSettings.get_setting_int('session_timeout_minutes', 60)
+        session_lifetime = timedelta(minutes=session_timeout_minutes)
+        
+        # Check if session is permanent and has expired
+        if flask.session.get('_permanent', False):
+            # Ensure both datetimes are timezone-naive for consistent comparison
+            now = datetime.now()
+            created = flask.session.get('_created', now)
+            
+            # Convert created to timezone-naive if it's timezone-aware
+            if hasattr(created, 'tzinfo') and created.tzinfo is not None:
+                created = created.replace(tzinfo=None)
+            
+            session_age = now - created
+            if session_age > session_lifetime:
+                logging.info(f"[session] Session expired for user {flask_login.current_user.email}")
+                flask_login.logout_user()
+                flask.session.clear()
+                return jsonify({'error': 'Session expired. Please log in again.'}), 401
 
 # ICONS ======================================================================
 @app.route("/favicon.ico")
@@ -237,122 +321,15 @@ def log_tab_switch():
     data = flask.request.get_json()
     tab = data.get('tab')
     task_id = data.get('task_id')
-    timestamp = data.get('timestamp')
-    logging.info(f"[Tab Switch] User switched to tab '{tab}' for task_id={task_id} at {timestamp}")
-    return flask.jsonify({'status': 'ok'})
+    user_id = flask_login.current_user.user_id if flask_login.current_user.is_authenticated else None
+    logging.info(f"Tab switch: user={user_id}, task={task_id}, tab={tab}")
+    return jsonify({"success": True})
 
-
+# HEALTH ENDPOINTS ===========================================================
 @app.route("/api/healthz")
 def healthz():
-    """Basic health check endpoint."""
-    app.logger.debug("Basic health check")
-    return "ok", 200
-
-@app.route("/api/health")
-def comprehensive_health():
-    """Comprehensive health check endpoint."""
-    try:
-        # Run all health checks
-        results = health_checker.run_all_checks()
-        
-        # Determine overall status
-        overall_status, http_status = health_checker.get_overall_status(results)
-        
-        # Prepare response
-        response = {
-            'status': overall_status,
-            'http_status': http_status,
-            'checks': results,
-            'timestamp': datetime.now().isoformat()
-        }
-        
-        # Add cache headers for health checks
-        response_obj = jsonify(response)
-        response_obj.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
-        response_obj.headers['Pragma'] = 'no-cache'
-        response_obj.headers['Expires'] = '0'
-        
-        return response_obj, http_status
-        
-    except Exception as e:
-        app.logger.error(f"Health check failed: {e}")
-        return jsonify({
-            'status': 'error',
-            'message': f'Health check failed: {str(e)}',
-            'timestamp': datetime.now().isoformat()
-        }), 503
-
-@app.route("/api/health/ready")
-def readiness_probe():
-    """Kubernetes readiness probe endpoint."""
-    try:
-        # Only check critical services for readiness
-        critical_checks = {
-            'database': health_checker._check_database,
-            'redis': health_checker._check_redis,
-        }
-        
-        results = {}
-        for check_name, check_func in critical_checks.items():
-            try:
-                result = check_func()
-                results[check_name] = result
-            except Exception as e:
-                results[check_name] = {
-                    'status': 'error',
-                    'message': str(e),
-                    'timestamp': datetime.now().isoformat()
-                }
-        
-        # Check if all critical services are healthy
-        all_healthy = all(
-            result.get('status') == 'healthy' 
-            for result in results.values()
-        )
-        
-        if all_healthy:
-            return jsonify({
-                'status': 'ready',
-                'message': 'All critical services are ready',
-                'timestamp': datetime.now().isoformat()
-            }), 200
-        else:
-            return jsonify({
-                'status': 'not_ready',
-                'message': 'Critical services are not ready',
-                'checks': results,
-                'timestamp': datetime.now().isoformat()
-            }), 503
-            
-    except Exception as e:
-        app.logger.error(f"Readiness probe failed: {e}")
-        return jsonify({
-            'status': 'not_ready',
-            'message': f'Readiness probe failed: {str(e)}',
-            'timestamp': datetime.now().isoformat()
-        }), 503
-
-@app.route("/api/health/live")
-def liveness_probe():
-    """Kubernetes liveness probe endpoint."""
-    try:
-        # Simple check that the application is responding
-        return jsonify({
-            'status': 'alive',
-            'message': 'Application is alive',
-            'timestamp': datetime.now().isoformat()
-        }), 200
-    except Exception as e:
-        app.logger.error(f"Liveness probe failed: {e}")
-        return jsonify({
-            'status': 'dead',
-            'message': f'Application is not responding: {str(e)}',
-            'timestamp': datetime.now().isoformat()
-        }), 503
-
-@app.route("/test-alive")
-def test_alive():
-    return "ALIVE"
+    """Simple health check endpoint."""
+    return jsonify({"status": "healthy"}), 200
 
 # --- ADD catch-all route for React SPA ---
 @app.route('/', defaults={'path': ''})

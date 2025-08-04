@@ -13,6 +13,16 @@ class File:
         self.environment_id = environment_id
 
     def to_dict(self):
+        # Handle created_at which might be a string or datetime object
+        created_at_str = None
+        if self.created_at:
+            if hasattr(self.created_at, 'strftime'):
+                # It's a datetime object
+                created_at_str = self.created_at.strftime('%Y-%m-%d %H:%M:%S')
+            else:
+                # It's already a string
+                created_at_str = str(self.created_at)
+        
         return {
             'file_id': self.file_id,
             'task_id': self.task_id,
@@ -20,7 +30,7 @@ class File:
             'user_id': self.user_id,
             'filename': self.filename,
             'filepath': self.filepath,
-            'created_at': self.created_at.strftime('%Y-%m-%d %H:%M:%S') if self.created_at else None
+            'created_at': created_at_str
         }
 
     @staticmethod

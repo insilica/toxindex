@@ -34,7 +34,7 @@ def emit_status(task_id, status):
 def plain_openai_task(self, payload):
     """GCS-enabled OpenAI task that uploads results to GCS."""
     try:
-        logger.info(f"[ToxDirect GCS] Running plain_openai_task for task_id={payload.get('task_id')}, user_id={payload.get('user_id')}, payload={payload}")
+        logger.info(f"Running plain_openai_task for task_id={payload.get('task_id')}, user_id={payload.get('user_id')}, payload={payload}")
         r = redis.Redis(
             host=os.environ.get("REDIS_HOST", "localhost"),
             port=int(os.environ.get("REDIS_PORT", "6379"))

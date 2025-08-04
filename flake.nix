@@ -75,9 +75,34 @@
               exit 1
             fi
 
+            # Install local RAPtool package in editable mode
+            echo "Installing RAPtool in editable mode..."
+            pip install -e RAPtool/
+            if [ $? -ne 0 ]; then
+              echo "Error: Failed to install RAPtool. Please check the RAPtool directory."
+              exit 1
+            fi
+
+            # Install local pathway_analysis_tool package in editable mode
+            echo "Installing pathway_analysis_tool in editable mode..."
+            pip install -e pathway_analysis_tool/
+            if [ $? -ne 0 ]; then
+              echo "Error: Failed to install pathway_analysis_tool. Please check the pathway_analysis_tool directory."
+              exit 1
+            fi
+
             # Source your fullstack environment setup (Postgres, Redis, AWS, etc.)
             # This runs after the virtual environment is set up so Python scripts can access packages
             # source scripts/flake/shellhook.sh
+
+            # Load environment variables from .env file
+            if [ -f ".env" ]; then
+              echo "Loading environment variables from .env file..."
+              export $(grep -v '^#' .env | xargs)
+              echo "Environment variables loaded: REDIS_HOST=$REDIS_HOST, REDIS_PORT=$REDIS_PORT"
+            else
+              echo "Warning: .env file not found. Redis connection may fail."
+            fi
 
             # Unset PYTHONPATH after shellhook runs to avoid conflicts
             unset PYTHONPATH

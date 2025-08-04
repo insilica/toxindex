@@ -9,6 +9,7 @@ import ChatInputBar from "./shared/ChatInputBar";
 import { getWorkflowId, getWorkflowLabelById } from './shared/workflows';
 import { FaHammer } from 'react-icons/fa';
 import { RiDeleteBin6Line } from 'react-icons/ri';
+import SessionStatus from './SessionStatus';
 
 interface Task {
   task_id: string;
@@ -21,6 +22,8 @@ interface Task {
   finished_at?: string;
   workflow_id: number;
 }
+
+
 
 // const TYPEWRITER_TEXT = "Is it toxic, or just misunderstood? Let's break it down!";
 const TYPEWRITER_TEXT = "ToxIndex";
@@ -38,7 +41,7 @@ const Dashboard = () => {
   const [uploading, setUploading] = useState(false);
   const { selectedEnv, refetchEnvironments } = useEnvironment();
   const { selectedModel } = useModel();
-  const { socket, isConnected } = useSocket();
+  const { socket, isConnected, connect, isConnecting } = useSocket();
   const [typedHeading, setTypedHeading] = useState(ENABLE_TYPEWRITER ? "" : TYPEWRITER_TEXT);
   const typewriterTimeoutRef = useRef<number | null>(null);
   const typewriterIntervalRef = useRef<number | null>(null);
@@ -48,6 +51,12 @@ const Dashboard = () => {
   const [fileName, setFileName] = useState<string | undefined>(undefined);
 
   console.log("Dashboard mounted");
+
+  // Connect Socket.IO once on mount
+  useEffect(() => {
+    console.log('[Dashboard] Connecting Socket.IO...');
+    connect();
+  }, []); // Empty dependency array - only run once
 
   // Fetch environments when component mounts
   useEffect(() => {
@@ -108,6 +117,7 @@ const Dashboard = () => {
 
   // Socket.IO setup for real-time task status updates
   useEffect(() => {
+    console.log('[Dashboard] Socket.IO effect - socket:', !!socket, 'isConnected:', isConnected, 'activeTasks:', activeTasks.length);
     
     if (!socket) return;
 
@@ -116,6 +126,8 @@ const Dashboard = () => {
       // Leave old rooms
       const prevTaskIds = prevTaskIdsRef.current;
       const currentTaskIds = activeTasks.map(t => t.task_id);
+
+      console.log('[Dashboard] Managing rooms - prevTaskIds:', prevTaskIds, 'currentTaskIds:', currentTaskIds);
 
       prevTaskIds.forEach(id => {
         if (!currentTaskIds.includes(id)) {
@@ -133,6 +145,8 @@ const Dashboard = () => {
       });
 
       prevTaskIdsRef.current = currentTaskIds;
+    } else {
+      console.log('[Dashboard] Socket not connected, skipping room management');
     }
 
     // Global event logger for debugging (only in development)
@@ -151,7 +165,10 @@ const Dashboard = () => {
           // Update the task in place
           const updated = [...prev];
           updated[idx] = { ...updated[idx], ...data };
+          console.log('[Dashboard] Updated task:', updated[idx]);
           return updated;
+        } else {
+          console.log('[Dashboard] Task not found in activeTasks:', data.task_id);
         }
         return prev;
       });
@@ -165,7 +182,7 @@ const Dashboard = () => {
       }
       // Don't leave rooms on cleanup - let the server handle it
     };
-  }, [activeTasks]);
+  }, [activeTasks, socket, isConnected]);
 
 
   const archiveTask = (task_id: string) => {
@@ -264,6 +281,10 @@ const Dashboard = () => {
         `}</style>
       </div>
       <div className="w-full max-w-2xl mx-auto mt-8">
+        {/* Session Status Component */}
+        <div className="mb-6">
+          <SessionStatus />
+        </div>
         <div className="flex space-x-2 mb-4 border-b border-gray-700">
           <button
             className={`px-4 py-2 font-semibold flex items-center gap-2 focus:outline-none transition border-b-4 ${activeTab === 'tasks' ? 'border-white text-white' : 'border-transparent text-gray-400 hover:text-white'}`}

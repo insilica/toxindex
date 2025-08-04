@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import time
+import uuid
 from typing import Optional, Any, Dict, List
 from functools import wraps
 from webserver.storage import GCSFileStorage
@@ -14,11 +15,23 @@ class CacheManager:
     """Comprehensive cache manager for GCS files, database queries, and task results."""
     
     def __init__(self):
-        self.redis_client = redis.Redis(
-            host=os.environ.get("REDIS_HOST", "localhost"),
-            port=int(os.environ.get("REDIS_PORT", "6379")),
-            decode_responses=True
-        )
+        try:
+            self.redis_client = redis.Redis(
+                host=os.environ.get("REDIS_HOST", "localhost"),
+                port=int(os.environ.get("REDIS_PORT", "6379")),
+                decode_responses=True,
+                socket_connect_timeout=5,
+                socket_timeout=5,
+                retry_on_timeout=True,
+                health_check_interval=30
+            )
+            # Test connection
+            self.redis_client.ping()
+            logger.info("Redis connection established successfully")
+        except Exception as e:
+            logger.warning(f"Redis connection failed: {e}. Cache will be disabled.")
+            self.redis_client = None
+        
         self._gcs_storage = None  # Lazy load GCS storage
         
         # Cache TTLs (in seconds)
@@ -26,6 +39,19 @@ class CacheManager:
         self.METADATA_TTL = 300       # 5 minutes
         self.TASK_RESULT_TTL = 86400  # 24 hours
         self.QUERY_TTL = 300          # 5 minutes
+    
+    def _serialize_for_cache(self, obj: Any) -> str:
+        """Serialize object for caching, handling UUIDs and other special types."""
+        def json_serializer(obj):
+            if isinstance(obj, uuid.UUID):
+                return str(obj)
+            raise TypeError(f"Object of type {type(obj)} is not JSON serializable")
+        
+        return json.dumps(obj, default=json_serializer)
+    
+    def _redis_available(self) -> bool:
+        """Check if Redis is available."""
+        return self.redis_client is not None
     
     @property
     def gcs_storage(self):
@@ -44,6 +70,16 @@ class CacheManager:
     # File Content Caching
     def get_file_content(self, gcs_path: str) -> Optional[str]:
         """Get file content from cache or GCS."""
+        if not self._redis_available():
+            # If Redis is not available, try to get directly from GCS
+            try:
+                with self.gcs_storage.download_file(gcs_path, "/tmp/temp_download") as temp_path:
+                    with open(temp_path, 'r', encoding='utf-8') as f:
+                        return f.read()
+            except Exception as e:
+                logger.error(f"Error getting file content for {gcs_path}: {e}")
+                return None
+                
         try:
             # Get file metadata first
             metadata = self.get_file_metadata(gcs_path)
@@ -78,6 +114,9 @@ class CacheManager:
     
     def cache_file_content(self, gcs_path: str, content: str) -> None:
         """Cache file content."""
+        if not self._redis_available():
+            return
+            
         try:
             md5_hash = self._get_md5_hash(content)
             cache_key = self._get_cache_key("gcs_file", md5_hash)
@@ -89,6 +128,14 @@ class CacheManager:
     # File Metadata Caching
     def get_file_metadata(self, gcs_path: str) -> Optional[Dict]:
         """Get file metadata from cache or GCS."""
+        if not self._redis_available():
+            # If Redis is not available, get directly from GCS
+            try:
+                return self.gcs_storage.get_file_metadata(gcs_path)
+            except Exception as e:
+                logger.error(f"Error getting file metadata for {gcs_path}: {e}")
+                return None
+                
         try:
             md5_hash = self._get_md5_hash(gcs_path)
             cache_key = self._get_cache_key("gcs_metadata", md5_hash)
@@ -103,7 +150,7 @@ class CacheManager:
             metadata = self.gcs_storage.get_file_metadata(gcs_path)
             
             if metadata:
-                self.redis_client.setex(cache_key, self.METADATA_TTL, json.dumps(metadata))
+                self.redis_client.setex(cache_key, self.METADATA_TTL, self._serialize_for_cache(metadata))
                 logger.info(f"Cached file metadata: {gcs_path}")
             
             return metadata
@@ -115,6 +162,9 @@ class CacheManager:
     # Database Query Caching
     def cache_query(self, method: str, args: tuple, result: Any) -> None:
         """Cache database query results."""
+        if not self._redis_available():
+            return
+            
         try:
             args_hash = self._get_md5_hash(str(args))
             cache_key = self._get_cache_key("file_query", f"{method}:{args_hash}")
@@ -127,13 +177,16 @@ class CacheManager:
             else:
                 serializable_result = result
                 
-            self.redis_client.setex(cache_key, self.QUERY_TTL, json.dumps(serializable_result))
+            self.redis_client.setex(cache_key, self.QUERY_TTL, self._serialize_for_cache(serializable_result))
             logger.info(f"Cached query result: {method}")
         except Exception as e:
             logger.error(f"Error caching query result: {e}")
     
     def get_cached_query(self, method: str, args: tuple) -> Optional[Any]:
         """Get cached database query result."""
+        if not self._redis_available():
+            return None
+            
         try:
             args_hash = self._get_md5_hash(str(args))
             cache_key = self._get_cache_key("file_query", f"{method}:{args_hash}")
@@ -165,6 +218,9 @@ class CacheManager:
     # Task Result Caching
     def get_task_result(self, filepath: str, task_id: str) -> Optional[Dict]:
         """Get cached task result."""
+        if not self._redis_available():
+            return None
+            
         try:
             cache_key = self._get_cache_key("task_result", f"{filepath}:{task_id}")
             cached_result = self.redis_client.get(cache_key)
@@ -182,9 +238,12 @@ class CacheManager:
     
     def cache_task_result(self, filepath: str, task_id: str, result: Dict) -> None:
         """Cache task result."""
+        if not self._redis_available():
+            return
+            
         try:
             cache_key = self._get_cache_key("task_result", f"{filepath}:{task_id}")
-            self.redis_client.setex(cache_key, self.TASK_RESULT_TTL, json.dumps(result))
+            self.redis_client.setex(cache_key, self.TASK_RESULT_TTL, self._serialize_for_cache(result))
             logger.info(f"Cached task result: {task_id}")
         except Exception as e:
             logger.error(f"Error caching task result: {e}")

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { FaUsers, FaUserCog, FaTrash, FaEdit, FaSave, FaTimes, FaHammer} from 'react-icons/fa';
+import { FaUsers, FaUserCog, FaTrash, FaEdit, FaSave, FaTimes, FaHammer, FaClock, FaUndo} from 'react-icons/fa';
 import HomeButton from '../shared/HomeButton';
+import { get, put, post, del } from '../../utils/api';
 
 interface User {
   user_id: string;
@@ -30,17 +31,31 @@ interface WorkflowAccess {
   has_access: boolean;
 }
 
+interface SessionSettingsData {
+  session_timeout_minutes: number;
+  session_warning_minutes: number;
+  session_refresh_interval_minutes: number;
+}
+
 const UserGroupManager: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
   const [workflowAccess, setWorkflowAccess] = useState<WorkflowAccess[]>([]);
+  const [sessionSettings, setSessionSettings] = useState<SessionSettingsData>({
+    session_timeout_minutes: 60,
+    session_warning_minutes: 5,
+    session_refresh_interval_minutes: 30
+  });
+  const [originalSessionSettings, setOriginalSessionSettings] = useState<SessionSettingsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editingGroup, setEditingGroup] = useState<string | null>(null);
   const [newGroup, setNewGroup] = useState({ name: '', description: '' });
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const [activeTab, setActiveTab] = useState<'users' | 'workflows'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'workflows' | 'session'>('users');
+  const [savingSession, setSavingSession] = useState(false);
+  const [sessionMessage, setSessionMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   // Function to sort groups in desired order: admin, researcher, basic
   const sortGroups = (groups: Group[]) => {
@@ -86,10 +101,11 @@ const UserGroupManager: React.FC = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [usersResponse, groupsResponse, workflowAccessResponse] = await Promise.all([
-        fetch('/api/admin/users'),
-        fetch('/api/admin/groups'),
-        fetch('/api/admin/workflow-access')
+      const [usersResponse, groupsResponse, workflowAccessResponse, sessionSettingsResponse] = await Promise.all([
+        get('/api/admin/users'),
+        get('/api/admin/groups'),
+        get('/api/admin/workflow-access'),
+        get('/api/admin/settings/session')
       ]);
 
       if (!usersResponse.ok || !groupsResponse.ok || !workflowAccessResponse.ok) {
@@ -104,6 +120,15 @@ const UserGroupManager: React.FC = () => {
       setGroups(groupsData.groups);
       setWorkflowAccess(workflowAccessData.access_matrix);
       setWorkflows(workflowAccessData.workflows || []);
+
+      // Load session settings if available
+      if (sessionSettingsResponse.ok) {
+        const sessionData = await sessionSettingsResponse.json();
+        if (sessionData.success) {
+          setSessionSettings(sessionData.settings);
+          setOriginalSessionSettings(sessionData.settings);
+        }
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
@@ -111,13 +136,56 @@ const UserGroupManager: React.FC = () => {
     }
   };
 
+  const saveSessionSettings = async () => {
+    try {
+      setSavingSession(true);
+      setSessionMessage(null);
+
+      const response = await put('/api/admin/settings/session', sessionSettings);
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setSessionMessage({ type: 'success', text: 'Session settings updated successfully' });
+        setOriginalSessionSettings(sessionSettings);
+      } else {
+        setSessionMessage({ type: 'error', text: data.error || 'Failed to update session settings' });
+      }
+    } catch (error) {
+      console.error('Error updating session settings:', error);
+      setSessionMessage({ type: 'error', text: 'Failed to update session settings' });
+    } finally {
+      setSavingSession(false);
+    }
+  };
+
+  const resetSessionSettings = () => {
+    if (originalSessionSettings) {
+      setSessionSettings(originalSessionSettings);
+      setSessionMessage(null);
+    }
+  };
+
+  const handleSessionSettingChange = (key: keyof SessionSettingsData, value: string) => {
+    const numValue = parseInt(value) || 0;
+    setSessionSettings(prev => ({
+      ...prev,
+      [key]: numValue
+    }));
+    setSessionMessage(null);
+  };
+
+  const hasSessionChanges = () => {
+    if (!originalSessionSettings) return false;
+    return Object.keys(sessionSettings).some(key => 
+      sessionSettings[key as keyof SessionSettingsData] !== originalSessionSettings[key as keyof SessionSettingsData]
+    );
+  };
+
   const toggleWorkflowAccess = async (groupId: string, workflowId: number, currentAccess: boolean) => {
     try {
-      const method = currentAccess ? 'DELETE' : 'POST';
-      const response = await fetch(`/api/admin/groups/${groupId}/workflows/${workflowId}/access`, {
-        method,
-        headers: { 'Content-Type': 'application/json' }
-      });
+      const response = currentAccess 
+        ? await del(`/api/admin/groups/${groupId}/workflows/${workflowId}/access`)
+        : await post(`/api/admin/groups/${groupId}/workflows/${workflowId}/access`, {});
 
       if (!response.ok) {
         throw new Error(`Failed to ${currentAccess ? 'revoke' : 'grant'} workflow access`);
@@ -138,11 +206,7 @@ const UserGroupManager: React.FC = () => {
 
   const updateUserGroup = async (userId: string, groupId: string) => {
     try {
-      const response = await fetch(`/api/admin/users/${userId}/group`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ group_id: groupId })
-      });
+      const response = await put(`/api/admin/users/${userId}/group`, { group_id: groupId });
 
       if (!response.ok) {
         throw new Error('Failed to update user group');
@@ -157,11 +221,7 @@ const UserGroupManager: React.FC = () => {
 
   const createGroup = async () => {
     try {
-      const response = await fetch('/api/admin/groups', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newGroup)
-      });
+      const response = await post('/api/admin/groups', newGroup);
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -178,11 +238,7 @@ const UserGroupManager: React.FC = () => {
 
   const updateGroup = async (groupId: string, name: string, description: string) => {
     try {
-      const response = await fetch(`/api/admin/groups/${groupId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, description })
-      });
+      const response = await put(`/api/admin/groups/${groupId}`, { name, description });
 
       if (!response.ok) {
         throw new Error('Failed to update group');
@@ -201,9 +257,7 @@ const UserGroupManager: React.FC = () => {
     }
 
     try {
-      const response = await fetch(`/api/admin/groups/${groupId}`, {
-        method: 'DELETE'
-      });
+      const response = await del(`/api/admin/groups/${groupId}`);
 
       if (!response.ok) {
         throw new Error('Failed to delete group');
@@ -271,6 +325,17 @@ const UserGroupManager: React.FC = () => {
         >
           <FaHammer className="inline mr-2" />
           Workflow Access
+        </button>
+        <button
+          onClick={() => setActiveTab('session')}
+          className={`px-6 py-3 font-medium rounded-t-lg transition-colors ${
+            activeTab === 'session'
+              ? '!bg-blue-600 text-white border-b-2 border-blue-400'
+              : '!text-gray-200 hover:!text-white !bg-gray-700'
+          }`}
+        >
+          <FaClock className="inline mr-2" />
+          Session Settings
         </button>
       </div>
 
@@ -507,6 +572,125 @@ const UserGroupManager: React.FC = () => {
               <div className="text-gray-400">No workflows or groups available</div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Session Settings Tab */}
+      {activeTab === 'session' && (
+        <div className="bg-gray-800 rounded-lg p-6">
+          <div className="mb-6">
+            <h2 className="text-xl font-semibold text-white flex items-center gap-2">
+              <FaClock className="text-blue-400" />
+              Session Settings
+            </h2>
+            <p className="text-gray-300 mt-2">Configure session timeout and user activity settings</p>
+          </div>
+
+          {sessionMessage && (
+            <div className={`mb-4 p-3 rounded-md ${
+              sessionMessage.type === 'success' 
+                ? 'bg-green-100 border border-green-400 text-green-700' 
+                : 'bg-red-100 border border-red-400 text-red-700'
+            }`}>
+              {sessionMessage.text}
+            </div>
+          )}
+
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Session Timeout */}
+              <div className="bg-gray-700 p-4 rounded-lg">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Session Timeout (minutes)
+                </label>
+                <input
+                  type="number"
+                  min="15"
+                  max="480"
+                  value={sessionSettings.session_timeout_minutes}
+                  onChange={(e) => handleSessionSettingChange('session_timeout_minutes', e.target.value)}
+                  className="w-full px-3 py-2 !bg-gray-600 border border-gray-500 rounded-md text-white focus:outline-none focus:border-blue-500"
+                />
+                <p className="text-xs text-gray-400 mt-1">
+                  How long users stay logged in (15-480 minutes)
+                </p>
+              </div>
+
+              {/* Warning Time */}
+              <div className="bg-gray-700 p-4 rounded-lg">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Warning Time (minutes)
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  max={sessionSettings.session_timeout_minutes - 1}
+                  value={sessionSettings.session_warning_minutes}
+                  onChange={(e) => handleSessionSettingChange('session_warning_minutes', e.target.value)}
+                  className="w-full px-3 py-2 !bg-gray-600 border border-gray-500 rounded-md text-white focus:outline-none focus:border-blue-500"
+                />
+                <p className="text-xs text-gray-400 mt-1">
+                  When to warn users before session expires
+                </p>
+              </div>
+
+              {/* Refresh Interval */}
+              <div className="bg-gray-700 p-4 rounded-lg">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Refresh Interval (minutes)
+                </label>
+                <input
+                  type="number"
+                  min="5"
+                  max="60"
+                  value={sessionSettings.session_refresh_interval_minutes}
+                  onChange={(e) => handleSessionSettingChange('session_refresh_interval_minutes', e.target.value)}
+                  className="w-full px-3 py-2 !bg-gray-600 border border-gray-500 rounded-md text-white focus:outline-none focus:border-blue-500"
+                />
+                <p className="text-xs text-gray-400 mt-1">
+                  How often to refresh sessions (5-60 minutes)
+                </p>
+              </div>
+            </div>
+
+            {/* Summary */}
+            <div className="bg-blue-900 bg-opacity-30 p-4 rounded-lg border border-blue-700">
+              <h3 className="text-lg font-semibold text-blue-300 mb-2">Current Configuration</h3>
+              <div className="text-sm text-blue-200 space-y-1">
+                <p>• Users will be logged out after {sessionSettings.session_timeout_minutes} minutes of inactivity</p>
+                <p>• Users will see a warning {sessionSettings.session_warning_minutes} minutes before session expires</p>
+                <p>• Sessions will be refreshed every {sessionSettings.session_refresh_interval_minutes} minutes of activity</p>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex justify-end space-x-3 pt-4 border-t border-gray-700">
+              <button
+                onClick={resetSessionSettings}
+                disabled={!hasSessionChanges()}
+                className={`flex items-center px-4 py-2 rounded-md ${
+                  hasSessionChanges()
+                    ? '!bg-gray-600 hover:!bg-gray-700 text-white'
+                    : '!bg-gray-700 text-gray-500 cursor-not-allowed'
+                }`}
+              >
+                <FaUndo className="mr-2" />
+                Reset
+              </button>
+              <button
+                onClick={saveSessionSettings}
+                disabled={savingSession || !hasSessionChanges()}
+                className={`flex items-center px-4 py-2 rounded-md ${
+                  savingSession || !hasSessionChanges()
+                    ? '!bg-gray-700 text-gray-500 cursor-not-allowed'
+                    : '!bg-green-600 hover:!bg-green-700 text-white'
+                }`}
+              >
+                <FaSave className="mr-2" />
+                {savingSession ? 'Saving...' : 'Save Changes'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
       

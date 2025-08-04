@@ -120,6 +120,15 @@ def api_login():
             return jsonify({'error': 'Please verify your email before logging in.'}), 403
 
         flask_login.login_user(user)
+        
+        # Set session as permanent and track creation time for timeout management
+        flask.session.permanent = True
+        # Ensure timezone-naive datetime for consistency
+        created_time = datetime.datetime.now()
+        if hasattr(created_time, 'tzinfo') and created_time.tzinfo is not None:
+            created_time = created_time.replace(tzinfo=None)
+        flask.session['_created'] = created_time
+        
         print(f"Login successful for user: {email}")  # Debug log
         return jsonify({'success': True, 'user_id': user.user_id, 'email': user.email})
 
@@ -130,9 +139,58 @@ def api_login():
 @csrf.exempt
 @auth_bp.route('/logout', methods=['POST'])
 def api_logout():
-    flask_login.logout_user()
-    flask.session.clear()  # Explicitly clear the session
-    return jsonify({"success": True})
+    try:
+        user_email = flask_login.current_user.email if flask_login.current_user.is_authenticated else "unknown"
+        flask_login.logout_user()
+        flask.session.clear()  # Explicitly clear the session
+        print(f"Logout successful for user: {user_email}")  # Debug log
+        return jsonify({"success": True})
+    except Exception as e:
+        print(f"Logout error: {str(e)}")  # Debug log
+        return jsonify({"success": False, "error": "Logout failed"}), 500
+
+@csrf.exempt
+@auth_bp.route('/refresh_session', methods=['POST'])
+def api_refresh_session():
+    """Refresh the user's session to extend the timeout."""
+    try:
+        if flask_login.current_user.is_authenticated:
+            # Make session permanent and update creation time
+            flask.session.permanent = True
+            # Ensure timezone-naive datetime for consistency
+            created_time = datetime.datetime.now()
+            if hasattr(created_time, 'tzinfo') and created_time.tzinfo is not None:
+                created_time = created_time.replace(tzinfo=None)
+            flask.session['_created'] = created_time
+            print(f"[session] Session refreshed for user {flask_login.current_user.email}")  # Debug log
+            return jsonify({'success': True, 'message': 'Session refreshed'})
+        else:
+            return jsonify({'error': 'Not authenticated'}), 401
+    except Exception as e:
+        print(f"Session refresh error: {str(e)}")  # Debug log
+        return jsonify({'error': 'Session refresh failed'}), 500
+
+@csrf.exempt
+@auth_bp.route('/session_settings', methods=['GET'])
+@flask_login.login_required
+def api_get_session_settings():
+    """Get session settings for the current user (non-admin endpoint)."""
+    try:
+        from webserver.model.system_settings import SystemSettings
+        
+        settings = {
+            'session_timeout_minutes': SystemSettings.get_setting_int('session_timeout_minutes', 15),
+            'session_warning_minutes': SystemSettings.get_setting_int('session_warning_minutes', 14),
+            'session_refresh_interval_minutes': SystemSettings.get_setting_int('session_refresh_interval_minutes', 30)
+        }
+        
+        return jsonify({
+            'success': True,
+            'settings': settings
+        })
+    except Exception as e:
+        logging.error(f"Error getting session settings: {e}")
+        return jsonify({'error': 'Failed to get session settings'}), 500
 
 def send_password_reset(email):
   user = User.get_user(email)

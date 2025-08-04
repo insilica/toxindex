@@ -25,7 +25,8 @@ python3 scripts/seed_workflows.py
 echo "Setting up default admin user..."
 python3 scripts/setup_default_admin.py
 
-source scripts/flake/start_redis.sh
+# Use GKE Redis Memorystore for local development
+# source scripts/flake/start_redis.sh  # Comment out local Redis
 
 source scripts/load_gcp_environment.sh 
 
@@ -44,10 +45,13 @@ source .env
 
 export FRONTEND_URL=https://toxindex.com
 
-# Redis (Redis is running on the same EC2 instance as the webserver)
-export CELERY_BROKER_URL=redis://localhost:6379/0
-export CELERY_RESULT_BACKEND=redis://localhost:6379/0
-export SOCKETIO_MESSAGE_QUEUE=redis://localhost:6379/0
+# Use GKE Redis Memorystore for local development
+# Get Redis host from GCP environment or use default
+export REDIS_HOST=${REDIS_HOST:-"your-gke-redis-memorystore-host"}
+export REDIS_PORT=${REDIS_PORT:-"6379"}
+export CELERY_BROKER_URL=redis://${REDIS_HOST}:${REDIS_PORT}/0
+export CELERY_RESULT_BACKEND=redis://${REDIS_HOST}:${REDIS_PORT}/0
+export SOCKETIO_MESSAGE_QUEUE=redis://${REDIS_HOST}:${REDIS_PORT}/0
 
 # Python
 export PYTHONPATH="${PYTHONPATH:+${PYTHONPATH}:}${PWD}"

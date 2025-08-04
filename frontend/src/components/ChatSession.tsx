@@ -24,9 +24,15 @@ const ChatSession = () => {
   const { selectedModel } = useModel();
   const [fileId, setFileId] = useState<string | undefined>(undefined);
   const [fileName, setFileName] = useState<string | undefined>(undefined);
-  const { socket, isConnected } = useSocket();
+  const { socket, isConnected, connect } = useSocket();
 
   console.log("ChatSession mounted", sessionId);
+
+  // Connect Socket.IO once on mount
+  useEffect(() => {
+    console.log('[ChatSession] Connecting Socket.IO...');
+    connect();
+  }, []); // Empty dependency array - only run once
 
   useEffect(() => {
     mountCount += 1;
