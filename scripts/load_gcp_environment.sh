@@ -14,7 +14,8 @@ fi
 
 SECRET_NAME="${1:-}"
 
-# Clear the .env file at the start
+# Clear the .env file at the start (in project root)
+cd "$(dirname "$(dirname "$0")")"  # Go to project root
 > .env
 
 if [ -z "$SECRET_NAME" ]; then
@@ -42,13 +43,13 @@ if [ -z "$SECRET_NAME" ]; then
           --secret "$secret" 2>/dev/null)
         
         if [ $? -eq 0 ] && [ -n "$SECRET_VALUE" ]; then
-            # Check if it's JSON or single value
-            if echo "$SECRET_VALUE" | jq . >/dev/null 2>&1; then
-                # JSON secret - export each key/value
+            # Check if it's a JSON object (not just valid JSON)
+            if echo "$SECRET_VALUE" | jq -e 'type == "object"' >/dev/null 2>&1; then
+                # JSON object secret - export each key/value
                 echo "$SECRET_VALUE" | jq -r 'to_entries[] | "export \(.key)=\(.value)"' >> .env
                 echo "✅ Loaded $(jq length <<< "$SECRET_VALUE") variables from $secret"
             else
-                # Single value secret
+                # Single value secret (string, number, boolean, etc.)
                 echo "export $secret=\"$SECRET_VALUE\"" >> .env
                 echo "✅ Loaded single value: $secret"
             fi
@@ -73,14 +74,14 @@ else
       --secret "$SECRET_NAME")
     
     if [ $? -eq 0 ]; then
-        # Check if it's JSON or single value
-        if echo "$SECRET_VALUE" | jq . >/dev/null 2>&1; then
-            # JSON secret - export each key/value
+        # Check if it's a JSON object (not just valid JSON)
+        if echo "$SECRET_VALUE" | jq -e 'type == "object"' >/dev/null 2>&1; then
+            # JSON object secret - export each key/value
             echo "$SECRET_VALUE" | jq -r 'to_entries[] | "export \(.key)=\(.value)"' > .env
             set -a && source .env && set +a
             echo "✅ Loaded $(jq length <<< "$SECRET_VALUE") environment variables"
         else
-            # Single value secret
+            # Single value secret (string, number, boolean, etc.)
             echo "export $SECRET_NAME=\"$SECRET_VALUE\"" > .env
             export "$SECRET_NAME"="$SECRET_VALUE"
             echo "✅ Loaded single value: $SECRET_NAME"
