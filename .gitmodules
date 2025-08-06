@@ -1,0 +1,3 @@
+[submodule "sygma/metabolite-sygma"]
+	path = sygma/metabolite-sygma
+	url = https://github.com/toxindex/metabolite-sygma.git
