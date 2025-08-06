@@ -26,7 +26,9 @@
             pkgs.zlib 
             pkgs.nodejs
             pkgs.gh
+            pkgs.libjpeg
           ];
+
 
           shellHook = ''
             # Remove NVM from PATH to avoid conflicts

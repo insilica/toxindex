@@ -35,7 +35,7 @@ from sygma_predictor import SygmaMetabolitePredictor, predict_metabolites_datafr
 
 # Define the task for metabolite SYGMA analysis (main function)
 @celery.task(bind=True)
-def metabolite_sygma_task():
+def metabolite_sygma_task(self, payload):
     """Task to perform metabolite SYGMA analysis.
 
     General Steps:
@@ -70,10 +70,13 @@ def metabolite_sygma_task():
         task_id = payload.get("task_id")
         user_id = payload.get("user_id")
 
+        user_query = payload.get("payload", "Is Gentamicin nephrotoxic?")
+
+        if not all([task_id, user_id, user_query]):
+            raise ValueError(f"Missing required fields. task_id={task_id}, user_id={user_id}, user_query={user_query}")
         # Allow users to upload a file with chemical names or SMILES strings
-        file_id = payload.get("payload")
-        if not all([task_id, user_id, file_id]):
-            raise ValueError(f"Missing required fields. task_id={task_id}, user_id={user_id}, file_id={file_id}")
+        # file_id = payload.get("payload")
+        
     pass
 
 # Define helper functions for the task (Add unit tests for each helper function)
@@ -96,6 +99,12 @@ def check_if_SMILES(chemical_string: str) -> bool:
     except Exception as e:
         logger.error(f"String is not a valid SMILES: {chemical_string}, error: {e}")
         return False
+
+def parse_user_query(user_query: str) -> dict:
+    """Parse the user query to extract chemical names or SMILES strings."""
+    # This is a placeholder for more complex parsing logic
+    # For now, we assume the user query is a single chemical name or SMILES string
+    return {"chemical": user_query.strip()}
 
 def sygma_get_metabolites(parent_smiles: str, phase1_cycles=1, phase2_cycles=1) -> pd.DataFrame:
     """Get metabolites using the SygmaMetabolitePredictor."""

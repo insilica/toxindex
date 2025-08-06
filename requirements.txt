@@ -1,3 +1,4 @@
 -e ./RAPtool
 -e ./pathway_analysis_tool
+# -e ./sygma/metabolite_sygma <- failing due to dependency conflicts
 . 
