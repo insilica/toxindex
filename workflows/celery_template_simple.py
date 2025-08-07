@@ -1,7 +1,16 @@
 """ celery_template_simple.py
+========================================
+This module defines a basic Celery task that demonstrates the
+structure of a workflow in the application. 
 
-# Task: write a simple Celery task (take in a query from GCS, extract chemical names, check if the names are SMILES strings, return the SMILES strings)
-This is a simple example to demonstrate the structure of a Celery task.
+The example workflow reads a text query from a file stored in Google Cloud Storage (GCS), 
+tokenizes the contents to identify potential chemical names, filters those
+tokens for valid SMILES strings, and returns the list of SMILES.
+
+This code herein can serve as scaffolding for more complex
+workflows. It demonstrates how to interact with the shared ``celery``
+application, emit status updates via Redis, and download input
+data using the helper functions in the ``workflows.utils`` module.
 
 """
 
@@ -26,7 +35,7 @@ def is_smiles(token: str) -> bool:
         token (str): The string to check. This token should be a chemical name or SMILES string, provided by the user.
     
     Outputs:
-        bool: True if the token is a valid SMILES string, False otherwise.
+        bool: True if the token appears to be a valid SMILES string, False otherwise.
 
     Exceptions:
         TypeError: If the input is not a string.
@@ -56,8 +65,22 @@ def is_smiles(token: str) -> bool:
 @celery.task(bind=True, name="extract_smiles_task")
 def extract_smiles_task(self, gcs_path: str, payload: Dict[str, str]) -> Dict[str, List[str]]:
     """
-    Celery task to extract SMILES strings from a GCS file containing chemical names or SMILES strings.
-    
+    Celery task to extract SMILES strings from a query file, stored in Google Cloud Storage (GCS), containing chemical names or SMILES strings.
+    This task is designed to be simple and illustrative of how to structure a Celery workflow.
+
+    The task workflow is as follows:
+
+    1. Emit a status update indicating that the task has started.
+    2. Download the query text from Google Cloud Storage into a
+       temporary directory using the ``download_gcs_file_to_temp`` helper.
+    3. Tokenize the text on whitespace to find potential chemical names.
+    4. Filter these tokens using a heuristic to identify SMILES strings.
+    5. Emit a completion status and return the list of SMILES strings.
+
+    If any exception occurs during processing, the task will emit a
+    failure status and re‑raise the exception so that Celery marks the
+    task as failed.
+
     Args:
         gcs_path (str): The Google Cloud Storage (GCS) path to the file containing chemical names or SMILES strings.
         payload (Dict[str, str]): Additional payload data, if needed.
