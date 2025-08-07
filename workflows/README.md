@@ -1,1 +1,1 @@
-how to upload a new celery task will be described here.
+celery -A workflows.celery_worker worker --loglevel=info -Q celery,probra,openai,raptool,pathway

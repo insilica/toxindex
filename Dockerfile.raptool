@@ -1,0 +1,17 @@
+# RAPtool worker image for RAPtool-specific tasks
+FROM toxindex-base:latest
+
+# Copy RAPtool-specific requirements
+COPY requirements-raptool.txt /app/requirements.txt
+
+# Install RAPtool Python dependencies
+RUN pip install -r requirements.txt
+
+# Install RAPtool package in editable mode
+RUN pip install -e ./RAPtool/
+
+# Expose the port Flask runs on
+EXPOSE 6513
+
+# Entrypoint: Celery worker for RAPtool tasks
+CMD ["celery", "-A", "workflows.celery_worker", "worker", "--loglevel=info", "-Q", "raptool"]

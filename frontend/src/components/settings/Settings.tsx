@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { FaListAlt } from "react-icons/fa";
-import HomeButton from './shared/HomeButton';
+import HomeButton from '../shared/HomeButton';
 
 const DEFAULT_INSTRUCTIONS = "Example: Run tests and linters for every code change but not when changing code comments or documentation";
 

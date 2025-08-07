@@ -20,37 +20,100 @@ logging.getLogger().info("probra.py module loaded")
 logger = logging.getLogger(__name__)
 
 
-
-def emit_status(task_id, status):
-    logger.info(f"[emit_status] {task_id} -> {status}")
-    Task.set_status(task_id, status)
-    r = redis.Redis(
+def get_redis_connection():
+    """Get Redis connection with consistent configuration"""
+    return redis.Redis(
         host=os.environ.get("REDIS_HOST", "localhost"),
         port=int(os.environ.get("REDIS_PORT", "6379"))
     )
-    task = Task.get_task(task_id)
+
+
+def publish_to_celery_updates(event_type, task_id, data):
+    """Publish event to celery_updates channel for database processing"""
+    r = get_redis_connection()
     event = {
-        "type": "task_status_update",
-        "task_id": task.task_id,
-        "data": task.to_dict(),
+        "type": event_type,
+        "task_id": task_id,
+        "data": data,
     }
     r.publish("celery_updates", json.dumps(event, default=str))
+    logger.info(f"Published {event_type} to celery_updates for task {task_id}")
 
-@celery.task(bind=True)
+
+def publish_to_socketio(event_name, room, data):
+    """Publish event to Socket.IO Redis channel for real-time updates"""
+    r = get_redis_connection()
+    socketio_event = {
+        "method": "emit",
+        "event": event_name,
+        "room": room,
+        "data": data
+    }
+    r.publish("socketio", json.dumps(socketio_event, default=str))
+    logger.info(f"Published {event_name} to Socket.IO for room {room}")
+
+
+def emit_status(task_id, status):
+    """Emit task status update to both database and real-time channels"""
+    logger.info(f"[emit_status] {task_id} -> {status}")
+    
+    # Update database directly
+    Task.set_status(task_id, status)
+    task = Task.get_task(task_id)
+    
+    # Publish to celery_updates for any additional database processing
+    publish_to_celery_updates("task_status_update", task.task_id, task.to_dict())
+    
+    # Publish to Socket.IO for real-time updates
+    publish_to_socketio("task_status_update", f"task_{task_id}", task.to_dict())
+
+
+def emit_task_message(task_id, message_data):
+    """Emit task message to both database and real-time channels"""
+    # Publish to celery_updates for database processing
+    publish_to_celery_updates("task_message", task_id, message_data)
+    
+    # Publish to Socket.IO for real-time updates
+    task = Task.get_task(task_id)
+    if task and getattr(task, 'session_id', None):
+        # Emit to chat session room
+        publish_to_socketio("new_message", f"chat_session_{task.session_id}", message_data)
+    
+    # Emit to task room
+    publish_to_socketio("task_message", f"task_{task_id}", {
+        "type": "task_message",
+        "data": message_data,
+        "task_id": str(task_id),  # Convert UUID to string for JSON serialization
+    })
+
+
+def emit_task_file(task_id, file_data):
+    """Emit task file to both database and real-time channels"""
+    # Publish to celery_updates for database processing
+    publish_to_celery_updates("task_file", task_id, file_data)
+    
+    # Publish to Socket.IO for real-time updates
+    publish_to_socketio("task_file", f"task_{task_id}", file_data)
+
+
+@celery.task(bind=True, queue='probra')
 def probra_task(self, payload):
     """GCS-enabled background task that emits progress messages and uploads files to GCS."""
+    # Add detailed task start logging
+    logger.info(f"=== TASK STARTED: probra_task ===")
+    logger.info(f"Task ID: {self.request.id}")
+    logger.info(f"Payload: {payload}")
+    
     try:
         logger.info(f"Starting probra task with payload: {payload}")
-        r = redis.Redis(
-            host=os.environ.get("REDIS_HOST", "localhost"),
-            port=int(os.environ.get("REDIS_PORT", "6379"))
-        )
+        r = get_redis_connection()
         task_id = payload.get("task_id")
         user_id = payload.get("user_id")
 
         if not all([task_id, user_id]):
             raise ValueError(f"Missing required fields. task_id={task_id}, user_id={user_id}")
 
+        logger.info(f"Processing task {task_id} for user {user_id}")
         emit_status(task_id, "starting")
         chemprop_query = payload.get("payload", "Is Gentamicin nephrotoxic?")
         logger.info(f"User query for deeptox_agent: {chemprop_query}")
@@ -66,15 +129,26 @@ def probra_task(self, payload):
         
         if cached_structured and cached_markdown:
             # Use cached data
-            original_response = json.loads(cached_structured.decode())
-            response_content = cached_markdown.decode()
-            emit_status(task_id, "using cache")
+            logger.info(f"Using cached data for query: {chemprop_query}")
+            try:
+                original_response = json.loads(cached_structured.decode())
+                response_content = cached_markdown.decode()
+                logger.info(f"Cached data loaded successfully. Type: {type(original_response)}")
+                emit_status(task_id, "using cache")
+            except Exception as e:
+                logger.error(f"Error loading cached data: {e}")
+                # Clear corrupted cache and regenerate
+                r.delete(structured_cache_key)
+                r.delete(markdown_cache_key)
+                cached_structured = None
+                cached_markdown = None
         else:
             # Run agent and generate both formats
+            logger.info(f"Running agent for query: {chemprop_query}")
             emit_status(task_id, "running agent")
             response = deeptox_agent.run(chemprop_query)
             
-            # Get original structured response
+            # Get original structured response and ensure it's always a dict
             if isinstance(response.content, ChemicalToxicityAssessment):
                 original_response = response.content.model_dump()
             elif isinstance(response.content, dict):
@@ -83,33 +157,43 @@ def probra_task(self, payload):
                 # Fallback for string response
                 original_response = {"content": response.content}
             
-            # Ensure original_response is always serializable
-            if isinstance(original_response, ChemicalToxicityAssessment):
-                original_response = original_response.model_dump()
-            
             # Convert to markdown
+            logger.info(f"Converting response to markdown")
             emit_status(task_id, "converting to markdown")
+            
+            # Ensure original_response is a dict for markdown conversion
+            logger.info(f"Converting to markdown. Input type: {type(original_response)}")
+            if hasattr(original_response, 'model_dump'):
+                markdown_input = original_response.model_dump()
+                logger.info("Converted using model_dump()")
+            elif hasattr(original_response, 'dict'):
+                markdown_input = original_response.dict()
+                logger.info("Converted using dict()")
+            else:
+                markdown_input = original_response
+                logger.info("Using original_response as-is")
+                
+            logger.info(f"Markdown input type: {type(markdown_input)}")
             response_content = convert_pydantic_to_markdown(
-                original_response, 
+                markdown_input, 
                 chemprop_query
             )
             
             # Cache both formats
-            r.set(structured_cache_key, json.dumps(original_response), ex=60*60*24)
+            logger.info(f"Caching results for future use")
+            # Ensure we cache the dict version, not the object
+            cache_dict = markdown_input if 'markdown_input' in locals() else original_response
+            r.set(structured_cache_key, json.dumps(cache_dict, default=str), ex=60*60*24)
             r.set(markdown_cache_key, response_content, ex=60*60*24)
             emit_status(task_id, "agent complete")
 
+        logger.info(f"Sending message to user")
         emit_status(task_id, "sending message")
         # display raw markdown content directly to user
         message = MessageSchema(role="assistant", content=response_content)
-        event = {
-            "type": "task_message",
-            "data": message.model_dump(),
-            "task_id": task_id,
-        }
-        r.publish("celery_updates", json.dumps(event, default=str))
-        logger.info(f"Published task_message event to Redis for task_id={task_id}")
+        emit_task_message(task_id, message.model_dump())
 
+        logger.info(f"Uploading files to GCS")
         emit_status(task_id, "uploading files to GCS")
         
         # Get the original structured data for JSON file
@@ -119,16 +203,8 @@ def probra_task(self, payload):
         json_filename = f"probra_result_{uuid.uuid4().hex}.json"
         json_content = ""
         
-        # Ensure original_response is always a dict before JSON serialization
-        if isinstance(original_response, ChemicalToxicityAssessment):
-            response_dict = original_response.model_dump()
-        elif isinstance(original_response, dict):
-            response_dict = original_response
-        else:
-            # Fallback: create minimal JSON
-            response_dict = {"message": "Analysis completed", "content": str(original_response)}
-        
-        json_content = json.dumps(response_dict, indent=2, ensure_ascii=False)
+        # original_response is already a dict from earlier processing
+        json_content = json.dumps(original_response, indent=2, ensure_ascii=False, default=str)
         
         # Create Markdown file
         md_filename = f"probra_result_{uuid.uuid4().hex}.md"
@@ -161,33 +237,25 @@ def probra_task(self, payload):
             
             emit_status(task_id, "files uploaded")
             
-            # Publish JSON file event
-            json_file_event = {
-                "type": "task_file",
-                "task_id": task_id,
-                "data": {
-                    "user_id": user_id,
-                    "filename": json_filename,
-                    "filepath": json_gcs_path,
-                    "file_type": "json",
-                    "content_type": "application/json"
-                },
+            # Emit JSON file event
+            json_file_data = {
+                "user_id": user_id,
+                "filename": json_filename,
+                "filepath": json_gcs_path,
+                "file_type": "json",
+                "content_type": "application/json"
             }
-            r.publish("celery_updates", json.dumps(json_file_event, default=str))
+            emit_task_file(task_id, json_file_data)
             
-            # Publish Markdown file event
-            md_file_event = {
-                "type": "task_file",
-                "task_id": task_id,
-                "data": {
-                    "user_id": user_id,
-                    "filename": md_filename,
-                    "filepath": md_gcs_path,
-                    "file_type": "markdown",
-                    "content_type": "text/markdown"
-                },
+            # Emit Markdown file event
+            md_file_data = {
+                "user_id": user_id,
+                "filename": md_filename,
+                "filepath": md_gcs_path,
+                "file_type": "markdown",
+                "content_type": "text/markdown"
             }
-            r.publish("celery_updates", json.dumps(md_file_event, default=str))
+            emit_task_file(task_id, md_file_data)
             
         finally:
             # Clean up temporary files
@@ -197,6 +265,7 @@ def probra_task(self, payload):
             except Exception as e:
                 logger.warning(f"Failed to clean up temp files: {e}")
 
+        logger.info(f"Task {task_id} completed successfully")
         finished_at = Task.mark_finished(task_id)
         emit_status(task_id, "done")
         return {"done": True, "finished_at": finished_at}

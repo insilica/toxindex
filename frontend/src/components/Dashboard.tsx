@@ -9,7 +9,6 @@ import ChatInputBar from "./shared/ChatInputBar";
 import { getWorkflowId, getWorkflowLabelById } from './shared/workflows';
 import { FaHammer } from 'react-icons/fa';
 import { RiDeleteBin6Line } from 'react-icons/ri';
-import SessionStatus from './SessionStatus';
 
 interface Task {
   task_id: string;
@@ -41,7 +40,7 @@ const Dashboard = () => {
   const [uploading, setUploading] = useState(false);
   const { selectedEnv, refetchEnvironments } = useEnvironment();
   const { selectedModel } = useModel();
-  const { socket, isConnected, connect, isConnecting } = useSocket();
+  const { socket, isConnected, connect } = useSocket();
   const [typedHeading, setTypedHeading] = useState(ENABLE_TYPEWRITER ? "" : TYPEWRITER_TEXT);
   const typewriterTimeoutRef = useRef<number | null>(null);
   const typewriterIntervalRef = useRef<number | null>(null);
@@ -50,18 +49,168 @@ const Dashboard = () => {
   const [fileId, setFileId] = useState<string | undefined>(undefined);
   const [fileName, setFileName] = useState<string | undefined>(undefined);
 
+  // Get timeout for different workflows (in seconds) - loaded from server
+  const [timeoutSettings, setTimeoutSettings] = useState<{
+    toxindex_rap: number;
+    toxindex_vanilla: number;
+    toxindex_json: number;
+    raptool: number;
+    pathway_analysis: number;
+    default: number;
+  } | null>(null);
+
+  const getWorkflowTimeout = (workflowId: number): number => {
+    if (!timeoutSettings) return 600; // Default 10 minutes if not loaded yet
+    
+    switch (workflowId) {
+      case 1: // ToxIndex RAP (probra)
+        return timeoutSettings.toxindex_rap;
+      case 2: // ToxIndex Vanilla (plain_openai_task)
+        return timeoutSettings.toxindex_vanilla;
+      case 3: // ToxIndex JSON (openai_json_schema_task)
+        return timeoutSettings.toxindex_json;
+      case 4: // RAPtool
+        return timeoutSettings.raptool;
+      case 5: // Pathway Analysis
+        return timeoutSettings.pathway_analysis;
+      default:
+        return timeoutSettings.default;
+    }
+  };
+
+  // Check for timed out tasks and mark them as error
+  const checkForTimedOutTasks = async () => {
+    const now = Date.now();
+    const timedOutTasks = activeTasks.filter(task => {
+      if (!task.created_at || task.status === 'done' || task.status === 'error') return false;
+      const createdTime = new Date(task.created_at).getTime();
+      const runningTime = (now - createdTime) / 1000; // seconds
+      const timeout = getWorkflowTimeout(task.workflow_id);
+      return runningTime > timeout;
+    });
+
+    if (timedOutTasks.length > 0) {
+      console.log(`Marking ${timedOutTasks.length} timed out tasks as error`);
+      
+      // Track which tasks we've already processed to avoid duplicate calls
+      const processedTaskIds = new Set<string>();
+      
+      // Mark each timed out task as error
+      for (const task of timedOutTasks) {
+        // Skip if we've already processed this task
+        if (processedTaskIds.has(task.task_id)) {
+          continue;
+        }
+        
+        try {
+          const response = await fetch(`/api/tasks/${task.task_id}/status`, {
+            method: 'PUT',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'error' })
+          });
+          
+          if (response.ok) {
+            processedTaskIds.add(task.task_id);
+            console.log(`Successfully marked task ${task.task_id} as error`);
+          }
+        } catch (err) {
+          console.error(`Error marking task ${task.task_id} as error:`, err);
+        }
+      }
+
+      // Only refresh if we actually processed some tasks
+      if (processedTaskIds.size > 0) {
+        setTasksLoading(true);
+        let url = "/api/tasks";
+        if (selectedEnv && selectedEnv !== "__add__" && selectedEnv !== "__manage__") {
+          url += `?environment_id=${selectedEnv}`;
+        }
+        try {
+          const response = await fetch(url, { credentials: "include", cache: "no-store" });
+          if (response.ok) {
+            const data = await response.json();
+            setActiveTasks(data.active_tasks || []);
+            setArchivedTasks(data.archived_tasks || []);
+          }
+        } catch (err) {
+          console.error("Error refreshing tasks after timeout:", err);
+        } finally {
+          setTasksLoading(false);
+        }
+      }
+    }
+  };
+
+  // Load timeout settings from server
+  const loadTimeoutSettings = async () => {
+    try {
+      const response = await fetch('/api/admin/settings/session', {
+        credentials: 'include',
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.settings && data.settings.task_timeout_minutes) {
+          const timeouts = data.settings.task_timeout_minutes;
+          setTimeoutSettings({
+            toxindex_rap: (timeouts.toxindex_rap || 10) * 60,
+            toxindex_vanilla: (timeouts.toxindex_vanilla || 10) * 60,
+            toxindex_json: (timeouts.toxindex_json || 10) * 60,
+            raptool: (timeouts.raptool || 10) * 60,
+            pathway_analysis: (timeouts.pathway_analysis || 10) * 60,
+            default: (timeouts.default || 10) * 60,
+          });
+        } else {
+          // Set default values if no settings found
+          setTimeoutSettings({
+            toxindex_rap: 10 * 60,
+            toxindex_vanilla: 10 * 60,
+            toxindex_json: 10 * 60,
+            raptool: 10 * 60,
+            pathway_analysis: 10 * 60,
+            default: 10 * 60,
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error loading timeout settings:', error);
+      // Set default values on error
+      setTimeoutSettings({
+        toxindex_rap: 10 * 60,
+        toxindex_vanilla: 10 * 60,
+        toxindex_json: 10 * 60,
+        raptool: 10 * 60,
+        pathway_analysis: 10 * 60,
+        default: 10 * 60,
+      });
+    }
+  };
+
+  console.log('[Dashboard] Dashboard state:', { 
+    selectedEnv, 
+    selectedModel, 
+    activeTasksCount: activeTasks.length,
+    archivedTasksCount: archivedTasks.length,
+    socketConnected: isConnected
+  });
+
   console.log("Dashboard mounted");
 
   // Connect Socket.IO once on mount
   useEffect(() => {
     console.log('[Dashboard] Connecting Socket.IO...');
     connect();
+    return () => {
+      console.log('[Dashboard] Dashboard component unmounting');
+    };
   }, []); // Empty dependency array - only run once
 
-  // Fetch environments when component mounts
+  // Fetch environments and timeout settings when component mounts
   useEffect(() => {
     refetchEnvironments();
-  }, [refetchEnvironments]);
+    loadTimeoutSettings();
+  }, []); // Empty dependency array - only run once on mount
 
   useEffect(() => {
     console.log("selectedEnv", selectedEnv);
@@ -84,6 +233,12 @@ const Dashboard = () => {
       })
       .finally(() => setTasksLoading(false));
   }, [selectedEnv]);
+
+  // Periodically refresh long-running tasks
+  useEffect(() => {
+    const interval = setInterval(checkForTimedOutTasks, 30000); // Check every 30 seconds
+    return () => clearInterval(interval);
+  }, [selectedEnv]); // Removed activeTasks dependency to prevent excessive calls
 
   useEffect(() => {
     if (!ENABLE_TYPEWRITER) {
@@ -117,37 +272,9 @@ const Dashboard = () => {
 
   // Socket.IO setup for real-time task status updates
   useEffect(() => {
-    console.log('[Dashboard] Socket.IO effect - socket:', !!socket, 'isConnected:', isConnected, 'activeTasks:', activeTasks.length);
+    console.log('[Dashboard] Socket.IO effect - socket:', !!socket, 'isConnected:', isConnected);
     
     if (!socket) return;
-
-    // Only manage rooms if socket is connected
-    if (isConnected) {
-      // Leave old rooms
-      const prevTaskIds = prevTaskIdsRef.current;
-      const currentTaskIds = activeTasks.map(t => t.task_id);
-
-      console.log('[Dashboard] Managing rooms - prevTaskIds:', prevTaskIds, 'currentTaskIds:', currentTaskIds);
-
-      prevTaskIds.forEach(id => {
-        if (!currentTaskIds.includes(id)) {
-          console.log('[SocketIO] Leaving task room', id);
-          socket.emit('leave_task_room', { task_id: id });
-        }
-      });
-
-      // Join new rooms
-      currentTaskIds.forEach(id => {
-        if (!prevTaskIds.includes(id)) {
-          console.log('[SocketIO] Joining task room', id);
-          socket.emit('join_task_room', { task_id: id });
-        }
-      });
-
-      prevTaskIdsRef.current = currentTaskIds;
-    } else {
-      console.log('[Dashboard] Socket not connected, skipping room management');
-    }
 
     // Global event logger for debugging (only in development)
     if (import.meta.env.DEV) {
@@ -180,8 +307,35 @@ const Dashboard = () => {
       if (import.meta.env.DEV) {
         socket.offAny(); // Remove global event logger
       }
-      // Don't leave rooms on cleanup - let the server handle it
     };
+  }, [socket, isConnected]); // Removed activeTasks dependency
+
+  // Separate effect for room management to avoid feedback loops
+  useEffect(() => {
+    if (!socket || !isConnected) return;
+
+    const currentTaskIds = activeTasks.map(t => t.task_id);
+    const prevTaskIds = prevTaskIdsRef.current;
+
+    console.log('[Dashboard] Managing rooms - prevTaskIds:', prevTaskIds, 'currentTaskIds:', currentTaskIds);
+
+    // Leave old rooms
+    prevTaskIds.forEach(id => {
+      if (!currentTaskIds.includes(id)) {
+        console.log('[SocketIO] Leaving task room', id);
+        socket.emit('leave_task_room', { task_id: id });
+      }
+    });
+
+    // Join new rooms
+    currentTaskIds.forEach(id => {
+      if (!prevTaskIds.includes(id)) {
+        console.log('[SocketIO] Joining task room', id);
+        socket.emit('join_task_room', { task_id: id });
+      }
+    });
+
+    prevTaskIdsRef.current = currentTaskIds;
   }, [activeTasks, socket, isConnected]);
 
 
@@ -245,21 +399,46 @@ const Dashboard = () => {
           file_id: fileId,
         }),
       });
-      if (!res.ok) throw new Error("Failed to create task");
+      if (!res.ok) {
+        // Try to get detailed error message from backend
+        try {
+          const errorData = await res.json();
+          throw new Error(errorData.error || `HTTP ${res.status}: ${res.statusText}`);
+        } catch (parseErr) {
+          // If we can't parse the error response, use a generic message
+          throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        }
+      }
 
       setTasksLoading(true);
       let url = "/api/tasks";
       if (selectedEnv && selectedEnv !== "__add__" && selectedEnv !== "__manage__") {
         url += `?environment_id=${selectedEnv}`;
       }
-      const tasksData = await fetch(url, { credentials: "include", cache: "no-store" }).then(r => r.json());
+      
+      // Fetch tasks with proper error handling
+      const tasksResponse = await fetch(url, { credentials: "include", cache: "no-store" });
+      if (!tasksResponse.ok) {
+        // Try to get detailed error message from backend
+        try {
+          const errorData = await tasksResponse.json();
+          throw new Error(errorData.error || `HTTP ${tasksResponse.status}: ${tasksResponse.statusText}`);
+        } catch (parseErr) {
+          // If we can't parse the error response, use a generic message
+          throw new Error(`HTTP ${tasksResponse.status}: ${tasksResponse.statusText}`);
+        }
+      }
+      
+      const tasksData = await tasksResponse.json();
       setActiveTasks(tasksData.active_tasks || []);
       setArchivedTasks(tasksData.archived_tasks || []);
       setTasksLoading(false);
       setFileId(undefined);
       setFileName(undefined);
     } catch (err) {
-      setError("Failed to post task.");
+      // Use the specific error message from the backend or fallback to generic message
+      const errorMessage = err instanceof Error ? err.message : "Failed to post task.";
+      setError(errorMessage);
     } finally {
       setUploading(false);
     }
@@ -281,10 +460,6 @@ const Dashboard = () => {
         `}</style>
       </div>
       <div className="w-full max-w-2xl mx-auto mt-8">
-        {/* Session Status Component */}
-        <div className="mb-6">
-          <SessionStatus />
-        </div>
         <div className="flex space-x-2 mb-4 border-b border-gray-700">
           <button
             className={`px-4 py-2 font-semibold flex items-center gap-2 focus:outline-none transition border-b-4 ${activeTab === 'tasks' ? 'border-white text-white' : 'border-transparent text-gray-400 hover:text-white'}`}
@@ -362,6 +537,19 @@ const Dashboard = () => {
                           startTime={task.created_at ? new Date(task.created_at).getTime() : undefined} 
                           workflowId={task.workflow_id}
                           status={task.status}
+                          timeoutSeconds={getWorkflowTimeout(task.workflow_id)}
+                          onTimeout={() => {
+                            // Mark task as error when timeout occurs
+                            fetch(`/api/tasks/${task.task_id}/status`, {
+                              method: 'PUT',
+                              credentials: 'include',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ status: 'error' })
+                            }).then(() => {
+                              // Refresh task list
+                              checkForTimedOutTasks();
+                            });
+                          }}
                         />
                         {task.status && (
                           <span className="ml-2 text-xs text-green-300 font-mono" style={{ maxWidth: 120, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -371,23 +559,6 @@ const Dashboard = () => {
                       </span>
                     )}
 
-                    {/*
-                    {task.created_at && task.status === 'done' && (
-                      <span className="ml-2 text-xs text-gray-400 whitespace-nowrap">
-                        <span className="font-semibold text-gray-500">Created:</span>
-
-                          {new Date(task.created_at).toLocaleString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            hour: 'numeric',
-                            minute: '2-digit',
-                            hour12: true,
-                          })}
-
-                      </span>
-                    )}
-                    */}
-                    
                     {task.status === 'done' && task.created_at && task.finished_at && (
                       (() => {
                         const start = new Date(task.created_at).getTime();
@@ -413,7 +584,7 @@ const Dashboard = () => {
                       */}
                   </div>
                   <div className="w-12" />
-                  {task.status === 'done' && (
+                  {(task.status === 'done' || task.status === 'error') && (
                     <button
                       onClick={e => {
                         e.stopPropagation();
@@ -426,6 +597,7 @@ const Dashboard = () => {
                       <FaArchive />
                     </button>
                   )}
+
                 </li>
               ))}
             </ul>

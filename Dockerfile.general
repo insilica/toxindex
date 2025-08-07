@@ -1,0 +1,18 @@
+# General worker image for standard tasks (probra, openai, etc.)
+FROM toxindex-base:latest
+
+# Copy general requirements
+COPY requirements-general.txt /app/requirements.txt
+
+# Install general Python dependencies
+RUN pip install -r requirements.txt
+
+# Install local packages in editable mode
+RUN pip install -e ./RAPtool/ || true
+RUN pip install -e ./pathway_analysis_tool/ || true
+
+# Expose the port Flask runs on
+EXPOSE 6513
+
+# Entrypoint: Gunicorn with gevent-websocket worker for Flask-SocketIO
+CMD ["gunicorn", "--worker-class", "geventwebsocket.gunicorn.workers.GeventWebSocketWorker", "-w", "1", "-b", "0.0.0.0:6513", "webserver.app:app"]

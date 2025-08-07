@@ -5,6 +5,16 @@ from webserver.csrf import csrf
 from flask import request, jsonify, Blueprint
 import flask, flask_login, secrets, datetime, os
 import random
+import redis
+import datetime
+import json
+import logging
+import os
+from flask import jsonify, request
+import flask_login
+from webserver.model import User
+from webserver.csrf import csrf
+import random
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://toxindex.com')
@@ -31,6 +41,89 @@ ERROR_MESSAGES = [
     "You shall not pass... yet! Try again.",
     "Mistakes happen! Give it another go."
 ]
+
+# Initialize Redis connection for session management
+redis_client = redis.Redis(
+    host=os.environ.get("REDIS_HOST", "localhost"),
+    port=int(os.environ.get("REDIS_PORT", "6379")),
+    decode_responses=True
+)
+
+logger = logging.getLogger(__name__)
+
+# Session management constants (defaults, will be overridden by database settings)
+DEFAULT_SESSION_TIMEOUT_MINUTES = 15
+DEFAULT_SESSION_WARNING_MINUTES = 14
+SESSION_KEY_PREFIX = "session:"
+SESSION_ACTIVITY_PREFIX = "activity:"
+
+def get_session_settings():
+    """Get session settings from database with fallback to defaults."""
+    try:
+        from webserver.model import SystemSettings
+        timeout = SystemSettings.get_setting_int('session_timeout_minutes', DEFAULT_SESSION_TIMEOUT_MINUTES)
+        warning = SystemSettings.get_setting_int('session_warning_minutes', DEFAULT_SESSION_WARNING_MINUTES)
+        return {
+            'timeout_minutes': timeout,
+            'warning_minutes': warning
+        }
+    except Exception as e:
+        logger.error(f"Error getting session settings: {e}")
+        return {
+            'timeout_minutes': DEFAULT_SESSION_TIMEOUT_MINUTES,
+            'warning_minutes': DEFAULT_SESSION_WARNING_MINUTES
+        }
+
+def get_session_key(user_id: str) -> str:
+    """Generate Redis key for user session."""
+    return f"{SESSION_KEY_PREFIX}{user_id}"
+
+def get_activity_key(user_id: str) -> str:
+    """Generate Redis key for user activity tracking."""
+    return f"{SESSION_ACTIVITY_PREFIX}{user_id}"
+
+def update_session_activity(user_id: str):
+    """Update user's last activity timestamp in Redis."""
+    try:
+        settings = get_session_settings()
+        activity_key = get_activity_key(user_id)
+        redis_client.setex(activity_key, settings['timeout_minutes'] * 60, datetime.datetime.now().isoformat())
+        logger.debug(f"Updated activity for user {user_id}")
+    except Exception as e:
+        logger.error(f"Failed to update activity for user {user_id}: {e}")
+
+def get_session_time_remaining(user_id: str) -> int:
+    """Get remaining session time in seconds."""
+    try:
+        settings = get_session_settings()
+        activity_key = get_activity_key(user_id)
+        last_activity = redis_client.get(activity_key)
+        
+        if not last_activity:
+            return 0
+        
+        last_activity_time = datetime.datetime.fromisoformat(last_activity)
+        elapsed = (datetime.datetime.now() - last_activity_time).total_seconds()
+        remaining = (settings['timeout_minutes'] * 60) - elapsed
+        
+        return max(0, int(remaining))
+    except Exception as e:
+        logger.error(f"Failed to get session time remaining for user {user_id}: {e}")
+        return 0
+
+def is_session_expired(user_id: str) -> bool:
+    """Check if user session has expired."""
+    return get_session_time_remaining(user_id) <= 0
+
+def is_session_warning(user_id: str) -> bool:
+    """Check if session is in warning state (close to expiry)."""
+    try:
+        settings = get_session_settings()
+        remaining = get_session_time_remaining(user_id)
+        return 0 < remaining <= (settings['warning_minutes'] * 60)
+    except Exception as e:
+        logger.error(f"Error checking session warning: {e}")
+        return False
 
 def generate_validation_link(user):
   print(f"Generating validation link for user: {user.user_id}")  # Debug log
@@ -129,6 +222,9 @@ def api_login():
             created_time = created_time.replace(tzinfo=None)
         flask.session['_created'] = created_time
         
+        # Initialize Redis session tracking
+        update_session_activity(user.user_id)
+        
         print(f"Login successful for user: {email}")  # Debug log
         return jsonify({'success': True, 'user_id': user.user_id, 'email': user.email})
 
@@ -155,13 +251,16 @@ def api_refresh_session():
     """Refresh the user's session to extend the timeout."""
     try:
         if flask_login.current_user.is_authenticated:
-            # Make session permanent and update creation time
+            # Update Redis activity tracking
+            update_session_activity(flask_login.current_user.user_id)
+            
+            # Also update Flask session for compatibility
             flask.session.permanent = True
-            # Ensure timezone-naive datetime for consistency
             created_time = datetime.datetime.now()
             if hasattr(created_time, 'tzinfo') and created_time.tzinfo is not None:
                 created_time = created_time.replace(tzinfo=None)
             flask.session['_created'] = created_time
+            
             print(f"[session] Session refreshed for user {flask_login.current_user.email}")  # Debug log
             return jsonify({'success': True, 'message': 'Session refreshed'})
         else:
@@ -169,6 +268,47 @@ def api_refresh_session():
     except Exception as e:
         print(f"Session refresh error: {str(e)}")  # Debug log
         return jsonify({'error': 'Session refresh failed'}), 500
+
+@csrf.exempt
+@auth_bp.route('/session_status', methods=['GET'])
+def api_session_status():
+    """Get current session status including time remaining and warning state."""
+    try:
+        if not flask_login.current_user.is_authenticated:
+            return jsonify({'error': 'Not authenticated'}), 401
+        
+        user_id = flask_login.current_user.user_id
+        time_remaining = get_session_time_remaining(user_id)
+        is_warning = is_session_warning(user_id)
+        is_expired = is_session_expired(user_id)
+        
+        return jsonify({
+            'success': True,
+            'timeRemaining': time_remaining,
+            'showWarning': is_warning,
+            'isExpired': is_expired,
+            'sessionTimeoutMinutes': get_session_settings()['timeout_minutes'],
+            'sessionWarningMinutes': get_session_settings()['warning_minutes']
+        })
+    except Exception as e:
+        logger.error(f"Session status error: {e}")
+        return jsonify({'error': 'Failed to get session status'}), 500
+
+@csrf.exempt
+@auth_bp.route('/update_activity', methods=['POST'])
+def api_update_activity():
+    """Update user activity timestamp."""
+    try:
+        if not flask_login.current_user.is_authenticated:
+            return jsonify({'error': 'Not authenticated'}), 401
+        
+        user_id = flask_login.current_user.user_id
+        update_session_activity(user_id)
+        
+        return jsonify({'success': True, 'message': 'Activity updated'})
+    except Exception as e:
+        logger.error(f"Update activity error: {e}")
+        return jsonify({'error': 'Failed to update activity'}), 500
 
 @csrf.exempt
 @auth_bp.route('/session_settings', methods=['GET'])
@@ -179,8 +319,8 @@ def api_get_session_settings():
         from webserver.model.system_settings import SystemSettings
         
         settings = {
-            'session_timeout_minutes': SystemSettings.get_setting_int('session_timeout_minutes', 15),
-            'session_warning_minutes': SystemSettings.get_setting_int('session_warning_minutes', 14),
+            'session_timeout_minutes': get_session_settings()['timeout_minutes'],
+            'session_warning_minutes': get_session_settings()['warning_minutes'],
             'session_refresh_interval_minutes': SystemSettings.get_setting_int('session_refresh_interval_minutes', 30)
         }
         

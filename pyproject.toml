@@ -58,6 +58,7 @@ dependencies = [
   "jsonschema",
   "psutil>=5.9.0",
   "google-cloud-monitoring>=2.0.0",
+  "google-cloud-logging>=3.0.0",
   "flask-cors"
 ]
 

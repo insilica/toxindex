@@ -34,7 +34,14 @@ interface WorkflowAccess {
 interface SessionSettingsData {
   session_timeout_minutes: number;
   session_warning_minutes: number;
-  session_refresh_interval_minutes: number;
+  task_timeout_minutes: {
+    toxindex_rap: number;
+    toxindex_vanilla: number;
+    toxindex_json: number;
+    raptool: number;
+    pathway_analysis: number;
+    default: number;
+  };
 }
 
 const UserGroupManager: React.FC = () => {
@@ -45,7 +52,14 @@ const UserGroupManager: React.FC = () => {
   const [sessionSettings, setSessionSettings] = useState<SessionSettingsData>({
     session_timeout_minutes: 60,
     session_warning_minutes: 5,
-    session_refresh_interval_minutes: 30
+    task_timeout_minutes: {
+      toxindex_rap: 10,
+      toxindex_vanilla: 10,
+      toxindex_json: 10,
+      raptool: 10,
+      pathway_analysis: 10,
+      default: 10,
+    },
   });
   const [originalSessionSettings, setOriginalSessionSettings] = useState<SessionSettingsData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -165,12 +179,23 @@ const UserGroupManager: React.FC = () => {
     }
   };
 
-  const handleSessionSettingChange = (key: keyof SessionSettingsData, value: string) => {
-    const numValue = parseInt(value) || 0;
-    setSessionSettings(prev => ({
-      ...prev,
-      [key]: numValue
-    }));
+  const handleSessionSettingChange = (key: keyof SessionSettingsData, subKey?: string, value?: string) => {
+    if (key === 'task_timeout_minutes' && subKey && value) {
+      const numValue = parseInt(value) || 0;
+      setSessionSettings(prev => ({
+        ...prev,
+        task_timeout_minutes: {
+          ...prev.task_timeout_minutes,
+          [subKey]: numValue
+        }
+      }));
+    } else if (value) {
+      const numValue = parseInt(value) || 0;
+      setSessionSettings(prev => ({
+        ...prev,
+        [key]: numValue
+      }));
+    }
     setSessionMessage(null);
   };
 
@@ -597,7 +622,7 @@ const UserGroupManager: React.FC = () => {
           )}
 
           <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Session Timeout */}
               <div className="bg-gray-700 p-4 rounded-lg">
                 <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -608,7 +633,7 @@ const UserGroupManager: React.FC = () => {
                   min="15"
                   max="480"
                   value={sessionSettings.session_timeout_minutes}
-                  onChange={(e) => handleSessionSettingChange('session_timeout_minutes', e.target.value)}
+                  onChange={(e) => handleSessionSettingChange('session_timeout_minutes', undefined, e.target.value)}
                   className="w-full px-3 py-2 !bg-gray-600 border border-gray-500 rounded-md text-white focus:outline-none focus:border-blue-500"
                 />
                 <p className="text-xs text-gray-400 mt-1">
@@ -626,30 +651,104 @@ const UserGroupManager: React.FC = () => {
                   min="1"
                   max={sessionSettings.session_timeout_minutes - 1}
                   value={sessionSettings.session_warning_minutes}
-                  onChange={(e) => handleSessionSettingChange('session_warning_minutes', e.target.value)}
+                  onChange={(e) => handleSessionSettingChange('session_warning_minutes', undefined, e.target.value)}
                   className="w-full px-3 py-2 !bg-gray-600 border border-gray-500 rounded-md text-white focus:outline-none focus:border-blue-500"
                 />
                 <p className="text-xs text-gray-400 mt-1">
                   When to warn users before session expires
                 </p>
               </div>
+            </div>
 
-              {/* Refresh Interval */}
-              <div className="bg-gray-700 p-4 rounded-lg">
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Refresh Interval (minutes)
-                </label>
-                <input
-                  type="number"
-                  min="5"
-                  max="60"
-                  value={sessionSettings.session_refresh_interval_minutes}
-                  onChange={(e) => handleSessionSettingChange('session_refresh_interval_minutes', e.target.value)}
-                  className="w-full px-3 py-2 !bg-gray-600 border border-gray-500 rounded-md text-white focus:outline-none focus:border-blue-500"
-                />
-                <p className="text-xs text-gray-400 mt-1">
-                  How often to refresh sessions (5-60 minutes)
-                </p>
+            {/* Task Timeout Configuration */}
+            <div className="bg-gray-700 p-4 rounded-lg">
+              <h3 className="text-lg font-semibold text-white mb-4">Task Timeout Settings</h3>
+              <p className="text-gray-300 text-sm mb-4">Configure how long tasks can run before being marked as error</p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    ToxIndex RAP (minutes)
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="120"
+                    value={sessionSettings.task_timeout_minutes.toxindex_rap}
+                    onChange={(e) => handleSessionSettingChange('task_timeout_minutes', 'toxindex_rap', e.target.value)}
+                    className="w-full px-3 py-2 !bg-gray-600 border border-gray-500 rounded-md text-white focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    ToxIndex Vanilla (minutes)
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="60"
+                    value={sessionSettings.task_timeout_minutes.toxindex_vanilla}
+                    onChange={(e) => handleSessionSettingChange('task_timeout_minutes', 'toxindex_vanilla', e.target.value)}
+                    className="w-full px-3 py-2 !bg-gray-600 border border-gray-500 rounded-md text-white focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    ToxIndex JSON (minutes)
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="60"
+                    value={sessionSettings.task_timeout_minutes.toxindex_json}
+                    onChange={(e) => handleSessionSettingChange('task_timeout_minutes', 'toxindex_json', e.target.value)}
+                    className="w-full px-3 py-2 !bg-gray-600 border border-gray-500 rounded-md text-white focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    RAPtool (minutes)
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="120"
+                    value={sessionSettings.task_timeout_minutes.raptool}
+                    onChange={(e) => handleSessionSettingChange('task_timeout_minutes', 'raptool', e.target.value)}
+                    className="w-full px-3 py-2 !bg-gray-600 border border-gray-500 rounded-md text-white focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Pathway Analysis (minutes)
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="90"
+                    value={sessionSettings.task_timeout_minutes.pathway_analysis}
+                    onChange={(e) => handleSessionSettingChange('task_timeout_minutes', 'pathway_analysis', e.target.value)}
+                    className="w-full px-3 py-2 !bg-gray-600 border border-gray-500 rounded-md text-white focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Default (minutes)
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="60"
+                    value={sessionSettings.task_timeout_minutes.default}
+                    onChange={(e) => handleSessionSettingChange('task_timeout_minutes', 'default', e.target.value)}
+                    className="w-full px-3 py-2 !bg-gray-600 border border-gray-500 rounded-md text-white focus:outline-none focus:border-blue-500"
+                  />
+                </div>
               </div>
             </div>
 
@@ -659,7 +758,8 @@ const UserGroupManager: React.FC = () => {
               <div className="text-sm text-blue-200 space-y-1">
                 <p>• Users will be logged out after {sessionSettings.session_timeout_minutes} minutes of inactivity</p>
                 <p>• Users will see a warning {sessionSettings.session_warning_minutes} minutes before session expires</p>
-                <p>• Sessions will be refreshed every {sessionSettings.session_refresh_interval_minutes} minutes of activity</p>
+                <p>• Sessions are automatically refreshed on user activity (clicks, scrolls, etc.)</p>
+                <p>• Tasks will timeout after: ToxIndex RAP ({sessionSettings.task_timeout_minutes.toxindex_rap}m), Vanilla ({sessionSettings.task_timeout_minutes.toxindex_vanilla}m), JSON ({sessionSettings.task_timeout_minutes.toxindex_json}m), RAPtool ({sessionSettings.task_timeout_minutes.raptool}m), Pathway ({sessionSettings.task_timeout_minutes.pathway_analysis}m), Default ({sessionSettings.task_timeout_minutes.default}m)</p>
               </div>
             </div>
 

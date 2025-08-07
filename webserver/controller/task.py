@@ -37,7 +37,21 @@ def get_user_tasks():
         })
     except Exception as e:
         logging.error(f"Error retrieving tasks: {str(e)}")
-        return jsonify({"error": "Failed to retrieve tasks"}), 500
+        
+        # Provide more detailed error message based on exception type
+        error_message = 'Failed to retrieve tasks'
+        if 'Database' in str(type(e)) or 'connection' in str(e).lower():
+            error_message = f'Database error: {str(e)}'
+        elif 'Permission' in str(e):
+            error_message = f'Permission error: {str(e)}'
+        elif 'environment_id' in str(e).lower():
+            error_message = f'Invalid environment: {str(e)}'
+        elif 'user_id' in str(e).lower():
+            error_message = f'User authentication error: {str(e)}'
+        else:
+            error_message = f'Task retrieval failed: {str(e)}'
+        
+        return jsonify({"error": error_message}), 500
 
 @csrf.exempt
 @task_bp.route('', methods=['POST'])
@@ -91,7 +105,20 @@ def get_task(task_id):
         return jsonify(task.to_dict())
     except Exception as e:
         logging.error(f"/api/tasks/{task_id} error: {e}", exc_info=True)
-        return jsonify({"error": "Internal server error"}), 500
+        
+        # Provide more detailed error message based on exception type
+        if 'Database' in str(type(e)) or 'connection' in str(e).lower():
+            error_message = f'Database error: {str(e)}'
+        elif 'Permission' in str(e):
+            error_message = f'Permission error: {str(e)}'
+        elif 'task_id' in str(e).lower():
+            error_message = f'Task ID error: {str(e)}'
+        elif 'user_id' in str(e).lower():
+            error_message = f'User authentication error: {str(e)}'
+        else:
+            error_message = f'Task retrieval failed: {str(e)}'
+        
+        return jsonify({"error": error_message}), 500
 
 @csrf.exempt
 @task_bp.route('/<task_id>/archive', methods=['POST'])
@@ -112,6 +139,33 @@ def unarchive_task(task_id):
     user_id = flask_login.current_user.user_id
     ds.execute("UPDATE tasks SET archived = FALSE WHERE task_id = %s AND user_id = %s", (task_id, user_id))
     return jsonify({"success": True})
+
+@csrf.exempt
+@task_bp.route('/<task_id>/status', methods=['PUT'])
+@flask_login.login_required
+def update_task_status(task_id):
+    if not is_valid_uuid(task_id):
+        return jsonify({"success": False, "error": "Invalid task ID"}), 400
+    
+    try:
+        data = request.get_json()
+        new_status = data.get('status')
+        
+        if not new_status:
+            return jsonify({"success": False, "error": "Status is required"}), 400
+        
+        user_id = flask_login.current_user.user_id
+        task = Task.get_task(task_id)
+        
+        if not task or task.user_id != user_id:
+            return jsonify({"success": False, "error": "Task not found"}), 404
+        
+        Task.set_status(task_id, new_status)
+        return jsonify({"success": True})
+        
+    except Exception as e:
+        logging.error(f"Error updating task status: {e}", exc_info=True)
+        return jsonify({"success": False, "error": "Failed to update task status"}), 500
 
 @task_bp.route('/<task_id>/files', methods=['GET'])
 @flask_login.login_required

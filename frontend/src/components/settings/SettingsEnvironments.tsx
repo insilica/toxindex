@@ -1,7 +1,7 @@
 import React, {useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useEnvironment } from "../context/EnvironmentContext";
-import HomeButton from './shared/HomeButton';
+import { useEnvironment } from "../../context/EnvironmentContext";
+import HomeButton from '../shared/HomeButton';
 
 interface Environment {
   environment_id: string;
@@ -21,7 +21,7 @@ const SettingsEnvironments: React.FC = () => {
   useEffect(() => {
     // Fetch environments when component mounts
     refetchEnvironments();
-  }, [refetchEnvironments]);
+  }, []); // Only run once on mount
 
   const handleDelete = (envId: string) => {
     fetch(`/api/environments/${envId}`, {

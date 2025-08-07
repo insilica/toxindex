@@ -1,0 +1,17 @@
+# Pathway analysis worker image for pathway-specific tasks
+FROM toxindex-base:latest
+
+# Copy pathway-specific requirements
+COPY requirements-pathway.txt /app/requirements.txt
+
+# Install pathway Python dependencies
+RUN pip install -r requirements.txt
+
+# Install pathway analysis package in editable mode
+RUN pip install -e ./pathway_analysis_tool/
+
+# Expose the port Flask runs on
+EXPOSE 6513
+
+# Entrypoint: Celery worker for pathway tasks
+CMD ["celery", "-A", "workflows.celery_worker", "worker", "--loglevel=info", "-Q", "pathway"]

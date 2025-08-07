@@ -110,10 +110,27 @@ def update_system_setting(setting_key):
 def get_session_settings():
     """Get session-related settings"""
     try:
+        # Get task timeout settings from JSON or individual settings
+        task_timeout_json = SystemSettings.get_setting('task_timeout_minutes')
+        if task_timeout_json:
+            import json
+            task_timeouts = json.loads(task_timeout_json)
+        else:
+            # Fallback to individual settings
+            task_timeouts = {
+                'toxindex_rap': SystemSettings.get_setting_int('task_timeout_toxindex_rap', 10),
+                'toxindex_vanilla': SystemSettings.get_setting_int('task_timeout_toxindex_vanilla', 10),
+                'toxindex_json': SystemSettings.get_setting_int('task_timeout_toxindex_json', 10),
+                'raptool': SystemSettings.get_setting_int('task_timeout_raptool', 10),
+                'pathway_analysis': SystemSettings.get_setting_int('task_timeout_pathway_analysis', 10),
+                'default': SystemSettings.get_setting_int('task_timeout_default', 10)
+            }
+        
         settings = {
             'session_timeout_minutes': SystemSettings.get_setting_int('session_timeout_minutes', 60),
             'session_warning_minutes': SystemSettings.get_setting_int('session_warning_minutes', 5),
-            'session_refresh_interval_minutes': SystemSettings.get_setting_int('session_refresh_interval_minutes', 30)
+            'session_refresh_interval_minutes': SystemSettings.get_setting_int('session_refresh_interval_minutes', 30),
+            'task_timeout_minutes': task_timeouts
         }
         return jsonify({
             'success': True,
@@ -133,7 +150,7 @@ def update_session_settings():
         if not data:
             return jsonify({'error': 'Request body is required'}), 400
         
-        # Validate and update each setting
+        # Validate and update session settings
         updates = {}
         for key in ['session_timeout_minutes', 'session_warning_minutes', 'session_refresh_interval_minutes']:
             if key in data:
@@ -149,6 +166,19 @@ def update_session_settings():
         if 'session_timeout_minutes' in updates and 'session_warning_minutes' in updates:
             if updates['session_warning_minutes'] >= updates['session_timeout_minutes']:
                 return jsonify({'error': 'Warning time must be less than timeout time'}), 400
+        
+        # Handle task timeout settings
+        if 'task_timeout_minutes' in data:
+            task_timeouts = data['task_timeout_minutes']
+            if isinstance(task_timeouts, dict):
+                # Validate all timeout values
+                for key, value in task_timeouts.items():
+                    if not isinstance(value, int) or value <= 0:
+                        return jsonify({'error': f'Task timeout {key} must be a positive integer'}), 400
+                
+                # Save as JSON
+                import json
+                updates['task_timeout_minutes'] = json.dumps(task_timeouts)
         
         # Apply updates
         for key, value in updates.items():

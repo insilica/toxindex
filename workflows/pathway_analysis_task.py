@@ -58,7 +58,7 @@ def upload_local_file_to_gcs(local_path: Path, gcs_path: str, content_type: str 
     gcs_storage.upload_file(str(local_path), gcs_path, content_type=content_type)
     return gcs_path
 
-@celery.task(bind=True)
+@celery.task(bind=True, queue='pathway')
 def pathway_analysis_task(self, payload):
     """GCS-enabled pathway analysis task that downloads input files from GCS and uploads outputs to GCS."""
     try:

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useEnvironment } from "../context/EnvironmentContext";
-import HomeButton from './shared/HomeButton';
+import { useEnvironment } from "../../context/EnvironmentContext";
+import HomeButton from '../shared/HomeButton';
 
 const CreateEnvironmentSettings: React.FC = () => {
   const [title, setTitle] = useState("");

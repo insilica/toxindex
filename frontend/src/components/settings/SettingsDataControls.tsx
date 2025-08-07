@@ -1,5 +1,5 @@
 import React from "react";
-import HomeButton from './shared/HomeButton';
+import HomeButton from '../shared/HomeButton';
 
 const SettingsDataControls: React.FC = () => {
   return (

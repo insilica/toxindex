@@ -19,6 +19,7 @@ except ImportError:
 
 # LLM provider selection (default: openai)
 llm_provider = os.environ.get("LLM_PROVIDER", "openai").lower()
+print(f"Using LLM provider: {llm_provider}")
 
 if llm_provider == "openai":
     from langchain_openai import ChatOpenAI
@@ -146,7 +147,32 @@ follow_up_chain = (
 # ── helper functions (RunnableLambda wrappers) ──────────────────────────────────
 def parse_search_results(search_text: str, top_k: int = 5) -> List[Dict[str, str]]:
     """Extract URLs, fetch their titles and a snippet of content."""
-    urls = re.findall(r"https?://[^\s]+", search_text)[:top_k]
+    print(f"Parsing search text (first 500 chars): {search_text[:500]}...")
+    
+    # Try to parse as JSON first (GoogleSearchAPIWrapper might return structured data)
+    try:
+        search_data = json.loads(search_text)
+        print(f"Search data is JSON with keys: {list(search_data.keys()) if isinstance(search_data, dict) else 'not a dict'}")
+        
+        # Extract URLs from structured search results
+        urls = []
+        if isinstance(search_data, dict):
+            # Look for items array or similar structure
+            items = search_data.get('items', [])
+            if not items and 'organic_results' in search_data:
+                items = search_data.get('organic_results', [])
+            
+            for item in items[:top_k]:
+                if isinstance(item, dict):
+                    url = item.get('link') or item.get('url') or item.get('href')
+                    if url:
+                        urls.append(url)
+    except json.JSONDecodeError:
+        # Fallback to regex URL extraction
+        urls = re.findall(r"https?://[^\s]+", search_text)[:top_k]
+    
+    print(f"Found {len(urls)} URLs: {urls}")
+    
     parsed: List[Dict[str, str]] = []
     for url in urls:
         try:
@@ -161,7 +187,8 @@ def parse_search_results(search_text: str, top_k: int = 5) -> List[Dict[str, str
             else:
                 title = url.split("//")[1].split("/")[0]
                 content = f"Content from {url}"
-        except Exception:
+        except Exception as e:
+            print(f"Error fetching {url}: {e}")
             title = url.split("//")[1].split("/")[0]
             content = f"Content from {url}"
         parsed.append({
@@ -169,10 +196,22 @@ def parse_search_results(search_text: str, top_k: int = 5) -> List[Dict[str, str
             "title": title,
             "content": content,
         })
+    print(f"Parsed {len(parsed)} results")
     return parsed
 
 def summarize_results(results: List[Dict[str, str]]) -> List[str]:
-    return [summarizer_chain.invoke({"result": r}) for r in results]
+    summaries = []
+    for i, r in enumerate(results):
+        try:
+            summary = summarizer_chain.invoke({"result": r})
+            summaries.append(summary)
+            print(f"Generated summary {i+1}/{len(results)}: {summary[:100]}...")
+        except Exception as e:
+            print(f"Error generating summary {i+1}: {e}")
+            # Fallback: use a simple summary
+            fallback_summary = f"Summary of {r.get('title', 'Unknown title')}: {r.get('content', 'No content available')[:200]}..."
+            summaries.append(fallback_summary)
+    return summaries
 
 # Wrap helpers in RunnableLambda so they fit inside a graph
 parse_results_runnable = RunnableLambda(parse_search_results)
@@ -234,11 +273,17 @@ def preprocess_and_generate_query(state: SearchState) -> SearchState:
     })
 
 def run_search(state: SearchState) -> SearchState:
+    print(f"Running search for query: {state.search_query}")
     serp_text = search_tool.run(state.search_query)
+    print(f"Search returned {len(serp_text)} characters")
+    print(f"Search result type: {type(serp_text)}")
     return SearchState(**{**asdict(state), "initial_search_results": serp_text})
 
 def parse_results(state: SearchState) -> SearchState:
     parsed = parse_search_results(state.initial_search_results)
+    print(f"Parsed {len(parsed)} initial search results")
+    for i, result in enumerate(parsed):
+        print(f"Result {i+1}: {result.get('title', 'No title')[:50]}...")
     return SearchState(**{**asdict(state), "parsed_initial_results": parsed})
 
 def summarize_initial(state: SearchState) -> SearchState:
@@ -256,11 +301,16 @@ def generate_follow_up(state: SearchState) -> SearchState:
     return SearchState(**{**asdict(state), "follow_up_query": fq})
 
 def run_follow_up_search(state: SearchState) -> SearchState:
+    print(f"Running follow-up search for query: {state.follow_up_query}")
     serp_text = search_tool.run(state.follow_up_query)
+    print(f"Follow-up search returned {len(serp_text)} characters")
     return SearchState(**{**asdict(state), "follow_up_search_results": serp_text})
 
 def parse_follow_up(state: SearchState) -> SearchState:
     parsed = parse_search_results(state.follow_up_search_results)
+    print(f"Parsed {len(parsed)} follow-up search results")
+    for i, result in enumerate(parsed):
+        print(f"Follow-up Result {i+1}: {result.get('title', 'No title')[:50]}...")
     return SearchState(**{**asdict(state), "parsed_follow_up_results": parsed})
 
 def summarize_follow_up(state: SearchState) -> SearchState:

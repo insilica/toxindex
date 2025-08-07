@@ -1,0 +1,58 @@
+# General requirements for standard tasks (probra, openai, etc.)
+# Core dependencies
+email-validator==2.1.0.post1
+Flask-SocketIO==5.3.6
+gunicorn==21.2.0
+gevent>=25.0.0
+gevent-websocket==0.10.1
+google-cloud-storage
+celery
+redis
+Flask==3.0.0
+python-dotenv==1.1.0
+requests
+flask-login
+Flask-WTF==1.2.1
+markdown
+openai>=1.68.2,<2.0.0
+sendgrid==6.10.0
+psycopg2-binary==2.9.9
+pandas
+stripe==4.2.0
+annotated-types
+aiohttp
+tenacity
+pyarrow
+fastparquet
+seaborn
+matplotlib
+scikit-learn
+cython
+blosc2
+langchain
+langchain-openai
+langchain-community
+langchain-core
+langgraph
+agno
+typing-extensions
+idna
+pubchempy
+httpx
+duckduckgo-search
+pydantic
+sqlalchemy
+numpy
+langchain-google-community
+google-genai
+langchain-google-genai
+bs4
+jsonschema
+psutil>=5.9.0
+google-cloud-monitoring>=2.0.0
+google-cloud-logging>=3.0.0
+flask-cors
+
+# Local packages (installed in editable mode)
+-e ./RAPtool
+-e ./pathway_analysis_tool

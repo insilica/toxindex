@@ -146,7 +146,20 @@ def upload_file(env_id):
             except:
                 pass
         logging.error(f"Failed to upload file {filename} to GCS: {e}")
-        return jsonify({'error': 'Failed to upload file to cloud storage'}), 500
+        
+        # Provide more detailed error message based on exception type
+        if 'GCSFileStorage' in str(type(e)):
+            error_message = f'Cloud storage error: {str(e)}'
+        elif 'Permission' in str(e):
+            error_message = f'Permission denied: {str(e)}'
+        elif 'Network' in str(e) or 'Connection' in str(e):
+            error_message = f'Network error: {str(e)}'
+        elif 'Timeout' in str(e):
+            error_message = f'Upload timeout: {str(e)}'
+        else:
+            error_message = f'Upload failed: {str(e)}'
+        
+        return jsonify({'error': error_message}), 500
 
 @env_bp.route('/<env_id>/files/<file_id>', methods=['GET'])
 @flask_login.login_required

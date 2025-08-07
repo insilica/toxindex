@@ -6,7 +6,7 @@ import logging
 import openai
 import hashlib
 import tempfile
-from pathlib import Path
+# from pathlib import Path
 from workflows.celery_worker import celery
 from webserver.model.message import MessageSchema
 from webserver.tools.toxicity_schema import TOXICITY_SCHEMA
@@ -30,7 +30,7 @@ def emit_status(task_id, status):
     }
     r.publish("celery_updates", json.dumps(event, default=str))
 
-@celery.task(bind=True)
+@celery.task(bind=True, queue='openai')
 def plain_openai_task(self, payload):
     """GCS-enabled OpenAI task that uploads results to GCS."""
     try:

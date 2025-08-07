@@ -7,10 +7,71 @@ import { useEnvironment } from "../context/EnvironmentContext";
 import { useChatSession } from "../context/ChatSessionContext";
 import { useModel } from "../context/ModelContext";
 import { useAdmin } from "../hooks/useAdmin";
+import { useSession } from "../context/SessionContext";
 import logoUrl from '../assets/logo.svg';
 
+// Separate component for session countdown that only re-renders every second
+const SessionCountdown: React.FC = () => {
+  const { showWarning, timeRemaining } = useSession();
+  const [localTimeRemaining, setLocalTimeRemaining] = useState(timeRemaining);
+  const countdownIntervalRef = useRef<number | null>(null);
+
+  // Update local time when server time changes
+  useEffect(() => {
+    setLocalTimeRemaining(timeRemaining);
+  }, [timeRemaining]);
+
+  // Set up local countdown timer
+  useEffect(() => {
+    if (countdownIntervalRef.current) {
+      clearInterval(countdownIntervalRef.current);
+    }
+
+    if (localTimeRemaining > 0) {
+      countdownIntervalRef.current = window.setInterval(() => {
+        setLocalTimeRemaining(prev => Math.max(0, prev - 1));
+      }, 1000);
+    }
+
+    return () => {
+      if (countdownIntervalRef.current) {
+        clearInterval(countdownIntervalRef.current);
+      }
+    };
+  }, [localTimeRemaining]);
+
+  const formatDuration = (ms: number): string => {
+    const seconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    
+    if (hours > 0) {
+      return `${hours}h ${minutes % 60}m`;
+    } else if (minutes > 0) {
+      return `${minutes}m ${seconds % 60}s`;
+    } else {
+      return `${seconds}s`;
+    }
+  };
+
+  return (
+    <div className="flex items-center space-x-2">
+      <div className={`w-2 h-2 rounded-full ${showWarning ? 'bg-orange-500' : 'bg-green-500'}`} />
+      {showWarning && (
+        <span className="text-xs text-orange-300">
+          Session expires in {formatDuration(localTimeRemaining * 1000)}
+        </span>
+      )}
+    </div>
+  );
+};
+
+const CompactSessionStatus: React.FC = () => {
+  return <SessionCountdown />;
+};
+
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  console.log("Layout mounted");
+  console.log('[Layout] Layout component mounting');
   const navigate = useNavigate();
   const location = useLocation();
   const [auth, setAuth] = useState<null | boolean>(null);
@@ -23,36 +84,57 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [envFiles, setEnvFiles] = useState<{ file_id: string; filename: string }[]>([]);
   const [sidebarPreviewFileId, setSidebarPreviewFileId] = useState<string | null>(null);
   const [sidebarPreviewOpen, setSidebarPreviewOpen] = useState(false);
-
   const { refetchChatSessions, selectedSessionId, setSelectedSessionId, chatSessions} = useChatSession();
   const { environments, setEnvironments, selectedEnv, setSelectedEnv } = useEnvironment(); 
   const [openChatMenu, setOpenChatMenu] = useState<string | null>(null);
   const menuButtonRefs = useRef<{ [key: string]: React.RefObject<HTMLButtonElement> }>({});
   const { isAdmin } = useAdmin();
 
-  // Show back arrow on environment and task detail pages
-  // const showBackArrow = location.pathname.startsWith('/environments') || location.pathname.startsWith('/settings') || location.pathname.startsWith('/chat/session');
-  // const [isBackHover, setIsBackHover] = useState(false);
+  console.log('[Layout] Layout state:', { 
+    auth, 
+    selectedEnv, 
+    selectedModel, 
+    environmentsCount: environments.length,
+    chatSessionsCount: chatSessions.length,
+    location: location.pathname + location.search
+  });
+
+  console.log("Layout mounted");
 
   useEffect(() => {
+    console.log('[Layout] Layout component mounted');
+    return () => {
+      console.log('[Layout] Layout component unmounting');
+    };
+  }, []);
+
+  useEffect(() => {
+    console.log('[Layout] Fetching user authentication...');
     fetch("/api/users/me", { credentials: "include", cache: "no-store" })
       .then(res => {
         if (res.status === 200) {
+          console.log('[Layout] User authenticated');
           setAuth(true);
           return res.json();
         } else {
+          console.log('[Layout] User not authenticated');
           setAuth(false);
           return null;
         }
       })
-      .then(data => setUser(data))
+      .then(data => {
+        console.log('[Layout] User data loaded:', data);
+        setUser(data);
+      })
       .catch(() => {
+        console.log('[Layout] Authentication check failed');
         setAuth(false);
         setUser(null);
       });
   }, []);
 
   useEffect(() => {
+    console.log('[Layout] Setting up profile click handler');
     function handleClick(e: MouseEvent) {
       if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
         setProfileOpen(false);
@@ -64,21 +146,32 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   // Fetch files for selected environment
   useEffect(() => {
+    console.log('[Layout] selectedEnv changed:', selectedEnv);
     if (!selectedEnv) {
+      console.log('[Layout] No environment selected, clearing files');
       setEnvFiles([]); // Clear files if no environment selected
       return;
     }
+    console.log('[Layout] Fetching files for environment:', selectedEnv);
     fetch(`/api/environments/${selectedEnv}/files`, { credentials: 'include' })
       .then(res => res.json())
-      .then(data => setEnvFiles(data.files || []))
-      .catch(() => setEnvFiles([]));
+      .then(data => {
+        console.log('[Layout] Files fetched successfully:', data.files);
+        setEnvFiles(data.files || []);
+      })
+      .catch(error => {
+        console.error('[Layout] Error fetching files:', error);
+        setEnvFiles([]);
+      });
   }, [selectedEnv]);
 
   // Fetch environments and set default selectedEnv (URL param takes priority)
   useEffect(() => {
+    console.log('[Layout] Fetching environments...');
     fetch("/api/environments", { credentials: "include" })
       .then(res => res.json())
       .then(data => {
+        console.log('[Layout] Environments fetched:', data.environments);
         setEnvironments(data.environments || []);
         const params = new URLSearchParams(location.search);
         const envParam = params.get("env");
@@ -95,7 +188,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           if (selectedEnv !== "__add__") setSelectedEnv("__add__");
         }
       })
-      .catch(() => {
+      .catch(error => {
+        console.error('[Layout] Error fetching environments:', error);
         setEnvironments([]);
         if (selectedEnv !== "__add__") setSelectedEnv("__add__");
       });
@@ -103,6 +197,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   // Robust two-way sync between selectedEnv and the URL
   useEffect(() => {
+    console.log('[Layout] Syncing selectedEnv and selectedModel with URL params...');
     const params = new URLSearchParams(location.search);
     const envParam = params.get("env");
     const workflowParam = params.get("workflow");
@@ -138,15 +233,20 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   // Fetch chat sessions (flat, not by environment)
   useEffect(() => {
+    console.log('[Layout] Refetching chat sessions...');
     refetchChatSessions();
-  }, [refetchChatSessions]);
+  }, []); // Empty dependency array - only run once on mount
 
   const handleLogout = () => {
+    console.log('[Layout] Logging out...');
     fetch("/api/auth/logout", {
       method: "POST",
       credentials: "include",
     }).then(() => {
+      console.log('[Layout] Logout successful, redirecting to login...');
       navigate("/login");
+    }).catch(error => {
+      console.error('[Layout] Error during logout:', error);
     });
   };
 
@@ -162,13 +262,16 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   // Open sidebar by default on general settings page
   useEffect(() => {
+    console.log('[Layout] Checking if sidebar should open on general settings page...');
     if (isGeneralSettings && !sidebarOpen && !sidebarClosing) {
+      console.log('[Layout] Opening sidebar on general settings page.');
       setSidebarOpen(true);
     }
-  }, [isGeneralSettings]); // Remove sidebarOpen and sidebarClosing from dependencies
+  }, [isGeneralSettings, sidebarOpen, sidebarClosing]); // Add sidebarOpen and sidebarClosing to dependencies
 
   // Create a new chat session (flat)
   const handleNewChat = async () => {
+    console.log('[Layout] Creating new chat session...');
     const res = await fetch(`/api/chat_sessions`, {
       method: 'POST',
       credentials: 'include',
@@ -177,9 +280,12 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     });
     if (res.ok) {
       const session = await res.json();
+      console.log('[Layout] New chat session created:', session);
       await refetchChatSessions();
       setSelectedSessionId(session.session_id);
       navigate(`/chat/session/${session.session_id}`);
+    } else {
+      console.error('[Layout] Error creating new chat session:', res.status, res.statusText);
     }
   };
 
@@ -196,32 +302,52 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   // Handler to delete a chat session
   const handleDeleteChat = async (sessionId: string) => {
-    if (!window.confirm('Are you sure you want to delete this chat?')) return;
-    await fetch(`/api/chat_sessions/${sessionId}`, {
-      method: 'DELETE',
-      credentials: 'include',
-    });
-    await refetchChatSessions();
-    setSelectedSessionId(null);
+    console.log('[Layout] Deleting chat session:', sessionId);
+    if (!window.confirm('Are you sure you want to delete this chat?')) {
+      console.log('[Layout] User cancelled chat deletion.');
+      return;
+    }
+    try {
+      await fetch(`/api/chat_sessions/${sessionId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      console.log('[Layout] Chat session deleted:', sessionId);
+      await refetchChatSessions();
+      setSelectedSessionId(null);
+    } catch (error) {
+      console.error('[Layout] Error deleting chat session:', error);
+    }
   };
 
   // Handler to rename a chat session
   const handleRenameChat = async (sessionId: string, currentTitle: string) => {
+    console.log('[Layout] Renaming chat session:', sessionId);
     const newTitle = window.prompt('Enter new chat name:', currentTitle);
-    if (!newTitle || newTitle.trim() === '' || newTitle === currentTitle) return;
-    await fetch(`/api/chat_sessions/${sessionId}`, {
-      method: 'PATCH',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title: newTitle })
-    });
-    await refetchChatSessions();
+    if (!newTitle || newTitle.trim() === '' || newTitle === currentTitle) {
+      console.log('[Layout] User cancelled chat rename or no change.');
+      return;
+    }
+    try {
+      await fetch(`/api/chat_sessions/${sessionId}`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: newTitle })
+      });
+      console.log('[Layout] Chat session renamed:', sessionId);
+      await refetchChatSessions();
+    } catch (error) {
+      console.error('[Layout] Error renaming chat session:', error);
+    }
   };
 
   // Add a click-away listener to close the dropdown
   useEffect(() => {
+    console.log('[Layout] Setting up click-away listener for chat menu...');
     function handleClick(e: MouseEvent) {
       if (openChatMenu && !(e.target as HTMLElement).closest('.group')) {
+        console.log('[Layout] Clicked outside chat menu, closing...');
         setOpenChatMenu(null);
       }
     }
@@ -256,9 +382,11 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 transition: 'all 0.5s cubic-bezier(0.4,0,0.2,1)'
               }}
               onClick={() => {
+                console.log('[Layout] Closing sidebar...');
                 setSidebarClosing(true);
                 setSidebarOpen(false);
                 setTimeout(() => {
+                  console.log('[Layout] Sidebar closed animation finished.');
                   setSidebarClosing(false);
                 }, 500);
               }}
@@ -416,6 +544,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                             }}
                             onClick={e => {
                               e.stopPropagation();
+                              console.log('[Layout] Opening chat menu for session:', session.session_id);
                               setOpenChatMenu(openChatMenu === session.session_id ? null : session.session_id);
                             }}
                             title="Chat options"
@@ -450,7 +579,10 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           <button
             className="fixed z-50 w-9 h-9 flex items-center justify-center rounded-full text-gray-300 hover:text-green-400 shadow transition group"
             style={{ top: '1.95rem', left: '1.45rem', minWidth: '32px', minHeight: '32px', position: 'fixed', background: 'none', padding: 0 }}
-            onClick={() => setSidebarOpen(true)}
+            onClick={() => {
+              console.log('[Layout] Opening sidebar...');
+              setSidebarOpen(true);
+            }}
             title="Open sidebar"
           >
             <span className="absolute w-9 h-9 flex items-center justify-center transition-opacity duration-200 opacity-100 group-hover:opacity-0">
@@ -464,61 +596,72 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           </button>
         )}
       </div>
-      {/* User profile button at top right, aligned with others */}
+      {/* Header controls at top right */}
       {auth && (
-        <div style={{ position: 'absolute', top: '2rem', right: '2.5rem', zIndex: 40 }} ref={profileRef}>
-          <button
-            onClick={() => setProfileOpen(v => !v)}
-            className="w-11 h-11 flex items-center justify-center rounded-full !bg-gray-900 !bg-opacity-10 text-white hover:!bg-gray-800 focus:outline-none shadow"
-            style={{ padding: 0 }}
-            title="User profile"
-          >
-            <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" className="text-gray-300">
-              <circle cx="12" cy="8" r="4" />
-              <path d="M4 20c0-2.5 3.5-4 8-4s8 1.5 8 4" />
-            </svg>
-          </button>
-          {profileOpen && (
-            <div className="absolute right-0 mt-2 w-56 bg-neutral-200 rounded-lg shadow-lg py-2 text-gray-900 border border-gray-200">
-              {user?.user_id ? (
+        <div style={{ position: 'absolute', top: '2rem', right: '2.5rem', zIndex: 40, display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          {/* Session Status */}
+          <CompactSessionStatus />
+          
+          {/* User profile button */}
+          <div ref={profileRef}>
+            <button
+              onClick={() => {
+                console.log('[Layout] Toggling profile menu...');
+                setProfileOpen(v => !v);
+              }}
+              className="w-11 h-11 flex items-center justify-center rounded-full !bg-gray-900 !bg-opacity-10 text-white hover:!bg-gray-800 focus:outline-none shadow"
+              style={{ padding: 0 }}
+              title="User profile"
+            >
+              <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" className="text-gray-300">
+                <circle cx="12" cy="8" r="4" />
+                <path d="M4 20c0-2.5 3.5-4 8-4s8 1.5 8 4" />
+              </svg>
+            </button>
+            {profileOpen && (
+              <div className="absolute right-0 mt-2 w-56 bg-neutral-200 rounded-lg shadow-lg py-2 text-gray-900 border border-gray-200">
+                {user?.user_id ? (
+                  <button
+                    onClick={() => {
+                      console.log('[Layout] Navigating to user profile:', user.user_id);
+                      navigate(`/user/${user.user_id}`);
+                      setProfileOpen(false);
+                    }}
+                    className="font-medium text-neutral-900 hover:text-green-500 transition-colors cursor-pointer w-full text-left px-4 py-2 border-b border-gray-100 text-sm"
+                    style={{ background: 'none', border: 'none' }}
+                  >
+                    <FaUser className="inline mr-2" />
+                    {user.email || "Logged in"}
+                  </button>
+                ) : (
+                  <div className="font-medium flex items-center px-4 py-2 border-b border-gray-100 text-sm">
+                    <FaUser className="inline mr-2" />
+                    {user?.email || "Logged in"}
+                  </div>
+                )}
                 <button
                   onClick={() => {
-                    navigate(`/user/${user.user_id}`);
+                    console.log('[Layout] Navigating to settings...');
+                    navigate('/settings/general');
                     setProfileOpen(false);
                   }}
-                  className="font-medium text-neutral-900 hover:text-green-500 transition-colors cursor-pointer w-full text-left px-4 py-2 border-b border-gray-100 text-sm"
+                  className="w-full text-left hover:text-purple-500 px-4 py-2 text-gray-900 text-sm"
                   style={{ background: 'none', border: 'none' }}
                 >
-                  <FaUser className="inline mr-2" />
-                  {user.email || "Logged in"}
+                  <FaCog className="inline mr-2" />
+                  Settings
                 </button>
-              ) : (
-                <div className="font-medium flex items-center px-4 py-2 border-b border-gray-100 text-sm">
-                  <FaUser className="inline mr-2" />
-                  {user?.email || "Logged in"}
-                </div>
-              )}
-              <button
-                onClick={() => {
-                  navigate('/settings/general');
-                  setProfileOpen(false);
-                }}
-                className="w-full text-left hover:text-purple-500 px-4 py-2 text-gray-900 text-sm"
-                style={{ background: 'none', border: 'none' }}
-              >
-                <FaCog className="inline mr-2" />
-                Settings
-              </button>
-              <button
-                onClick={handleLogout}
-                className="w-full text-left hover:text-red-500 px-4 py-2 text-gray-900 text-sm"
-                style={{ background: 'none', border: 'none' }}
-              >
-                <FaSignOutAlt className="inline mr-2" />
-                Logout
-              </button>
-            </div>
-          )}
+                <button
+                  onClick={handleLogout}
+                  className="w-full text-left hover:text-red-500 px-4 py-2 text-gray-900 text-sm"
+                  style={{ background: 'none', border: 'none' }}
+                >
+                  <FaSignOutAlt className="inline mr-2" />
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       )}
       

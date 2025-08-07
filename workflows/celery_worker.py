@@ -1,31 +1,17 @@
-import logging
 import os
-from datetime import datetime
-from webserver.data_paths import LOGS_ROOT
+import logging
+from webserver.logging_utils import setup_logging, log_service_startup, get_logger
 
-# BD ENC
-print("PGUSER:", os.getenv("PGUSER"))
-print("PGHOST:", os.getenv("PGHOST"))
-print("PGPORT:", os.getenv("PGPORT"))
-print("PGDATABASE:", os.getenv("PGDATABASE"))
-print("PG_SOCKET_DIR:", os.getenv("PG_SOCKET_DIR"))
+# Setup logging with shared utility
+setup_logging("celery-worker", log_level=logging.INFO)
+logger = get_logger("celery-worker")
 
-# Ensure logs directory exists
-LOGS_ROOT().mkdir(parents=True, exist_ok=True)
-log_filename = LOGS_ROOT() / f'app_{datetime.now().strftime("%Y-%m-%d_%H")}.log'
+# Log startup information
+log_service_startup("celery-worker")
 
 # Remove print statements and use env vars for Redis URLs
 broker_url = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379/0")
 result_backend = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
-
-logging.basicConfig(
-    level=logging.INFO,  # Set to INFO for production
-    format='%(asctime)s - %(name)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s',
-    handlers=[
-        logging.FileHandler(log_filename),
-        logging.StreamHandler()
-    ]
-)
 
 from celery import Celery
 from . import celery_config
@@ -37,9 +23,23 @@ celery = Celery(
 )
 celery.config_from_object(celery_config)
 
+# Configure Celery to use our logging setup
+celery.conf.update(
+    worker_hijack_root_logger=False,
+    worker_log_format='[%(asctime)s: %(levelname)s/%(processName)s] %(message)s',
+    worker_task_log_format='[%(asctime)s: %(levelname)s/%(processName)s][%(task_name)s(%(task_id)s)] %(message)s',
+    worker_log_color=True,
+    task_track_started=True,
+    task_send_sent_event=True,
+    worker_send_task_events=True,
+)
+
 # Import tasks so they are registered
 import workflows.probra # noqa: F401
 import workflows.plain_openai_tasks # noqa: F401
 import workflows.raptool_task # noqa: F401
 import workflows.pathway_analysis_task # noqa: F401
+
+# Log registered tasks
+logger.info(f"Registered tasks: {list(celery.tasks.keys())}")
 

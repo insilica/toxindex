@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 
 type ModelContextType = {
   selectedModel: string;
@@ -8,8 +8,18 @@ type ModelContextType = {
 const ModelContext = createContext<ModelContextType | undefined>(undefined);
 
 export const ModelProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  console.log("ModelProvider mounted");
+  console.log('[ModelProvider] ModelProvider mounting');
   const [selectedModel, setSelectedModel] = useState("toxindex-rap");
+  
+  useEffect(() => {
+    console.log('[ModelProvider] ModelProvider mounted');
+    return () => {
+      console.log('[ModelProvider] ModelProvider unmounting');
+    };
+  }, []);
+  
+  console.log('[ModelProvider] ModelProvider rendering with selectedModel:', selectedModel);
+  
   return (
     <ModelContext.Provider value={{ selectedModel, setSelectedModel }}>
       {children}

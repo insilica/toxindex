@@ -9,11 +9,14 @@ interface LoadingSpinnerProps {
   startTime?: number; // UNIX timestamp in seconds or ms
   workflowId?: number;
   status?: string;
+  timeoutSeconds?: number; // Timeout in seconds
+  onTimeout?: () => void; // Callback when timeout occurs
 }
 
 // Status-to-step mapping for each workflow/tool
 const STATUS_STEP_MAP: Record<number, Record<string, number>> = {
   1: { // probra
+    "processing": 1,
     "starting": 1,
     "checking cache": 2,
     "using cache": 2,
@@ -25,6 +28,7 @@ const STATUS_STEP_MAP: Record<number, Record<string, number>> = {
     "error": 0,
   },
   2: { // plain_openai_task
+    "processing": 1,
     "checking cache": 1,
     "using cache": 2,
     "calling openai": 2,
@@ -34,6 +38,7 @@ const STATUS_STEP_MAP: Record<number, Record<string, number>> = {
     "error": 0,
   },
   3: { // openai_json_schema_task
+    "processing": 1,
     "checking cache": 1,
     "using cache": 2,
     "calling openai": 2,
@@ -43,12 +48,20 @@ const STATUS_STEP_MAP: Record<number, Record<string, number>> = {
     "error": 0,
   },
   4: { // raptool_task
+    "processing": 1,
     "fetching file": 1,
     "converting csv": 2,
     "parsing chemicals": 3,
     "publishing result": 4,
     "done": 4,
     "error": 0,
+  },
+  5: { // pathway analysis
+    "processing": 1,
+    "checking cache": 1,
+    "using cache": 2,
+    "running agent": 2,
+    "agent complete": 3,
   },
 };
 
@@ -71,7 +84,9 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   showTimer = false,
   startTime,
   workflowId,
-  status
+  status,
+  timeoutSeconds,
+  onTimeout
 }) => {
   const sizeClass = {
     small: 'text-xl',
@@ -101,6 +116,18 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   const step = workflowId && status
     ? STATUS_STEP_MAP[workflowId]?.[status] ?? 0
     : 0;
+
+  // Check for timeout
+  React.useEffect(() => {
+    if (!timeoutSeconds || !startTime) return;
+    const now = Date.now();
+    const startMs = startTime > 1e12 ? startTime : startTime * 1000;
+    const elapsedSeconds = Math.floor((now - startMs) / 1000);
+
+    if (elapsedSeconds >= timeoutSeconds) {
+      onTimeout?.();
+    }
+  }, [startTime, timeoutSeconds, onTimeout]);
 
   return (
     <div className={`flex items-center justify-center flex-col gap-3 ${className}`}>

@@ -22,7 +22,11 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
     return <div>Loading...</div>;
   }
 
-  return auth ? <>{children}</> : <Navigate to="/login" />;
+  if (!auth) {
+    return <Navigate to="/login" />;
+  }
+
+  return <>{children}</>;
 };
 
 export default ProtectedRoute; 

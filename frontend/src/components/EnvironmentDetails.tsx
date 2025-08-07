@@ -6,6 +6,7 @@ import { FaEye, FaDownload, FaTrash, } from 'react-icons/fa';
 import EnvironmentSelector from './shared/EnvironmentSelector';
 import LoadingSpinner from './shared/LoadingSpinner';
 import { useEnvironment } from "../context/EnvironmentContext";
+import HomeButton from './shared/HomeButton';
 
 interface Environment {
   environment_id: string;
@@ -155,7 +156,14 @@ export const EnvironmentDetails: React.FC<EnvironmentDetailsProps> = ({ paddingC
       style={{ background: 'linear-gradient(135deg, #1a1426 0%, #2a1a2a 60%, #231a23 100%)' }}
     >
       <div className="flex items-center justify-between mb-2">
-        <EnvironmentSelector/>
+        <div className="flex items-center gap-4">
+          <HomeButton
+            color="#16a34a"
+            hoverColor="#2563eb"
+            aria-label="Go back"
+          />
+          <EnvironmentSelector/>
+        </div>
         <button
           className="px-6 font-semibold transition border border-red-500"
           style={{
@@ -254,7 +262,7 @@ export const EnvironmentDetails: React.FC<EnvironmentDetailsProps> = ({ paddingC
               <div className="flex gap-4 px-3 py-1 rounded-full shadow-sm"
                 style={{ background: 'rgba(139, 81, 196, 0.18)', minWidth: 140, justifyContent: 'flex-end' }}>
                 <button
-                  className="bg-purple-700 hover:bg-purple-600 active:bg-purple-800 text-white transition flex items-center justify-center"
+                  className="!bg-purple-700 hover:!bg-purple-600 text-white transition flex items-center justify-center"
                   style={{ width: 36, height: 36, borderRadius: '50%', fontSize: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, border: 'none' }}
                   onClick={() => { setPreviewFileId(file.file_id); setPreviewOpen(true); }}
                   title="Preview"
@@ -263,7 +271,7 @@ export const EnvironmentDetails: React.FC<EnvironmentDetailsProps> = ({ paddingC
                 </button>
                 <a
                   href={`/api/environments/${selectedEnv || undefined}/files/${file.file_id}/download`}
-                  className="bg-purple-700 hover:bg-purple-600 active:bg-purple-800 text-white transition flex items-center justify-center"
+                  className="!bg-purple-700 hover:!bg-purple-600 text-white transition flex items-center justify-center"
                   style={{ width: 36, height: 36, borderRadius: '50%', fontSize: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, border: 'none' }}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -272,7 +280,7 @@ export const EnvironmentDetails: React.FC<EnvironmentDetailsProps> = ({ paddingC
                   <FaDownload />
                 </a>
                 <button
-                  className="bg-purple-700 hover:bg-purple-600 active:bg-purple-800 text-white transition flex items-center justify-center"
+                  className="!bg-purple-700 hover:!bg-purple-600 text-white transition flex items-center justify-center"
                   style={{ width: 36, height: 36, borderRadius: '50%', fontSize: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, border: 'none' }}
                   onClick={() => handleFileDelete(file.file_id)}
                   title="Delete"

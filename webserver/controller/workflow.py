@@ -19,12 +19,30 @@ def get_workflows_config():
         with open(workflows_file, 'r') as f:
             data = json.load(f)
         
-        # Filter workflows based on user's group access
+        # Get user's accessible workflow IDs from database
         user_id = flask_login.current_user.user_id
-        accessible_workflows = UserGroup.get_accessible_workflows(user_id)
-        accessible_workflow_ids = {w['workflow_id'] for w in accessible_workflows}
+        try:
+            accessible_workflows = UserGroup.get_accessible_workflows(user_id)
+            accessible_workflow_ids = {w['workflow_id'] for w in accessible_workflows}
+            
+            # If no accessible workflows found, check if user is admin
+            if not accessible_workflow_ids:
+                user_group = UserGroup.get_user_group(user_id)
+                if user_group and user_group.name == 'admin':
+                    # Admin gets access to all workflows
+                    accessible_workflow_ids = {w.get('workflow_id') for w in data.get('workflows', [])}
+                    logging.info(f"Admin user {user_id} gets access to all workflows")
+                else:
+                    logging.warning(f"No accessible workflows found for user {user_id}, group: {user_group.name if user_group else 'None'}")
+                    # Return empty workflows list for non-admin users with no access
+                    data['workflows'] = []
+        except Exception as e:
+            logging.error(f"Error getting accessible workflows for user {user_id}: {e}")
+            # Fallback: return all workflows for now (this should be fixed by proper database setup)
+            accessible_workflow_ids = {w.get('workflow_id') for w in data.get('workflows', [])}
+            logging.warning(f"Using fallback - returning all workflows due to error: {e}")
         
-        # Filter the workflows list
+        # Filter the workflows list based on database access permissions
         if 'workflows' in data:
             data['workflows'] = [
                 w for w in data['workflows'] 
