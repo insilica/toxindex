@@ -91,7 +91,17 @@ def get_task(task_id):
         return jsonify(task.to_dict())
     except Exception as e:
         logging.error(f"/api/tasks/{task_id} error: {e}", exc_info=True)
-        return jsonify({"error": "Internal server error"}), 500
+        if 'Database' in str(type(e)) or 'connection' in str(e).lower():
+            error_message = f'Database error: {str(e)}'
+        elif 'Permission' in str(e):
+            error_message = f'Permission error: {str(e)}'
+        elif 'task_id' in str(e).lower():
+            error_message = f'Task ID error: {str(e)}'
+        elif 'user_id' in str(e).lower():
+            error_message = f'User authentication error: {str(e)}'
+        else:
+            error_message = f'Task retrieval failed: {str(e)}'
+        return jsonify({"error": error_message}), 500
 
 @csrf.exempt
 @task_bp.route('/<task_id>/archive', methods=['POST'])

@@ -245,7 +245,16 @@ const Dashboard = () => {
           file_id: fileId,
         }),
       });
-      if (!res.ok) throw new Error("Failed to create task");
+      if (!res.ok) {
+        // Try to get detailed error message from backend
+        try {
+          const errorData = await res.json();
+          throw new Error(errorData.error || `HTTP ${res.status}: ${res.statusText}`);
+        } catch (parseErr) {
+          // If we can't parse the error response, use a generic message
+          throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        }
+      };
 
       setTasksLoading(true);
       let url = "/api/tasks";
@@ -259,7 +268,9 @@ const Dashboard = () => {
       setFileId(undefined);
       setFileName(undefined);
     } catch (err) {
-      setError("Failed to post task.");
+      // Use the specific error message from the backend or fallback to generic message
+      const errorMessage = err instanceof Error ? err.message : "Failed to post task.";
+      setError(errorMessage);
     } finally {
       setUploading(false);
     }
