@@ -10,9 +10,6 @@ from pathlib import Path
 # For data manipulation
 import pandas as pd
 
-# Celery for task management
-from workflows.celery_worker import celery
-
 # Webserver models and storage
 from webserver.model.message import MessageSchema
 from webserver.model.task import Task
@@ -27,6 +24,17 @@ def emit_status(task_id, status):
         port=int(os.environ.get("REDIS_PORT", "6379"))
     )
     task = Task.get_task(task_id)
+
+    # If no task exists, publish a minimal event
+    if not task:
+        event = {
+            "type": "task_status_update",
+            "task_id": task_id,
+            "data": {"status": status},
+        }
+        r.publish("celery_updates", json.dumps(event, default=str))
+        return
+
     event = {
         "type": "task_status_update",
         "task_id": task.task_id,
