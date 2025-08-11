@@ -27,6 +27,14 @@
             pkgs.nodejs
             pkgs.gh
             pkgs.libjpeg
+
+            # --- Sphinx docs ---
+            pkgs.python312Packages.sphinx
+            pkgs.python312Packages.myst-parser
+            pkgs.python312Packages.furo
+            pkgs.python312Packages.sphinx-autobuild
+            pkgs.python312Packages.sphinx-rtd-theme
+            pkgs.graphviz
           ];
 
 
