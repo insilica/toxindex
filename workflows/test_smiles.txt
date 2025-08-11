@@ -1,0 +1,6 @@
+(C2(C)C)/C=C(\C)/C(=O)OC)C/C=C\C=C
+C1CCCCC1
+C1CCCCC1C2CCCCC2
+C1=CC1
+cyclopropane
+decalin
