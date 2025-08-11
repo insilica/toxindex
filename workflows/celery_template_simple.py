@@ -50,17 +50,12 @@ def is_smiles(token: str) -> bool:
     # uppercase and lowercase letters, digits, and common symbols such
     # as parentheses, brackets, bond indicators and stereochemistry
     # markers.  See https://en.wikipedia.org/wiki/Simplified_molecular_input_line_entry_system
-    if not re.match(r'^[A-Za-z0-9@+\-\[\]\(\)=#$%/\\.]+$', token):
+    if not re.match(r'^[A-Za-z0-9@+\-\[\]\(\)=#$%/\\\.]+$', token):
         return False
     
     # Require at least one alphabetic character so that plain numbers
     # like ring closure digits are not treated as SMILES on their own.
     return any(ch.isalpha() for ch in token)
-    
-    # Simple SMILES validation: contains only allowed characters
-    smiles_pattern = r'^[A-Za-z0-9@+\-\[\]\(\)=#$%\\/\.]+$'
-    return bool(re.match(smiles_pattern, token))
-
 
 @celery.task(bind=True, name="extract_smiles_task")
 def extract_smiles_task(self, gcs_path: str, payload: Dict[str, str]) -> Dict[str, List[str]]:
@@ -100,17 +95,15 @@ def extract_smiles_task(self, gcs_path: str, payload: Dict[str, str]) -> Dict[st
         with tempfile.TemporaryDirectory() as tmpdir:
             temp_dir = Path(tmpdir)
             local_file_path = download_gcs_file_to_temp(gcs_path, temp_dir)
-        
-        logger.info(
-            "Downloaded query file from %s to %s",
-            gcs_path,
-            local_file_path
-        )
-
+            logger.info(
+                "Downloaded query file from %s to %s",
+                gcs_path,
+                local_file_path
+            )
         # Read the contents of the query file
         # Assume UTF-8 encoding for simplicity. May need to adjust based on actual file encoding.
-        with open(local_file_path, 'r', encoding='utf-8') as file:
-            query_content = file.read()
+            with open(local_file_path, 'r', encoding='utf-8') as file:
+                query_content = file.read()
         
         # Split the query content into tokens based on whitespace
         # For more sophisticated chemical entity recognition you could employ
