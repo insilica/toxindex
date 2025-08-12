@@ -1,0 +1,66 @@
+[
+  {
+    "smiles": "CCCCOC(=O)c1ccc(C(=O)OCCCC)cc1",
+    "probability": 1
+  },
+  {
+    "smiles": "CCCCOC(=O)c1ccc(C(=O)O)cc1",
+    "probability": 0.272
+  },
+  {
+    "smiles": "CCCCO",
+    "probability": 0.272
+  },
+  {
+    "smiles": "CCCCOC(=O)c1ccc(C(=O)OCCC(C)O)cc1",
+    "probability": 0.106
+  },
+  {
+    "smiles": "CCCCOC(=O)c1ccc(C(=O)OC2OC(C(=O)O)C(O)C(O)C2O)cc1",
+    "probability": 0.084592
+  },
+  {
+    "smiles": "CCCCOC(=O)c1ccc(C(=O)OCCCCO)cc1",
+    "probability": 0.063
+  },
+  {
+    "smiles": "CCCCOC(=O)c1ccc(C(=O)OCCCC(=O)O)cc1",
+    "probability": 0.03
+  },
+  {
+    "smiles": "CCCCOC1OC(C(=O)O)C(O)C(O)C1O",
+    "probability": 0.027472000000000003
+  },
+  {
+    "smiles": "CCCCOC(=O)c1ccc(C(=O)NCC(=O)O)cc1",
+    "probability": 0.023664
+  },
+  {
+    "smiles": "CCCCOC(=O)c1ccc(C(=O)OCCC(C)OC2OC(C(=O)O)C(O)C(O)C2O)cc1",
+    "probability": 0.010706
+  },
+  {
+    "smiles": "CCCCOC(=O)c1ccc(C(=O)OCCCCOC2OC(C(=O)O)C(O)C(O)C2O)cc1",
+    "probability": 0.006363000000000001
+  },
+  {
+    "smiles": "CCCCOS(=O)(=O)O",
+    "probability": 0.004896
+  },
+  {
+    "smiles": "CCCCOC(=O)c1ccc(C(=O)OCCCC(=O)OC2OC(C(=O)O)C(O)C(O)C2O)cc1",
+    "probability": 0.0045
+  },
+  {
+    "smiles": "CCCCOC(=O)c1ccc(C(=O)OCCC(C)OS(=O)(=O)O)cc1",
+    "probability": 0.0019079999999999998
+  },
+  {
+    "smiles": "CCCCOC(=O)c1ccc(C(=O)OCCCCOS(=O)(=O)O)cc1",
+    "probability": 0.001134
+  },
+  {
+    "smiles": "CCCCOC(=O)c1ccc(C(=O)OCCCC(=O)NCC(=O)O)cc1",
+    "probability": 0.0010799999999999998
+  }
+]

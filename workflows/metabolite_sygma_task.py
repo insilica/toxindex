@@ -1,6 +1,7 @@
 # nix develop failed because of dependency conflicts with other tools -> move to separate Docker containers + Orchestrate
 # Implement this tool as a stand alone Docker container
 
+import re
 import redis
 import json
 import os
@@ -64,6 +65,7 @@ def metabolite_sygma_task(self, payload):
     Should customize the reaction rules based on the chemical and its context.
 
     Inputs: 
+    - payload: Dictionary containing the task ID, user ID, query, and path to the input file.
 
     Outputs:
 
@@ -134,9 +136,6 @@ def metabolite_sygma_task(self, payload):
         # For now, we just log the error and emit a failure status
         logger.error(f"Error in metabolite_sygma_task: {e}")
 
-        
-    pass
-
 # Define helper functions for the task (Add unit tests for each helper function)
 def parse_user_query(user_query: str) -> dict:
     """Parse the user query to determine steps for metabolite prediction.
@@ -174,7 +173,7 @@ def define_reaction_rules(chemical: str) -> List[str]:
         logger.info(f"Defining reaction rules for chemical: {chemical}")
     # Example of a simple rule definition
     # In practice, this would be more complex and based on chemical properties
-        rules = ["Oxidation", "Reduction", "Hydrolysis", "Hydroxylation"]
+        rules = ["Oxidation", "Reduction", "Hydrolysis", "Hydroxylation", "Dealkylation", "Deamination"]
 
     except Exception as e:
         logger.error(f"Error defining reaction rules for chemical {chemical}: {e}")
@@ -186,7 +185,6 @@ def convert_chemical_name_to_smiles(chemical_name: str) -> str:
     """Convert a chemical name to SMILES using PubChemPy or NCI tool.
     Kyu suggested using an LLM agent."""
     import pubchempy as pcp
-import re
     compound = pcp.get_compounds(chemical_name, 'name')
     if compound:
         return compound[0].canonical_smiles
@@ -204,8 +202,12 @@ def check_if_SMILES(chemical_string: str) -> bool:
         logger.error(f"String is not a valid SMILES: {chemical_string}, error: {e}")
         return False
 
-def sygma_get_metabolites(parent_smiles: str, phase1_cycles=1, phase2_cycles=1, reaction_rules: List[str]) -> pd.DataFrame:
-    """Get metabolites using the SygmaMetabolitePredictor."""
+def sygma_get_metabolites(parent_smiles: str, phase1_cycles=1, phase2_cycles=1) -> pd.DataFrame:
+    """Get metabolites using the SygmaMetabolitePredictor.
+    
+    Notes: Add in `reaction_rules: List[str]` parameter to customize the reaction rules 
+    based on the chemical and its context.
+    """
     predictor = SygmaMetabolitePredictor()
     metabolites = predictor.get_metabolites(parent_smiles, phase1_cycles, phase2_cycles)
 
@@ -216,5 +218,14 @@ def sygma_get_metabolites(parent_smiles: str, phase1_cycles=1, phase2_cycles=1, 
         json.dump(metabolites, f, indent=4)
     logger.info(f"Found {len(metabolites)} metabolites for SMILES: {parent_smiles}")
     
-    
     return pd.DataFrame(metabolites)
+
+
+# Just for testing purposes, remove later
+if __name__ == "__main__":
+    test_payload = {
+        "task_id": "dev-test",
+        "user_id": "local-user",
+        "payload": "acetaminophen"
+    }
+    metabolite_sygma_task.apply(args=(test_payload,))
