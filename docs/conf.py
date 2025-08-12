@@ -4,8 +4,8 @@ import sys
 from datetime import date
 
 # -- Project info -----------------------------------------------------
-project = "toxindex"
-author = "Your Name"
+project = "ToxIndex"
+author = "Kyu Sang Han, Shakuntala Mitra"
 copyright = f"{date.today().year}, {author}"
 release = "0.1.0"
 
