@@ -1,13 +1,13 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: celery-worker-raptool-hpa
+  name: celery-worker-rap
   namespace: toxindex-app
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: celery-worker-raptool
+    name: celery-worker-rap
   minReplicas: 1
   maxReplicas: 5
   metrics:

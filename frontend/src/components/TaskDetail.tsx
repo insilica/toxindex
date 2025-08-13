@@ -178,18 +178,18 @@ const TaskDetail: React.FC = () => {
   const duration = getDuration(task.created_at, task.finished_at);
 
   return (
-    <div className="pl-8 pr-8 pt-4 pb-4 bg-neutral-800 text-neutral-200 flex flex-col min-h-screen w-full" style={{ minHeight: '100vh' }}>
+    <div className="px-4 pt-4 pb-4 bg-neutral-800 text-neutral-200 flex flex-col min-h-screen w-full overflow-x-hidden" style={{ minHeight: '100vh' }}>
       <div className="flex items-center gap-4 px-4 py-4 border-b-2 border-gray-600 mb-6">
         <HomeButton />
         <span className="text-neutral-600 text-xl font-light mx-2">|</span>
-        <span className="text-lg font-semibold text-white">{task.title}</span>
-        <span className="text-neutral-400 ml-4 text-sm">
+        <span className="text-lg font-semibold text-white truncate">{task.title}</span>
+        <span className="text-neutral-400 ml-4 text-sm whitespace-nowrap">
           {task.created_at ? new Date(task.created_at).toLocaleString() : "Unknown date"}
         </span>
       </div>
-      <div className="flex flex-row w-full min-h-[60vh]">
+      <div className="flex flex-row w-full min-h-[60vh] overflow-hidden">
         {/* Sidebar: File List */}
-        <div className="w-64 pr-6 border-r border-neutral-800 flex-shrink-0 overflow-y-auto" style={{ minWidth: 220 }}>
+        <div className="w-64 pr-4 border-r border-neutral-800 flex-shrink-0 overflow-y-auto" style={{ minWidth: 200, maxWidth: 250 }}>
           <div className="mb-6">
             <div className="mb-2 font-semibold text-neutral-200">Output files for this Task:</div>
             {taskFiles.length === 0 ? (
@@ -294,22 +294,22 @@ const TaskDetail: React.FC = () => {
           </div>
         </div>
         {/* Main Content */}
-        <div className="flex-1 flex flex-col items-center justify-center w-full pl-8">
+        <div className="flex-1 flex flex-col items-center justify-center w-full pl-4 overflow-hidden">
           {/* Tab content */}
-          <div className="flex-1 flex flex-col items-center justify-center w-full">
-              <div className="w-full max-w-full bg-neutral-800 rounded-lg p-6 shadow-inner">
+          <div className="flex-1 flex flex-col items-center justify-center w-full max-w-full">
+              <div className="w-full bg-neutral-800 rounded-lg p-4 shadow-inner overflow-hidden">
                 {messageLoading ? (
                   <div className="text-gray-400">Loading result...</div>
                 ) : assistantMessage ? (
                   <>
                     {latestFiles.length > 0 && latestFiles.map((file, idx) => (
                       <div key={file.file_id} className="mb-6 flex flex-col gap-2">
-                        <div className="flex items-center gap-4">
-                          <span className="text-neutral-100 font-semibold">Latest file{latestFiles.length > 1 ? ` #${idx + 1}` : ''}:</span>
-                          <span className="text-neutral-300 font-mono text-sm">{file.filename}</span>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-neutral-100 font-semibold whitespace-nowrap">Latest file{latestFiles.length > 1 ? ` #${idx + 1}` : ''}:</span>
+                          <span className="text-neutral-300 font-mono text-sm truncate flex-1 min-w-0">{file.filename}</span>
                           <a
                             href={`/api/tasks/${file.task_id}/files/${file.file_id}/download`}
-                            className="ml-2 px-2 py-1 text-gray-300 bg-transparent hover:bg-green-400/10 hover:border-green-300 hover:text-green-200 rounded-full text-xs font-semibold flex items-center gap-1 transition focus:outline-none focus:ring-2 focus:ring-green-400/50"
+                            className="ml-2 px-2 py-1 text-gray-300 bg-transparent hover:bg-green-400/10 hover:border-green-300 hover:text-green-200 rounded-full text-xs font-semibold flex items-center gap-1 transition focus:outline-none focus:ring-2 focus:ring-green-400/50 flex-shrink-0"
                             title={`Download ${file.filename}`}
                             download
                           >
@@ -319,7 +319,7 @@ const TaskDetail: React.FC = () => {
                         <div className="border-b border-gray-700 my-2"></div>
                         {file.filename.toLowerCase().endsWith('.md') ? (
                           <div
-                            className="prose prose-invert w-full max-w-full cursor-pointer hover:bg-blue-950/30 transition"
+                            className="prose prose-invert w-full cursor-pointer hover:bg-blue-950/30 transition overflow-x-auto"
                             style={{ lineHeight: 2, maxHeight: 650, overflowY: 'auto' }}
                             onClick={() => {
                               if (task?.session_id) {
@@ -344,7 +344,7 @@ const TaskDetail: React.FC = () => {
                     ))}
                     {latestFiles.length === 0 && (
                       <div
-                        className="prose prose-invert w-full max-w-full cursor-pointer hover:bg-blue-950/30 transition"
+                        className="prose prose-invert w-full cursor-pointer hover:bg-blue-950/30 transition overflow-x-auto"
                         style={{ lineHeight: 2, maxHeight: 650, overflowY: 'auto' }}
                         onClick={() => {
                           if (task?.session_id) {
@@ -372,9 +372,9 @@ const TaskDetail: React.FC = () => {
           </div>
         </div>
       </div>
-      <footer className="mt-6 pt-1 pb-1 pl-20 pr-10 border-t border-gray-700 bg-gray-950 rounded-b-lg shadow-inner">
-        <div className="w-full max-w-10xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-0 text-base overflow-x-auto min-w-0 w-full">
+      <footer className="mt-6 pt-1 pb-1 px-4 border-t border-gray-700 bg-gray-950 rounded-b-lg shadow-inner">
+        <div className="w-full mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-0 text-base overflow-x-auto min-w-0 w-full">
             <div className="flex items-center space-x-2">
               <span className="font-semibold text-gray-300">Tool:</span>
               <span>{getWorkflowLabelById(task.workflow_id ?? 0) ?? <span className="text-gray-400">Unknown</span>}</span>

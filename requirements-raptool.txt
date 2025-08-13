@@ -27,10 +27,4 @@ psutil>=5.9.0
 google-cloud-monitoring>=2.0.0
 google-cloud-logging>=3.0.0
 
-# RAPtool-specific dependencies
-# Add your external repository here with specific version constraints
-# Example:
-# git+https://github.com/example/external-repo.git@v1.0.0#egg=external-repo
-
-# Local RAPtool package
 -e ./RAPtool
