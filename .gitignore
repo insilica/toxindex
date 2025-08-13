@@ -69,3 +69,6 @@ toxindex.egg-info/
 
 
 k8s/backend-secrets.yaml
+
+# Python build directory
+build/
