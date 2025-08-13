@@ -217,6 +217,20 @@ const SessionManager: React.FC<{ children: ReactNode }> = ({ children }) => {
     };
   }, [checkSessionStatus, updateActivity, loadSessionSettings]);
 
+  // Handle session expiration
+  useEffect(() => {
+    if (isExpired) {
+      console.log('[SessionManager] Session expired, logging out');
+      setShowWarning(false);
+      setTimeRemaining(0);
+      // Clear any cached data
+      localStorage.clear();
+      sessionStorage.clear();
+      // Redirect to login page
+      window.location.href = '/login';
+    }
+  }, [isExpired]);
+
   // Set up activity listeners
   useEffect(() => {
     const events = ['mousedown', 'scroll', 'touchstart', 'click'];
@@ -257,7 +271,15 @@ const SessionManager: React.FC<{ children: ReactNode }> = ({ children }) => {
       refreshSession,
       extendSession: refreshSession, // Alias for compatibility
       logoutNow: () => {
-        // This will be handled by the parent
+        console.log('[SessionManager] Logout requested');
+        setIsExpired(true);
+        setShowWarning(false);
+        setTimeRemaining(0);
+        // Clear any cached data
+        localStorage.clear();
+        sessionStorage.clear();
+        // Redirect to login page
+        window.location.href = '/login';
       },
     };
   }, [showWarning, timeRemaining, sessionSettings]);

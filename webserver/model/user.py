@@ -66,6 +66,7 @@ class User(flask_login.UserMixin):
   def create_stripe_customer(email):
     return stripe_controller.create_customer(email)
   
+  @staticmethod
   def create_datastore_customer(email, password, stripe_customer_id):
     try:
       hashpw = generate_password_hash(password)
@@ -83,6 +84,7 @@ class User(flask_login.UserMixin):
       ds.execute("INSERT INTO users (user_id, email, hashpw, token, stripe_customer_id, group_id) values (%s,%s,%s,%s,%s,%s)", params)
     except Exception as e:
       logging.error(f"[User.create_datastore_customer] Exception: {e}", exc_info=True)
+      raise  # Re-raise the exception so create_user can handle it
   
   @staticmethod
   def create_user(email, password):
@@ -100,7 +102,15 @@ class User(flask_login.UserMixin):
 
   @staticmethod
   def delete_user(email):
-    if not User.user_exists: raise ValueError(f"{email} does not exist")
+    if not User.user_exists(email): 
+      raise ValueError(f"{email} does not exist")
     user = User.get_user(email)
-    stripe_controller.delete_customer(user.stripe_customer_id)
+    
+    # Only try to delete Stripe customer if it's not a placeholder
+    if user.stripe_customer_id and not user.stripe_customer_id.startswith('placeholder_'):
+      try:
+        stripe_controller.delete_customer(user.stripe_customer_id)
+      except Exception as e:
+        logging.warning(f"[User.delete_user] Failed to delete Stripe customer: {e}")
+    
     ds.execute("DELETE FROM users WHERE email = (%s)",(email,))

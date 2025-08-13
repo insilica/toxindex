@@ -27,20 +27,17 @@ celery.conf.update(
     worker_send_task_events=True,
 )
 
-# Import tasks so they are registered
+# Import ONLY the probra task
 import workflows.probra # noqa: F401
-import workflows.plain_openai_tasks # noqa: F401
-import workflows.raptool_task # noqa: F401
-import workflows.pathway_analysis_task # noqa: F401
 
 def setup_celery_worker():
     """Setup logging and startup for celery worker - only call this when actually starting a worker"""
     # Setup logging with shared utility
-    setup_logging("celery-worker", log_level=logging.INFO)
-    logger = get_logger("celery-worker")
+    setup_logging("celery-worker-probra", log_level=logging.INFO)
+    logger = get_logger("celery-worker-probra")
 
     # Log startup information
-    log_service_startup("celery-worker")
+    log_service_startup("celery-worker-probra")
     
     # Log registered tasks
     logger.info(f"Registered tasks: {list(celery.tasks.keys())}")
@@ -48,4 +45,3 @@ def setup_celery_worker():
 # Only setup logging if this module is run directly (i.e., as a celery worker)
 if __name__ == '__main__':
     setup_celery_worker()
-

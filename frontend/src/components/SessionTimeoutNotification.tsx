@@ -46,11 +46,12 @@ export const SessionTimeoutNotification: React.FC<SessionTimeoutNotificationProp
   // Auto-logout when time reaches 0
   useEffect(() => {
     if (isVisible && localTimeRemaining <= 0) {
+      console.log('[SessionTimeoutNotification] Time expired, calling logout');
       onLogout();
     }
   }, [isVisible, localTimeRemaining, onLogout]);
 
-  if (!isVisible) return null;
+  if (!isVisible || localTimeRemaining <= 0) return null;
 
   const minutes = Math.floor(localTimeRemaining / 60);
   const seconds = localTimeRemaining % 60;

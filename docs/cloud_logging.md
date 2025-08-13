@@ -4,7 +4,7 @@ This document describes the Cloud Logging integration for toxindex components.
 
 ## Overview
 
-The logging system provides consistent logging across all components with automatic Cloud Logging integration when running in GKE.
+The logging system provides consistent logging across all components with automatic Cloud Logging integration when running in GKE. The system includes a resilient Cloud Logging handler that gracefully handles timeouts and connection issues.
 
 ## Components
 
@@ -13,10 +13,19 @@ The logging system provides consistent logging across all components with automa
 Provides centralized logging configuration for all services:
 
 - **Local Development**: File + stdout logging
-- **GKE Production**: File + stdout + Cloud Logging
+- **GKE Production**: File + stdout + Cloud Logging (with timeout resilience)
 - **Automatic Detection**: Detects environment via `KUBERNETES_SERVICE_HOST`
+- **Graceful Fallback**: Falls back to local logging if Cloud Logging fails
 
-### 2. Service-Specific Logging
+### 2. Resilient Cloud Logging Handler
+
+The `ResilientCloudLoggingHandler` class provides:
+- **Timeout Protection**: Configures Cloud Logging with shorter timeouts
+- **Error Handling**: Gracefully handles Cloud Logging failures
+- **Fallback Logging**: Automatically falls back to local logging
+- **Batch Optimization**: Uses smaller batch sizes to prevent timeouts
+
+### 3. Service-Specific Logging
 
 Each component uses the shared utility:
 
@@ -62,6 +71,7 @@ log_service_shutdown("my-service")
 - **File**: `data/logs/{service_name}_{YYYY-MM-DD_HH}.log`
 - **Stdout**: Container logs (captured by Kubernetes)
 - **Cloud Logging**: Google Cloud Logging with service-specific log names
+- **Fallback**: Local logging if Cloud Logging fails
 
 ## Log Format
 
@@ -81,6 +91,7 @@ Example:
 - Detects GKE environment via `KUBERNETES_SERVICE_HOST`
 - Uses default Google Cloud credentials
 - Logs are sent to Cloud Logging with service-specific log names
+- Includes timeout and error handling
 
 ### Manual Configuration
 If you need custom Cloud Logging setup:
@@ -93,12 +104,25 @@ client = cloud_logging.Client()
 cloud_handler = CloudLoggingHandler(client, name="custom-log-name")
 ```
 
+### Environment Variables
+
+#### `DISABLE_CLOUD_LOGGING`
+Set to `"true"` to disable Cloud Logging entirely:
+```bash
+export DISABLE_CLOUD_LOGGING=true
+```
+
+This is useful for:
+- Debugging Cloud Logging issues
+- Reducing latency in development
+- Emergency situations where Cloud Logging is causing problems
+
 ## Testing
 
 Run the test script to verify logging setup:
 
 ```bash
-python test_cloud_logging.py
+python test_logging_fix.py
 ```
 
 This will test:
@@ -106,6 +130,8 @@ This will test:
 - All log levels (DEBUG, INFO, WARNING, ERROR)
 - Structured logging
 - Multiple service names
+- Cloud Logging timeout resilience
+- Fallback logging functionality
 
 ## Dependencies
 
@@ -119,10 +145,19 @@ dependencies = [
 
 ## Troubleshooting
 
+### Cloud Logging Timeout Issues
+**Problem**: `504 Deadline Exceeded` errors in Cloud Logging
+**Solution**: The resilient handler automatically handles this by:
+1. Using smaller batch sizes (5 instead of default)
+2. Shorter max latency (15 seconds instead of default)
+3. Falling back to local logging on failures
+4. Using HTTP instead of gRPC to avoid gRPC timeout issues
+
 ### Cloud Logging Not Working
 1. Check if `google-cloud-logging` is installed
 2. Verify Google Cloud credentials are configured
 3. Ensure running in GKE environment (`KUBERNETES_SERVICE_HOST` set)
+4. Check if `DISABLE_CLOUD_LOGGING` is set to `"true"`
 
 ### Local Logs Not Appearing
 1. Check `data/logs/` directory exists
@@ -133,6 +168,7 @@ dependencies = [
 - Cloud Logging adds latency for each log message
 - Consider using structured logging for better performance
 - Use appropriate log levels (INFO for production, DEBUG for development)
+- Set `DISABLE_CLOUD_LOGGING=true` if Cloud Logging is causing performance issues
 
 ## Best Practices
 
@@ -141,6 +177,8 @@ dependencies = [
 3. **Appropriate Log Levels**: Use DEBUG for development, INFO for production
 4. **Error Handling**: Always handle logging setup failures gracefully
 5. **Environment Detection**: Let the system automatically detect the environment
+6. **Timeout Resilience**: The system automatically handles Cloud Logging timeouts
+7. **Fallback Strategy**: Always have local logging as a fallback
 
 ## Monitoring
 
@@ -151,4 +189,30 @@ dependencies = [
 ### GKE Production
 - Use `kubectl logs <pod-name>` for container logs
 - Check Google Cloud Console > Logging for Cloud Logging
-- Set up log-based alerts in Cloud Monitoring 
+- Monitor for timeout errors in Cloud Logging
+- Check local log files if Cloud Logging is failing
+
+## Emergency Procedures
+
+### If Cloud Logging is Causing Issues
+1. **Quick Fix**: Set `DISABLE_CLOUD_LOGGING=true` in the deployment
+2. **Redeploy**: Update the Kubernetes deployment
+3. **Monitor**: Check that local logging is working
+4. **Investigate**: Debug Cloud Logging issues separately
+
+### Deployment Configuration
+```yaml
+env:
+  - name: DISABLE_CLOUD_LOGGING
+    value: "true"  # Temporarily disable Cloud Logging
+```
+
+## Recent Improvements
+
+### v2.0 - Resilient Cloud Logging
+- Added `ResilientCloudLoggingHandler` class
+- Implemented timeout protection
+- Added graceful fallback to local logging
+- Reduced batch sizes to prevent timeouts
+- Added environment variable control
+- Improved error handling and recovery 

@@ -303,7 +303,7 @@ const TaskDetail: React.FC = () => {
                 ) : assistantMessage ? (
                   <>
                     {latestFiles.length > 0 && latestFiles.map((file, idx) => (
-                      <div key={file.file_id} className="mb-4 flex flex-col gap-2">
+                      <div key={file.file_id} className="mb-6 flex flex-col gap-2">
                         <div className="flex items-center gap-4">
                           <span className="text-neutral-100 font-semibold">Latest file{latestFiles.length > 1 ? ` #${idx + 1}` : ''}:</span>
                           <span className="text-neutral-300 font-mono text-sm">{file.filename}</span>
@@ -317,30 +317,52 @@ const TaskDetail: React.FC = () => {
                           </a>
                         </div>
                         <div className="border-b border-gray-700 my-2"></div>
-                        {!file.filename.toLowerCase().endsWith('.md') && (
+                        {file.filename.toLowerCase().endsWith('.md') ? (
+                          <div
+                            className="prose prose-invert w-full max-w-full cursor-pointer hover:bg-blue-950/30 transition"
+                            style={{ lineHeight: 2, maxHeight: 650, overflowY: 'auto' }}
+                            onClick={() => {
+                              if (task?.session_id) {
+                                navigate(`/chat/session/${task.session_id}?env=${task.environment_id}`);
+                              }
+                            }}
+                            title="Go to chat session"
+                          >
+                            <ReactMarkdown
+                              remarkPlugins={[remarkGfm]}
+                              components={{
+                                td: ({node, ...props}) => <td className="markdown-table-cell" {...props} />
+                              }}
+                            >
+                              {assistantMessage}
+                            </ReactMarkdown>
+                          </div>
+                        ) : (
                           <FilePreviewInline fileId={file.file_id} />
                         )}
                       </div>
                     ))}
-                    <div
-                      className="prose prose-invert w-full max-w-full cursor-pointer hover:bg-blue-950/30 transition"
-                      style={{ lineHeight: 2, maxHeight: 650, overflowY: 'auto' }}
-                      onClick={() => {
-                        if (task?.session_id) {
-                          navigate(`/chat/session/${task.session_id}?env=${task.environment_id}`);
-                        }
-                      }}
-                      title="Go to chat session"
-                    >
-                      <ReactMarkdown
-                        remarkPlugins={[remarkGfm]}
-                        components={{
-                          td: ({node, ...props}) => <td className="markdown-table-cell" {...props} />
+                    {latestFiles.length === 0 && (
+                      <div
+                        className="prose prose-invert w-full max-w-full cursor-pointer hover:bg-blue-950/30 transition"
+                        style={{ lineHeight: 2, maxHeight: 650, overflowY: 'auto' }}
+                        onClick={() => {
+                          if (task?.session_id) {
+                            navigate(`/chat/session/${task.session_id}?env=${task.environment_id}`);
+                          }
                         }}
+                        title="Go to chat session"
                       >
-                        {assistantMessage}
-                      </ReactMarkdown>
-                    </div>
+                        <ReactMarkdown
+                          remarkPlugins={[remarkGfm]}
+                          components={{
+                            td: ({node, ...props}) => <td className="markdown-table-cell" {...props} />
+                          }}
+                        >
+                          {assistantMessage}
+                        </ReactMarkdown>
+                      </div>
+                    )}
                   </>
                 ) : (
                   <div className="text-gray-400">No assistant message found for this task.</div>

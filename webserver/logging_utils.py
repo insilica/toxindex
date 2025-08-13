@@ -10,6 +10,73 @@ from pathlib import Path
 from typing import Optional
 
 
+class ResilientCloudLoggingHandler(logging.Handler):
+    """
+    A Cloud Logging handler that gracefully handles timeouts and connection issues.
+    Falls back to local logging if Cloud Logging fails.
+    """
+    
+    def __init__(self, service_name: str, fallback_handler: logging.Handler = None):
+        super().__init__()
+        self.service_name = service_name
+        self.fallback_handler = fallback_handler
+        self.cloud_handler = None
+        self._setup_cloud_handler()
+    
+    def _setup_cloud_handler(self):
+        """Setup the Cloud Logging handler with proper error handling."""
+        try:
+            from google.cloud import logging as cloud_logging
+            from google.cloud.logging.handlers import CloudLoggingHandler
+            
+            # Initialize Cloud Logging client with timeout configuration
+            client = cloud_logging.Client(
+                _http=None,  # Use default HTTP client
+                _use_grpc=False  # Use HTTP instead of gRPC to avoid gRPC timeout issues
+            )
+            
+            # Create Cloud Logging handler with custom configuration
+            self.cloud_handler = CloudLoggingHandler(
+                client, 
+                name=self.service_name,
+                transport=cloud_logging.handlers.transports.BackgroundThreadTransport(
+                    client,
+                    batch_size=5,   # Very small batch size to prevent timeouts
+                    max_latency=15,  # Short max latency
+                    max_workers=1    # Single worker
+                )
+            )
+            self.cloud_handler.setLevel(logging.INFO)
+            print(f"✅ Cloud Logging handler created for {self.service_name}")
+            
+        except Exception as e:
+            print(f"⚠️  Failed to create Cloud Logging handler for {self.service_name}: {e}")
+            self.cloud_handler = None
+    
+    def emit(self, record):
+        """Emit a log record to Cloud Logging, with fallback to local logging."""
+        if self.cloud_handler:
+            try:
+                # Try to emit to Cloud Logging
+                self.cloud_handler.emit(record)
+            except Exception as e:
+                # If Cloud Logging fails, use fallback handler
+                if self.fallback_handler:
+                    try:
+                        self.fallback_handler.emit(record)
+                    except Exception:
+                        # If even fallback fails, just pass
+                        pass
+                print(f"⚠️  Cloud Logging failed for {self.service_name}, using fallback: {e}")
+        elif self.fallback_handler:
+            # If no Cloud Logging handler, use fallback
+            try:
+                self.fallback_handler.emit(record)
+            except Exception:
+                # If fallback fails, just pass
+                pass
+
+
 def setup_logging(
     service_name: str,
     log_level: int = logging.INFO,
@@ -31,32 +98,30 @@ def setup_logging(
     logs_root.mkdir(parents=True, exist_ok=True)
     log_filename = logs_root / f"{service_name}_{datetime.now().strftime('%Y-%m-%d_%H')}.log"
     
-    handlers = [
-        logging.FileHandler(log_filename),  # Local file for debugging
-        logging.StreamHandler()             # Stdout for container logs
-    ]
+    # Create local handlers
+    file_handler = logging.FileHandler(log_filename)
+    stream_handler = logging.StreamHandler()
     
-    # Add Cloud Logging handler if running in GKE
-    if os.environ.get("KUBERNETES_SERVICE_HOST"):
+    handlers = [file_handler, stream_handler]
+    
+    # Add Cloud Logging handler if running in GKE and not disabled
+    if os.environ.get("KUBERNETES_SERVICE_HOST") and not os.environ.get("DISABLE_CLOUD_LOGGING"):
         try:
-            from google.cloud import logging as cloud_logging
-            from google.cloud.logging.handlers import CloudLoggingHandler
-            
-            # Initialize Cloud Logging client
-            client = cloud_logging.Client()
-            cloud_handler = CloudLoggingHandler(client, name=service_name)
-            
-            # Set Cloud Logging level to INFO
-            cloud_handler.setLevel(logging.INFO)
-            
+            # Use our resilient Cloud Logging handler
+            cloud_handler = ResilientCloudLoggingHandler(
+                service_name, 
+                fallback_handler=stream_handler
+            )
             handlers.append(cloud_handler)
             print(f"✅ Cloud Logging enabled for {service_name} in GKE environment")
-        except ImportError:
-            print(f"⚠️  google-cloud-logging not available, skipping Cloud Logging for {service_name}")
         except Exception as e:
             print(f"⚠️  Failed to setup Cloud Logging for {service_name}: {e}")
+            # Continue without Cloud Logging - local logging will still work
     else:
-        print(f"ℹ️  Running {service_name} locally, Cloud Logging disabled")
+        if os.environ.get("DISABLE_CLOUD_LOGGING"):
+            print(f"ℹ️  Cloud Logging disabled via DISABLE_CLOUD_LOGGING environment variable")
+        else:
+            print(f"ℹ️  Running {service_name} locally, Cloud Logging disabled")
 
     logging.basicConfig(
         level=log_level,

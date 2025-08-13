@@ -10,7 +10,7 @@ import TermsPrivacy from "./components/TermsPrivacy";
 import Settings from "./components/settings/Settings";
 import SettingsDataControls from "./components/settings/SettingsDataControls";
 import CreateEnvironmentSettings from "./components/settings/CreateEnvironmentSettings";
-import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import EnvironmentDetails from "./components/EnvironmentDetails";
 
 import ChatSession from "./components/ChatSession";

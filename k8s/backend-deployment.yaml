@@ -19,25 +19,35 @@ spec:
       containers:
         - name: backend
           image: us-docker.pkg.dev/toxindex/toxindex-backend/backend:latest
+          command: ["gunicorn", "--worker-class", "geventwebsocket.gunicorn.workers.GeventWebSocketWorker", "-w", "2", "--timeout", "120", "--keep-alive", "5", "-b", "0.0.0.0:6513", "webserver.app:app"]
           ports:
             - containerPort: 6513
           envFrom:
             - secretRef:
                 name: backend-secrets
           env:
+            - name: DISABLE_CLOUD_LOGGING
+              value: "true"  # Temporarily disable Cloud Logging to prevent timeout issues
+          resources:
+            requests:
+              cpu: 500m
+              memory: 2Gi
+            limits:
+              cpu: 1000m
+              memory: 4Gi
           livenessProbe:
             httpGet:
-              path: /api/health/live
+              path: /api/healthz
               port: 6513
             periodSeconds: 30
-            timeoutSeconds: 5
+            timeoutSeconds: 10
             failureThreshold: 3
           readinessProbe:
             httpGet:
-              path: /api/health/ready
+              path: /api/healthz
               port: 6513
             periodSeconds: 10
-            timeoutSeconds: 5
+            timeoutSeconds: 10
             failureThreshold: 3
             initialDelaySeconds: 30
       volumes:

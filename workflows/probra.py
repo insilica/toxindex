@@ -5,7 +5,7 @@ import uuid
 import logging
 import tempfile
 from datetime import datetime
-from workflows.celery_worker import celery
+from workflows.celery_worker_probra import celery
 from webserver.model.message import MessageSchema
 import hashlib
 from webserver.model.task import Task
@@ -13,7 +13,7 @@ from webserver.storage import GCSFileStorage
 from webserver.cache_manager import cache_manager
 
 from webserver.tools.deeptox_agent import deeptox_agent
-from webserver.tools.toxicity_models import ChemicalToxicityAssessment
+from webserver.tools.toxicity_models_simple import ChemicalToxicityAssessment
 from webserver.ai_service import convert_pydantic_to_markdown
 
 logging.getLogger().info("probra.py module loaded")
@@ -161,29 +161,16 @@ def probra_task(self, payload):
             logger.info(f"Converting response to markdown")
             emit_status(task_id, "converting to markdown")
             
-            # Ensure original_response is a dict for markdown conversion
+            # original_response is already a dict from earlier processing
             logger.info(f"Converting to markdown. Input type: {type(original_response)}")
-            if hasattr(original_response, 'model_dump'):
-                markdown_input = original_response.model_dump()
-                logger.info("Converted using model_dump()")
-            elif hasattr(original_response, 'dict'):
-                markdown_input = original_response.dict()
-                logger.info("Converted using dict()")
-            else:
-                markdown_input = original_response
-                logger.info("Using original_response as-is")
-                
-            logger.info(f"Markdown input type: {type(markdown_input)}")
             response_content = convert_pydantic_to_markdown(
-                markdown_input, 
+                original_response, 
                 chemprop_query
             )
             
             # Cache both formats
             logger.info(f"Caching results for future use")
-            # Ensure we cache the dict version, not the object
-            cache_dict = markdown_input if 'markdown_input' in locals() else original_response
-            r.set(structured_cache_key, json.dumps(cache_dict, default=str), ex=60*60*24)
+            r.set(structured_cache_key, json.dumps(original_response, default=str), ex=60*60*24)
             r.set(markdown_cache_key, response_content, ex=60*60*24)
             emit_status(task_id, "agent complete")
 

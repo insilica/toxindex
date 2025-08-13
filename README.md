@@ -69,7 +69,7 @@ cd frontend && npm install
   ```
 - Start Celery worker:
   ```sh
-  celery -A workflows.celery_worker worker --loglevel=info
+  celery -A workflows.celery_worker worker --loglevel=info -Q celery,probra,openai,raptool,pathway
   ```
 - Start frontend:
   ```sh

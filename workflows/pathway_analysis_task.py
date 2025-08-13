@@ -8,7 +8,7 @@ from workflows.celery_worker import celery
 from webserver.model.message import MessageSchema
 from webserver.model.task import Task
 from webserver.model.file import File
-from pathway_analysis_tool.annotate_pathway import save_pathway
+from pathway_analysis_tool import save_pathway
 import pandas as pd
 from webserver.storage import GCSFileStorage
 from webserver.cache_manager import cache_manager
