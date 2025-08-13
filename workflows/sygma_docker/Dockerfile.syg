@@ -1,0 +1,35 @@
+# General worker image for standard tasks (probra, openai, etc.)
+FROM toxindex-base:latest
+
+# Set working directory inside the container
+WORKDIR /app
+
+# Copy only the necessary files for metabolite-sygma celery task
+# Core workflow files
+COPY ../../workflows/__init__.py ./workflows/__init__.py
+COPY ../../workflows/utils.py ./workflows/utils.py
+COPY ../../workflows/celery_worker.py ./workflows/celery_worker.py
+COPY ../../workflows/celery_config.py ./workflows/celery_config.py
+COPY ../../workflows/metabolite_sygma_task.py ./workflows/metabolite_sygma_task.py
+COPY ../../workflows/sygma_docker/ ./workflows/sygma_docker/
+# Webserver files
+COPY ../../webserver/model/ ./webserver/model/
+COPY ../../webserver/tools/ ./webserver/tools/
+COPY ../../webserver/controller/ ./webserver/controller/
+COPY ../../webserver/__init__.py ./webserver/__init__.py
+COPY ../../webserver/storage.py ./webserver/storage.py
+COPY ../../webserver/cache_manager.py ./webserver/cache_manager.py
+COPY ../../webserver/ai_service.py ./webserver/ai_service.py
+COPY ../../webserver/logging_utils.py ./webserver/logging_utils.py
+COPY ../../webserver/data_paths.py ./webserver/data_paths.py
+COPY ../../webserver/datastore.py ./webserver/datastore.py
+COPY ../../config/ ./config/
+COPY ../../sygma/metabolite-sygma/ ./metabolite-sygma/
+# Copy minimal requirements for metabolite-sygma
+# This is a minimal set of dependencies required for metabolite-sygma tasks
+COPY requirements-metabolite-sygma.txt /app/requirements.txt
+# Install general Python dependencies
+RUN pip install -r requirements.txt
+# Entrypoint: Celery worker for metabolite-sygma tasks only
+# Note: Create a separate worker for metabolite-sygma tasks (not using the base worker)
+CMD ["celery", "-A", "workflows.celery_worker", "worker", "--loglevel=info", "-Q", "metabolite-sygma"]
