@@ -8,8 +8,6 @@ import logging
 import tempfile
 from datetime import datetime
 
-
-
 from rdkit import Chem
 from sygma_predictor import SygmaMetabolitePredictor
 
