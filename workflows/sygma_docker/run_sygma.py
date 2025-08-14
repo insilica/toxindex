@@ -4,19 +4,15 @@ import json
 from rdkit import Chem
 from sygma_predictor import SygmaMetabolitePredictor
 
+from . import sygma_utils
+from sygma_utils import is_valid_smiles, run_sygma_on_smiles
+from webserver import ai_service
+
 # def convert_chemical_name_to_smiles(chemical_name: str) -> str:
 #     compounds = pcp.get_compounds(chemical_name, 'name')
 #     if not compounds:
 #         raise ValueError(f"Could not find SMILES for: {chemical_name}")
 #     return compounds[0].canonical_smiles
-
-def is_valid_smiles(smiles: str) -> bool:
-    return Chem.MolFromSmiles(smiles) is not None
-
-def run_sygma_on_smiles(smiles: str):
-    predictor = SygmaMetabolitePredictor()
-    metabolites = predictor.get_metabolites(smiles, phase1_cycles=1, phase2_cycles=1)
-    return metabolites
 
 def main():
     if len(sys.argv) < 2:

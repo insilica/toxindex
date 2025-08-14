@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: celery-worker-sygma
+  namespace: toxindex-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: celery-worker-sygma
+  template:
+    metadata:
+      labels:
+        app: celery-worker-sygma
+    spec:
+      serviceAccountName: toxindex-app-sa
+      containers:
+      - name: celery-worker-sygma
+        image: us-docker.pkg.dev/toxindex/toxindex-backend/sygma:latest
+        command: ["python", "-m", "celery", "-A", "workflows.celery_worker_sygma", "worker", "--loglevel=info", "-Q", "sygma"]
+        envFrom:
+        - secretRef:
+            name: backend-secrets
+        env:
+        - name: REDIS_HOST
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: REDIS_HOST
+        - name: REDIS_PORT
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: REDIS_PORT
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"

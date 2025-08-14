@@ -10,8 +10,10 @@ COPY ../../workflows/__init__.py ./workflows/__init__.py
 COPY ../../workflows/utils.py ./workflows/utils.py
 COPY ../../workflows/celery_worker.py ./workflows/celery_worker.py
 COPY ../../workflows/celery_config.py ./workflows/celery_config.py
-COPY ../../workflows/metabolite_sygma_task.py ./workflows/metabolite_sygma_task.py
+# Metabolite-Sygma task files
+# COPY ../../workflows/metabolite_sygma_task.py ./workflows/metabolite_sygma_task.py
 COPY ../../workflows/sygma_docker/ ./workflows/sygma_docker/
+COPY ../../sygma/metabolite-sygma/ ./metabolite-sygma/
 # Webserver files
 COPY ../../webserver/model/ ./webserver/model/
 COPY ../../webserver/tools/ ./webserver/tools/
@@ -24,12 +26,19 @@ COPY ../../webserver/logging_utils.py ./webserver/logging_utils.py
 COPY ../../webserver/data_paths.py ./webserver/data_paths.py
 COPY ../../webserver/datastore.py ./webserver/datastore.py
 COPY ../../config/ ./config/
-COPY ../../sygma/metabolite-sygma/ ./metabolite-sygma/
 # Copy minimal requirements for metabolite-sygma
 # This is a minimal set of dependencies required for metabolite-sygma tasks
 COPY requirements-metabolite-sygma.txt /app/requirements.txt
+
+# Install metabolite-sygma tool from source
+RUN cd metabolite-sygma && pip install -e .
+
+# go back to the sygma_docker directory
+RUN cd ./workflows/sygma_docker
+
 # Install general Python dependencies
 RUN pip install -r requirements.txt
+
 # Entrypoint: Celery worker for metabolite-sygma tasks only
 # Note: Create a separate worker for metabolite-sygma tasks (not using the base worker)
-CMD ["celery", "-A", "workflows.celery_worker", "worker", "--loglevel=info", "-Q", "metabolite-sygma"]
+CMD ["celery", "-A", "workflows.celery_worker_sygma", "worker", "--loglevel=info", "-Q", "sygma"]
