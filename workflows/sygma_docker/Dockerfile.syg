@@ -1,44 +1,63 @@
 # General worker image for standard tasks (probra, openai, etc.)
 FROM toxindex-base:latest
 
+# Become root for system package install
+USER root
+ENV DEBIAN_FRONTEND=noninteractive PIP_NO_CACHE_DIR=1
+
+# System libs needed by Pillow and RDKit drawing
+# (and create apt lists dir so non-root base layers don't block update)
+RUN mkdir -p /var/lib/apt/lists/partial && chmod -R 0755 /var/lib/apt/lists && \
+    apt-get update && apt-get install -y --no-install-recommends \
+      build-essential gcc g++ make \
+      zlib1g-dev libjpeg62-turbo-dev libpng-dev libtiff5-dev libfreetype6-dev \
+      liblcms2-dev libwebp-dev libopenjp2-7-dev \
+      libharfbuzz-dev libfribidi-dev libxcb1-dev \
+      libxrender1 libxext6 libsm6 libx11-6 libexpat1 \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
 # Set working directory inside the container
 WORKDIR /app
 
-# Copy only the necessary files for metabolite-sygma celery task
+# ---- COPY CODE (paths are relative to the build context root) ----
 # Core workflow files
-COPY ../../workflows/__init__.py ./workflows/__init__.py
-COPY ../../workflows/utils.py ./workflows/utils.py
-COPY ../../workflows/celery_worker.py ./workflows/celery_worker.py
-COPY ../../workflows/celery_config.py ./workflows/celery_config.py
-# Metabolite-Sygma task files
-# COPY ../../workflows/metabolite_sygma_task.py ./workflows/metabolite_sygma_task.py
-COPY ../../workflows/sygma_docker/ ./workflows/sygma_docker/
-COPY ../../sygma/metabolite-sygma/ ./metabolite-sygma/
-# Webserver files
-COPY ../../webserver/model/ ./webserver/model/
-COPY ../../webserver/tools/ ./webserver/tools/
-COPY ../../webserver/controller/ ./webserver/controller/
-COPY ../../webserver/__init__.py ./webserver/__init__.py
-COPY ../../webserver/storage.py ./webserver/storage.py
-COPY ../../webserver/cache_manager.py ./webserver/cache_manager.py
-COPY ../../webserver/ai_service.py ./webserver/ai_service.py
-COPY ../../webserver/logging_utils.py ./webserver/logging_utils.py
-COPY ../../webserver/data_paths.py ./webserver/data_paths.py
-COPY ../../webserver/datastore.py ./webserver/datastore.py
-COPY ../../config/ ./config/
-# Copy minimal requirements for metabolite-sygma
-# This is a minimal set of dependencies required for metabolite-sygma tasks
-COPY requirements-metabolite-sygma.txt /app/requirements.txt
+COPY workflows/__init__.py               workflows/__init__.py
+COPY workflows/utils.py                  workflows/utils.py
+COPY workflows/celery_worker.py          workflows/celery_worker.py
+COPY workflows/celery_config.py          workflows/celery_config.py
 
-# Install metabolite-sygma tool from source
-RUN cd metabolite-sygma && pip install -e .
+# SyGMa docker helper files and tool source
+COPY workflows/sygma_docker/             workflows/sygma_docker/
+COPY sygma/metabolite-sygma/             metabolite-sygma/
 
-# go back to the sygma_docker directory
-RUN cd ./workflows/sygma_docker
+# Webserver bits required by the worker
+COPY webserver/model/                    webserver/model/
+COPY webserver/tools/                    webserver/tools/
+COPY webserver/controller/               webserver/controller/
+COPY webserver/__init__.py               webserver/__init__.py
+COPY webserver/storage.py                webserver/storage.py
+COPY webserver/cache_manager.py          webserver/cache_manager.py
+COPY webserver/ai_service.py             webserver/ai_service.py
+COPY webserver/logging_utils.py          webserver/logging_utils.py
+COPY webserver/data_paths.py             webserver/data_paths.py
+COPY webserver/datastore.py              webserver/datastore.py
 
-# Install general Python dependencies
-RUN pip install -r requirements.txt
+# App config
+COPY config/                              config/
+
+# Minimal dependencies for metabolite-sygma worker
+COPY workflows/sygma_docker/requirements-metabolite-sygma.txt /app/requirements.txt
+
+# Install metabolite-sygma tool from source (editable), reuse env (no build isolation)
+ENV PIP_BREAK_SYSTEM_PACKAGES=1
+RUN pip install --no-build-isolation -e /app/metabolite-sygma
+
+# Install Python deps first (ensures wheels are used; Pillow will succeed thanks to system libs)
+RUN python -m pip install --upgrade pip && pip install -r /app/requirements.txt
+
+# (Optional) drop back to the non-root user your base image uses.
+# If your base image user is different, change 'app' accordingly, or comment this out.
+USER app
 
 # Entrypoint: Celery worker for metabolite-sygma tasks only
-# Note: Create a separate worker for metabolite-sygma tasks (not using the base worker)
 CMD ["celery", "-A", "workflows.celery_worker_sygma", "worker", "--loglevel=info", "-Q", "sygma"]
