@@ -1,18 +1,6 @@
-import logging
 import os
-from datetime import datetime
-from webserver.data_paths import LOGS_ROOT
-
-# BD ENC
-print("PGUSER:", os.getenv("PGUSER"))
-print("PGHOST:", os.getenv("PGHOST"))
-print("PGPORT:", os.getenv("PGPORT"))
-print("PGDATABASE:", os.getenv("PGDATABASE"))
-print("PG_SOCKET_DIR:", os.getenv("PG_SOCKET_DIR"))
-
-# Ensure logs directory exists
-LOGS_ROOT().mkdir(parents=True, exist_ok=True)
-log_filename = LOGS_ROOT() / f'app_{datetime.now().strftime("%Y-%m-%d_%H")}.log'
+import logging
+from webserver.logging_utils import setup_logging, log_service_startup, get_logger
 
 # Remove print statements and use env vars for Redis URLs
 broker_url = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379/0")
@@ -39,23 +27,18 @@ celery.conf.update(
     worker_send_task_events=True,
 )
 
-# Import tasks so they are registered
-import workflows.probra # noqa: F401
-import workflows.plain_openai_tasks # noqa: F401
-import workflows.raptool_task # noqa: F401
-import workflows.pathway_analysis_task # noqa: F401
-# import workflows.celery_template_simple # noqa: F401
+# Import ONLY the metabolite-sygma task
 import workflows.sygma_docker.metabolite_sygma_task # noqa: F401
 
 def setup_celery_worker():
     """Setup logging and startup for celery worker - only call this when actually starting a worker"""
     # Setup logging with shared utility
-    setup_logging("celery-worker", log_level=logging.INFO)
-    logger = get_logger("celery-worker")
+    setup_logging("celery-worker-sygma", log_level=logging.INFO)
+    logger = get_logger("celery-worker-sygma")
 
     # Log startup information
-    log_service_startup("celery-worker")
-    
+    log_service_startup("celery-worker-sygma")
+
     # Log registered tasks
     logger.info(f"Registered tasks: {list(celery.tasks.keys())}")
 

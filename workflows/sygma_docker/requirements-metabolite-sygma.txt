@@ -1,3 +1,10 @@
+# Core dependencies
+celery
+redis
+google-cloud-monitoring>=2.0.0
+google-cloud-logging>=3.0.0
+google-cloud-storage
+# Dependencise for metabolite-sygma tool
 fastapi==0.115.8
 pydantic==2.4.2
 rdkit==2024.9.5

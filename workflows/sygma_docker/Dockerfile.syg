@@ -24,6 +24,7 @@ WORKDIR /app
 COPY workflows/__init__.py               workflows/__init__.py
 COPY workflows/utils.py                  workflows/utils.py
 COPY workflows/celery_worker.py          workflows/celery_worker.py
+COPY workflows/celery_worker_sygma.py    workflows/celery_worker_sygma.py
 COPY workflows/celery_config.py          workflows/celery_config.py
 
 # SyGMa docker helper files and tool source
