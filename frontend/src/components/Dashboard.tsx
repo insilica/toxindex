@@ -41,7 +41,7 @@ const Dashboard = () => {
   const [uploading, setUploading] = useState(false);
   const { selectedEnv, refetchEnvironments } = useEnvironment();
   const { selectedModel } = useModel();
-  const { socket, isConnected, connect, isConnecting } = useSocket();
+  const { socket, isConnected, connect } = useSocket();
   const [typedHeading, setTypedHeading] = useState(ENABLE_TYPEWRITER ? "" : TYPEWRITER_TEXT);
   const typewriterTimeoutRef = useRef<number | null>(null);
   const typewriterIntervalRef = useRef<number | null>(null);

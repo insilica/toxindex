@@ -10,7 +10,7 @@ import TermsPrivacy from "./components/TermsPrivacy";
 import Settings from "./components/Settings";
 import SettingsDataControls from "./components/SettingsDataControls";
 import CreateEnvironmentSettings from "./components/CreateEnvironmentSettings";
-import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import EnvironmentDetails from "./components/EnvironmentDetails";
 
 import ChatSession from "./components/ChatSession";
@@ -28,16 +28,16 @@ import { SessionProvider, useSession } from "./context/SessionContext";
 import { SessionTimeoutNotification } from "./components/SessionTimeoutNotification";
 
 function AppContent() {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
-  const handleSessionExpired = () => {
-    console.log('[App] Session expired, redirecting to login');
-    // Clear any stored auth data
-    localStorage.removeItem('authToken');
-    sessionStorage.clear();
-    // Redirect to login
-    navigate('/login');
-  };
+  // const handleSessionExpired = () => {
+  //   console.log('[App] Session expired, redirecting to login');
+  //   // Clear any stored auth data
+  //   localStorage.removeItem('authToken');
+  //   sessionStorage.clear();
+  //   // Redirect to login
+  //   navigate('/login');
+  // };
 
   // Get session state from context
   const {

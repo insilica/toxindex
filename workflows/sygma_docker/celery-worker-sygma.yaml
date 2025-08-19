@@ -16,7 +16,7 @@ spec:
       serviceAccountName: toxindex-app-sa
       containers:
       - name: celery-worker-sygma
-        image: us-docker.pkg.dev/toxindex/toxindex-backend/sygma:latest
+        image: us-docker.pkg.dev/toxindex/toxindex-backend/syg:latest
         command: ["python", "-m", "celery", "-A", "workflows.celery_worker_sygma", "worker", "--loglevel=info", "-Q", "sygma"]
         envFrom:
         - secretRef:
