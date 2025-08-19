@@ -25,6 +25,7 @@
             pkgs.gcc
             pkgs.zlib 
             pkgs.nodejs
+            pkgs.libjpeg
             pkgs.gh
             pkgs.libjpeg
 
@@ -72,10 +73,10 @@
             echo "Python version: $(python3 --version)"
 
             # Remove existing .venv if it exists
-            if [ -d ".venv" ]; then
-              echo "Removing existing .venv..."
-              rm -rf .venv
-            fi
+            #if [ -d ".venv" ]; then
+            #  echo "Removing existing .venv..."
+            #  rm -rf .venv
+            #fi
 
             # Create new venv with Nix Python explicitly
             echo "Creating new virtual environment with Python 3.12..."

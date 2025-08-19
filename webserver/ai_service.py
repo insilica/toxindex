@@ -1,9 +1,12 @@
 import os
 import openai
 import json
+import logging
 from typing import Any, Dict
 from pydantic import BaseModel
-from webserver.tools.toxicity_models import ChemicalToxicityAssessment
+from webserver.tools.toxicity_models_simple import ChemicalToxicityAssessment
+
+logger = logging.getLogger(__name__)
 
 openai.api_key = os.environ.get('OPENAI_API_KEY')
 
@@ -57,6 +60,29 @@ def convert_pydantic_to_markdown(model_data: Dict[str, Any], original_query: str
         else:
             # It's already a dict or other serializable type
             serializable_data = model_data
+        
+        # Ensure all nested objects are serializable by converting to JSON and back
+        # This handles cases where the dict contains Pydantic models or other non-serializable objects
+        try:
+            # Test serialization and deserialization to ensure everything is JSON serializable
+            json_str = json.dumps(serializable_data, default=str, ensure_ascii=False)
+            serializable_data = json.loads(json_str)
+        except Exception as e:
+            logger.warning(f"Failed to ensure JSON serialization: {e}")
+            # If serialization fails, try to convert any remaining Pydantic objects
+            def convert_pydantic_objects(obj):
+                if hasattr(obj, 'model_dump'):
+                    return obj.model_dump()
+                elif hasattr(obj, 'dict'):
+                    return obj.dict()
+                elif isinstance(obj, dict):
+                    return {k: convert_pydantic_objects(v) for k, v in obj.items()}
+                elif isinstance(obj, list):
+                    return [convert_pydantic_objects(item) for item in obj]
+                else:
+                    return str(obj)
+            
+            serializable_data = convert_pydantic_objects(serializable_data)
         
         # Create a comprehensive prompt for conversion
         prompt = f"""
@@ -119,6 +145,26 @@ def convert_pydantic_to_markdown(model_data: Dict[str, Any], original_query: str
                 serializable_data = model_data.dict()
             else:
                 serializable_data = model_data
+            
+            # Ensure serialization works in fallback too
+            try:
+                json_str = json.dumps(serializable_data, default=str, ensure_ascii=False)
+                serializable_data = json.loads(json_str)
+            except Exception:
+                # If serialization fails, convert any remaining Pydantic objects
+                def convert_pydantic_objects(obj):
+                    if hasattr(obj, 'model_dump'):
+                        return obj.model_dump()
+                    elif hasattr(obj, 'dict'):
+                        return obj.dict()
+                    elif isinstance(obj, dict):
+                        return {k: convert_pydantic_objects(v) for k, v in obj.items()}
+                    elif isinstance(obj, list):
+                        return [convert_pydantic_objects(item) for item in obj]
+                    else:
+                        return str(obj)
+                
+                serializable_data = convert_pydantic_objects(serializable_data)
                 
             return f"""
             # Chemical Toxicity Assessment Report

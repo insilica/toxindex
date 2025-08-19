@@ -1,10 +1,9 @@
-import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import type { ReactNode } from 'react';
 
 interface SessionSettings {
   timeoutMinutes: number;
   warningMinutes: number;
-  refreshIntervalMinutes: number;
 }
 
 interface SessionStats {
@@ -21,7 +20,6 @@ interface SessionState {
   // Session warning and timeout
   showWarning: boolean;
   timeRemaining: number;
-  timeUntilTimeout: number;
   
   // Session settings
   settings: SessionSettings;
@@ -44,212 +42,201 @@ interface SessionProviderProps {
 
 const SessionContext = createContext<SessionState | undefined>(undefined);
 
-export const SessionProvider: React.FC<SessionProviderProps> = ({ 
-  children, 
-  onSessionExpired 
-}) => {
-  const refreshIntervalRef = useRef<number | null>(null);
-  const lastActivityRef = useRef<number>(Date.now());
-  const lastRefreshRef = useRef<number>(Date.now());
-  const sessionStartRef = useRef<number>(Date.now());
-  const isRefreshingRef = useRef<boolean>(false);
-  const onSessionExpiredRef = useRef(onSessionExpired);
-  
-  // Update the ref when onSessionExpired changes
-  useEffect(() => {
-    onSessionExpiredRef.current = onSessionExpired;
-  }, [onSessionExpired]);
-  
+// Server-side session management component
+const SessionManager: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [showWarning, setShowWarning] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(0);
-  const [refreshCount, setRefreshCount] = useState(0);
-  
-  const [settings, setSettings] = useState<SessionSettings>({
-    timeoutMinutes: 60,
-    warningMinutes: 5,
-    refreshIntervalMinutes: 30
+  const [isExpired, setIsExpired] = useState(false);
+  const [sessionSettings, setSessionSettings] = useState({
+    timeoutMinutes: 15,
+    warningMinutes: 14
   });
-  const [settingsLoaded, setSettingsLoaded] = useState(false);
-  
-  const [stats, setStats] = useState<SessionStats>({
-    sessionStartTime: sessionStartRef.current,
-    lastActivityTime: lastActivityRef.current,
-    lastRefreshTime: lastRefreshRef.current,
-    refreshCount: 0,
-    totalSessionDuration: 0,
-    timeSinceLastActivity: 0,
-    timeSinceLastRefresh: 0
-  });
+  const statusCheckIntervalRef = useRef<number | null>(null);
+  const activityUpdateIntervalRef = useRef<number | null>(null);
 
-  // Load settings from backend
-  const loadSettings = async () => {
+  const lastServerTimeRemainingRef = useRef<number>(0);
+  const lastActivityUpdateRef = useRef<number>(0);
+  const sessionSettingsRef = useRef(sessionSettings);
+
+  // Update ref when settings change
+  useEffect(() => {
+    sessionSettingsRef.current = sessionSettings;
+  }, [sessionSettings]);
+
+  // Load session settings from server
+  const loadSessionSettings = useCallback(async () => {
     try {
-      console.log('[SessionContext] Loading session settings...');
       const response = await fetch('/api/auth/session_settings', {
         credentials: 'include',
       });
 
-      console.log('[SessionContext] Settings response status:', response.status);
-      
       if (response.ok) {
         const data = await response.json();
-        console.log('[SessionContext] Settings response data:', data);
         if (data.success && data.settings) {
-          console.log('[SessionContext] Loaded settings:', data.settings);
-          setSettings({
+          setSessionSettings({
             timeoutMinutes: data.settings.session_timeout_minutes || 15,
-            warningMinutes: data.settings.session_warning_minutes || 14,
-            refreshIntervalMinutes: data.settings.session_refresh_interval_minutes || 30
+            warningMinutes: data.settings.session_warning_minutes || 14
           });
-          setSettingsLoaded(true);
-        } else {
-          console.log('[SessionContext] Invalid settings data, using defaults');
-          setSettings({
-            timeoutMinutes: 15,
-            warningMinutes: 14,
-            refreshIntervalMinutes: 30
-          });
-          setSettingsLoaded(true);
         }
-      } else {
-        console.log('[SessionContext] Settings endpoint failed, using defaults');
-        setSettings({
-          timeoutMinutes: 15,
-          warningMinutes: 14,
-          refreshIntervalMinutes: 30
-        });
-        setSettingsLoaded(true);
       }
     } catch (error) {
-      console.error('[SessionContext] Error loading settings:', error);
-      setSettings({
-        timeoutMinutes: 15,
-        warningMinutes: 14,
-        refreshIntervalMinutes: 30
-      });
-      setSettingsLoaded(true);
+      console.error('[SessionManager] Error loading session settings:', error);
     }
-  };
+  }, []);
 
-  // Update last activity on user interaction
-  const updateActivity = () => {
-    lastActivityRef.current = Date.now();
-    setShowWarning(false); // Hide warning when user is active
-  };
-
-  // Refresh session
-  const refreshSession = async () => {
-    const now = Date.now();
-    const timeSinceLastRefresh = now - lastRefreshRef.current;
-    const minRefreshInterval = 5000; // Minimum 5 seconds between refreshes
-    
-    // Prevent concurrent refresh calls
-    if (isRefreshingRef.current) {
-      console.log('[SessionContext] Refresh already in progress, skipping');
-      return;
-    }
-    
-    if (timeSinceLastRefresh < minRefreshInterval) {
-      console.log(`[SessionContext] Skipping refresh - too soon (${Math.round(timeSinceLastRefresh / 1000)}s since last refresh)`);
-      return;
-    }
-    
-    isRefreshingRef.current = true;
-    
+  // Check session status from server
+  const checkSessionStatus = useCallback(async () => {
     try {
-      console.log('[SessionContext] Sending refresh request...');
-      const response = await fetch('/api/auth/refresh_session', {
-        method: 'POST',
+      const response = await fetch('/api/auth/session_status', {
         credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
       });
 
       if (!response.ok) {
         if (response.status === 401) {
-          // Session expired
-          console.log('[SessionContext] Session expired, logging out');
-          onSessionExpiredRef.current?.();
-        } else {
-          console.log(`[SessionContext] Refresh failed with status: ${response.status}`);
+          console.log('[SessionManager] Session expired on server');
+          setIsExpired(true);
+          setShowWarning(false);
+          setTimeRemaining(0);
+          return;
         }
-      } else {
-        console.log('[SessionContext] Session refreshed successfully');
-        lastRefreshRef.current = now;
-        setRefreshCount(prev => prev + 1);
-        setShowWarning(false);
+        return;
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Only update if values actually changed
+        if (data.timeRemaining !== lastServerTimeRemainingRef.current) {
+          lastServerTimeRemainingRef.current = data.timeRemaining;
+          setTimeRemaining(data.timeRemaining);
+        }
+        
+        if (data.showWarning !== showWarning) {
+          setShowWarning(data.showWarning);
+        }
+        
+        if (data.isExpired !== isExpired) {
+          setIsExpired(data.isExpired);
+        }
+        
       }
     } catch (error) {
-      console.error('[SessionContext] Error refreshing session:', error);
-    } finally {
-      isRefreshingRef.current = false;
+      console.error('[SessionManager] Error checking session status:', error);
     }
-  };
+  }, [showWarning, isExpired]);
 
-  // Extend session manually
-  const extendSession = async () => {
-    await refreshSession();
-  };
-
-  // Logout immediately
-  const logoutNow = () => {
-    onSessionExpiredRef.current?.();
-  };
-
-  // Calculate time until timeout
-  const getTimeUntilTimeout = (): number => {
-    if (!settings.timeoutMinutes || !stats.timeSinceLastActivity) {
-      return 0;
+  // Update activity on server with dynamic interval based on session settings
+  const updateActivity = useCallback(async () => {
+    const now = Date.now();
+    const timeSinceLastUpdate = now - lastActivityUpdateRef.current;
+    
+    // Calculate dynamic interval: session timeout minus warning time
+    // This ensures we refresh before the warning appears
+    const dynamicInterval = (sessionSettingsRef.current.timeoutMinutes - sessionSettingsRef.current.warningMinutes) * 60 * 1000;
+    const minUpdateInterval = Math.max(dynamicInterval, 30000); // Minimum 30 seconds
+    
+    if (timeSinceLastUpdate < minUpdateInterval) {
+      return; // Skip if too soon
     }
-    const timeoutMs = settings.timeoutMinutes * 60 * 1000;
-    return Math.max(0, timeoutMs - stats.timeSinceLastActivity);
-  };
+    
+    try {
+      lastActivityUpdateRef.current = now;
+      console.log('[SessionManager] Updating activity on server...');
+      
+      await fetch('/api/auth/update_activity', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      
+      // Immediately check session status after updating activity
+      // This ensures the countdown reflects the activity right away
+      await checkSessionStatus();
+    } catch (error) {
+      console.error('[SessionManager] Error updating activity:', error);
+    }
+  }, [checkSessionStatus]);
 
-  // Update stats every second
+  // Refresh session
+  const refreshSession = useCallback(async () => {
+    try {
+      const response = await fetch('/api/auth/refresh_session', {
+        method: 'POST',
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          console.log('[SessionManager] Session expired during refresh');
+          setIsExpired(true);
+          return;
+        }
+        return;
+      }
+
+      // Re-check status after refresh
+      await checkSessionStatus();
+    } catch (error) {
+      console.error('[SessionManager] Error refreshing session:', error);
+    }
+  }, [checkSessionStatus]);
+
+  // Set up periodic status checks
   useEffect(() => {
-    const interval = setInterval(() => {
-      const now = Date.now();
-      setStats(prev => ({
-        ...prev,
-        sessionStartTime: sessionStartRef.current,
-        lastActivityTime: lastActivityRef.current,
-        lastRefreshTime: lastRefreshRef.current,
-        refreshCount,
-        totalSessionDuration: now - sessionStartRef.current,
-        timeSinceLastActivity: now - lastActivityRef.current,
-        timeSinceLastRefresh: now - lastRefreshRef.current
-      }));
-    }, 1000);
+    // Load settings and check status immediately
+    loadSessionSettings();
+    checkSessionStatus();
 
-    return () => clearInterval(interval);
-  }, [refreshCount]);
+    // Check status every 30 seconds
+    statusCheckIntervalRef.current = window.setInterval(() => {
+      checkSessionStatus();
+    }, 30000);
 
+    // Update activity periodically based on session settings
+    // Use dynamic interval: session timeout minus warning time
+    const dynamicActivityInterval = Math.max(
+      (sessionSettingsRef.current.timeoutMinutes - sessionSettingsRef.current.warningMinutes) * 60 * 1000,
+      300000 // Minimum 5 minutes
+    );
+    
+    activityUpdateIntervalRef.current = window.setInterval(() => {
+      console.log('[SessionManager] Periodic activity update (dynamic interval):', {
+        interval: Math.round(dynamicActivityInterval / 1000),
+        sessionTimeout: sessionSettingsRef.current.timeoutMinutes,
+        warningTime: sessionSettingsRef.current.warningMinutes
+      });
+      updateActivity();
+    }, dynamicActivityInterval);
+
+    return () => {
+      if (statusCheckIntervalRef.current) {
+        clearInterval(statusCheckIntervalRef.current);
+      }
+      if (activityUpdateIntervalRef.current) {
+        clearInterval(activityUpdateIntervalRef.current);
+      }
+    };
+  }, [checkSessionStatus, updateActivity, loadSessionSettings]);
+
+  // Handle session expiration
   useEffect(() => {
-    // Load settings on mount
-    loadSettings();
-  }, []);
+    if (isExpired) {
+      console.log('[SessionManager] Session expired, logging out');
+      setShowWarning(false);
+      setTimeRemaining(0);
+      // Clear any cached data
+      localStorage.clear();
+      sessionStorage.clear();
+      // Redirect to login page
+      window.location.href = '/login';
+    }
+  }, [isExpired]);
 
+  // Set up activity listeners
   useEffect(() => {
-    if (!settingsLoaded) return;
-
-    // Ensure we have valid settings
-    if (!settings.refreshIntervalMinutes || settings.refreshIntervalMinutes <= 0) {
-      console.log('[SessionContext] Invalid refresh interval, using default of 30 minutes');
-      setSettings(prev => ({ ...prev, refreshIntervalMinutes: 30 }));
-      return;
-    }
-
-    // Clean up any existing interval first
-    if (refreshIntervalRef.current) {
-      clearInterval(refreshIntervalRef.current);
-      refreshIntervalRef.current = null;
-    }
-
-    // Set up activity listeners
-    const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
+    const events = ['mousedown', 'scroll', 'touchstart', 'click'];
     
     const handleActivity = () => {
+      // Update activity on server when user is active
       updateActivity();
     };
 
@@ -257,77 +244,74 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({
       document.addEventListener(event, handleActivity, true);
     });
 
-    // Set up periodic session refresh and warning checks
-    const refreshInterval = setInterval(() => {
-      const now = Date.now();
-      const timeSinceLastActivity = now - lastActivityRef.current;
-      const timeoutMs = settings.timeoutMinutes * 60 * 1000;
-      const warningMs = settings.warningMinutes * 60 * 1000;
-      const refreshIntervalMs = settings.refreshIntervalMinutes * 60 * 1000;
-
-      console.log(`[SessionContext] Checking session - Time since last activity: ${Math.round(timeSinceLastActivity / 1000)}s, Refresh interval: ${settings.refreshIntervalMinutes}min`);
-
-      // If user has been inactive for too long, don't refresh
-      if (timeSinceLastActivity > timeoutMs) {
-        console.log('[SessionContext] User inactive for too long, not refreshing session');
-        onSessionExpiredRef.current?.();
-        return;
-      }
-
-      // Check if we should show warning
-      const timeUntilExpiry = timeoutMs - timeSinceLastActivity;
-      if (timeUntilExpiry <= warningMs && timeUntilExpiry > 0) {
-        setShowWarning(true);
-        setTimeRemaining(Math.ceil(timeUntilExpiry / 1000));
-      } else {
-        setShowWarning(false);
-      }
-
-      // Only refresh if enough time has passed since last refresh
-      const timeSinceLastRefresh = now - lastRefreshRef.current;
-      if (timeSinceLastRefresh >= refreshIntervalMs) {
-        console.log('[SessionContext] Refreshing session...');
-        refreshSession();
-      } else {
-        console.log(`[SessionContext] Skipping refresh - ${Math.round((refreshIntervalMs - timeSinceLastRefresh) / 1000)}s until next refresh`);
-      }
-    }, 30000); // Check every 30 seconds
-
-    refreshIntervalRef.current = refreshInterval;
-
-    // Don't do initial refresh to prevent spam
-
     return () => {
-      // Clean up event listeners
       events.forEach(event => {
         document.removeEventListener(event, handleActivity, true);
       });
-
-      // Clean up interval
-      if (refreshIntervalRef.current) {
-        clearInterval(refreshIntervalRef.current);
-        refreshIntervalRef.current = null;
-      }
     };
-  }, [settingsLoaded]);
+  }, [updateActivity]);
 
-  const contextValue: SessionState = {
-    showWarning,
-    timeRemaining,
-    timeUntilTimeout: getTimeUntilTimeout(),
-    settings,
-    settingsLoaded,
-    stats,
-    updateActivity,
-    refreshSession,
-    extendSession,
-    logoutNow,
-  };
+  // Memoize the context value to prevent unnecessary re-renders
+  const contextValue = useMemo(() => {
+    return {
+      showWarning,
+      timeRemaining,
+      settings: sessionSettings,
+      settingsLoaded: true,
+      stats: {
+        sessionStartTime: 0,
+        lastActivityTime: 0,
+        lastRefreshTime: 0,
+        refreshCount: 0,
+        totalSessionDuration: 0,
+        timeSinceLastActivity: 0,
+        timeSinceLastRefresh: 0,
+      },
+      updateActivity,
+      refreshSession,
+      extendSession: refreshSession, // Alias for compatibility
+      logoutNow: () => {
+        console.log('[SessionManager] Logout requested');
+        setIsExpired(true);
+        setShowWarning(false);
+        setTimeRemaining(0);
+        // Clear any cached data
+        localStorage.clear();
+        sessionStorage.clear();
+        // Redirect to login page
+        window.location.href = '/login';
+      },
+    };
+  }, [showWarning, timeRemaining, sessionSettings]);
 
   return (
     <SessionContext.Provider value={contextValue}>
       {children}
     </SessionContext.Provider>
+  );
+};
+
+export const SessionProvider: React.FC<SessionProviderProps> = ({ 
+  children, 
+  onSessionExpired 
+}) => {
+  const onSessionExpiredRef = useRef(onSessionExpired);
+  
+  useEffect(() => {
+    return () => {
+      // Cleanup on unmount
+    };
+  }, []);
+  
+  // Update the ref when onSessionExpired changes
+  useEffect(() => {
+    onSessionExpiredRef.current = onSessionExpired;
+  }, [onSessionExpired]);
+
+  return (
+    <SessionManager>
+      {children}
+    </SessionManager>
   );
 };
 

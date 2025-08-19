@@ -63,21 +63,27 @@ cd frontend && npm install
   ```sh
   python -m webserver.app
   ```
+- Start redis listener:
+  ```sh
+  python redis_listener_standalone.py
+  ```
 - Start Celery worker:
   ```sh
-  celery -A workflows.celery_worker worker --loglevel=info
+  celery -A workflows.celery_worker worker --loglevel=info -Q celery,probra,openai,raptool,pathway
 
-  set -a && source .env && set +a && celery -A workflows.celery_worker worker --loglevel=info
+  celery -A workflows.celery_worker_probra worker --loglevel=info -Q probra
   ```
 - Start frontend:
   ```sh
   cd frontend && npm run dev
   ```
+
 - Run Redis Listener
 ``` 
 python redis_listener_standalone.py
 ```
----
+=======
+
 
 ## Production Setup (not for local developlment)
 

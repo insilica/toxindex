@@ -1,0 +1,33 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: flyway-repair
+  namespace: toxindex-app
+spec:
+  template:
+    spec:
+      containers:
+      - name: flyway
+        image: flyway/flyway:latest
+        command: ["flyway", "repair"]
+        env:
+        - name: FLYWAY_URL
+          value: jdbc:postgresql://172.26.240.4:5432/toxindex
+        - name: FLYWAY_USER
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: PGUSER
+        - name: FLYWAY_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: PGPASSWORD
+        volumeMounts:
+        - name: flyway-sql
+          mountPath: /flyway/sql
+      restartPolicy: Never
+      volumes:
+      - name: flyway-sql
+        configMap:
+          name: flyway-sql-configmap

@@ -20,22 +20,14 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 # Import after setting up path
 from webserver.model import Task, Message, File
 import webserver.datastore as ds
-from webserver.data_paths import LOGS_ROOT
+from webserver.logging_utils import setup_logging, log_service_startup, get_logger
 
-# Configure logging
-LOGS_ROOT().mkdir(exist_ok=True)
-log_filename = LOGS_ROOT() / f"redis_listener_{datetime.now().strftime('%Y-%m-%d_%H')}.log"
+# Setup logging with shared utility
+setup_logging("redis-listener", log_level=logging.INFO)
+logger = get_logger("redis-listener")
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s',
-    handlers=[
-        logging.FileHandler(log_filename),
-        logging.StreamHandler()
-    ]
-)
-
-logger = logging.getLogger(__name__)
+# Log startup information
+log_service_startup("redis-listener")
 
 def create_minimal_task_dict(task):
     """Create a minimal task dictionary to reduce payload size"""
@@ -70,7 +62,7 @@ def create_minimal_message_dict(msg):
     return minimal_msg
 
 def redis_listener_standalone():
-    """Standalone Redis listener that processes Celery events"""
+    """Standalone Redis listener that processes Celery events for database updates only"""
     listener_id = uuid.uuid4().hex[:8]
     
     # Connect to Redis
@@ -124,12 +116,6 @@ def redis_listener_standalone():
                     logger.info(f"[redis_listener] ({listener_id}) Processing task_file for task_id={event_task_id}")
                     File.process_event(task, event_data)
                     logger.info(f"[redis_listener] ({listener_id}) Processed file event for task_id={event_task_id}")
-                    
-                elif event_type == "task_status_update":
-                    logger.info(f"[redis_listener] ({listener_id}) Processing task_status_update for task_id={event_task_id}")
-                    # Update task status in database
-                    Task.set_status(event_task_id, event_data.get("status", "processing"))
-                    logger.info(f"[redis_listener] ({listener_id}) Updated task status for task_id={event_task_id}")
                     
             except json.JSONDecodeError:
                 logger.error(f"[redis_listener] ({listener_id}) Failed to decode Redis message as JSON.")

@@ -19,6 +19,7 @@ except ImportError:
 
 # LLM provider selection (default: openai)
 llm_provider = os.environ.get("LLM_PROVIDER", "openai").lower()
+print(f"Using LLM provider: {llm_provider}")
 
 if llm_provider == "openai":
     from langchain_openai import ChatOpenAI
@@ -146,33 +147,87 @@ follow_up_chain = (
 # ── helper functions (RunnableLambda wrappers) ──────────────────────────────────
 def parse_search_results(search_text: str, top_k: int = 5) -> List[Dict[str, str]]:
     """Extract URLs, fetch their titles and a snippet of content."""
-    urls = re.findall(r"https?://[^\s]+", search_text)[:top_k]
+    print(f"Parsing search text (first 500 chars): {search_text[:500]}...")
+    
+    # Try to parse as JSON first (GoogleSearchAPIWrapper might return structured data)
+    try:
+        search_data = json.loads(search_text)
+        print(f"Search data is JSON with keys: {list(search_data.keys()) if isinstance(search_data, dict) else 'not a dict'}")
+        
+        # Extract URLs from structured search results
+        urls = []
+        if isinstance(search_data, dict):
+            # Look for items array or similar structure
+            items = search_data.get('items', [])
+            if not items and 'organic_results' in search_data:
+                items = search_data.get('organic_results', [])
+            
+            for item in items[:top_k]:
+                if isinstance(item, dict):
+                    url = item.get('link') or item.get('url') or item.get('href')
+                    if url:
+                        urls.append(url)
+    except json.JSONDecodeError:
+        # Fallback to regex URL extraction
+        urls = re.findall(r"https?://[^\s]+", search_text)[:top_k]
+    
+    print(f"Found {len(urls)} URLs: {urls}")
+    
     parsed: List[Dict[str, str]] = []
-    for url in urls:
-        try:
-            resp = requests.get(url, timeout=5)
-            if resp.status_code == 200:
-                soup = BeautifulSoup(resp.text, "html.parser")
-                title = soup.title.string.strip() if soup.title and soup.title.string else url.split("//")[1].split("/")[0]
-                texts = soup.stripped_strings
-                content = " ".join(list(texts))[:1500]
-                if not content:
+    
+    # If we found URLs, fetch their content
+    if urls:
+        for url in urls:
+            try:
+                resp = requests.get(url, timeout=5)
+                if resp.status_code == 200:
+                    soup = BeautifulSoup(resp.text, "html.parser")
+                    title = soup.title.string.strip() if soup.title and soup.title.string else url.split("//")[1].split("/")[0]
+                    texts = soup.stripped_strings
+                    content = " ".join(list(texts))[:1500]
+                    if not content:
+                        content = f"Content from {url}"
+                else:
+                    title = url.split("//")[1].split("/")[0]
                     content = f"Content from {url}"
-            else:
+            except Exception as e:
+                print(f"Error fetching {url}: {e}")
                 title = url.split("//")[1].split("/")[0]
                 content = f"Content from {url}"
-        except Exception:
-            title = url.split("//")[1].split("/")[0]
-            content = f"Content from {url}"
-        parsed.append({
-            "url": url,
-            "title": title,
-            "content": content,
-        })
+            parsed.append({
+                "url": url,
+                "title": title,
+                "content": content,
+            })
+    else:
+        # If no URLs found, create a summary from the search text itself
+        print("No URLs found in search results, creating summary from search text")
+        # Split the search text into chunks and create summaries
+        text_chunks = [search_text[i:i+2000] for i in range(0, len(search_text), 2000)][:top_k]
+        
+        for i, chunk in enumerate(text_chunks):
+            parsed.append({
+                "url": f"search_result_{i+1}",
+                "title": f"Search Result {i+1}",
+                "content": chunk,
+            })
+    
+    print(f"Parsed {len(parsed)} results")
     return parsed
 
 def summarize_results(results: List[Dict[str, str]]) -> List[str]:
-    return [summarizer_chain.invoke({"result": r}) for r in results]
+    summaries = []
+    for i, r in enumerate(results):
+        try:
+            summary = summarizer_chain.invoke({"result": r})
+            summaries.append(summary)
+            print(f"Generated summary {i+1}/{len(results)}: {summary[:100]}...")
+        except Exception as e:
+            print(f"Error generating summary {i+1}: {e}")
+            # Fallback: use a simple summary
+            fallback_summary = f"Summary of {r.get('title', 'Unknown title')}: {r.get('content', 'No content available')[:200]}..."
+            summaries.append(fallback_summary)
+    return summaries
 
 # Wrap helpers in RunnableLambda so they fit inside a graph
 parse_results_runnable = RunnableLambda(parse_search_results)
@@ -209,9 +264,18 @@ def preprocess_and_generate_query(state: SearchState) -> SearchState:
     ]
     chemical_name = llm.invoke(chemical_messages).content.strip()
 
-    # Extract toxicity type
+    # Extract toxicity type with improved prompt
     toxicity_messages = [
-        ("system", "Given a prompt, extract the toxicity type. Return only the toxicity type."),
+        ("system", """Given a toxicology query, extract the specific toxicity type being asked about. 
+        Common toxicity types include: hepatotoxicity, nephrotoxicity, neurotoxicity, cardiotoxicity, 
+        genotoxicity, carcinogenicity, reproductive toxicity, developmental toxicity, immunotoxicity, etc.
+        
+        If the query asks "Is [chemical] [toxicity_type]?" or "Does [chemical] cause [toxicity_type]?", 
+        extract the [toxicity_type] part.
+        
+        If the query doesn't specify a toxicity type, return "general toxicity".
+        
+        Return only the toxicity type."""),
         ("human", state.original_query)
     ]
     toxicity_type = llm.invoke(toxicity_messages).content.strip()
@@ -234,11 +298,17 @@ def preprocess_and_generate_query(state: SearchState) -> SearchState:
     })
 
 def run_search(state: SearchState) -> SearchState:
+    print(f"Running search for query: {state.search_query}")
     serp_text = search_tool.run(state.search_query)
+    print(f"Search returned {len(serp_text)} characters")
+    print(f"Search result type: {type(serp_text)}")
     return SearchState(**{**asdict(state), "initial_search_results": serp_text})
 
 def parse_results(state: SearchState) -> SearchState:
     parsed = parse_search_results(state.initial_search_results)
+    print(f"Parsed {len(parsed)} initial search results")
+    for i, result in enumerate(parsed):
+        print(f"Result {i+1}: {result.get('title', 'No title')[:50]}...")
     return SearchState(**{**asdict(state), "parsed_initial_results": parsed})
 
 def summarize_initial(state: SearchState) -> SearchState:
@@ -256,11 +326,16 @@ def generate_follow_up(state: SearchState) -> SearchState:
     return SearchState(**{**asdict(state), "follow_up_query": fq})
 
 def run_follow_up_search(state: SearchState) -> SearchState:
+    print(f"Running follow-up search for query: {state.follow_up_query}")
     serp_text = search_tool.run(state.follow_up_query)
+    print(f"Follow-up search returned {len(serp_text)} characters")
     return SearchState(**{**asdict(state), "follow_up_search_results": serp_text})
 
 def parse_follow_up(state: SearchState) -> SearchState:
     parsed = parse_search_results(state.follow_up_search_results)
+    print(f"Parsed {len(parsed)} follow-up search results")
+    for i, result in enumerate(parsed):
+        print(f"Follow-up Result {i+1}: {result.get('title', 'No title')[:50]}...")
     return SearchState(**{**asdict(state), "parsed_follow_up_results": parsed})
 
 def summarize_follow_up(state: SearchState) -> SearchState:
@@ -270,6 +345,16 @@ def summarize_follow_up(state: SearchState) -> SearchState:
 def generate_report(state: SearchState) -> SearchState:
     # Combine all parsed results for reference enforcement
     all_results = (state.parsed_initial_results or []) + (state.parsed_follow_up_results or [])
+    
+    # Extract and format references from search results
+    references_text = ""
+    if all_results:
+        references_text = "\nAvailable References:\n"
+        for i, result in enumerate(all_results):
+            title = result.get('title', f'Reference {i+1}')
+            url = result.get('url', '')
+            content_preview = result.get('content', '')[:200] + "..." if len(result.get('content', '')) > 200 else result.get('content', '')
+            references_text += f"{i+1}. {title}\n   URL: {url}\n   Content: {content_preview}\n\n"
     
     # Create a comprehensive prompt for the agent
     prompt = f"""
@@ -286,8 +371,16 @@ def generate_report(state: SearchState) -> SearchState:
     Follow-up Search: {state.follow_up_search_results}
     Follow-up Summaries: {state.follow_up_summaries}
     
-    Available References:
-    {chr(10).join(f"- {r.get('title', '')}: {r.get('url', '')}" for r in all_results)}
+    {references_text}
+    
+    IMPORTANT: You MUST include references in your response. Use the available references above to create proper citations.
+    For each reference you use, include it in the references field with:
+    - title: The title of the source
+    - authors: If available from the content
+    - year: If available from the content
+    - url: The URL if available
+    - type: "scientific_article", "review", "case_study", etc.
+    - relevance: Brief description of how this reference supports your assessment
     
     Please create a comprehensive toxicity assessment using the Pydantic model structure.
     Ensure all data is properly referenced and scientifically rigorous.
@@ -437,8 +530,10 @@ deeptox_agent = Agent(
         
         Workflow:
         1. Use get_chemprop to obtain chemical properties
-        2. Use invoke_deepsearch to gather clinical evidence and mechanistic information
+        2. Use invoke_deepsearch ONCE with the original user query to gather comprehensive clinical evidence and mechanistic information
         3. Output structured data using the Pydantic model
+        
+        IMPORTANT: Only call invoke_deepsearch ONCE with the original user query. Do not make multiple separate search calls for different aspects. The search tool will automatically perform comprehensive research including initial search and follow-up queries.
         
         Focus on:
         - Chemical properties and their relevance to toxicity

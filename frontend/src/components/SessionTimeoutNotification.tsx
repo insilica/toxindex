@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 interface SessionTimeoutNotificationProps {
   isVisible: boolean;
@@ -13,57 +13,71 @@ export const SessionTimeoutNotification: React.FC<SessionTimeoutNotificationProp
   onLogout,
   timeRemaining
 }) => {
-  const [timeLeft, setTimeLeft] = useState(timeRemaining);
+  const [localTimeRemaining, setLocalTimeRemaining] = useState(timeRemaining);
+  const countdownIntervalRef = useRef<number | null>(null);
 
+  // Update local time when server time changes
   useEffect(() => {
-    if (isVisible && timeLeft > 0) {
-      const timer = setInterval(() => {
-        setTimeLeft(prev => {
-          if (prev <= 1) {
-            onLogout();
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-
-      return () => clearInterval(timer);
-    }
-  }, [isVisible, timeLeft, onLogout]);
-
-  useEffect(() => {
-    setTimeLeft(timeRemaining);
+    setLocalTimeRemaining(timeRemaining);
   }, [timeRemaining]);
 
-  if (!isVisible) return null;
+  // Set up local countdown timer
+  useEffect(() => {
+    if (countdownIntervalRef.current) {
+      clearInterval(countdownIntervalRef.current);
+    }
 
-  const minutes = Math.floor(timeLeft / 60);
-  const seconds = timeLeft % 60;
+    if (isVisible && localTimeRemaining > 0) {
+      countdownIntervalRef.current = window.setInterval(() => {
+        setLocalTimeRemaining(prev => {
+          const newValue = Math.max(0, prev - 1);
+          return newValue;
+        });
+      }, 1000);
+    }
+
+    return () => {
+      if (countdownIntervalRef.current) {
+        clearInterval(countdownIntervalRef.current);
+      }
+    };
+  }, [isVisible, localTimeRemaining]);
+
+  // Auto-logout when time reaches 0
+  useEffect(() => {
+    if (isVisible && localTimeRemaining <= 0) {
+      console.log('[SessionTimeoutNotification] Time expired, calling logout');
+      onLogout();
+    }
+  }, [isVisible, localTimeRemaining, onLogout]);
+
+  if (!isVisible || localTimeRemaining <= 0) return null;
+
+  const minutes = Math.floor(localTimeRemaining / 60);
+  const seconds = localTimeRemaining % 60;
 
   return (
-    <div className="fixed top-4 right-4 z-50 bg-yellow-100 border border-yellow-400 text-yellow-800 px-4 py-3 rounded shadow-lg">
-      <div className="flex items-center justify-between">
-        <div className="flex-1">
-          <h3 className="font-semibold">Session Timeout Warning</h3>
-          <p className="text-sm">
-            Your session will expire in {minutes}:{seconds.toString().padStart(2, '0')}
-          </p>
-        </div>
-        <div className="flex space-x-2 ml-4">
-          <button
-            onClick={onExtendSession}
-            className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm"
-          >
-            Extend Session
-          </button>
-          <button
-            onClick={onLogout}
-            className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
-          >
-            Logout Now
-          </button>
+    <>
+      {/* Backdrop with foggy effect */}
+      <div className="fixed inset-0 backdrop-blur-sm z-40" />
+      
+      {/* Modal in center */}
+      <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div 
+          className="bg-white border border-gray-300 text-gray-800 px-6 py-4 rounded-lg shadow-xl max-w-sm mx-4 cursor-pointer hover:bg-gray-50 transition-colors"
+          onClick={onExtendSession}
+        >
+          <div className="text-center">
+            <h3 className="text-lg font-semibold mb-2">Session Timeout</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              Your session will expire in {minutes}:{seconds.toString().padStart(2, '0')}
+            </p>
+            <p className="text-sm text-gray-500">
+              Click anywhere to extend your session
+            </p>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }; 

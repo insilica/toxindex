@@ -1,0 +1,27 @@
+# General worker image for standard tasks (probra, openai, etc.)
+FROM toxindex-base:latest
+
+# Copy only the necessary files for probra celery task
+# Core workflow files
+COPY workflows/ /app/workflows/
+COPY webserver/model/ /app/webserver/model/
+COPY webserver/tools/ /app/webserver/tools/
+COPY webserver/controller/ /app/webserver/controller/
+COPY webserver/__init__.py /app/webserver/
+COPY webserver/storage.py /app/webserver/
+COPY webserver/cache_manager.py /app/webserver/
+COPY webserver/ai_service.py /app/webserver/
+COPY webserver/logging_utils.py /app/webserver/
+COPY webserver/data_paths.py /app/webserver/
+COPY webserver/datastore.py /app/webserver/
+COPY config/ /app/config/
+
+# Copy minimal requirements for probra only
+COPY requirements-probra-minimal.txt /app/requirements.txt
+
+# Install general Python dependencies
+RUN pip install -r requirements.txt
+
+# Entrypoint: Celery worker for probra tasks only
+CMD ["celery", "-A", "workflows.celery_worker_probra", "worker", "--loglevel=info", "-Q", "probra"]
+

@@ -65,7 +65,7 @@ def upload_local_file_to_gcs(local_path: Path, gcs_path: str) -> str:
     gcs_storage.upload_file(str(local_path), gcs_path)
     return gcs_path
 
-@celery.task(bind=True)
+@celery.task(bind=True, queue='raptool')
 def raptool_task(self, payload):
     """Run RAPtool parse_chemicals on a GCS file and publish results back to GCS."""
     try:

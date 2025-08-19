@@ -8,7 +8,7 @@ from workflows.celery_worker import celery
 from webserver.model.message import MessageSchema
 from webserver.model.task import Task
 from webserver.model.file import File
-from pathway_analysis_tool.annotate_pathway import save_pathway
+from pathway_analysis_tool import save_pathway
 import pandas as pd
 from webserver.storage import GCSFileStorage
 from webserver.cache_manager import cache_manager
@@ -58,7 +58,7 @@ def upload_local_file_to_gcs(local_path: Path, gcs_path: str, content_type: str 
     gcs_storage.upload_file(str(local_path), gcs_path, content_type=content_type)
     return gcs_path
 
-@celery.task(bind=True)
+@celery.task(bind=True, queue='pathway')
 def pathway_analysis_task(self, payload):
     """GCS-enabled pathway analysis task that downloads input files from GCS and uploads outputs to GCS."""
     try:

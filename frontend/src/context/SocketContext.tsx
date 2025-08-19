@@ -30,9 +30,17 @@ interface SocketProviderProps {
 }
 
 export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
+  console.log('[SocketProvider] SocketProvider mounting');
   const socketRef = useRef<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
+
+  useEffect(() => {
+    console.log('[SocketProvider] SocketProvider mounted');
+    return () => {
+      console.log('[SocketProvider] SocketProvider unmounting');
+    };
+  }, []);
 
   const connect = () => {
     // Don't connect if already connecting or connected

@@ -43,8 +43,13 @@ from webserver.controller.user import user_bp
 from webserver.controller.schema import schema_bp
 from webserver.data_paths import LOGS_ROOT
 from webserver.health_checker import health_checker
+from webserver.logging_utils import setup_logging, log_service_startup, get_logger
 
 dotenv.load_dotenv()
+
+# Setup logging with shared utility
+setup_logging("webserver", log_level=logging.DEBUG)
+logger = get_logger("webserver")
 
 # FLASK APP ===================================================================
 static_folder_path = os.path.join(os.path.dirname(__file__), "webserver", "static")
@@ -86,11 +91,11 @@ if is_development or is_localhost:
              methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
              expose_headers=["Content-Type", "Authorization"]
         )
-        logging.info("CORS enabled for development environment")
+        logger.info("CORS enabled for development environment")
     except ImportError:
-        logging.warning("Flask-CORS not installed, CORS disabled")
+        logger.warning("Flask-CORS not installed, CORS disabled")
 else:
-    logging.info("CORS disabled for production environment")
+    logger.info("CORS disabled for production environment")
 
 app.config["WTF_CSRF_TIME_LIMIT"] = 3600  # 1 hour
 
@@ -114,18 +119,8 @@ logging.info(f"Session timeout: {app.config['PERMANENT_SESSION_LIFETIME']} (from
 
 socketio.init_app(app)
 
-LOGS_ROOT().mkdir(exist_ok=True)
-log_filename = LOGS_ROOT() / f"app_{datetime.now().strftime('%Y-%m-%d_%H')}.log"
-
-# Configure logging to output to file with detailed formatting
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s',
-    handlers=[
-        logging.FileHandler(log_filename),
-        logging.StreamHandler()  # Also keep console output
-    ]
-)
+# Log startup information
+log_service_startup("webserver")
 
 # Set Flask app logger to use same configuration
 app.logger.setLevel(logging.INFO)
@@ -136,35 +131,35 @@ Workflow.load_default_workflows()
 
 csrf.init_app(app)
 
-logging.info(f"DB ENV (Flask startup): PGHOST={os.getenv('PGHOST')}, PGPORT={os.getenv('PGPORT')}, PGDATABASE={os.getenv('PGDATABASE')}, PGUSER={os.getenv('PGUSER')}, PGPASSWORD={os.getenv('PGPASSWORD')}")
+logger.info(f"DB ENV (Flask startup): PGHOST={os.getenv('PGHOST')}, PGPORT={os.getenv('PGPORT')}, PGDATABASE={os.getenv('PGDATABASE')}, PGUSER={os.getenv('PGUSER')}, PGPASSWORD={os.getenv('PGPASSWORD')}")
 
 # SOCKETIO HANDLERS ==========================================================
 @socketio.on("connect")
 def handle_connect(auth):
     try:
-        logging.info(f"[socketio] Client connected: {request.sid}")
+        logger.info(f"[socketio] Client connected: {request.sid}")
         # Don't require authentication for initial connection
         # Authentication will be checked when joining specific rooms
         emit("connected", {"sid": request.sid})
     except Exception as e:
-        logging.error(f"[socketio] Error in connect handler: {e}")
+        logger.error(f"[socketio] Error in connect handler: {e}")
         emit("error", {"error": "Connection failed"})
 
 @socketio.on_error()
 def error_handler(e):
     """Global error handler for Socket.IO events."""
     error_str = str(e)
-    logging.error(f"[socketio] Socket.IO error: {error_str}")
+    logger.error(f"[socketio] Socket.IO error: {error_str}")
     
     # Handle specific payload errors
     if "Too many packets in payload" in error_str:
-        logging.warning(f"[socketio] Payload size exceeded for {request.sid}, reducing data size")
+        logger.warning(f"[socketio] Payload size exceeded for {request.sid}, reducing data size")
         try:
             emit("error", {"error": "Payload too large, reducing data size"})
         except:
             pass  # Don't emit if we can't
     elif "Payload decode error" in error_str:
-        logging.warning(f"[socketio] Payload decode error for {request.sid}")
+        logger.warning(f"[socketio] Payload decode error for {request.sid}")
         try:
             emit("error", {"error": "Invalid payload format"})
         except:
@@ -178,35 +173,35 @@ def error_handler(e):
 @socketio.on("disconnect")
 def handle_disconnect(data=None):
     try:
-        logging.info(f"[socketio] Client disconnected: {request.sid}")
+        logger.info(f"[socketio] Client disconnected: {request.sid}")
     except Exception as e:
-        logging.error(f"[socketio] Error in disconnect handler: {e}")
+        logger.error(f"[socketio] Error in disconnect handler: {e}")
 
 # TODO right now I think any user can join any task room
 @socketio.on("join_task_room")
 def handle_join_task_room(data):
     try:
-        logging.info(f"[socketio] join_task_room called with data: {data}")
+        logger.info(f"[socketio] join_task_room called with data: {data}")
         task_id = data.get("task_id")
         user = flask_login.current_user
 
         # Check authentication
         if not user.is_authenticated:
-            logging.warning(f"[socketio] join_task_room called without authentication by {request.sid}")
+            logger.warning(f"[socketio] join_task_room called without authentication by {request.sid}")
             emit("error", {"error": "Authentication required"})
             return
 
         # Check authorization: does this user own the task?
         task = Task.get_task(task_id)
         if not task or task.user_id != user.user_id:
-            logging.warning(f"[socketio] join_task_room called without authorization by {request.sid} for task {task_id}")
+            logger.warning(f"[socketio] join_task_room called without authorization by {request.sid} for task {task_id}")
             emit("error", {"error": "Not authorized to join this task room"})
             return
 
         room = f"task_{task_id}"
-        logging.info(f"[socketio] {request.sid} joining room: {room}")
+        logger.info(f"[socketio] {request.sid} joining room: {room}")
         join_room(room)
-        logging.info(f"[socketio] {request.sid} joined room: {room}")
+        logger.info(f"[socketio] {request.sid} joined room: {room}")
         emit("joined_task_room", {"task_id": task_id})
         
         # Send minimal task status to avoid payload issues
@@ -284,27 +279,51 @@ app.register_blueprint(health_bp)
 @app.before_request
 def check_session_timeout():
     """Check if user session has expired and log them out if necessary."""
+    
+    # Skip session checks for auth endpoints (login, register, etc.)
+    if request.endpoint and request.endpoint.startswith('auth.'):
+        return
+    
+    # Skip session checks for static files and other non-API routes
+    if request.path.startswith('/static/') or request.path.startswith('/uploads/'):
+        return
+    
     if flask_login.current_user.is_authenticated:
-        # Get current session timeout from database
-        session_timeout_minutes = SystemSettings.get_setting_int('session_timeout_minutes', 60)
-        session_lifetime = timedelta(minutes=session_timeout_minutes)
-        
-        # Check if session is permanent and has expired
-        if flask.session.get('_permanent', False):
-            # Ensure both datetimes are timezone-naive for consistent comparison
-            now = datetime.now()
-            created = flask.session.get('_created', now)
+        try:
+            # Import the session management functions
+            from webserver.controller.auth import is_session_expired, update_session_activity
             
-            # Convert created to timezone-naive if it's timezone-aware
-            if hasattr(created, 'tzinfo') and created.tzinfo is not None:
-                created = created.replace(tzinfo=None)
+            user_id = flask_login.current_user.user_id
             
-            session_age = now - created
-            if session_age > session_lifetime:
+            # Check if session has expired in Redis
+            if is_session_expired(user_id):
                 logging.info(f"[session] Session expired for user {flask_login.current_user.email}")
                 flask_login.logout_user()
                 flask.session.clear()
                 return jsonify({'error': 'Session expired. Please log in again.'}), 401
+            
+            # Update activity for this request
+            update_session_activity(user_id)
+            
+        except Exception as e:
+            logging.error(f"[session] Error checking session timeout: {e}")
+            # Fall back to old Flask session check for compatibility
+            session_timeout_minutes = SystemSettings.get_setting_int('session_timeout_minutes', 60)
+            session_lifetime = timedelta(minutes=session_timeout_minutes)
+            
+            if flask.session.get('_permanent', False):
+                now = datetime.now()
+                created = flask.session.get('_created', now)
+                
+                if hasattr(created, 'tzinfo') and created.tzinfo is not None:
+                    created = created.replace(tzinfo=None)
+                
+                session_age = now - created
+                if session_age > session_lifetime:
+                    logging.info(f"[session] Session expired for user {flask_login.current_user.email}")
+                    flask_login.logout_user()
+                    flask.session.clear()
+                    return jsonify({'error': 'Session expired. Please log in again.'}), 401
 
 # ICONS ======================================================================
 @app.route("/favicon.ico")
