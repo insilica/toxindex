@@ -1,0 +1,98 @@
+[
+  {
+    "smiles": "CCCCOC(=O)c1ccc(C(=O)OCCCC)cc1",
+    "name": "Di-n-butyl phthalate",
+    "IUPAC_name": "Dibutyl benzene-1,2-dicarboxylate",
+    "probability": 1
+  },
+  {
+    "smiles": "CCCCOC(=O)c1ccc(C(=O)O)cc1",
+    "name": "Mono-n-butyl phthalate",
+    "IUPAC_name": "2-Butoxycarbonylbenzoic acid",
+    "probability": 0.272
+  },
+  {
+    "smiles": "CCCCO",
+    "name": "Butanol",
+    "IUPAC_name": "Butan-1-ol",
+    "probability": 0.272
+  },
+  {
+    "smiles": "CCCCOC(=O)c1ccc(C(=O)OCCC(C)O)cc1",
+    "name": "",
+    "IUPAC_name": "2-(4-(butoxycarbonyl)benzoyloxy)-1-propanol",
+    "probability": 0.106
+  },
+  {
+    "smiles": "CCCCOC(=O)c1ccc(C(=O)OC2OC(C(=O)O)C(O)C(O)C2O)cc1",
+    "name": "",
+    "IUPAC_name": "Butyl 4-((2,3,4-trihydroxy-5-(hydroxymethyl)tetrahydrofuran-2-yl)oxycarbonyl)benzoate",
+    "probability": 0.084592
+  },
+  {
+    "smiles": "CCCCOC(=O)c1ccc(C(=O)OCCCCO)cc1",
+    "name": "",
+    "IUPAC_name": "Butyl 4-(4-hydroxybutoxycarbonyl)benzoate",
+    "probability": 0.063
+  },
+  {
+    "smiles": "CCCCOC(=O)c1ccc(C(=O)OCCCC(=O)O)cc1",
+    "name": "",
+    "IUPAC_name": "Butyl 4-(4-carboxybutoxycarbonyl)benzoate",
+    "probability": 0.03
+  },
+  {
+    "smiles": "CCCCOC1OC(C(=O)O)C(O)C(O)C1O",
+    "name": "",
+    "IUPAC_name": "Butyl 1-deoxy-1-carboxy-β-D-glucopyranoside",
+    "probability": 0.027472000000000003
+  },
+  {
+    "smiles": "CCCCOC(=O)c1ccc(C(=O)NCC(=O)O)cc1",
+    "name": "",
+    "IUPAC_name": "Butyl 4-(2-carboxyacetamido)benzoate",
+    "probability": 0.023664
+  },
+  {
+    "smiles": "CCCCOC(=O)c1ccc(C(=O)OCCC(C)OC2OC(C(=O)O)C(O)C(O)C2O)cc1",
+    "name": "",
+    "IUPAC_name": "Butyl 4,3-(2-hydroxy-3-(hydroxy-4-carboxy-tetrahydro-2H-pyran-2-yloxy)-2-methylpropoxy)carbonylbenzoate",
+    "probability": 0.010706
+  },
+  {
+    "smiles": "CCCCOC(=O)c1ccc(C(=O)OCCCCOC2OC(C(=O)O)C(O)C(O)C2O)cc1",
+    "name": "",
+    "IUPAC_name": "Butyl 4-(3-(β-D-glucuronopyranosyloxy)propoxycarbonyl)benzoate",
+    "probability": 0.006363000000000001
+  },
+  {
+    "smiles": "CCCCOS(=O)(=O)O",
+    "name": "",
+    "IUPAC_name": "Butyl hydrogen sulfate",
+    "probability": 0.004896
+  },
+  {
+    "smiles": "CCCCOC(=O)c1ccc(C(=O)OCCCC(=O)OC2OC(C(=O)O)C(O)C(O)C2O)cc1",
+    "name": "",
+    "IUPAC_name": "Butyl 2-[(4-(5-(β-D-glucuronosyloxy)pentanoyl)benzene-1,2-dicarboxylate)]",
+    "probability": 0.0045
+  },
+  {
+    "smiles": "CCCCOC(=O)c1ccc(C(=O)OCCC(C)OS(=O)(=O)O)cc1",
+    "name": "",
+    "IUPAC_name": "Butyl 2-[(4-(2-(sulfatoxy)-2-methylpropyl)benzene-1,2-dicarboxylate)]",
+    "probability": 0.0019079999999999998
+  },
+  {
+    "smiles": "CCCCOC(=O)c1ccc(C(=O)OCCCCOS(=O)(=O)O)cc1",
+    "name": "",
+    "IUPAC_name": "Butyl 4-(carboxy-(2-sulfatooxyethyl) ester) phthalate",
+    "probability": 0.001134
+  },
+  {
+    "smiles": "CCCCOC(=O)c1ccc(C(=O)OCCCC(=O)NCC(=O)O)cc1",
+    "name": "",
+    "IUPAC_name": "Butyl 2-(4-((2-carboxyacetamido)butoxy)-2-oxoethyl)benzoate",
+    "probability": 0.0010799999999999998
+  }
+]

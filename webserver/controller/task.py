@@ -105,8 +105,7 @@ def get_task(task_id):
         return jsonify(task.to_dict())
     except Exception as e:
         logging.error(f"/api/tasks/{task_id} error: {e}", exc_info=True)
-        
-        # Provide more detailed error message based on exception type
+
         if 'Database' in str(type(e)) or 'connection' in str(e).lower():
             error_message = f'Database error: {str(e)}'
         elif 'Permission' in str(e):
@@ -117,7 +116,6 @@ def get_task(task_id):
             error_message = f'User authentication error: {str(e)}'
         else:
             error_message = f'Task retrieval failed: {str(e)}'
-        
         return jsonify({"error": error_message}), 500
 
 @csrf.exempt

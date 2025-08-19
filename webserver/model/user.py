@@ -32,7 +32,7 @@ class User(flask_login.UserMixin):
     return check_password_hash(self.hashpw,password)
 
   @staticmethod
-  def user_exists(email):
+  def user_exists(email: str) -> bool:
     res = ds.find("SELECT email from users where email = (%s)",(email,))
     return res is not None
 

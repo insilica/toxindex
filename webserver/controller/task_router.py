@@ -12,6 +12,7 @@ from workflows.probra import probra_task
 from workflows.plain_openai_tasks import plain_openai_task, openai_json_schema_task
 from workflows.raptool_task import raptool_task
 from workflows.pathway_analysis_task import pathway_analysis_task
+from workflows.celery_template_simple import extract_smiles_task
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +23,7 @@ TASK_MAPPING = {
     'openai_json_schema_task': openai_json_schema_task,
     'raptool_task': raptool_task,
     'pathway_analysis_task': pathway_analysis_task,
+    'extract_smiles_task': extract_smiles_task,
 }
 
 def get_workflows_file_path() -> Path:
@@ -103,7 +105,8 @@ def create_task_payload(workflow_id: int, task_id: str, user_id: str, message: s
             "property_name": "value",  # Default property column
             "entity_kind": "gene",  # Default entity type
             "file_id": file_id,
-        })
+        }
+    )
         
         # If message contains pathway info, try to parse it
         if message and "WP" in message.upper():
@@ -111,7 +114,8 @@ def create_task_payload(workflow_id: int, task_id: str, user_id: str, message: s
             pathway_match = re.search(r'WP\d+', message.upper())
             if pathway_match:
                 payload["pathway_id"] = pathway_match.group()
-    
+    elif celery_task_name == 'extract_smiles_task':
+        payload["payload"] = file_id
     return payload
 
 def route_task(workflow_id: int, task_id: str, user_id: str, message: str = "", file_id: str = None):

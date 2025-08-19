@@ -431,10 +431,16 @@ def api_register():
             return jsonify({'error': 'Email already registered.'}), 409
 
         # Create user
-        user = User.create_user(email, password)
-        if user is None:
-            return jsonify({'error': 'Failed to create user.'}), 500
+        try:
+            user = User.create_user(email, password)
+        except Exception as e:
+            print(f"[register] create_user raised: {str(e)}")  # Debug log
+            return jsonify({'error': 'Failed to create user (internal error). Please try again.'}), 500
         
+        if user is None:
+            print("[register] create_user returned None (likely swallowed exception)")  # Debug log
+            return jsonify({'error': 'Failed to create user.'}), 500
+
         print(f"User created successfully, proceeding to validation")  # Debug log
         
         # Send verification email

@@ -27,7 +27,24 @@
             pkgs.nodejs
             pkgs.libjpeg
             pkgs.gh
+            pkgs.libjpeg
+
+            # --- Sphinx docs ---
+            pkgs.python312Packages.sphinx
+            pkgs.python312Packages.myst-parser
+            pkgs.python312Packages.furo
+            pkgs.python312Packages.sphinx-autobuild
+            pkgs.python312Packages.sphinx-rtd-theme
+            pkgs.graphviz
+
+            # --- for rd.kit.Chem.Draw (used in SyGMa) ---
+            pkgs.xorg.libX11
+            pkgs.xorg.libXext
+            pkgs.xorg.libSM
+            pkgs.xorg.libXrender
+            pkgs.expat
           ];
+
 
           shellHook = ''
             # Remove NVM from PATH to avoid conflicts
@@ -37,7 +54,9 @@
             # Set locale and library paths
             export LANG=C.UTF-8
             export LC_ALL=C.UTF-8
-            export LD_LIBRARY_PATH="${pkgs.zlib.out}/lib:${pkgs.stdenv.cc.cc.lib}/lib:$LD_LIBRARY_PATH"
+            # export LD_LIBRARY_PATH="${pkgs.zlib.out}/lib:${pkgs.stdenv.cc.cc.lib}/lib:$LD_LIBRARY_PATH"
+            export LD_LIBRARY_PATH="${pkgs.zlib.out}/lib:${pkgs.stdenv.cc.cc.lib}/lib:${pkgs.xorg.libXrender}/lib:${pkgs.xorg.libX11}/lib:${pkgs.xorg.libXext}/lib:${pkgs.xorg.libSM}/lib:${pkgs.expat}/lib:$LD_LIBRARY_PATH"
+
 
             # Ensure GitHub CLI is authenticated
             if ! gh auth status >/dev/null 2>&1; then
@@ -76,6 +95,20 @@
               exit 1
             fi
 
+            # Install rdkit first (must be before sygma)
+            pip install rdkit
+            if [ $? -ne 0 ]; then
+              echo "Error: Failed to install rdkit."
+              exit 1
+            fi
+
+            # Install SyGMa (original tool)
+            pip install --no-build-isolation sygma
+            if [ $? -ne 0 ]; then
+              echo "Error: Failed to install sygma."
+              exit 1
+            fi
+
             # Install local RAPtool package in editable mode
             echo "Installing RAPtool in editable mode..."
             pip install -e RAPtool/
@@ -89,6 +122,14 @@
             pip install -e pathway_analysis_tool/
             if [ $? -ne 0 ]; then
               echo "Error: Failed to install pathway_analysis_tool. Please check the pathway_analysis_tool directory."
+              exit 1
+            fi
+
+            # Install local metabolite-sygma package in editable mode
+            echo "Installing metabolite-sygma in editable mode..."
+            pip install -e sygma/metabolite-sygma/
+            if [ $? -ne 0 ]; then
+              echo "Error: Failed to install metabolite-sygma. Please check the sygma/metabolite-sygma directory."
               exit 1
             fi
 

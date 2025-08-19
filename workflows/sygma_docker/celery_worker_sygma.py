@@ -27,39 +27,22 @@ celery.conf.update(
     worker_send_task_events=True,
 )
 
-# Import tasks so they are registered
-import workflows.probra # noqa: F401
-import workflows.plain_openai_tasks # noqa: F401
-import workflows.raptool_task # noqa: F401
-import workflows.pathway_analysis_task # noqa: F401
-# import workflows.celery_template_simple # noqa: F401
-import workflows.sygma_docker.metabolite_sygma_task # noqa: F401
+# Import ONLY the metabolite-sygma task
+from . import run_sygma # noqa: F401
+import workflows.metabolite_sygma_task # noqa: F401
 
 def setup_celery_worker():
     """Setup logging and startup for celery worker - only call this when actually starting a worker"""
     # Setup logging with shared utility
-    setup_logging("celery-worker", log_level=logging.INFO)
-    logger = get_logger("celery-worker")
+    setup_logging("celery-worker-sygma", log_level=logging.INFO)
+    logger = get_logger("celery-worker-sygma")
 
     # Log startup information
-    log_service_startup("celery-worker")
-    
-    # Log registered tasks
-    logger.info(f"Registered tasks: {list(celery.tasks.keys())}")
+    log_service_startup("celery-worker-sygma")
 
-def setup_celery_worker():
-    """Setup logging and startup for celery worker - only call this when actually starting a worker"""
-    # Setup logging with shared utility
-    setup_logging("celery-worker", log_level=logging.INFO)
-    logger = get_logger("celery-worker")
-
-    # Log startup information
-    log_service_startup("celery-worker")
-    
     # Log registered tasks
     logger.info(f"Registered tasks: {list(celery.tasks.keys())}")
 
 # Only setup logging if this module is run directly (i.e., as a celery worker)
 if __name__ == '__main__':
     setup_celery_worker()
-

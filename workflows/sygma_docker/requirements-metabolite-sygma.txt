@@ -1,0 +1,25 @@
+# Core dependencies
+celery
+redis
+stripe
+flask
+flask-login
+python-dotenv==1.1.0
+psycopg2-binary==2.9.9
+google-cloud-monitoring>=2.0.0
+google-cloud-logging>=3.0.0
+google-cloud-storage
+openai
+beautifulsoup4
+# Dependencise for metabolite-sygma tool
+fastapi==0.115.8
+pydantic==2.4.2
+rdkit==2024.9.5
+requests==2.32.*
+numpy==2.3.*  # changed from 1.24.*
+pandas==2.2.3
+bokeh==2.4.3
+panel==0.14.1
+Pillow==9.4.0
+uvicorn==0.34.0
+sygma==1.0.0

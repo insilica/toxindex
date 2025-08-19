@@ -1,0 +1,112 @@
+# General worker image for standard tasks (probra, openai, etc.)
+FROM toxindex-base:latest
+
+# Become root for system package install
+USER root
+ENV DEBIAN_FRONTEND=noninteractive PIP_NO_CACHE_DIR=1
+
+# System libs needed by Pillow and RDKit drawing
+# (and create apt lists dir so non-root base layers don't block update)
+RUN mkdir -p /var/lib/apt/lists/partial && chmod -R 0755 /var/lib/apt/lists && \
+    apt-get update && apt-get install -y --no-install-recommends \
+      build-essential gcc g++ make \
+      zlib1g-dev libjpeg62-turbo-dev libpng-dev libtiff5-dev libfreetype6-dev \
+      liblcms2-dev libwebp-dev libopenjp2-7-dev \
+      libharfbuzz-dev libfribidi-dev libxcb1-dev \
+      libxrender1 libxext6 libsm6 libx11-6 libexpat1 \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Set working directory inside the container
+WORKDIR /app
+
+# ---- COPY CODE (paths are relative to the build context root) ----
+# Core workflow files
+COPY workflows/__init__.py               workflows/__init__.py
+COPY workflows/utils.py                  workflows/utils.py
+COPY workflows/celery_worker.py          workflows/celery_worker.py
+COPY workflows/celery_worker_sygma.py    workflows/celery_worker_sygma.py
+COPY workflows/celery_config.py          workflows/celery_config.py
+
+# SyGMa docker helper files and tool source
+COPY workflows/sygma_docker/             workflows/sygma_docker/
+COPY sygma/metabolite-sygma/             metabolite-sygma/
+
+# Webserver bits required by the worker
+COPY webserver/model/                    webserver/model/
+COPY webserver/tools/                    webserver/tools/
+COPY webserver/controller/               webserver/controller/
+COPY webserver/__init__.py               webserver/__init__.py
+COPY webserver/storage.py                webserver/storage.py
+COPY webserver/cache_manager.py          webserver/cache_manager.py
+COPY webserver/ai_service.py             webserver/ai_service.py
+COPY webserver/logging_utils.py          webserver/logging_utils.py
+COPY webserver/data_paths.py             webserver/data_paths.py
+COPY webserver/datastore.py              webserver/datastore.py
+
+# App config
+COPY config/                              config/
+
+# Minimal dependencies for metabolite-sygma worker
+COPY workflows/sygma_docker/requirements-metabolite-sygma.txt /app/requirements.txt
+
+# Install metabolite-sygma tool from source (editable), reuse env (no build isolation)
+ENV PIP_BREAK_SYSTEM_PACKAGES=1
+RUN pip install --no-build-isolation -e /app/metabolite-sygma
+
+# Install Python deps first (ensures wheels are used; Pillow will succeed thanks to system libs)
+RUN python -m pip install --upgrade pip && pip install -r /app/requirements.txt
+
+# Ensure the installed 'sygma' package directory is always on sys.path
+# This writes a .pth file that points at the .../site-packages/sygma folder
+RUN python - <<'PY'
+import site, pathlib, sys
+candidates = site.getsitepackages() + [site.getusersitepackages()]
+for base in candidates:
+    pkg_dir = pathlib.Path(base) / "sygma"
+    if pkg_dir.is_dir():
+        pth = pathlib.Path(base) / "zz_sygma_syspath.pth"
+        pth.write_text(str(pkg_dir.resolve()) + "\n")
+        print("Wrote", pth, "->", pkg_dir)
+        break
+else:
+    sys.exit("Could not locate installed 'sygma' package to make .pth")
+PY
+
+
+# Fix SyGMa’s absolute import ("from scenario import *") to a relative one
+# Patch SyGMa's absolute imports to relative imports
+# RUN python - <<'PY'
+# import site, pathlib
+# fixes = [
+#     ('from scenario import', 'from .scenario import'),
+#     ('from tree import',     'from .tree import'),
+#     ('from treenode import', 'from .treenode import'),
+#     # ('from utils import',    'from .utils import'),
+#     # ('from sygma import',    'from .sygma import'),
+#     # ('from sygma_config import', 'from .sygma_config import'),
+#     # ('from sygma_logging import', 'from .sygma_logging import'),
+#     # ('from sygma_utils import', 'from .sygma_utils import'),
+#     # ('from sygma_version import', 'from .sygma_version import'),
+# ]
+# for base in site.getsitepackages() + [site.getusersitepackages()]:
+#     init = pathlib.Path(base) / 'sygma' / '__init__.py'
+#     if init.exists():
+#         txt = init.read_text()
+#         new = txt
+#         for a,b in fixes:
+#             new = new.replace(a, b)
+#         if new != txt:
+#             init.write_text(new)
+#             print(f'Patched {init}')
+#         else:
+#             print(f'No changes needed in {init}')
+#         break
+# PY
+
+
+# (Optional) drop back to the non-root user your base image uses.
+# If your base image user is different, change 'app' accordingly, or comment this out.
+USER app
+
+# Entrypoint: Celery worker for metabolite-sygma tasks only
+CMD ["celery", "-A", "workflows.celery_worker_sygma.celery", "worker", "--loglevel=info", "-Q", "sygma"]

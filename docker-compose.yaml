@@ -1,0 +1,38 @@
+# version: "3.9"
+
+services:
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  celery-worker-sygma:
+    # build your image from the repo (recommended)
+    build:
+      context: .
+      dockerfile: workflows/sygma_docker/Dockerfile.syg
+    image: metabolite-sygma:latest
+    container_name: celery-worker-sygma
+    command: >
+      python -m celery -A workflows.celery_worker_sygma.celery worker --loglevel=info -Q sygma
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      # talk to the 'redis' service via Docker network DNS
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      # add any other env vars you normally inject via k8s secrets here
+      # EXAMPLE:
+      # GOOGLE_APPLICATION_CREDENTIALS: /secrets/sa.json
+    # volumes:
+    #   - ./secrets:/secrets:ro
+    volumes:
+      - ./workflows/sygma_docker:/app/workflows/sygma_docker
+      - ./workflows:/app/workflows

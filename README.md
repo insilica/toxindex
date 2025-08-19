@@ -78,7 +78,12 @@ cd frontend && npm install
   cd frontend && npm run dev
   ```
 
----
+- Run Redis Listener
+``` 
+python redis_listener_standalone.py
+```
+=======
+
 
 ## Production Setup (not for local developlment)
 

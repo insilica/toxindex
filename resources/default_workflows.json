@@ -44,6 +44,15 @@
       "description": "Analyze and visualize pathway data using WikiPathways and Cytoscape integration.",
       "initial_prompt": "Enter pathway ID (e.g., WP3657) or upload data file",
       "celery_task": "pathway_analysis_task"
+    },
+    {
+      "workflow_id": 6,
+      "frontend_id": "toxindex-smiles",
+      "title": "toxindex-smiles",
+      "label": "SMILES Extraction",
+      "description": "Extract SMILES from uploaded files.",
+      "initial_prompt": "Upload a file containing chemical structures.",
+      "celery_task": "extract_smiles_task"
     }
   ]
 }

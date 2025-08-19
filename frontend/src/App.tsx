@@ -7,9 +7,11 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Dashboard from "./components/Dashboard";
 import SettingsEnvironments from "./components/settings/SettingsEnvironments";
 import TermsPrivacy from "./components/TermsPrivacy";
+
 import Settings from "./components/settings/Settings";
 import SettingsDataControls from "./components/settings/SettingsDataControls";
 import CreateEnvironmentSettings from "./components/settings/CreateEnvironmentSettings";
+
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import EnvironmentDetails from "./components/EnvironmentDetails";
 
@@ -28,10 +30,10 @@ import { SessionProvider, useSession } from "./context/SessionContext";
 import { SessionTimeoutNotification } from "./components/SessionTimeoutNotification";
 import { useEffect } from "react";
 
-// Component for protected routes with session management
+
 function ProtectedRoutes() {
   console.log('[App] ProtectedRoutes component rendering');
-  
+
   // Get session state from context
   const {
     extendSession,
