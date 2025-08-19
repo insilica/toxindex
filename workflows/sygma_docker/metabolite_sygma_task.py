@@ -21,7 +21,7 @@ import pandas as pd
 from typing import List, Dict, Any, Optional, Tuple, Iterable, Union
 
 # Celery for task management
-from celery_worker_sygma import celery
+from workflows.celery_worker_sygma import celery
 
 # Webserver models and storage
 from webserver.model.message import MessageSchema
@@ -29,7 +29,7 @@ from webserver.model.task import Task
 from webserver.model.file import File
 from webserver.storage import GCSFileStorage
 from webserver.cache_manager import cache_manager
-from webserver.ai_service import convert_pydantic_to_markdown
+# from webserver.ai_service import convert_pydantic_to_markdown
 
 # Utility functions
 from workflows.utils import download_gcs_file_to_temp, upload_local_file_to_gcs
@@ -43,6 +43,25 @@ logging.getLogger().info("metabolite_sygma_task.py module loaded")
 logger = logging.getLogger(__name__)
 
 # <----- Utility Functions ----->
+def _to_markdown_summary(*, query: str, smiles: str, rows):
+    """Make a small Markdown summary without any OpenAI deps."""
+    lines = []
+    lines.append(f"### SyGMa results")
+    lines.append(f"- **Query:** {query}")
+    lines.append(f"- **Resolved SMILES:** `{smiles}`")
+    lines.append("")
+    if not rows:
+        lines.append("_No metabolites found._")
+        return "\n".join(lines)
+    lines.append("| # | Metabolite SMILES | Probability |")
+    lines.append("|---:|---|---:|")
+    for i, r in enumerate(rows, 1):
+        smi = r.get("smiles", "")
+        prob = r.get("probability", "")
+        prob_str = f"{prob:.6f}" if isinstance(prob, (int, float)) else str(prob)
+        lines.append(f"| {i} | `{smi}` | {prob_str} |")
+    return "\n".join(lines)
+
 def get_redis_connection():
     """Get Redis connection with consistent configuration"""
     return redis.Redis(

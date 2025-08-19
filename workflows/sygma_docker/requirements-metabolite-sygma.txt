@@ -1,9 +1,16 @@
 # Core dependencies
 celery
 redis
+stripe
+flask
+flask-login
+python-dotenv==1.1.0
+psycopg2-binary==2.9.9
 google-cloud-monitoring>=2.0.0
 google-cloud-logging>=3.0.0
 google-cloud-storage
+openai
+beautifulsoup4
 # Dependencise for metabolite-sygma tool
 fastapi==0.115.8
 pydantic==2.4.2

@@ -56,9 +56,57 @@ RUN pip install --no-build-isolation -e /app/metabolite-sygma
 # Install Python deps first (ensures wheels are used; Pillow will succeed thanks to system libs)
 RUN python -m pip install --upgrade pip && pip install -r /app/requirements.txt
 
+# Ensure the installed 'sygma' package directory is always on sys.path
+# This writes a .pth file that points at the .../site-packages/sygma folder
+RUN python - <<'PY'
+import site, pathlib, sys
+candidates = site.getsitepackages() + [site.getusersitepackages()]
+for base in candidates:
+    pkg_dir = pathlib.Path(base) / "sygma"
+    if pkg_dir.is_dir():
+        pth = pathlib.Path(base) / "zz_sygma_syspath.pth"
+        pth.write_text(str(pkg_dir.resolve()) + "\n")
+        print("Wrote", pth, "->", pkg_dir)
+        break
+else:
+    sys.exit("Could not locate installed 'sygma' package to make .pth")
+PY
+
+
+# Fix SyGMa’s absolute import ("from scenario import *") to a relative one
+# Patch SyGMa's absolute imports to relative imports
+# RUN python - <<'PY'
+# import site, pathlib
+# fixes = [
+#     ('from scenario import', 'from .scenario import'),
+#     ('from tree import',     'from .tree import'),
+#     ('from treenode import', 'from .treenode import'),
+#     # ('from utils import',    'from .utils import'),
+#     # ('from sygma import',    'from .sygma import'),
+#     # ('from sygma_config import', 'from .sygma_config import'),
+#     # ('from sygma_logging import', 'from .sygma_logging import'),
+#     # ('from sygma_utils import', 'from .sygma_utils import'),
+#     # ('from sygma_version import', 'from .sygma_version import'),
+# ]
+# for base in site.getsitepackages() + [site.getusersitepackages()]:
+#     init = pathlib.Path(base) / 'sygma' / '__init__.py'
+#     if init.exists():
+#         txt = init.read_text()
+#         new = txt
+#         for a,b in fixes:
+#             new = new.replace(a, b)
+#         if new != txt:
+#             init.write_text(new)
+#             print(f'Patched {init}')
+#         else:
+#             print(f'No changes needed in {init}')
+#         break
+# PY
+
+
 # (Optional) drop back to the non-root user your base image uses.
 # If your base image user is different, change 'app' accordingly, or comment this out.
 USER app
 
 # Entrypoint: Celery worker for metabolite-sygma tasks only
-CMD ["celery", "-A", "workflows.celery_worker_sygma", "worker", "--loglevel=info", "-Q", "sygma"]
+CMD ["celery", "-A", "workflows.celery_worker_sygma.celery", "worker", "--loglevel=info", "-Q", "sygma"]

@@ -1,4 +1,4 @@
-version: "3.9"
+# version: "3.9"
 
 services:
   redis:
@@ -12,13 +12,15 @@ services:
       timeout: 3s
       retries: 5
 
-  sygma-worker:
+  celery-worker-sygma:
     # build your image from the repo (recommended)
     build:
       context: .
       dockerfile: workflows/sygma_docker/Dockerfile.syg
     image: metabolite-sygma:latest
     container_name: celery-worker-sygma
+    command: >
+      python -m celery -A workflows.celery_worker_sygma.celery worker --loglevel=info -Q sygma
     depends_on:
       redis:
         condition: service_healthy
@@ -31,6 +33,6 @@ services:
       # GOOGLE_APPLICATION_CREDENTIALS: /secrets/sa.json
     # volumes:
     #   - ./secrets:/secrets:ro
-    command: >
-      python -m celery -A workflows.celery_worker_sygma
-      worker --loglevel=info -Q sygma
+    volumes:
+      - ./workflows/sygma_docker:/app/workflows/sygma_docker
+      - ./workflows:/app/workflows
