@@ -28,33 +28,18 @@ celery.conf.update(
 )
 
 # Import tasks so they are registered
-import workflows.probra # noqa: F401
-import workflows.plain_openai_tasks # noqa: F401
-import workflows.raptool_task # noqa: F401
-import workflows.pathway_analysis_task # noqa: F401
-# import workflows.celery_template_simple # noqa: F401
-import workflows.sygma_docker.metabolite_sygma_task # noqa: F401
+import workflows.celery_task_template # noqa: F401
 
 def setup_celery_worker():
     """Setup logging and startup for celery worker - only call this when actually starting a worker"""
+    worker_name = "celery-worker-[toolname]"
+
     # Setup logging with shared utility
-    setup_logging("celery-worker", log_level=logging.INFO)
-    logger = get_logger("celery-worker")
+    setup_logging(worker_name, log_level=logging.INFO)
+    logger = get_logger(worker_name)
 
     # Log startup information
-    log_service_startup("celery-worker")
-    
-    # Log registered tasks
-    logger.info(f"Registered tasks: {list(celery.tasks.keys())}")
-
-def setup_celery_worker():
-    """Setup logging and startup for celery worker - only call this when actually starting a worker"""
-    # Setup logging with shared utility
-    setup_logging("celery-worker", log_level=logging.INFO)
-    logger = get_logger("celery-worker")
-
-    # Log startup information
-    log_service_startup("celery-worker")
+    log_service_startup(worker_name)
     
     # Log registered tasks
     logger.info(f"Registered tasks: {list(celery.tasks.keys())}")

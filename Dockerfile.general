@@ -1,18 +1,26 @@
 # General worker image for standard tasks (probra, openai, etc.)
 FROM toxindex-base:latest
 
-# Copy general requirements
+# Copy only the necessary files for probra celery task
+# Core workflow files
+COPY workflows/ /app/workflows/
+COPY webserver/model/ /app/webserver/model/
+COPY webserver/tools/ /app/webserver/tools/
+COPY webserver/controller/ /app/webserver/controller/
+COPY webserver/__init__.py /app/webserver/
+COPY webserver/storage.py /app/webserver/
+COPY webserver/cache_manager.py /app/webserver/
+COPY webserver/ai_service.py /app/webserver/
+COPY webserver/logging_utils.py /app/webserver/
+COPY webserver/data_paths.py /app/webserver/
+COPY webserver/datastore.py /app/webserver/
+COPY config/ /app/config/
+
+# Copy minimal requirements for probra only
 COPY requirements-general.txt /app/requirements.txt
 
 # Install general Python dependencies
 RUN pip install -r requirements.txt
 
-# Install local packages in editable mode
-RUN pip install -e ./RAPtool/ || true
-RUN pip install -e ./pathway_analysis_tool/ || true
-
-# Expose the port Flask runs on
-EXPOSE 6513
-
-# Entrypoint: Gunicorn with gevent-websocket worker for Flask-SocketIO
-CMD ["gunicorn", "--worker-class", "geventwebsocket.gunicorn.workers.GeventWebSocketWorker", "-w", "1", "-b", "0.0.0.0:6513", "webserver.app:app"]
+# Entrypoint: Celery worker for probra tasks only
+CMD ["celery", "-A", "workflows.celery_worker_[toolname]", "worker", "--loglevel=info", "-Q", "[toolname]"]
