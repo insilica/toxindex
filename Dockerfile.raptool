@@ -1,17 +1,41 @@
 # RAPtool worker image for RAPtool-specific tasks
 FROM toxindex-base:latest
 
+# Core workflow files
+
+COPY workflows/celery_worker_raptool.py /app/workflows/celery_worker_raptool.py
+COPY workflows/raptool_task.py /app/workflows/raptool_task.py
+
+# Core webserver files
+COPY webserver/model/ /app/webserver/model/
+COPY webserver/tools/ /app/webserver/tools/
+COPY webserver/controller/ /app/webserver/controller/
+COPY webserver/__init__.py /app/webserver/
+COPY webserver/storage.py /app/webserver/
+COPY webserver/cache_manager.py /app/webserver/
+COPY webserver/ai_service.py /app/webserver/
+COPY webserver/logging_utils.py /app/webserver/
+COPY webserver/data_paths.py /app/webserver/
+COPY webserver/datastore.py /app/webserver/
+
+# Copy config files
+COPY config/ /app/config/
+
+
+# Copy your repo
+COPY RAPtool/ /app/RAPtool/
 # Copy RAPtool-specific requirements
 COPY requirements-raptool.txt /app/requirements.txt
-
-# Install RAPtool Python dependencies
+# Install general Python dependencies
 RUN pip install -r requirements.txt
 
-# Install RAPtool package in editable mode
-RUN pip install -e ./RAPtool/
+# Switch to root to install RAPtool (needs build permissions)
+USER root
+RUN pip install ./RAPtool/
 
-# Expose the port Flask runs on
-EXPOSE 6513
+# Switch back to app user for security
+USER app
 
-# Entrypoint: Celery worker for RAPtool tasks
-CMD ["celery", "-A", "workflows.celery_worker", "worker", "--loglevel=info", "-Q", "raptool"]
+# Entrypoint
+CMD ["celery", "-A", "workflows.celery_worker_raptool", "worker", "--loglevel=info", "-Q", "raptool"]
+

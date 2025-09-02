@@ -21,7 +21,7 @@ import pandas as pd
 from typing import List, Dict, Any, Optional, Tuple, Iterable, Union
 
 # Celery for task management
-from celery_worker_sygma import celery
+from workflows.celery_app import celery
 
 # Webserver models and storage
 from webserver.model.message import MessageSchema

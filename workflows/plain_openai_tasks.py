@@ -7,7 +7,7 @@ import openai
 import hashlib
 import tempfile
 # from pathlib import Path
-from workflows.celery_worker import celery
+from workflows.celery_app import celery
 from webserver.model.message import MessageSchema
 from webserver.tools.toxicity_schema import TOXICITY_SCHEMA
 from webserver.model.task import Task

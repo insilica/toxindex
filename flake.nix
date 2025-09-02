@@ -47,6 +47,11 @@
 
 
           shellHook = ''
+            # Preserve user environment
+            export USER="$USER"
+            export HOME="$HOME"
+            export LOGNAME="$LOGNAME"
+            
             # Remove NVM from PATH to avoid conflicts
             export PATH=$(echo "$PATH" | tr ':' '\n' | grep -v '\.nvm' | paste -sd:)
             unset NVM_DIR
@@ -99,37 +104,6 @@
             pip install rdkit
             if [ $? -ne 0 ]; then
               echo "Error: Failed to install rdkit."
-              exit 1
-            fi
-
-            # Install SyGMa (original tool)
-            pip install --no-build-isolation sygma
-            if [ $? -ne 0 ]; then
-              echo "Error: Failed to install sygma."
-              exit 1
-            fi
-
-            # Install local RAPtool package in editable mode
-            echo "Installing RAPtool in editable mode..."
-            pip install -e RAPtool/
-            if [ $? -ne 0 ]; then
-              echo "Error: Failed to install RAPtool. Please check the RAPtool directory."
-              exit 1
-            fi
-
-            # Install local pathway_analysis_tool package in editable mode
-            echo "Installing pathway_analysis_tool in editable mode..."
-            pip install -e pathway_analysis_tool/
-            if [ $? -ne 0 ]; then
-              echo "Error: Failed to install pathway_analysis_tool. Please check the pathway_analysis_tool directory."
-              exit 1
-            fi
-
-            # Install local metabolite-sygma package in editable mode
-            echo "Installing metabolite-sygma in editable mode..."
-            pip install -e sygma/metabolite-sygma/
-            if [ $? -ne 0 ]; then
-              echo "Error: Failed to install metabolite-sygma. Please check the sygma/metabolite-sygma directory."
               exit 1
             fi
 

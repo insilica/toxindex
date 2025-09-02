@@ -17,7 +17,7 @@ spec:
       containers:
       - name: celery-worker-raptool
         image: us-docker.pkg.dev/toxindex/toxindex-backend/raptool:latest
-        command: ["celery", "-A", "workflows.celery_worker", "worker", "--loglevel=info", "-Q", "raptool"]
+        command: ["python", "-m", "celery", "-A", "workflows.celery_worker_raptool", "worker", "--loglevel=info", "-Q", "raptool"]
         envFrom:
         - secretRef:
             name: backend-secrets
@@ -34,8 +34,8 @@ spec:
               key: REDIS_PORT
         resources:
           requests:
-            memory: "512Mi"
-            cpu: "250m"
-          limits:
             memory: "1Gi"
             cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"

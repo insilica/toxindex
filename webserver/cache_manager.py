@@ -73,9 +73,9 @@ class CacheManager:
         if not self._redis_available():
             # If Redis is not available, try to get directly from GCS
             try:
-                with self.gcs_storage.download_file(gcs_path, "/tmp/temp_download") as temp_path:
-                    with open(temp_path, 'r', encoding='utf-8') as f:
-                        return f.read()
+                temp_path = self.gcs_storage.download_file(gcs_path, "/tmp/temp_download")
+                with open(temp_path, 'r', encoding='utf-8') as f:
+                    return f.read()
             except Exception as e:
                 logger.error(f"Error getting file content for {gcs_path}: {e}")
                 return None
@@ -99,15 +99,15 @@ class CacheManager:
             
             # Cache miss - download from GCS
             logger.info(f"Cache MISS for file content: {gcs_path}")
-            with self.gcs_storage.download_file(gcs_path, "/tmp/temp_download") as temp_path:
-                with open(temp_path, 'r', encoding='utf-8') as f:
-                    content = f.read()
-                
-                # Cache the content
-                self.redis_client.setex(cache_key, self.FILE_CONTENT_TTL, content)
-                logger.info(f"Cached file content: {gcs_path}")
-                return content
-                
+            temp_path = self.gcs_storage.download_file(gcs_path, "/tmp/temp_download")
+            with open(temp_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            
+            # Cache the content
+            self.redis_client.setex(cache_key, self.FILE_CONTENT_TTL, content)
+            logger.info(f"Cached file content: {gcs_path}")
+            return content
+            
         except Exception as e:
             logger.error(f"Error getting file content for {gcs_path}: {e}")
             return None

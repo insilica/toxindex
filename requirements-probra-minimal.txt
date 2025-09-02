@@ -12,7 +12,15 @@ sqlalchemy
 psutil>=5.9.0
 google-cloud-monitoring>=2.0.0
 google-cloud-logging>=3.0.0
-pubchempy
+
+# Web framework dependencies (needed for model imports)
+flask-login
+Flask==3.0.0
+markdown
+sendgrid==6.10.0
+annotated-types
+flask-cors
+stripe==4.2.0
 
 # AI/ML dependencies for probra
 langchain
@@ -28,12 +36,8 @@ google-genai
 bs4
 jsonschema
 duckduckgo-search
+pubchempy
 
-# Web framework dependencies (needed for model imports)
-flask-login
-Flask==3.0.0
-markdown
-sendgrid==6.10.0
-annotated-types
-flask-cors
-stripe==4.2.0
+
+
+

@@ -4,7 +4,7 @@ import os
 import uuid
 import logging
 import tempfile
-from workflows.celery_worker_probra import celery
+from workflows.celery_app import celery
 from webserver.model.message import MessageSchema
 from webserver.model.task import Task
 from webserver.storage import GCSFileStorage

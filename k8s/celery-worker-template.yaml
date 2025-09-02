@@ -1,23 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: celery-worker-rap
+  name: celery-worker-[yourtool]
   namespace: toxindex-app
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: celery-worker-rap
+      app: celery-worker-[yourtool]
   template:
     metadata:
       labels:
-        app: celery-worker-rap
+        app: celery-worker-[yourtool]
     spec:
       serviceAccountName: toxindex-app-sa
       containers:
-      - name: celery-worker-rap
-        image: us-docker.pkg.dev/toxindex/toxindex-backend/probra:latest
-        command: ["celery", "-A", "workflows.celery_worker_probra", "worker", "--loglevel=info", "-Q", "probra"]
+      - name: celery-worker-[yourtool]
+        image: us-docker.pkg.dev/toxindex/toxindex-backend/raptool:latest
+        command: ["celery", "-A", "workflows.celery_worker_[yourtool]", "worker", "--loglevel=info", "-Q", "[yourtool]"]
         envFrom:
         - secretRef:
             name: backend-secrets

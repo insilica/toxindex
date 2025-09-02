@@ -8,7 +8,7 @@ import { useChatSession } from "../context/ChatSessionContext";
 import { useModel } from "../context/ModelContext";
 import { useAdmin } from "../hooks/useAdmin";
 import { useSession } from "../context/SessionContext";
-import logoUrl from '../assets/logo.svg';
+import logoUrl from '../assets/logo.png';
 
 // Separate component for session countdown that only re-renders every second
 const SessionCountdown: React.FC = () => {

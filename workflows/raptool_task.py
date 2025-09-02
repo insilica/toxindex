@@ -5,7 +5,7 @@ import uuid
 import logging
 import tempfile
 from pathlib import Path
-from workflows.celery_worker import celery
+from workflows.celery_app import celery
 from webserver.model.message import MessageSchema
 from webserver.model.task import Task
 import pandas as pd

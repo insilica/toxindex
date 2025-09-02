@@ -5,7 +5,7 @@ import uuid
 import logging
 import tempfile
 from datetime import datetime
-from workflows.celery_worker_probra import celery
+from workflows.celery_app import celery
 from webserver.model.message import MessageSchema
 import hashlib
 from webserver.model.task import Task

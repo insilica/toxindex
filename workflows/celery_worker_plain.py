@@ -8,21 +8,24 @@ result_backend = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379
 
 from workflows.celery_app import celery
 
-# Import ONLY the metabolite-sygma task
-import workflows.metabolite_sygma_task # noqa: F401
+# Import tasks so they are registered
+import workflows.plain_openai_tasks # noqa: F401
 
 def setup_celery_worker():
     """Setup logging and startup for celery worker - only call this when actually starting a worker"""
+    worker_name = "celery-worker-plain_openai"
+
     # Setup logging with shared utility
-    setup_logging("celery-worker-sygma", log_level=logging.INFO)
-    logger = get_logger("celery-worker-sygma")
+    setup_logging(worker_name, log_level=logging.INFO)
+    logger = get_logger(worker_name)
 
     # Log startup information
-    log_service_startup("celery-worker-sygma")
-
+    log_service_startup(worker_name)
+    
     # Log registered tasks
     logger.info(f"Registered tasks: {list(celery.tasks.keys())}")
 
 # Only setup logging if this module is run directly (i.e., as a celery worker)
 if __name__ == '__main__':
     setup_celery_worker()
+

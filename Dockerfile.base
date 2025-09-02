@@ -16,10 +16,17 @@ RUN apt-get update && apt-get install -y \
 # Set work directory
 WORKDIR /app
 
+# Copy workflow files
+COPY workflows/__init__.py /app/workflows/__init__.py
+COPY workflows/celery_app.py /app/workflows/celery_app.py
+COPY workflows/celery_config.py /app/workflows/celery_config.py
+
 # Install common Python dependencies
 RUN pip install --upgrade pip setuptools wheel
 
 # Create a non-root user
 RUN useradd --create-home --shell /bin/bash app \
     && chown -R app:app /app
+
+# Switch to app user for application code
 USER app
