@@ -21,6 +21,21 @@ COPY workflows/__init__.py /app/workflows/__init__.py
 COPY workflows/celery_app.py /app/workflows/celery_app.py
 COPY workflows/celery_config.py /app/workflows/celery_config.py
 
+# Core webserver files
+COPY webserver/model/ /app/webserver/model/
+COPY webserver/tools/ /app/webserver/tools/
+COPY webserver/controller/ /app/webserver/controller/
+COPY webserver/__init__.py /app/webserver/
+COPY webserver/storage.py /app/webserver/
+COPY webserver/cache_manager.py /app/webserver/
+COPY webserver/ai_service.py /app/webserver/
+COPY webserver/logging_utils.py /app/webserver/
+COPY webserver/data_paths.py /app/webserver/
+COPY webserver/datastore.py /app/webserver/
+
+# Copy config files
+COPY config/ /app/config/
+
 # Install common Python dependencies
 RUN pip install --upgrade pip setuptools wheel
 
@@ -30,3 +45,9 @@ RUN useradd --create-home --shell /bin/bash app \
 
 # Switch to app user for application code
 USER app
+
+# Copy minimal requirements for probra only
+COPY requirements.txt /app/requirements.txt
+
+# Install general Python dependencies
+RUN pip install -r requirements.txt

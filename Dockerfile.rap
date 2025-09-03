@@ -16,12 +16,6 @@ COPY webserver/data_paths.py /app/webserver/
 COPY webserver/datastore.py /app/webserver/
 COPY config/ /app/config/
 
-# Copy minimal requirements for probra only
-COPY requirements-probra-minimal.txt /app/requirements.txt
-
-# Install general Python dependencies
-RUN pip install -r requirements.txt
-
 # Entrypoint: Celery worker for probra tasks only
 CMD ["celery", "-A", "workflows.celery_worker_probra", "worker", "--loglevel=info", "-Q", "probra"]
 

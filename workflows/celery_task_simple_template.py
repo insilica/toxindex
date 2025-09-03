@@ -23,7 +23,7 @@ from pathlib import Path
 from typing import Dict, List
 
 from celery import Celery  # maybe not necessary to import here, but for clarity
-from workflows.celery_worker import celery
+from workflows.celery_app import celery
 from workflows.utils import emit_status, download_gcs_file_to_temp, upload_local_file_to_gcs
 
 

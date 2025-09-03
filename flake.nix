@@ -47,10 +47,16 @@
 
 
           shellHook = ''
-            # Preserve user environment
-            export USER="$USER"
-            export HOME="$HOME"
-            export LOGNAME="$LOGNAME"
+            # Preserve user environment - fix the "I have no name!" issue
+            if [ -z "$USER" ]; then
+              export USER=$(whoami)
+            fi
+            if [ -z "$HOME" ]; then
+              export HOME="$HOME"
+            fi
+            if [ -z "$LOGNAME" ]; then
+              export LOGNAME="$USER"
+            fi
             
             # Remove NVM from PATH to avoid conflicts
             export PATH=$(echo "$PATH" | tr ':' '\n' | grep -v '\.nvm' | paste -sd:)
@@ -94,7 +100,7 @@
             
             # Sync dependencies with explicit Python version
             echo "Syncing dependencies..."
-            GIT_CLONE_PROTECTION_ACTIVE=false uv sync --python python3
+            GIT_CLONE_PROTECTION_ACTIVE=false uv sync --python python
             if [ $? -ne 0 ]; then
               echo "Error: 'uv sync' failed. Please check your dependencies."
               exit 1
@@ -106,6 +112,27 @@
               echo "Error: Failed to install rdkit."
               exit 1
             fi
+            
+            # Install local development packages
+            echo "Installing local development packages..."
+            
+            # Install RAPtool in development mode
+            if [ -d "RAPtool" ]; then
+              echo "Installing RAPtool..."
+              pip install -e RAPtool/
+              if [ $? -ne 0 ]; then
+                echo "Warning: Failed to install RAPtool. Some features may not work."
+              else
+                echo "RAPtool installed successfully"
+              fi
+            fi
+            
+            # Install other local packages if they exist
+            if [ -d "pathway_analysis_tool" ]; then
+              echo "Installing pathway_analysis_tool..."
+              pip install -e pathway_analysis_tool/
+            fi
+            
 
             # Source your fullstack environment setup (Postgres, Redis, AWS, etc.)
             # This runs after the virtual environment is set up so Python scripts can access packages

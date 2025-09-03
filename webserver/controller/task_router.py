@@ -12,7 +12,7 @@ from workflows.probra import probra_task
 from workflows.plain_openai_tasks import plain_openai_task, openai_json_schema_task
 from workflows.raptool_task import raptool_task
 from workflows.pathway_analysis_task import pathway_analysis_task
-from workflows.celery_template_simple import extract_smiles_task
+from workflows.celery_task_simple_template import extract_smiles_task
 
 logger = logging.getLogger(__name__)
 
