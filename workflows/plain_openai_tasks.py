@@ -13,22 +13,10 @@ from webserver.tools.toxicity_schema import TOXICITY_SCHEMA
 from webserver.model.task import Task
 from webserver.storage import GCSFileStorage
 from webserver.cache_manager import cache_manager
+from workflows.utils import emit_status
 
 logger = logging.getLogger(__name__)
 
-def emit_status(task_id, status):
-    Task.set_status(task_id, status)
-    r = redis.Redis(
-        host=os.environ.get("REDIS_HOST", "localhost"),
-        port=int(os.environ.get("REDIS_PORT", "6379"))
-    )
-    task = Task.get_task(task_id)
-    event = {
-        "type": "task_status_update",
-        "task_id": task.task_id,
-        "data": task.to_dict(),
-    }
-    r.publish("celery_updates", json.dumps(event, default=str))
 
 @celery.task(bind=True, queue='openai')
 def plain_openai_task(self, payload):

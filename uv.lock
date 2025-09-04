@@ -3315,6 +3315,7 @@ dependencies = [
     { name = "stripe" },
     { name = "tenacity" },
     { name = "typing-extensions" },
+    { name = "urllib3" },
 ]
 
 [package.metadata]
@@ -3374,6 +3375,7 @@ requires-dist = [
     { name = "stripe", specifier = "==4.2.0" },
     { name = "tenacity" },
     { name = "typing-extensions" },
+    { name = "urllib3", specifier = "==2.4.0" },
 ]
 
 [package.metadata.requires-dev]

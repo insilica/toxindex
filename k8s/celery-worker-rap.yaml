@@ -16,8 +16,8 @@ spec:
       serviceAccountName: toxindex-app-sa
       containers:
       - name: celery-worker-rap
-        image: us-docker.pkg.dev/toxindex/toxindex-backend/probra:latest
-        command: ["celery", "-A", "workflows.celery_worker_probra", "worker", "--loglevel=info", "-Q", "probra"]
+        image: us-docker.pkg.dev/toxindex/toxindex-backend/rap:latest
+        command: [ "python", "-m", "celery", "-A", "workflows.celery_worker_rap", "worker", "--loglevel=info", "-Q", "rap"]
         envFrom:
         - secretRef:
             name: backend-secrets

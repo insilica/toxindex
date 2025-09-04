@@ -12,6 +12,9 @@ const LoginForm: React.FC = () => {
   const [typed, setTyped] = useState('');
   const [typing, setTyping] = useState(true);
   const [errorAnim, setErrorAnim] = useState(false);
+  const [needsVerification, setNeedsVerification] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendMessage, setResendMessage] = useState<string | null>(null);
   const navigate = useNavigate();
 
   // Check if user is already authenticated and redirect if so
@@ -46,6 +49,8 @@ const LoginForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setResendMessage(null);
+    setNeedsVerification(false);
     setLoading(true);
     try {
       const res = await fetch('/api/auth/login', {
@@ -59,6 +64,14 @@ const LoginForm: React.FC = () => {
       } else {
         const data = await res.json();
         setError(data.error || 'Invalid email or password.');
+        
+        // Check if this is an email verification error
+        if (data.needs_verification) {
+          setNeedsVerification(true);
+        } else {
+          setNeedsVerification(false);
+        }
+        
         setErrorAnim(true);
         setTimeout(() => {
           setErrorAnim(false);
@@ -74,6 +87,42 @@ const LoginForm: React.FC = () => {
       }, 3000);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    if (!email) {
+      setResendMessage('Please enter your email address first.');
+      return;
+    }
+    
+    setResendLoading(true);
+    setResendMessage(null);
+    
+    try {
+      const res = await fetch('/api/auth/resend_verification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+        credentials: 'include',
+      });
+      
+      const data = await res.json();
+      if (res.ok) {
+        setResendMessage(data.message || 'Verification email sent successfully.');
+        // Clear the message after 5 seconds
+        setTimeout(() => setResendMessage(null), 4000);
+      } else {
+        setResendMessage(data.error || 'Failed to send verification email.');
+        // Clear the error message after 4 seconds
+        setTimeout(() => setResendMessage(null), 4000);
+      }
+    } catch (err) {
+      setResendMessage('Failed to send verification email. Please try again.');
+      // Clear the error message after 4 seconds
+      setTimeout(() => setResendMessage(null), 4000);
+    } finally {
+      setResendLoading(false);
     }
   };
 
@@ -180,7 +229,24 @@ const LoginForm: React.FC = () => {
           {/* Error message placeholder to prevent layout shift */}
           <div style={{ minHeight: 24, marginBottom: 8, textAlign: 'center' }}>
             {error ? (
-              <span className="text-red-400 animate-fade-in">{error}</span>
+              <div className="animate-fade-in">
+                <span className="text-red-400">{error}</span>
+                {needsVerification && (
+                  <div className="mt-2">
+                    <button
+                      type="button"
+                      onClick={handleResendVerification}
+                      disabled={resendLoading}
+                      className="!bg-red-200 text-blue-400 hover:text-blue-300 underline text-sm disabled:opacity-50"
+                    >
+                      {resendLoading ? 'Sending...' : 'Resend verification email'}
+                    </button>
+                    {resendMessage && (
+                      <div className="mt-1 text-sm text-gray-200">{resendMessage}</div>
+                    )}
+                  </div>
+                )}
+              </div>
             ) : (
               <span style={{ visibility: 'hidden' }}>placeholder</span>
             )}

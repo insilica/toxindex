@@ -81,7 +81,7 @@ const ResetPasswordPage: React.FC = () => {
             {error && <div className="text-red-400 mb-2 text-center animate-fade-in">{error}</div>}
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-green-500 to-green-700 text-white py-3 rounded-lg font-bold shadow-lg hover:from-green-600 hover:to-green-800 transition disabled:opacity-50"
+              className="w-full !bg-gray-800 text-white py-3 rounded-lg font-bold shadow-lg transition disabled:opacity-50"
               disabled={loading}
             >
               {loading ? 'Resetting...' : 'Reset Password'}

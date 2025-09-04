@@ -15,57 +15,12 @@ from webserver.cache_manager import cache_manager
 from webserver.tools.deeptox_agent import deeptox_agent
 from webserver.tools.toxicity_models_simple import ChemicalToxicityAssessment
 from webserver.ai_service import convert_pydantic_to_markdown
+from workflows.utils import emit_status, publish_to_celery_updates, publish_to_socketio, get_redis_connection
 
-logging.getLogger().info("probra.py module loaded")
+logging.getLogger().info("rap.py module loaded")
 logger = logging.getLogger(__name__)
 
 
-def get_redis_connection():
-    """Get Redis connection with consistent configuration"""
-    return redis.Redis(
-        host=os.environ.get("REDIS_HOST", "localhost"),
-        port=int(os.environ.get("REDIS_PORT", "6379"))
-    )
-
-
-def publish_to_celery_updates(event_type, task_id, data):
-    """Publish event to celery_updates channel for database processing"""
-    r = get_redis_connection()
-    event = {
-        "type": event_type,
-        "task_id": task_id,
-        "data": data,
-    }
-    r.publish("celery_updates", json.dumps(event, default=str))
-    logger.info(f"Published {event_type} to celery_updates for task {task_id}")
-
-
-def publish_to_socketio(event_name, room, data):
-    """Publish event to Socket.IO Redis channel for real-time updates"""
-    r = get_redis_connection()
-    socketio_event = {
-        "method": "emit",
-        "event": event_name,
-        "room": room,
-        "data": data
-    }
-    r.publish("socketio", json.dumps(socketio_event, default=str))
-    logger.info(f"Published {event_name} to Socket.IO for room {room}")
-
-
-def emit_status(task_id, status):
-    """Emit task status update to both database and real-time channels"""
-    logger.info(f"[emit_status] {task_id} -> {status}")
-    
-    # Update database directly
-    Task.set_status(task_id, status)
-    task = Task.get_task(task_id)
-    
-    # Publish to celery_updates for any additional database processing
-    publish_to_celery_updates("task_status_update", task.task_id, task.to_dict())
-    
-    # Publish to Socket.IO for real-time updates
-    publish_to_socketio("task_status_update", f"task_{task_id}", task.to_dict())
 
 
 def emit_task_message(task_id, message_data):
@@ -96,16 +51,16 @@ def emit_task_file(task_id, file_data):
     publish_to_socketio("task_file", f"task_{task_id}", file_data)
 
 
-@celery.task(bind=True, queue='probra')
-def probra_task(self, payload):
+@celery.task(bind=True, queue='rap')
+def rap_task(self, payload):
     """GCS-enabled background task that emits progress messages and uploads files to GCS."""
     # Add detailed task start logging
-    logger.info(f"=== TASK STARTED: probra_task ===")
+    logger.info(f"=== TASK STARTED: rap_task ===")
     logger.info(f"Task ID: {self.request.id}")
     logger.info(f"Payload: {payload}")
     
     try:
-        logger.info(f"Starting probra task with payload: {payload}")
+        logger.info(f"Starting rap task with payload: {payload}")
         r = get_redis_connection()
         task_id = payload.get("task_id")
         user_id = payload.get("user_id")
@@ -115,7 +70,7 @@ def probra_task(self, payload):
 
         logger.info(f"Processing task {task_id} for user {user_id}")
         emit_status(task_id, "starting")
-        chemprop_query = payload.get("payload", "Is Gentamicin nephrotoxic?")
+        chemprop_query = payload.get("user_query", "Is Gentamicin nephrotoxic?")
         logger.info(f"User query for deeptox_agent: {chemprop_query}")
 
         emit_status(task_id, "checking cache")
@@ -258,6 +213,6 @@ def probra_task(self, payload):
         return {"done": True, "finished_at": finished_at}
 
     except Exception as e:
-        logger.error(f"Error in probra_task: {str(e)}", exc_info=True)
+        logger.error(f"Error in rap_task: {str(e)}", exc_info=True)
         emit_status(task_id, "error")
         raise  # Re-raise the exception so Celery knows the task failed 

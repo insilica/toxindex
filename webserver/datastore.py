@@ -29,9 +29,10 @@ def find(query, param=None):
             cur.execute(query, param)
         res = cur.fetchone()
     except Exception as e:
-        logging.debug("error executing query")
-        logging.debug(query)
-        logging.debug(e)
+        logging.error("Database error executing query: %s", str(e))
+        logging.error("Query: %s", query)
+        logging.error("Params: %s", param)
+        raise  # Re-raise the exception so calling code can handle it
     finally:
         if cur: cur.close()
         if con: con.close()
@@ -48,9 +49,10 @@ def execute(query, param=None):
             cur.execute(query, param)
         con.commit()
     except Exception as e:
-        logging.debug("error executing query")
-        logging.debug(query)
-        logging.debug(e)
+        logging.error("Database error executing query: %s", str(e))
+        logging.error("Query: %s", query)
+        logging.error("Params: %s", param)
+        raise  # Re-raise the exception so calling code can handle it
     finally:
         if con: con.close()
         logging.debug("done")
@@ -68,9 +70,10 @@ def find_all(query, param=None):
             cur.execute(query, param)
         res = cur.fetchall()
     except Exception as e:
-        logging.debug("error executing query")
-        logging.debug(query)
-        logging.debug(e)
+        logging.error("Database error executing query: %s", str(e))
+        logging.error("Query: %s", query)
+        logging.error("Params: %s", param)
+        raise  # Re-raise the exception so calling code can handle it
     finally:
         if cur: cur.close()
         if con: con.close()

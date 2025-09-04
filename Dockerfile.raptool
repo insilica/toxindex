@@ -16,5 +16,5 @@ RUN pip install ./RAPtool/
 USER app
 
 # Entrypoint
-CMD ["celery", "-A", "workflows.celery_worker_raptool", "worker", "--loglevel=info", "-Q", "raptool"]
+CMD ["python", "-m", "celery", "-A", "workflows.celery_worker_raptool", "worker", "--loglevel=info", "-Q", "raptool"]
 

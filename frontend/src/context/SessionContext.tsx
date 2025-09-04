@@ -182,6 +182,17 @@ const SessionManager: React.FC<{ children: ReactNode }> = ({ children }) => {
 
   // Set up periodic status checks
   useEffect(() => {
+    // Check if we're on a public route that shouldn't have session management
+    const currentPath = window.location.pathname;
+    const publicRoutes = ['/login', '/register', '/verify', '/forgot_password', '/reset_password', '/policies'];
+    const isPublicRoute = publicRoutes.some(route => currentPath.startsWith(route));
+    
+    // Only perform session management on protected routes
+    if (isPublicRoute) {
+      console.log('[SessionManager] On public route, skipping session management');
+      return;
+    }
+
     // Load settings and check status immediately
     loadSessionSettings();
     checkSessionStatus();
@@ -233,6 +244,17 @@ const SessionManager: React.FC<{ children: ReactNode }> = ({ children }) => {
 
   // Set up activity listeners
   useEffect(() => {
+    // Check if we're on a public route that shouldn't have session management
+    const currentPath = window.location.pathname;
+    const publicRoutes = ['/login', '/register', '/verify', '/forgot_password', '/reset_password', '/policies'];
+    const isPublicRoute = publicRoutes.some(route => currentPath.startsWith(route));
+    
+    // Only set up activity listeners on protected routes
+    if (isPublicRoute) {
+      console.log('[SessionManager] On public route, skipping activity listeners');
+      return;
+    }
+
     const events = ['mousedown', 'scroll', 'touchstart', 'click'];
     
     const handleActivity = () => {

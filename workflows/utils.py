@@ -17,30 +17,53 @@ from webserver.model.file import File
 from webserver.storage import GCSFileStorage
 
 # <----- Utility functions (for workflows) ----->
-def emit_status(task_id, status):
-    Task.set_status(task_id, status)
-    r = redis.Redis(
+
+def get_redis_connection():
+    """Get Redis connection with consistent configuration"""
+    return redis.Redis(
         host=os.environ.get("REDIS_HOST", "localhost"),
         port=int(os.environ.get("REDIS_PORT", "6379"))
     )
-    task = Task.get_task(task_id)
 
-    # If no task exists, publish a minimal event
-    if not task:
-        event = {
-            "type": "task_status_update",
-            "task_id": task_id,
-            "data": {"status": status},
-        }
-        r.publish("celery_updates", json.dumps(event, default=str))
-        return
 
+def publish_to_celery_updates(event_type, task_id, data):
+    """Publish event to celery_updates channel for database processing"""
+    r = get_redis_connection()
     event = {
-        "type": "task_status_update",
-        "task_id": task.task_id,
-        "data": task.to_dict(),
+        "type": event_type,
+        "task_id": task_id,
+        "data": data,
     }
     r.publish("celery_updates", json.dumps(event, default=str))
+    logging.info(f"Published {event_type} to celery_updates for task {task_id}")
+
+
+def publish_to_socketio(event_name, room, data):
+    """Publish event to Socket.IO Redis channel for real-time updates"""
+    r = get_redis_connection()
+    socketio_event = {
+        "method": "emit",
+        "event": event_name,
+        "room": room,
+        "data": data
+    }
+    r.publish("socketio", json.dumps(socketio_event, default=str))
+    logging.info(f"Published {event_name} to Socket.IO for room {room}")
+
+
+def emit_status(task_id, status):
+    """Emit task status update to both database and real-time channels"""
+    logging.info(f"[emit_status] {task_id} -> {status}")
+    
+    # Update database directly
+    Task.set_status(task_id, status)
+    task = Task.get_task(task_id)
+    
+    # Publish to celery_updates for any additional database processing
+    publish_to_celery_updates("task_status_update", task.task_id, task.to_dict())
+    
+    # Publish to Socket.IO for real-time updates
+    publish_to_socketio("task_status_update", f"task_{task_id}", task.to_dict())
 
 def download_gcs_file_to_temp(gcs_path: str, temp_dir: Path) -> Path:
     """Download a file from GCS to a temporary local path with caching."""
@@ -67,8 +90,8 @@ def download_gcs_file_to_temp(gcs_path: str, temp_dir: Path) -> Path:
     
     return local_path
 
-def upload_local_file_to_gcs(local_path: Path, gcs_path: str) -> str:
+def upload_local_file_to_gcs(local_path: Path, gcs_path: str, content_type: str = None) -> str:
     """Upload a local file to GCS and return the GCS path."""
     gcs_storage = GCSFileStorage()
-    gcs_storage.upload_file(str(local_path), gcs_path)
+    gcs_storage.upload_file(str(local_path), gcs_path, content_type=content_type)
     return gcs_path

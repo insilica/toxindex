@@ -20,7 +20,7 @@ WORKDIR /app
 COPY workflows/__init__.py /app/workflows/__init__.py
 COPY workflows/celery_app.py /app/workflows/celery_app.py
 COPY workflows/celery_config.py /app/workflows/celery_config.py
-
+COPY workflows/utils.py /app/workflows/utils.py
 # Core webserver files
 COPY webserver/model/ /app/webserver/model/
 COPY webserver/tools/ /app/webserver/tools/

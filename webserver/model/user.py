@@ -31,6 +31,10 @@ class User(flask_login.UserMixin):
   def validate_password(self,password):
     return check_password_hash(self.hashpw,password)
 
+  def set_password(self, password):
+    """Set a new password for the user"""
+    self.hashpw = generate_password_hash(password)
+
   @staticmethod
   def user_exists(email: str) -> bool:
     res = ds.find("SELECT email from users where email = (%s)",(email,))
@@ -114,3 +118,12 @@ class User(flask_login.UserMixin):
         logging.warning(f"[User.delete_user] Failed to delete Stripe customer: {e}")
     
     ds.execute("DELETE FROM users WHERE email = (%s)",(email,))
+
+  @staticmethod
+  def update_password(user_id, hashed_password):
+    """Update user password in database"""
+    try:
+      ds.execute("UPDATE users SET hashpw = (%s) WHERE user_id = (%s)", (hashed_password, user_id))
+    except Exception as e:
+      logging.error(f"Failed to update password for user {user_id}: {str(e)}")
+      raise

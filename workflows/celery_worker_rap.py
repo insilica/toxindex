@@ -9,16 +9,16 @@ result_backend = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379
 from workflows.celery_app import celery
 
 # Import ONLY the probra task
-import workflows.probra # noqa: F401
+import workflows.rap # noqa: F401
 
 def setup_celery_worker():
     """Setup logging and startup for celery worker - only call this when actually starting a worker"""
     # Setup logging with shared utility
-    setup_logging("celery-worker-probra", log_level=logging.INFO)
-    logger = get_logger("celery-worker-probra")
+    setup_logging("celery-worker-rap", log_level=logging.INFO)
+    logger = get_logger("celery-worker-rap")
 
     # Log startup information
-    log_service_startup("celery-worker-probra")
+    log_service_startup("celery-worker-rap")
     
     # Log registered tasks
     logger.info(f"Registered tasks: {list(celery.tasks.keys())}")

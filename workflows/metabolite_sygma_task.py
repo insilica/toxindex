@@ -32,8 +32,7 @@ from webserver.cache_manager import cache_manager
 from webserver.ai_service import convert_pydantic_to_markdown
 
 # Utility functions
-from workflows.utils import download_gcs_file_to_temp, upload_local_file_to_gcs
-## if this does not work, add the functions directly
+from workflows.utils import download_gcs_file_to_temp, upload_local_file_to_gcs, emit_status, get_redis_connection, publish_to_celery_updates, publish_to_socketio
 
 # Import the Sygma tool
 from sygma_predictor import SygmaMetabolitePredictor
@@ -43,54 +42,6 @@ logging.getLogger().info("metabolite_sygma_task.py module loaded")
 logger = logging.getLogger(__name__)
 
 # <----- Utility Functions ----->
-def get_redis_connection():
-    """Get Redis connection with consistent configuration"""
-    return redis.Redis(
-        host=os.environ.get("REDIS_HOST", "localhost"),
-        port=int(os.environ.get("REDIS_PORT", "6379"))
-    )
-
-
-def publish_to_celery_updates(event_type, task_id, data):
-    """Publish event to celery_updates channel for database processing"""
-    r = get_redis_connection()
-    event = {
-        "type": event_type,
-        "task_id": task_id,
-        "data": data,
-    }
-    r.publish("celery_updates", json.dumps(event, default=str))
-    logger.info(f"Published {event_type} to celery_updates for task {task_id}")
-
-
-def publish_to_socketio(event_name, room, data):
-    """Publish event to Socket.IO Redis channel for real-time updates"""
-    r = get_redis_connection()
-    socketio_event = {
-        "method": "emit",
-        "event": event_name,
-        "room": room,
-        "data": data
-    }
-    r.publish("socketio", json.dumps(socketio_event, default=str))
-    logger.info(f"Published {event_name} to Socket.IO for room {room}")
-
-
-def emit_status(task_id, status):
-    """Emit task status update to both database and real-time channels"""
-    logger.info(f"[emit_status] {task_id} -> {status}")
-    
-    # Update database directly
-    Task.set_status(task_id, status)
-    task = Task.get_task(task_id)
-    
-    # Publish to celery_updates for any additional database processing
-    publish_to_celery_updates("task_status_update", task.task_id, task.to_dict())
-    
-    # Publish to Socket.IO for real-time updates
-    publish_to_socketio("task_status_update", f"task_{task_id}", task.to_dict())
-
-
 def emit_task_message(task_id, message_data):
     """Emit task message to both database and real-time channels"""
     # Publish to celery_updates for database processing
@@ -181,6 +132,39 @@ def convert_chemical_name_to_smiles(chemical_name: str) -> Optional[str]:
     except Exception as e:
         logger.warning(f"PubChem lookup failed for '{chemical_name}': {e}")
     return None
+
+# Aliases for missing functions
+def _name_to_smiles(chemical_name: str) -> Optional[str]:
+    """Alias for convert_chemical_name_to_smiles"""
+    return convert_chemical_name_to_smiles(chemical_name)
+
+def _normalize_metabolites(raw_result: Any) -> List[Dict[str, Any]]:
+    """Alias for _normalize_sygma_output"""
+    return _normalize_sygma_output(raw_result)
+
+def _to_markdown_summary(query: str, smiles: str, rows: List[Dict[str, Any]]) -> str:
+    """Generate a markdown summary of the metabolite analysis results"""
+    markdown = f"""# Metabolite Analysis Results
+
+## Input
+- **Query**: {query}
+- **SMILES**: `{smiles}`
+
+## Results
+Found {len(rows)} metabolites:
+
+"""
+    for i, metabolite in enumerate(rows[:10], 1):  # Show first 10
+        prob = metabolite.get('probability', 'N/A')
+        markdown += f"{i}. **SMILES**: `{metabolite.get('smiles', 'N/A')}`\n"
+        if prob != 'N/A':
+            markdown += f"   - **Probability**: {prob:.3f}\n"
+        markdown += "\n"
+    
+    if len(rows) > 10:
+        markdown += f"... and {len(rows) - 10} more metabolites.\n"
+    
+    return markdown
 
 # <----- Helper functions: Reaction rule stub (not used now, kept for future) ----->
 def define_reaction_rules(chemical: str) -> List[str]:
