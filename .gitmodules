@@ -1,3 +1,7 @@
 [submodule "sygma/metabolite-sygma"]
 	path = sygma/metabolite-sygma
 	url = https://github.com/toxindex/metabolite-sygma.git
+[submodule "ranking-workflow"]
+	path = ranking-workflow
+	url = git@github.com:toxindex/ranking-workflow.git
+	branch = main

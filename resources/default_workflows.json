@@ -53,6 +53,15 @@
       "description": "Extract SMILES from uploaded files.",
       "initial_prompt": "Upload a file containing chemical structures.",
       "celery_task": "extract_smiles_task"
+    },
+    {
+      "workflow_id": 7,
+      "frontend_id": "toxindex-ranking",
+      "title": "toxindex-ranking",
+      "label": "Hazard Ranking",
+      "description": "Workflow that ranks chemicals based on user-specified endpoints",
+      "initial_prompt": "Upload a text file of of InChI's and an endpoint to be ranked by",
+      "celery_task": "ranking_task"
     }
   ]
 }
