@@ -87,7 +87,7 @@ def ranking_task(self, payload):
             endpoint = (payload.get("endpoint") or "endocrine disruption").strip()
 
 
-            emit_status(task_id, f"running workflow ({score_type} / {endpoint})")
+            emit_status(task_id, f"rank({score_type} / {endpoint})")
             main_py = (Path(__file__).resolve().parent.parent / 'ranking-workflow' / 'ranking_workflow' / 'src' / 'main.py').resolve()
             if not main_py.exists():
                 raise FileNotFoundError(f"Ranking workflow entrypoint not found at {main_py}")
