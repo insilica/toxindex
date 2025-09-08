@@ -94,6 +94,18 @@
       "task_name": "workflows.celery_task_ranking.ranking_task", 
       "queue": "ranking",
       "notes": "Add task_name/queue when task is implemented"
+    },
+    {
+      "workflow_id": 8,
+      "frontend_id": "toxindex-sygma",
+      "title": "toxindex-sygma",
+      "label": "sygma",
+      "description": "Workflow that ranks chemicals based on user-specified endpoints",
+      "initial_prompt": "Upload a text file of of InChI's and an endpoint to be ranked by",
+      "celery_task": "sygma",
+      "task_name": "workflows.metabolite_sygma_task.metabolite_sygma_task", 
+      "queue": "sygma",
+      "notes": "Add task_name/queue when task is implemented"
     }
   ]
 }

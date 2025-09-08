@@ -91,12 +91,25 @@ class File:
 
     # ------------------------------------------------------------------
     def read_text(self):
-        """Return file contents if the file is available on disk."""
+        """Return file contents, always fetching from GCS for managed paths."""
         try:
-            with open(self.filepath, "r", encoding="utf-8") as f:
+            # Prefer cached content for GCS-backed files
+            if self.filepath and (self.filepath.startswith('tasks/') or self.filepath.startswith('environments/')):
+                from webserver.cache_manager import cache_manager
+                content = cache_manager.get_file_content(self.filepath)
+                return content or ""
+
+            # Fallback: attempt GCS download for any other stored path as a key
+            from webserver.storage import GCSFileStorage
+            import tempfile
+            gcs_storage = GCSFileStorage()
+            with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+                temp_path = temp_file.name
+            gcs_storage.download_file(self.filepath, temp_path)
+            with open(temp_path, "r", encoding="utf-8") as f:
                 return f.read()
         except Exception as e:
-            logging.warning(f"Could not read file {self.filepath}: {e}")
+            logging.warning(f"Could not read file via GCS for {self.filepath}: {e}")
             return ""
 
     def markdown_to_html(self):

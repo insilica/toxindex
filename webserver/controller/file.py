@@ -28,16 +28,14 @@ def inspect_file(file_id):
         return jsonify({'error': 'File not found'}), 404
     
     # Handle GCS files with caching
+    cached_content = None
     if file.filepath.startswith('environments/') or file.filepath.startswith('tasks/'):
         try:
             from webserver.cache_manager import cache_manager
             
             # Try to get content from cache first
-            content = cache_manager.get_file_content(file.filepath)
-            if content:
-                # Use cached content for processing
-                temp_path = None
-            else:
+            cached_content = cache_manager.get_file_content(file.filepath)
+            if not cached_content:
                 # Cache miss - download from GCS
                 from webserver.storage import GCSFileStorage
                 import tempfile
@@ -66,8 +64,12 @@ def inspect_file(file_id):
     # .txt, .csv, .json, .md, .markdown, .xlsx, .xls, .png, .jpg, .jpeg, .gif
     try:
         if ext in ['.txt', '.csv', '.json', '.md', '.markdown']:
-            with open(file.filepath, 'r', encoding='utf-8') as f:
-                content = f.read()
+            # If we have cached content from GCS, use it; otherwise read from local path
+            if cached_content is not None:
+                content = cached_content
+            else:
+                with open(file.filepath, 'r', encoding='utf-8') as f:
+                    content = f.read()
             if ext == '.json':
                 try:
                     parsed = json.loads(content)

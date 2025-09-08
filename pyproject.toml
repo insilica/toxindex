@@ -70,15 +70,6 @@ dependencies = [
   "sentence-transformers>=5.1.0"
 ]
 
-
-
-
-
-
-
-
-
-
 requires-python = ">=3.12"
 
 [build-system]

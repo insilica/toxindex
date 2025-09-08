@@ -2,23 +2,19 @@
 # # Implement this tool as a stand alone Docker container
 
 import re
-import redis
 import json
 import os
 import uuid
 import logging
 import tempfile
-
 import hashlib
 
 # Libraries for chemical data handling
 from rdkit import Chem
 
-from pathlib import Path
-
 # For data manipulation
 import pandas as pd
-from typing import List, Dict, Any, Optional, Tuple, Iterable, Union
+from typing import List, Dict, Any, Optional, Union
 
 # Celery for task management
 from workflows.celery_app import celery
@@ -26,13 +22,11 @@ from workflows.celery_app import celery
 # Webserver models and storage
 from webserver.model.message import MessageSchema
 from webserver.model.task import Task
-from webserver.model.file import File
 from webserver.storage import GCSFileStorage
 from webserver.cache_manager import cache_manager
-from webserver.ai_service import convert_pydantic_to_markdown
 
 # Utility functions
-from workflows.utils import download_gcs_file_to_temp, upload_local_file_to_gcs, emit_status, get_redis_connection, publish_to_celery_updates, publish_to_socketio
+from workflows.utils import emit_status, get_redis_connection, publish_to_celery_updates, publish_to_socketio
 
 # Import the Sygma tool
 from sygma_predictor import SygmaMetabolitePredictor
@@ -247,7 +241,7 @@ def metabolite_sygma_task(self, payload: Dict[str, Any]):
 
     task_id = payload.get("task_id")
     user_id = payload.get("user_id")
-    query = payload.get("payload")  # either a chemical name or a SMILES
+    query = payload.get("user_query")  # either a chemical name or a SMILES
 
     try:
         if not all([task_id, user_id, query]):
@@ -258,15 +252,7 @@ def metabolite_sygma_task(self, payload: Dict[str, Any]):
         logger.info(f"Processing SyGMa task {task_id} for user {user_id}. Query: {query}")
 
         # Redis
-        if get_redis_connection:
-            r = get_redis_connection()
-        else:
-            import redis as _redis
-            r = _redis.Redis(
-                host=os.environ.get("REDIS_HOST", "localhost"),
-                port=int(os.environ.get("REDIS_PORT", "6379")),
-                decode_responses=True,
-            )
+        r = get_redis_connection()
 
         emit_status(task_id, "resolving input")
 

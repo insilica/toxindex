@@ -8,11 +8,8 @@ import os
 import sys
 import json
 import logging
-import time
 import uuid
-import threading
 import redis
-from datetime import datetime
 
 # Add the project root to Python path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
