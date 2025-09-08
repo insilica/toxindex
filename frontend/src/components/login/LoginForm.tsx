@@ -127,7 +127,7 @@ const LoginForm: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-900 via-gray-900 to-black">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-900 via-gray-900 to-blac`k">
       <style>{`
         @keyframes fadeInScale {
           0% { opacity: 0; transform: scale(0.95); }

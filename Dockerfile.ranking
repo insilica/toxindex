@@ -1,42 +1,31 @@
 FROM toxindex-base:latest
 
 # Core application files
-COPY workflows/ /app/workflows/
-COPY webserver/model/ /app/webserver/model/
-COPY webserver/tools/ /app/webserver/tools/
-COPY webserver/controller/ /app/webserver/controller/
-COPY webserver/__init__.py /app/webserver/
-COPY webserver/storage.py /app/webserver/
-COPY webserver/cache_manager.py /app/webserver/
-COPY webserver/ai_service.py /app/webserver/
-COPY webserver/logging_utils.py /app/webserver/
-COPY webserver/data_paths.py /app/webserver/
-COPY webserver/datastore.py /app/webserver/
-COPY config/ /app/config/
+# Core workflow files
+COPY workflows/celery_worker_ranking.py /app/workflows/celery_worker_ranking.py
+COPY workflows/celery_task_ranking.py /app/workflows/celery_task_ranking.py
 
 # Ranking workflow codebase (used by celery_task_ranking)
 COPY ranking-workflow/ /app/ranking-workflow/
 
-# Python dependencies
-COPY requirements-ranking.txt /app/requirements-ranking.txt
+# Python dependencies via uv from submodule pyproject
 USER root
 # OS deps for uv installer
 RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates && rm -rf /var/lib/apt/lists/*
 # Faster installer: uv
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
     ln -sf /root/.local/bin/uv /usr/local/bin/uv && uv --version
-RUN uv pip install --system -r /app/requirements-ranking.txt
-USER app
+# Install the ranking workflow (and its dependencies) from its pyproject
+RUN uv pip install --system -e /app/ranking-workflow
 
 # Install utilities and Qdrant server
-USER root
 RUN apt-get update && apt-get install -y --no-install-recommends libgomp1 && rm -rf /var/lib/apt/lists/* && \
     curl -L -o /tmp/qdrant.tar.gz https://github.com/qdrant/qdrant/releases/latest/download/qdrant-x86_64-unknown-linux-gnu.tar.gz && \
     mkdir -p /opt/qdrant && tar -xzf /tmp/qdrant.tar.gz -C /opt/qdrant && \
     sh -lc 'set -e; QBIN=$(find /opt/qdrant -type f -name qdrant | head -n1); mv "$QBIN" /usr/local/bin/qdrant' && \
     chmod +x /usr/local/bin/qdrant && \
     rm -f /tmp/qdrant.tar.gz && mkdir -p /qdrant/storage && chown -R app:app /qdrant
-
+    
 USER app
 
 EXPOSE 6333
@@ -46,5 +35,5 @@ ENV QDRANT__SERVICE__HOST=0.0.0.0 \
     QDRANT__SERVICE__HTTP_PORT=6333 \
     QDRANT__STORAGE__STORAGE_PATH=/qdrant/storage
 
-# Start Qdrant then the Celery ranking worker
-CMD ["/bin/sh", "-lc", "qdrant & sleep 3; celery -A workflows.celery_worker_ranking worker --loglevel=info -Q ranking"]
+# Start Qdrant then the Celery ranking worker using Python 3.13 environment
+CMD ["/bin/sh", "-lc", "qdrant & sleep 3; uv run --python 3.13 celery -A workflows.celery_worker_ranking worker --loglevel=info -Q ranking"]

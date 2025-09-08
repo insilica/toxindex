@@ -56,6 +56,8 @@ def emit_status(task_id, status):
     logging.info(f"[emit_status] {task_id} -> {status}")
     
     # Update database directly
+    # Ensure status fits DB column (varchar(32))
+    status = (status or "")[:32]
     Task.set_status(task_id, status)
     task = Task.get_task(task_id)
     

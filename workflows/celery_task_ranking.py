@@ -1,4 +1,6 @@
 import logging
+import os
+import json
 import tempfile
 import subprocess
 import sys
@@ -18,6 +20,78 @@ from workflows.utils import (
 
 logging.getLogger().info("celery_task_ranking.py module loaded")
 logger = logging.getLogger(__name__)
+
+
+# Optional deps for env and Gemini; keep imports lazy-friendly
+try:
+    from dotenv import load_dotenv  # type: ignore
+except Exception:  # pragma: no cover
+    load_dotenv = None  # type: ignore
+
+try:
+    import google.generativeai as genai  # type: ignore
+except Exception:  # pragma: no cover
+    genai = None  # type: ignore
+
+
+def _strip_code_fences(text: str) -> str:
+    t = text.strip()
+    if t.startswith("```") and t.endswith("```"):
+        t = t.strip("`\n")
+        # If there's a language tag on first line, drop it
+        if "\n" in t:
+            first, rest = t.split("\n", 1)
+            if first and not first.strip().startswith("{"):
+                return rest.strip()
+        return t.strip()
+    return t
+
+
+def extract_score_and_endpoint_with_gemini(user_query: str) -> tuple[str, str]:
+    """Extract (score_type, endpoint) from a natural language query using Gemini.
+
+    Falls back to sensible defaults if extraction fails.
+    """
+    default_score_type = "GHS"
+    default_endpoint = "endocrine disruption"
+
+    if not user_query or not isinstance(user_query, str):
+        return default_score_type, default_endpoint
+
+    # Load env vars if available
+    if load_dotenv is not None:
+        try:
+            load_dotenv()
+        except Exception:
+            pass
+
+    api_key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
+    if not api_key or genai is None:
+        return default_score_type, default_endpoint
+
+    try:
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel("gemini-2.5-flash")
+        prompt = (
+            "You are an information extractor. Given a user query about chemical ranking, "
+            "extract two fields as concise strings: 'score_type' (e.g., GHS, PubChem, etc.) "
+            "and 'endpoint' (e.g., endocrine disruption, carcinogenicity, hepatotoxicity). "
+            "If either is missing, infer a likely value. "
+            "Respond with ONLY JSON: {\"score_type\": \"...\", \"endpoint\": \"...\"}.\n\n"
+            f"User query: {user_query}"
+        )
+        response = model.generate_content(prompt)
+        text = _strip_code_fences((getattr(response, "text", "") or "").strip())
+        data = json.loads(text)
+        score_type = str(data.get("score_type") or default_score_type).strip()
+        endpoint = str(data.get("endpoint") or default_endpoint).strip()
+        if not score_type:
+            score_type = default_score_type
+        if not endpoint:
+            endpoint = default_endpoint
+        return score_type, endpoint
+    except Exception:
+        return default_score_type, default_endpoint
 
 
 def emit_task_message(task_id, message_data):
@@ -61,6 +135,7 @@ def ranking_task(self, payload):
         task_id = payload.get("task_id")
         user_id = payload.get("user_id")
         file_id = payload.get("file_id")
+        user_query = payload.get("user_query")
 
         if not all([task_id, user_id, file_id]):
             raise ValueError(f"Missing required fields. task_id={task_id}, user_id={user_id}, file_id={file_id}")
@@ -82,12 +157,11 @@ def ranking_task(self, payload):
             logger.info(f"Processing task {task_id} for user {user_id}")
             emit_status(task_id, "starting")
 
-            # Prepare to run ranking workflow take them from query
-            score_type = (payload.get("score_type") or "GHS").strip()
-            endpoint = (payload.get("endpoint") or "endocrine disruption").strip()
+            # Prepare to run ranking workflow: extract from user query via Gemini
+            score_type, endpoint = extract_score_and_endpoint_with_gemini(user_query or "")
 
 
-            emit_status(task_id, f"running workflow ({score_type} / {endpoint})")
+            emit_status(task_id, f"ranking ({score_type} / {endpoint})")
             main_py = (Path(__file__).resolve().parent.parent / 'ranking-workflow' / 'ranking_workflow' / 'src' / 'main.py').resolve()
             if not main_py.exists():
                 raise FileNotFoundError(f"Ranking workflow entrypoint not found at {main_py}")

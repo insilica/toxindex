@@ -34,7 +34,7 @@ def raptool_task(self, payload):
         )
         task_id = payload.get("task_id")
         user_id = payload.get("user_id")
-        file_id = payload.get("payload")
+        file_id = payload.get("file_id")
         if not all([task_id, user_id, file_id]):
             raise ValueError(f"Missing required fields. task_id={task_id}, user_id={user_id}, file_id={file_id}")
 

@@ -14,7 +14,7 @@ dependencies = [
   "redis",
   "Flask==3.0.0",
   "python-dotenv==1.1.0",
-  "requests",
+  "requests>=2.32.5",
   "urllib3==2.4.0",
   "flask-login",
   "Flask-WTF==1.2.1",
@@ -22,7 +22,7 @@ dependencies = [
   "openai>=1.68.2,<2.0.0",
   "sendgrid==6.10.0",
   "psycopg2-binary==2.9.9",
-  "pandas",
+  "pandas>=2.3.1",
   "stripe==4.2.0",
   "annotated-types",
   "rdkit",
@@ -60,8 +60,24 @@ dependencies = [
   "psutil>=5.9.0",
   "google-cloud-monitoring>=2.0.0",
   "google-cloud-logging>=3.0.0",
-  "flask-cors"
+  "flask-cors",
+  "google-generativeai>=0.8.5",
+  "einops>=0.8.1",
+  "lxml>=6.0.0",
+  "mcp>=1.13.0",
+  "qdrant-client>=1.15.1",
+  "rdflib>=7.1.4",
+  "sentence-transformers>=5.1.0"
 ]
+
+
+
+
+
+
+
+
+
 
 requires-python = ">=3.12"
 
