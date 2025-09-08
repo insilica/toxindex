@@ -35,5 +35,5 @@ ENV QDRANT__SERVICE__HOST=0.0.0.0 \
     QDRANT__SERVICE__HTTP_PORT=6333 \
     QDRANT__STORAGE__STORAGE_PATH=/qdrant/storage
 
-# Start Qdrant then the Celery ranking worker using Python 3.13 environment
-CMD ["/bin/sh", "-lc", "qdrant & sleep 3; uv run --python 3.13 celery -A workflows.celery_worker_ranking worker --loglevel=info -Q ranking"]
+# Start Qdrant then the Celery ranking worker
+CMD ["/bin/sh", "-lc", "qdrant & sleep 3; celery -A workflows.celery_worker_ranking worker --loglevel=info -Q ranking"]
