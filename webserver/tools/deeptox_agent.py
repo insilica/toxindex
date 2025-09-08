@@ -9,6 +9,7 @@ from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
 import jsonschema
+import yaml
 
 # Try to load .env file if it exists
 try:
@@ -255,6 +256,23 @@ class SearchState:
     report: ChemicalToxicityAssessment | None = None
 
 # ── node definitions ────────────────────────────────────────────────────────────
+def _load_toxicity_types() -> List[str]:
+    """Load toxicity types from YAML config with a safe fallback ordering."""
+    config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "config", "toxicity_types.yaml")
+  
+    if os.path.exists(config_path):
+        with open(config_path, "r", encoding="utf-8") as f:
+            data = yaml.safe_load(f) or {}
+        order = data.get("order")
+        if isinstance(order, list) and order:
+            return [str(x) for x in order]
+        # Fall back to collecting from items if order not present
+        items = data.get("items", [])
+        names = [it.get("name") for it in items if isinstance(it, dict) and it.get("name")]
+        if names:
+            return [str(x) for x in names]
+    return []
+
 def preprocess_and_generate_query(state: SearchState) -> SearchState:
     """Extract chemical name and toxicity type, then format the query using both template and LLM-generated query."""
     # Extract chemical name
@@ -265,10 +283,11 @@ def preprocess_and_generate_query(state: SearchState) -> SearchState:
     chemical_name = llm.invoke(chemical_messages).content.strip()
 
     # Extract toxicity type with improved prompt
+    toxicity_types = _load_toxicity_types()
+    toxicity_types_str = ", ".join(toxicity_types)
     toxicity_messages = [
-        ("system", """Given a toxicology query, extract the specific toxicity type being asked about. 
-        Common toxicity types include: hepatotoxicity, nephrotoxicity, neurotoxicity, cardiotoxicity, 
-        genotoxicity, carcinogenicity, reproductive toxicity, developmental toxicity, immunotoxicity, etc.
+        ("system", f"""Given a toxicology query, extract the specific toxicity type being asked about. 
+        Common toxicity types include: {toxicity_types_str}, etc.
         
         If the query asks "Is [chemical] [toxicity_type]?" or "Does [chemical] cause [toxicity_type]?", 
         extract the [toxicity_type] part.

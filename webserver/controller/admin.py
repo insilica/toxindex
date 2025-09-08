@@ -143,6 +143,7 @@ def get_session_settings():
 @admin_bp.route('/settings/session', methods=['PUT'])
 @flask_login.login_required
 @require_admin()
+@csrf.exempt
 def update_session_settings():
     """Update session-related settings"""
     try:

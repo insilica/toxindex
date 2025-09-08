@@ -1,7 +1,3 @@
-import redis
-import json
-import os
-import uuid
 import logging
 import tempfile
 import subprocess
@@ -12,57 +8,16 @@ from webserver.model.task import Task
 from webserver.storage import GCSFileStorage
 from webserver.model.file import File
 from pathlib import Path
+from workflows.utils import (
+    get_redis_connection,
+    publish_to_celery_updates,
+    publish_to_socketio,
+    emit_status,
+    download_gcs_file_to_temp,
+)
 
 logging.getLogger().info("celery_task_ranking.py module loaded")
 logger = logging.getLogger(__name__)
-
-
-def get_redis_connection():
-    """Get Redis connection with consistent configuration"""
-    return redis.Redis(
-        host=os.environ.get("REDIS_HOST", "localhost"),
-        port=int(os.environ.get("REDIS_PORT", "6379"))
-    )
-
-
-def publish_to_celery_updates(event_type, task_id, data):
-    """Publish event to celery_updates channel for database processing"""
-    r = get_redis_connection()
-    event = {
-        "type": event_type,
-        "task_id": task_id,
-        "data": data,
-    }
-    r.publish("celery_updates", json.dumps(event, default=str))
-    logger.info(f"Published {event_type} to celery_updates for task {task_id}")
-
-
-def publish_to_socketio(event_name, room, data):
-    """Publish event to Socket.IO Redis channel for real-time updates"""
-    r = get_redis_connection()
-    socketio_event = {
-        "method": "emit",
-        "event": event_name,
-        "room": room,
-        "data": data
-    }
-    r.publish("socketio", json.dumps(socketio_event, default=str))
-    logger.info(f"Published {event_name} to Socket.IO for room {room}")
-
-
-def emit_status(task_id, status):
-    """Emit task status update to both database and real-time channels"""
-    logger.info(f"[emit_status] {task_id} -> {status}")
-    
-    # Update database directly
-    Task.set_status(task_id, status)
-    task = Task.get_task(task_id)
-    
-    # Publish to celery_updates for any additional database processing
-    publish_to_celery_updates("task_status_update", task.task_id, task.to_dict())
-    
-    # Publish to Socket.IO for real-time updates
-    publish_to_socketio("task_status_update", f"task_{task_id}", task.to_dict())
 
 
 def emit_task_message(task_id, message_data):
@@ -93,31 +48,6 @@ def emit_task_file(task_id, file_data):
     publish_to_socketio("task_file", f"task_{task_id}", file_data)
 
 
-def download_gcs_file_to_temp(gcs_path: str, temp_dir: Path) -> Path:
-    """Download a file from GCS to a temporary local path with caching."""
-    from webserver.cache_manager import cache_manager
-    
-    # Try to get from cache first
-    cached_content = cache_manager.get_file_content(gcs_path)
-    if cached_content:
-        # Write cached content to temp file
-        local_path = temp_dir / f"{uuid.uuid4().hex}_{Path(gcs_path).name}"
-        with open(local_path, 'w', encoding='utf-8') as f:
-            f.write(cached_content)
-        return local_path
-    
-    # Cache miss - download from GCS
-    gcs_storage = GCSFileStorage()
-    local_path = temp_dir / f"{uuid.uuid4().hex}_{Path(gcs_path).name}"
-    gcs_storage.download_file(gcs_path, str(local_path))
-    
-    # Cache the content for future use
-    with open(local_path, 'r', encoding='utf-8') as f:
-        content = f.read()
-    cache_manager.cache_file_content(gcs_path, content)
-    
-    return local_path
-
 @celery.task(bind=True, queue='ranking')
 def ranking_task(self, payload):
     """Run the ranking workflow using ranking_workflow/src/main.py and upload results to GCS."""
@@ -130,7 +60,7 @@ def ranking_task(self, payload):
         r = get_redis_connection()
         task_id = payload.get("task_id")
         user_id = payload.get("user_id")
-        file_id = payload.get("payload")
+        file_id = payload.get("file_id")
 
         if not all([task_id, user_id, file_id]):
             raise ValueError(f"Missing required fields. task_id={task_id}, user_id={user_id}, file_id={file_id}")
@@ -152,9 +82,11 @@ def ranking_task(self, payload):
             logger.info(f"Processing task {task_id} for user {user_id}")
             emit_status(task_id, "starting")
 
-            # Prepare to run ranking workflow
-            score_type = (payload.get("score_type") or "PubChem").strip()
+            # Prepare to run ranking workflow take them from query
+            score_type = (payload.get("score_type") or "GHS").strip()
             endpoint = (payload.get("endpoint") or "endocrine disruption").strip()
+
+
             emit_status(task_id, f"running workflow ({score_type} / {endpoint})")
             main_py = (Path(__file__).resolve().parent.parent / 'ranking-workflow' / 'ranking_workflow' / 'src' / 'main.py').resolve()
             if not main_py.exists():

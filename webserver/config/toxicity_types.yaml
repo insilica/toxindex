@@ -1,0 +1,88 @@
+# Canonical toxicity types used across extraction, validation, and UI filtering
+# You can add synonyms per type to aid NER/extraction and user input mapping.
+# Keep names in lower case for consistency; display names can be title-cased in UI.
+
+version: 1
+updated: 2025-09-08
+
+# Default ordering for UI and prompts
+order:
+  - hepatotoxicity
+  - nephrotoxicity
+  - neurotoxicity
+  - cardiotoxicity
+  - pulmonary toxicity
+  - dermatotoxicity
+  - ototoxicity
+  - endocrine disruption
+  - reproductive toxicity
+  - hematotoxicity
+  - genotoxicity
+  - mutagenicity
+  - teratogenicity
+  - allergenic toxicity
+  - cytotoxicity
+  - oxidative stress toxicity
+  - carcinogenicity
+  - developmental toxicity
+  - immunotoxicity
+
+# Detailed metadata per type
+items:
+  - name: hepatotoxicity
+    group: hepatic
+    synonyms: [liver toxicity, liver damage, hepatotoxic]
+  - name: nephrotoxicity
+    group: renal
+    synonyms: [kidney toxicity, renal toxicity, nephrotoxic]
+  - name: neurotoxicity
+    group: nervous system
+    synonyms: [neurotoxic]
+  - name: cardiotoxicity
+    group: cardiovascular
+    synonyms: [cardiac toxicity, heart toxicity, cardiotoxic]
+  - name: pulmonary toxicity
+    group: respiratory
+    synonyms: [lung toxicity, pneumotoxicity, respiratory toxicity]
+  - name: dermatotoxicity
+    group: dermatologic
+    synonyms: [skin toxicity, cutaneous toxicity, dermal toxicity]
+  - name: ototoxicity
+    group: sensory
+    synonyms: [ear toxicity, auditory toxicity]
+  - name: endocrine disruption
+    group: endocrine
+    synonyms: [endocrine toxicity, hormone disruption, EDC]
+  - name: reproductive toxicity
+    group: reproductive
+    synonyms: [reprotoxicity, fertility toxicity]
+  - name: hematotoxicity
+    group: hematologic
+    synonyms: [blood toxicity, hemotoxicity]
+  - name: genotoxicity
+    group: genetic
+    synonyms: [DNA damage]
+  - name: mutagenicity
+    group: genetic
+    synonyms: [mutagenic potential]
+  - name: teratogenicity
+    group: developmental
+    synonyms: [teratogenic effects]
+  - name: allergenic toxicity
+    group: immune
+    synonyms: [allergenicity, hypersensitivity]
+  - name: cytotoxicity
+    group: cellular
+    synonyms: [cell toxicity]
+  - name: oxidative stress toxicity
+    group: cellular
+    synonyms: [oxidative damage, ROS-mediated toxicity]
+  - name: carcinogenicity
+    group: oncologic
+    synonyms: [cancer risk, carcinogenic]
+  - name: developmental toxicity
+    group: developmental
+    synonyms: [developmental effects]
+  - name: immunotoxicity
+    group: immune
+    synonyms: [immune toxicity, immunosuppression, immunostimulation]
