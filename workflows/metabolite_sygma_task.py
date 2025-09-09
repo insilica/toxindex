@@ -280,8 +280,8 @@ def metabolite_sygma_task(self, payload: Dict[str, Any]):
         if cached_json and cached_md and cached_csv:
             logger.info("Using cached SyGMa results")
             metabolites = json.loads(cached_json)
-            markdown = cached_md
-            csv_data = cached_csv
+            markdown = cached_md.decode("utf-8") if isinstance(cached_md, (bytes, bytearray)) else cached_md
+            csv_data = cached_csv.decode("utf-8") if isinstance(cached_csv, (bytes, bytearray)) else cached_csv
             emit_status(task_id, "using cache")
         else:
             # Run SyGMa

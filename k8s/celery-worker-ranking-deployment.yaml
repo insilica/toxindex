@@ -17,7 +17,7 @@ spec:
       containers:
       - name: celery-worker-ranking
         image: us-docker.pkg.dev/toxindex/toxindex-backend/ranking:latest
-        command: ["python", "-m", "celery", "-A", "workflows.celery_worker_ranking", "worker", "--loglevel=info", "-Q", "ranking"]
+        command: ["python", "-m", "celery", "-A", "workflows.celery_worker_ranking", "worker", "--loglevel=info", "-Q", "ranking", "-c", "2", "--max-tasks-per-child", "1"]
         envFrom:
         - secretRef:
             name: backend-secrets
@@ -34,8 +34,10 @@ spec:
               key: REDIS_PORT
         resources:
           requests:
-            memory: "1Gi"
-            cpu: "500m"
-          limits:
             memory: "2Gi"
-            cpu: "1000m"
+            cpu: "2000m"
+            ephemeral-storage: "10Gi"
+          limits:
+            memory: "8Gi"
+            cpu: "2000m"
+            ephemeral-storage: "10Gi"
