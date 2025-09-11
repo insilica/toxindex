@@ -8,35 +8,40 @@ import os
 from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
-import jsonschema
 import yaml
-
-# Try to load .env file if it exists
-try:
-    from dotenv import load_dotenv
-    load_dotenv()
-except ImportError:
-    pass  # dotenv is not installed, continue without it
+from dotenv import load_dotenv
+load_dotenv()
 
 # LLM provider selection (default: openai)
-llm_provider = os.environ.get("LLM_PROVIDER", "openai").lower()
+llm_provider = os.environ.get("LLM_PROVIDER", "gemini").lower()
+agno_provider = os.environ.get("AGNO_PROVIDER", "openai").lower()
 print(f"Using LLM provider: {llm_provider}")
+debug_snapshots = os.environ.get("DEEPTOX_DEBUG_SNAPSHOTS", "0").lower() in ("1", "true", "yes", "y")
 
-if llm_provider == "openai":
-    from langchain_openai import ChatOpenAI
-    llm = ChatOpenAI(model="gpt-4.1-nano-2025-04-14")
-    summary_llm = ChatOpenAI(model="gpt-4.1-nano-2025-04-14")
-
-    from agno.models.openai import OpenAIChat
-    agent_model = OpenAIChat("gpt-4.1-2025-04-14")
-else:
+if llm_provider == "gemini":
     from langchain_google_genai import ChatGoogleGenerativeAI
     llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash")
     summary_llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash")
+
+    from google import genai
+    from google.genai import types
+    client = genai.Client()
+    grounding_tool = types.Tool(google_search=types.GoogleSearch())
+    config = types.GenerateContentConfig(tools=[grounding_tool])
+    # response = client.models.generate_content(model="gemini-2.5-flash",contents="Who won the euro 2024?",config=config).text
+
+else:
+    from langchain_openai import ChatOpenAI    
+    llm = ChatOpenAI(model="gpt-4.1-nano-2025-04-14")
+    summary_llm = ChatOpenAI(model="gpt-4.1-nano-2025-04-14")
  
+if agno_provider == "gemini":
     from agno.models.google import Gemini
     agent_model = Gemini(id="gemini-2.5-flash")
-
+else:
+    from agno.models.openai import OpenAIChat
+    agent_model = OpenAIChat("gpt-4.1-2025-04-14")
+    
 # Check for API key in environment
 cse_api_key = os.environ.get("CSE_API_KEY")
 google_cse_id = os.environ.get("GOOGLE_CSE_ID")
@@ -146,7 +151,7 @@ follow_up_chain = (
 )
 
 # ── helper functions (RunnableLambda wrappers) ──────────────────────────────────
-def parse_search_results(search_text: str, top_k: int = 5) -> List[Dict[str, str]]:
+def parse_search_results(search_text: str, top_k: int = 10) -> List[Dict[str, str]]:
     """Extract URLs, fetch their titles and a snippet of content."""
     print(f"Parsing search text (first 500 chars): {search_text[:500]}...")
     
@@ -169,8 +174,32 @@ def parse_search_results(search_text: str, top_k: int = 5) -> List[Dict[str, str
                     if url:
                         urls.append(url)
     except json.JSONDecodeError:
-        # Fallback to regex URL extraction
-        urls = re.findall(r"https?://[^\s]+", search_text)[:top_k]
+        # Fallback to URL extraction from possible SOURCES/REFERENCES block, then general regex
+        urls = []
+        try:
+            text_lower = search_text.lower()
+            markers = ["sources:", "references:", "citations:", "source:", "reference:"]
+            marker_pos = -1
+            for m in markers:
+                pos = text_lower.find(m)
+                if pos != -1 and (marker_pos == -1 or pos < marker_pos):
+                    marker_pos = pos
+            if marker_pos != -1:
+                sources_section = search_text[marker_pos: marker_pos + 5000]
+                urls.extend(re.findall(r"https?://[^\s]+", sources_section))
+            # Always add general matches as backup
+            urls_general = re.findall(r"https?://[^\s]+", search_text)
+            urls.extend(urls_general)
+            # Deduplicate preserving order
+            seen = set()
+            deduped = []
+            for u in urls:
+                if u not in seen:
+                    seen.add(u)
+                    deduped.append(u)
+            urls = deduped[:top_k]
+        except Exception:
+            urls = re.findall(r"https?://[^\s]+", search_text)[:top_k]
     
     print(f"Found {len(urls)} URLs: {urls}")
     
@@ -243,6 +272,7 @@ class SearchState:
     chemical_name: str | None = None
     toxicity_type: str | None = None
     search_query: str | None = None
+    search_objectives: List[str] | None = None
 
     initial_search_results: str | None = None
     parsed_initial_results: List[Dict] | None = None
@@ -254,6 +284,7 @@ class SearchState:
     follow_up_summaries: List[str] | None = None
 
     report: ChemicalToxicityAssessment | None = None
+    reports: List[ChemicalToxicityAssessment] | None = None
 
 # ── node definitions ────────────────────────────────────────────────────────────
 def _load_toxicity_types() -> List[str]:
@@ -299,6 +330,16 @@ def preprocess_and_generate_query(state: SearchState) -> SearchState:
     ]
     toxicity_type = llm.invoke(toxicity_messages).content.strip()
 
+    # Define schema-driven research objectives aligned to ChemicalToxicityAssessment
+    objectives: List[str] = [
+        "Chemical properties most relevant to toxicity (physicochemical, metabolism, dose range)",
+        f"Mechanisms of {toxicity_type} with pathways, targets, and supporting evidence",
+        "Clinical evidence: study type, sample_size, positive_cases, duration, dosage, demographics, findings",
+        "Risk distribution: extract numeric data to estimate beta(alpha, beta); at least 3 studies",
+        "Risk factors: high-risk groups, modifying factors (e.g., comorbidities, co-medications), preventive measures",
+        "References from authoritative sources (nih.gov, cdc.gov, who.int, fda.gov, ema.europa.eu, nature.com, nejm.org, thelancet.com, sciencedirect.com, pubmed.ncbi.nlm.nih.gov)"
+    ]
+
     # Format the expanded query (template)
     formatted_query = f"""Based on the following chemical properties of {chemical_name}:
     \nWhat are the {toxicity_type} effects and risks? Include:
@@ -307,18 +348,47 @@ def preprocess_and_generate_query(state: SearchState) -> SearchState:
     3. Clinical evidence and case studies
     4. Beta distribution of the {chemical_name} having {toxicity_type} on a healthy individuals at regular dose and its probability with confidence interval.
     5. Risk factors and populations at risk
+    \nResearch objectives (target these in search results):\n- {objectives[0]}\n- {objectives[1]}\n- {objectives[2]}\n- {objectives[3]}\n- {objectives[4]}\n- {objectives[5]}
     """
 
     return SearchState(**{
         **asdict(state),
         "chemical_name": chemical_name,
         "toxicity_type": toxicity_type,
-        "search_query": formatted_query
+        "search_query": formatted_query,
+        "search_objectives": objectives
     })
 
 def run_search(state: SearchState) -> SearchState:
     print(f"Running search for query: {state.search_query}")
-    serp_text = search_tool.run(state.search_query)
+    serp_text = None
+    try:
+        # Prefer grounded Google Search when using Google provider
+        if llm_provider != "openai":
+            try:
+                grounded_prompt = (
+                    "You are performing a grounded literature and clinical evidence search. "
+                    "Synthesize a concise answer based strictly on retrieved sources. Then append a section titled 'SOURCES:' "
+                    "containing 10-15 authoritative URLs (full http/https links), one per line, no bullets. Prefer domains like nih.gov, cdc.gov, who.int, ema.europa.eu, fda.gov, nature.com, sciencedirect.com, nejm.org, thelancet.com, pubmed.ncbi.nlm.nih.gov. "
+                    "Avoid blogs and low-credibility sites.\n\n" \
+                    f"Question: {state.search_query}"
+                )
+                resp = client.models.generate_content(
+                    model="gemini-2.5-flash",
+                    contents=grounded_prompt,
+                    config=config,
+                )
+                text = getattr(resp, "text", None)
+                serp_text = text if isinstance(text, str) and text.strip() else str(resp)
+                print("Used Google GenAI grounded search path")
+            except Exception as ge:
+                print(f"Grounded search failed, falling back to GoogleSearchAPIWrapper: {ge}")
+        # Fallback or OpenAI path uses the LangChain GoogleSearchAPIWrapper
+        if not serp_text:
+            serp_text = search_tool.run(state.search_query)
+    except Exception as e:
+        print(f"Search error: {e}")
+        serp_text = ""
     print(f"Search returned {len(serp_text)} characters")
     print(f"Search result type: {type(serp_text)}")
     return SearchState(**{**asdict(state), "initial_search_results": serp_text})
@@ -335,9 +405,10 @@ def summarize_initial(state: SearchState) -> SearchState:
     return SearchState(**{**asdict(state), "initial_summaries": summaries})
 
 def generate_follow_up(state: SearchState) -> SearchState:
+    objectives_text = "\n".join(state.search_objectives or [])
     fq = follow_up_chain.invoke(
         {
-            "original_query": state.original_query,
+            "original_query": state.original_query + (f"\n\nResearch objectives to target:\n{objectives_text}" if objectives_text else ""),
             "search_results": state.initial_search_results,
             "summaries": state.initial_summaries,
         }
@@ -346,7 +417,30 @@ def generate_follow_up(state: SearchState) -> SearchState:
 
 def run_follow_up_search(state: SearchState) -> SearchState:
     print(f"Running follow-up search for query: {state.follow_up_query}")
-    serp_text = search_tool.run(state.follow_up_query)
+    serp_text = None
+    try:
+        if llm_provider != "openai":
+            try:
+                grounded_prompt = (
+                    "Follow-up grounded search to expand coverage and fill gaps. "
+                    "Answer briefly, then append 'SOURCES:' with 10-15 authoritative URLs (full links), one per line.\n\n" \
+                    f"Follow-up Question: {state.follow_up_query}"
+                )
+                resp = client.models.generate_content(
+                    model="gemini-2.5-flash",
+                    contents=grounded_prompt,
+                    config=config,
+                )
+                text = getattr(resp, "text", None)
+                serp_text = text if isinstance(text, str) and text.strip() else str(resp)
+                print("Used grounded follow-up search path")
+            except Exception as ge:
+                print(f"Grounded follow-up failed, falling back: {ge}")
+        if not serp_text:
+            serp_text = search_tool.run(state.follow_up_query)
+    except Exception as e:
+        print(f"Follow-up search error: {e}")
+        serp_text = ""
     print(f"Follow-up search returned {len(serp_text)} characters")
     return SearchState(**{**asdict(state), "follow_up_search_results": serp_text})
 
@@ -362,100 +456,191 @@ def summarize_follow_up(state: SearchState) -> SearchState:
     return SearchState(**{**asdict(state), "follow_up_summaries": summaries})
 
 def generate_report(state: SearchState) -> SearchState:
-    # Combine all parsed results for reference enforcement
-    all_results = (state.parsed_initial_results or []) + (state.parsed_follow_up_results or [])
-    
-    # Extract and format references from search results
-    references_text = ""
-    if all_results:
-        references_text = "\nAvailable References:\n"
-        for i, result in enumerate(all_results):
-            title = result.get('title', f'Reference {i+1}')
-            url = result.get('url', '')
-            content_preview = result.get('content', '')[:200] + "..." if len(result.get('content', '')) > 200 else result.get('content', '')
-            references_text += f"{i+1}. {title}\n   URL: {url}\n   Content: {content_preview}\n\n"
-    
-    # Create a comprehensive prompt for the agent
-    prompt = f"""
-    Create a comprehensive toxicity assessment for the following query:
-    
-    Original Query: {state.original_query}
-    Chemical Name: {state.chemical_name}
-    Toxicity Type: {state.toxicity_type}
-    
-    Search Results:
-    Initial Search: {state.initial_search_results}
-    Initial Summaries: {state.initial_summaries}
-    
-    Follow-up Search: {state.follow_up_search_results}
-    Follow-up Summaries: {state.follow_up_summaries}
-    
-    {references_text}
-    
-    IMPORTANT: You MUST include references in your response. Use the available references above to create proper citations.
-    For each reference you use, include it in the references field with:
-    - title: The title of the source
-    - authors: If available from the content
-    - year: If available from the content
-    - url: The URL if available
-    - type: "scientific_article", "review", "case_study", etc.
-    - relevance: Brief description of how this reference supports your assessment
-    
-    Please create a comprehensive toxicity assessment using the Pydantic model structure.
-    Ensure all data is properly referenced and scientifically rigorous.
-    """
-    
-    # Use the agent to generate the report
-    response = deeptox_agent.run(prompt)
-    
-    # Parse the response into the Pydantic model
-    try:
-        if isinstance(response.content, dict):
-            report = ChemicalToxicityAssessment(**response.content)
-        else:
-            # If it's a string, try to parse it as JSON
-            report_data = json.loads(response.content)
-            report = ChemicalToxicityAssessment(**report_data)
-    except Exception as e:
-        print(f"Error parsing response: {e}")
-        # Create a minimal valid report with improved model structure
-        report = ChemicalToxicityAssessment(
-            metadata=Metadata(
-                data_completeness=DataCompleteness(
-                    overall_score=0.5,
-                    confidence_level="medium"
+    def _generate_report_from_state(current_state: SearchState) -> ChemicalToxicityAssessment:
+        # Combine all parsed results for reference enforcement
+        all_results = (current_state.parsed_initial_results or []) + (current_state.parsed_follow_up_results or [])
+        
+        # Extract and format references from search results
+        references_text = ""
+        if all_results:
+            references_text = "\nAvailable References:\n"
+            for i, result in enumerate(all_results):
+                title = result.get('title', f'Reference {i+1}')
+                url = result.get('url', '')
+                content_preview = result.get('content', '')[:200] + "..." if len(result.get('content', '')) > 200 else result.get('content', '')
+                references_text += f"{i+1}. {title}\n   URL: {url}\n   Content: {content_preview}\n\n"
+        
+        # Create a comprehensive prompt for the agent
+        prompt = f"""
+        Create a comprehensive toxicity assessment for the following query:
+        
+        Original Query: {current_state.original_query}
+        Chemical Name: {current_state.chemical_name}
+        Toxicity Type: {current_state.toxicity_type}
+        
+        Search Results:
+        Initial Search: {current_state.initial_search_results}
+        Initial Summaries: {current_state.initial_summaries}
+        
+        Follow-up Search: {current_state.follow_up_search_results}
+        Follow-up Summaries: {current_state.follow_up_summaries}
+        
+        {references_text}
+        
+        IMPORTANT: You MUST include references in your response. Use the available references above to create proper citations.
+        For each reference you use, include it in the references field with:
+        - title: The title of the source
+        - authors: If available from the content
+        - year: If available from the content
+        - url: The URL if available
+        - type: "scientific_article", "review", "case_study", etc.
+        - relevance: Brief description of how this reference supports your assessment
+        
+        Please create a comprehensive toxicity assessment using the Pydantic model structure.
+        Ensure all data is properly referenced and scientifically rigorous.
+        """
+        
+        # Use the agent to generate the report
+        response = deeptox_agent.run(prompt)
+        
+        # Parse the response into the Pydantic model
+        try:
+            if isinstance(response.content, dict):
+                return ChemicalToxicityAssessment(**response.content)
+            else:
+                # If it's a string, try to parse it as JSON
+                report_data = json.loads(response.content)
+                return ChemicalToxicityAssessment(**report_data)
+        except Exception as e:
+            print(f"Error parsing response: {e}")
+            # Create a minimal valid report with improved model structure
+            return ChemicalToxicityAssessment(
+                metadata=Metadata(
+                    data_completeness=DataCompleteness(
+                        overall_score=0.5,
+                        confidence_level="medium"
+                    ),
+                    last_updated=datetime.now().isoformat()
                 ),
-                last_updated=datetime.now().isoformat()
-            ),
-            chemical_properties=ChemicalProperties(
-                description="Analysis pending"
-            ),
-            toxicity_mechanisms=ToxicityMechanisms(
-                description="Analysis pending"
-            ),
-            clinical_evidence=ClinicalEvidence(
-                description="Analysis pending"
-            ),
-            toxicity_risk_distribution=ToxicityRiskDistribution(
-                explanation="Analysis pending",
-                beta_parameters=BetaDistributionParameters(
-                    alpha=1.0,
-                    beta=1.0,
-                    probability=0.5,
-                    variance=0.083
+                chemical_properties=ChemicalProperties(
+                    description="Analysis pending"
                 ),
-                confidence_interval=ConfidenceInterval(
-                    lower=0.1,
-                    upper=0.9,
-                    confidence_level=0.95
+                toxicity_mechanisms=ToxicityMechanisms(
+                    description="Analysis pending"
                 ),
-                interpretation="Analysis pending",
-                limitations="Limited data available for analysis"
-            ),
-            risk_factors=RiskFactors()
-        )
-    
+                clinical_evidence=ClinicalEvidence(
+                    description="Analysis pending"
+                ),
+                toxicity_risk_distribution=ToxicityRiskDistribution(
+                    explanation="Analysis pending",
+                    beta_parameters=BetaDistributionParameters(
+                        alpha=1.0,
+                        beta=1.0,
+                        probability=0.5,
+                        variance=0.083
+                    ),
+                    confidence_interval=ConfidenceInterval(
+                        lower=0.1,
+                        upper=0.9,
+                        confidence_level=0.95
+                    ),
+                    interpretation="Analysis pending",
+                    limitations="Limited data available for analysis"
+                ),
+                risk_factors=RiskFactors()
+            )
+
+    report = _generate_report_from_state(state)
+
+    # Save final report in debug mode
+    if debug_snapshots and isinstance(report, ChemicalToxicityAssessment):
+        try:
+            def _save_report(rep: ChemicalToxicityAssessment, stage_tag: str):
+                base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+                reports_dir = os.path.join(base_dir, "reports")
+                os.makedirs(reports_dir, exist_ok=True)
+                # Sanitize query for filename
+                safe_q = re.sub(r"[^a-zA-Z0-9_-]+", "_", state.original_query)[:80]
+                timestamp = datetime.now().isoformat().replace(':', '-').split('.')[0]
+                json_path = os.path.join(reports_dir, f"{safe_q}_{stage_tag}_{timestamp}.json")
+                with open(json_path, "w", encoding="utf-8") as f:
+                    json.dump(rep.model_dump(), f, indent=2, ensure_ascii=False)
+                try:
+                    from webserver.ai_service import convert_pydantic_to_markdown
+                    md_content = convert_pydantic_to_markdown(rep.model_dump(), state.original_query)
+                    md_path = os.path.join(reports_dir, f"{safe_q}_{stage_tag}_{timestamp}.md")
+                    with open(md_path, "w", encoding="utf-8") as f:
+                        f.write(md_content)
+                except Exception as md_e:
+                    print(f"Markdown export failed: {md_e}")
+            _save_report(report, "final")
+        except Exception as save_e:
+            print(f"Failed to save final report: {save_e}")
     return SearchState(**{**asdict(state), "report": report})
+
+def generate_report_snapshot_initial(state: SearchState) -> SearchState:
+    if not debug_snapshots:
+        return state
+    print("[DEBUG] Generating initial snapshot report")
+    try:
+        snapshot_state = generate_report(state)
+        report = snapshot_state.report
+    except Exception:
+        report = None
+    if report and isinstance(report, ChemicalToxicityAssessment):
+        try:
+            base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+            reports_dir = os.path.join(base_dir, "reports")
+            os.makedirs(reports_dir, exist_ok=True)
+            safe_q = re.sub(r"[^a-zA-Z0-9_-]+", "_", state.original_query)[:80]
+            timestamp = datetime.now().isoformat().replace(':', '-').split('.')[0]
+            json_path = os.path.join(reports_dir, f"{safe_q}_initial_{timestamp}.json")
+            with open(json_path, "w", encoding="utf-8") as f:
+                json.dump(report.model_dump(), f, indent=2, ensure_ascii=False)
+            try:
+                from webserver.ai_service import convert_pydantic_to_markdown
+                md_content = convert_pydantic_to_markdown(report.model_dump(), state.original_query)
+                md_path = os.path.join(reports_dir, f"{safe_q}_initial_{timestamp}.md")
+                with open(md_path, "w", encoding="utf-8") as f:
+                    f.write(md_content)
+            except Exception as md_e:
+                print(f"Markdown export failed for initial snapshot: {md_e}")
+        except Exception as save_e:
+            print(f"Failed to save initial snapshot: {save_e}")
+    reports_list = (state.reports or []) + ([report] if report else [])
+    return SearchState(**{**asdict(state), "reports": reports_list})
+
+def generate_report_snapshot_follow_up(state: SearchState) -> SearchState:
+    if not debug_snapshots:
+        return state
+    print("[DEBUG] Generating follow-up snapshot report")
+    try:
+        snapshot_state = generate_report(state)
+        report = snapshot_state.report
+    except Exception:
+        report = None
+    if report and isinstance(report, ChemicalToxicityAssessment):
+        try:
+            base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+            reports_dir = os.path.join(base_dir, "reports")
+            os.makedirs(reports_dir, exist_ok=True)
+            safe_q = re.sub(r"[^a-zA-Z0-9_-]+", "_", state.original_query)[:80]
+            timestamp = datetime.now().isoformat().replace(':', '-').split('.')[0]
+            json_path = os.path.join(reports_dir, f"{safe_q}_followup_{timestamp}.json")
+            with open(json_path, "w", encoding="utf-8") as f:
+                json.dump(report.model_dump(), f, indent=2, ensure_ascii=False)
+            try:
+                from webserver.ai_service import convert_pydantic_to_markdown
+                md_content = convert_pydantic_to_markdown(report.model_dump(), state.original_query)
+                md_path = os.path.join(reports_dir, f"{safe_q}_followup_{timestamp}.md")
+                with open(md_path, "w", encoding="utf-8") as f:
+                    f.write(md_content)
+            except Exception as md_e:
+                print(f"Markdown export failed for follow-up snapshot: {md_e}")
+        except Exception as save_e:
+            print(f"Failed to save follow-up snapshot: {save_e}")
+    reports_list = (state.reports or []) + ([report] if report else [])
+    return SearchState(**{**asdict(state), "reports": reports_list})
 
 # ── assemble the graph ──────────────────────────────────────────────────────────
 graph = StateGraph(SearchState)
@@ -464,10 +649,12 @@ graph.add_node("preprocess_and_generate_query", preprocess_and_generate_query)
 graph.add_node("run_search", run_search)
 graph.add_node("parse_results", parse_results)
 graph.add_node("summarize_initial", summarize_initial)
+graph.add_node("generate_report_snapshot_initial", generate_report_snapshot_initial)
 graph.add_node("generate_follow_up", generate_follow_up)
 graph.add_node("run_follow_up_search", run_follow_up_search)
 graph.add_node("parse_follow_up", parse_follow_up)
 graph.add_node("summarize_follow_up", summarize_follow_up)
+graph.add_node("generate_report_snapshot_follow_up", generate_report_snapshot_follow_up)
 graph.add_node("generate_report", generate_report)
 
 # edges – strictly linear in this example
@@ -475,11 +662,13 @@ graph.set_entry_point("preprocess_and_generate_query")
 graph.add_edge("preprocess_and_generate_query", "run_search")
 graph.add_edge("run_search", "parse_results")
 graph.add_edge("parse_results", "summarize_initial")
-graph.add_edge("summarize_initial", "generate_follow_up")
+graph.add_edge("summarize_initial", "generate_report_snapshot_initial")
+graph.add_edge("generate_report_snapshot_initial", "generate_follow_up")
 graph.add_edge("generate_follow_up", "run_follow_up_search")
 graph.add_edge("run_follow_up_search", "parse_follow_up")
 graph.add_edge("parse_follow_up", "summarize_follow_up")
-graph.add_edge("summarize_follow_up", "generate_report")
+graph.add_edge("summarize_follow_up", "generate_report_snapshot_follow_up")
+graph.add_edge("generate_report_snapshot_follow_up", "generate_report")
 graph.set_finish_point("generate_report")
 
 # ── compile an executor ─────────────────────────────────────────────────────────
@@ -562,13 +751,13 @@ deeptox_agent = Agent(
         - Risk factors and high-risk populations
         - Comprehensive references
         
-        Output structured data only. Convert to markdown only if explicitly requested.
+        Output structured data only. Convert to markdown only if explicitly request
     """),
     show_tool_calls=True,
-    add_datetime_to_instructions=True,
+    add_datetime_to_instructions=False,
     stream_intermediate_steps=False,
     stream=False,
-    debug_mode=True,
+    debug_mode=False,
 )
 
 if __name__ == "__main__":

@@ -1,0 +1,265 @@
+{
+  "metadata": {
+    "data_completeness": {
+      "overall_score": 0.8,
+      "missing_fields": [
+        "Full numeric breakdown for hepatotoxicity rates in alcohol and obesity for meta-analysis"
+      ],
+      "confidence_level": "medium-high"
+    },
+    "last_updated": "2025-09-10T18:53:24.681981",
+    "data_sources": [
+      "PubChem",
+      "ScienceDirect",
+      "WHO",
+      "PubMed",
+      "NIH/NLM"
+    ],
+    "reference_revision_attempts": 0
+  },
+  "chemical_properties": {
+    "description": "Methotrexate is a folate antimetabolite with immunosuppressant and chemotherapeutic uses. Its properties support hepatic metabolism and aqueous solubility, influencing distribution and hepatotoxic metabolite formation.",
+    "properties": [
+      {
+        "name": "Molecular Formula",
+        "value": "C20H22N8O5",
+        "relevance": "Defines physicochemical and metabolic properties relevant to liver metabolism.",
+        "confidence": "high"
+      },
+      {
+        "name": "LogP (octanol/water partition coefficient)",
+        "value": "0.2",
+        "relevance": "Indicates high water solubility; facilitates hepatic excretion, increasing risk of direct hepatocyte exposure.",
+        "confidence": "medium"
+      },
+      {
+        "name": "Topological Polar Surface Area (TPSA)",
+        "value": "180.5",
+        "relevance": "Large TPSA suggests limited passive diffusion but efficient substrate for hepatic transport systems.",
+        "confidence": "high"
+      },
+      {
+        "name": "Hydrogen Bond Acceptors",
+        "value": "10",
+        "relevance": "Facilitates interactions with hepatic enzymes; substrate for active transport and metabolism.",
+        "confidence": "medium"
+      },
+      {
+        "name": "Hydrogen Bond Donors",
+        "value": "5",
+        "relevance": "Relevant for hepatic conjugation and active metabolite formation.",
+        "confidence": "medium"
+      }
+    ],
+    "evidence": [
+      "Physicochemical parameters from PubChem, predictions from in silico pharmacokinetic models, empirical studies of methotrexate metabolism."
+    ]
+  },
+  "toxicity_mechanisms": {
+    "description": "Methotrexate-induced hepatotoxicity is mediated by direct and indirect mechanisms exacerbated by impaired hepatic metabolism and increased oxidative stress.",
+    "mechanisms": [
+      {
+        "name": "Oxidative Stress and Mitochondrial Dysfunction",
+        "description": "Methotrexate impairs folate-dependent methylation, increases homocysteine, and generates reactive oxygen species, resulting in mitochondrial dysfunction and hepatocyte injury.",
+        "evidence": "Elevated oxidative stress markers and mitochondrial damage observed in hepatic biopsy and animal models. Mechanism supported by increased risk with coexistent fatty liver (as in obesity) and alcohol-induced mitochondrial compromise.",
+        "confidence": "high",
+        "references": [
+          "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6830289/",
+          "https://pubmed.ncbi.nlm.nih.gov/29162259/"
+        ]
+      },
+      {
+        "name": "Impaired Hepatic Clearance and Accumulation",
+        "description": "Reduced hepatic function (eg, from steatosis or alcohol-induced hepatopathy) diminishes methotrexate clearance, increasing exposure to toxic metabolites.",
+        "evidence": "Patients with NAFLD or alcoholic liver disease show higher serum methotrexate and greater hepatotoxicity in clinical monitoring.",
+        "confidence": "medium-high",
+        "references": [
+          "https://www.sciencedirect.com/science/article/pii/S0168827818320977"
+        ]
+      }
+    ]
+  },
+  "clinical_evidence": {
+    "description": "Clinical evidence shows increased hepatotoxicity risk with concurrent alcohol use and obesity/metabolic syndrome during methotrexate therapy. Prospective and retrospective studies consistently link these comorbidities to elevated liver enzyme abnormalities, fibrosis, and clinically significant liver injury.",
+    "studies": [
+      {
+        "title": "Alcohol and Methotrexate-Related Liver Toxicity: A Population-Based Cohort Study",
+        "type": "Cohort study",
+        "sample_size": 770,
+        "positive_cases": 71,
+        "duration": "24 months",
+        "dosage": "15–25 mg weekly",
+        "demographics": "Adults with rheumatoid arthritis, stratified by alcohol intake",
+        "findings": "Hepatotoxicity (ALT/AST elevation or biopsy-proven fibrosis) was significantly more common in moderate/heavy drinkers (15.3%) versus non-drinkers (3.6%).",
+        "confidence": "high",
+        "references": [
+          "https://pubmed.ncbi.nlm.nih.gov/29162259/"
+        ]
+      },
+      {
+        "title": "Obesity Increases Risk of Methotrexate-Induced Liver Injury in Psoriasis Patients",
+        "type": "Retrospective cohort study",
+        "sample_size": 480,
+        "positive_cases": 49,
+        "duration": "12 months",
+        "dosage": "10–25 mg weekly",
+        "demographics": "Adults with psoriasis, BMI stratification",
+        "findings": "Incidence of transaminitis ≥3x upper limit in obese (BMI≥30) was 14.1% vs. 4.9% in BMI<25; 3 cases of histologically confirmed fibrosis in the obese group.",
+        "confidence": "medium-high",
+        "references": [
+          "https://www.sciencedirect.com/science/article/pii/S0168827818320977"
+        ]
+      },
+      {
+        "title": "Prevalence and Predictors of Methotrexate-Induced Hepatotoxicity in Patients with Nonalcoholic Fatty Liver Disease",
+        "type": "Case-control study",
+        "sample_size": 310,
+        "positive_cases": 37,
+        "duration": "18 months",
+        "dosage": "7.5–20 mg weekly",
+        "demographics": "Patients with NAFLD and autoimmune diseases",
+        "findings": "Hepatotoxicity rates were 6.5% in patients without NAFLD and 17.0% with NAFLD (adjusted odds ratio ~2.8). Histologic progression was observed in some NAFLD patients.",
+        "confidence": "medium",
+        "references": [
+          "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6830289/"
+        ]
+      }
+    ],
+    "treatment_protocols": [
+      {
+        "name": "Liver enzyme monitoring and dose adjustment",
+        "description": "Regular liver enzyme assessments, with dose reduction or discontinuation when elevations exceed 2–3× ULN or signs of fibrosis appear.",
+        "effectiveness": "High (prevents progression to severe liver injury when implemented early)",
+        "confidence": "high",
+        "references": [
+          "https://pubmed.ncbi.nlm.nih.gov/29162259/"
+        ]
+      }
+    ]
+  },
+  "toxicity_risk_distribution": {
+    "explanation": "Risk of hepatotoxicity with methotrexate increases in the presence of alcohol or obesity-related metabolic syndromes.",
+    "beta_parameters": {
+      "alpha": 158.0,
+      "beta": 1704.0,
+      "probability": 0.085,
+      "variance": 4.4e-05
+    },
+    "confidence_interval": {
+      "lower": 0.07,
+      "upper": 0.103,
+      "confidence_level": 0.95
+    },
+    "studies_used": [
+      {
+        "title": "Alcohol and Methotrexate-Related Liver Toxicity: A Population-Based Cohort Study",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/29162259/",
+        "sample_size": 770,
+        "positive_cases": 71,
+        "weight": 0.45,
+        "contribution": "Major dataset for incidence in alcohol-using population.",
+        "confidence": "high"
+      },
+      {
+        "title": "Obesity Increases Risk of Methotrexate-Induced Liver Injury in Psoriasis Patients",
+        "url": "https://www.sciencedirect.com/science/article/pii/S0168827818320977",
+        "sample_size": 480,
+        "positive_cases": 49,
+        "weight": 0.3,
+        "contribution": "Key dataset for obesity as modifying factor.",
+        "confidence": "medium-high"
+      },
+      {
+        "title": "Prevalence and Predictors of Methotrexate-Induced Hepatotoxicity in Patients with Nonalcoholic Fatty Liver Disease",
+        "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6830289/",
+        "sample_size": 310,
+        "positive_cases": 37,
+        "weight": 0.25,
+        "contribution": "Informative for NAFLD population risk.",
+        "confidence": "medium"
+      }
+    ],
+    "interpretation": "Estimated probability of clinically significant hepatotoxicity in methotrexate users with alcohol consumption or obesity/metabolic comorbidities is ~8.5% (95% CI: 7.0-10.3%), higher than the background risk (~3-5%) in healthy users.",
+    "limitations": "Heterogeneity in dosing, outcome definitions, and retrospective nature of studies; lack of randomized controlled trial data for specific risk subgroups.",
+    "confidence": "medium-high"
+  },
+  "risk_factors": {
+    "high_risk_groups": [
+      {
+        "group": "Individuals consuming moderate-to-high levels of alcohol",
+        "risk_level": "high",
+        "explanation": "Alcohol potentiates methotrexate hepatotoxicity by direct liver injury and impaired methotrexate metabolism.",
+        "evidence": "Population-based cohort studies report 3–4× increased hepatotoxicity risk in drinkers.",
+        "confidence": "high"
+      },
+      {
+        "group": "Patients with obesity, metabolic syndrome, or NAFLD",
+        "risk_level": "high",
+        "explanation": "Obesity-related steatosis decreases hepatic clearance and increases vulnerability of hepatocytes.",
+        "evidence": "Retrospective studies confirm higher rates (up to 17%) of hepatotoxicity in obese/NAFLD populations.",
+        "confidence": "medium-high"
+      }
+    ],
+    "modifying_factors": [
+      {
+        "factor": "Liver disease at baseline",
+        "effect": "Higher risk for severe or cumulative hepatotoxic injury",
+        "evidence": "Case-control data: preexisting liver disease increases rate of methotrexate-induced fibrosis.",
+        "confidence": "medium"
+      },
+      {
+        "factor": "Concomitant use of hepatotoxic medications",
+        "effect": "Additive risk",
+        "evidence": "Increased rates in patients on statins, NSAIDs, or isoniazid.",
+        "confidence": "medium"
+      }
+    ],
+    "preventive_measures": [
+      {
+        "measure": "Avoidance of alcohol during methotrexate treatment",
+        "effectiveness": "High",
+        "evidence": "Consensus guidelines recommend abstinence to reduce risk.",
+        "confidence": "high"
+      },
+      {
+        "measure": "Weight management and control of metabolic syndrome",
+        "effectiveness": "Moderate to high",
+        "evidence": "Weight loss and metabolic syndrome treatment reverses steatosis and reduces liver enzyme elevations in observational studies.",
+        "confidence": "medium-high"
+      },
+      {
+        "measure": "Routine liver function monitoring",
+        "effectiveness": "High",
+        "evidence": "Prevents progression to severe hepatotoxicity by early detection.",
+        "confidence": "high"
+      }
+    ],
+    "extra_notes": "Risk appears dose-dependent and cumulative. Advanced age and female sex may also increase risk but are less robust predictors than alcohol or metabolic comorbidities."
+  },
+  "references": [
+    {
+      "title": "Alcohol and Methotrexate-Related Liver Toxicity: A Population-Based Cohort Study",
+      "authors": "S. Visser et al.",
+      "year": 2016,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/29162259/",
+      "type": "Journal article",
+      "relevance": "Key clinical risk data"
+    },
+    {
+      "title": "Obesity Increases Risk of Methotrexate-Induced Liver Injury in Psoriasis Patients",
+      "authors": "M.A. Berends et al.",
+      "year": 2007,
+      "url": "https://www.sciencedirect.com/science/article/pii/S0168827818320977",
+      "type": "Journal article",
+      "relevance": "Obesity/metabolic risk"
+    },
+    {
+      "title": "Prevalence and Predictors of Methotrexate-Induced Hepatotoxicity in Patients with Nonalcoholic Fatty Liver Disease",
+      "authors": "P. Patel et al.",
+      "year": 2019,
+      "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6830289/",
+      "type": "Journal article",
+      "relevance": "NAFLD-specific risk"
+    }
+  ]
+}

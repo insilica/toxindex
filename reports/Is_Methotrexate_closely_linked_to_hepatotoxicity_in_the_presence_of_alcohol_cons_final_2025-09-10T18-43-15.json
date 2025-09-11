@@ -1,0 +1,51 @@
+{
+  "metadata": {
+    "data_completeness": {
+      "overall_score": 0.5,
+      "missing_fields": [],
+      "confidence_level": "medium"
+    },
+    "last_updated": "2025-09-10T18:43:15.269560",
+    "data_sources": [],
+    "reference_revision_attempts": 0
+  },
+  "chemical_properties": {
+    "description": "Analysis pending",
+    "properties": [],
+    "evidence": []
+  },
+  "toxicity_mechanisms": {
+    "description": "Analysis pending",
+    "mechanisms": []
+  },
+  "clinical_evidence": {
+    "description": "Analysis pending",
+    "studies": [],
+    "treatment_protocols": []
+  },
+  "toxicity_risk_distribution": {
+    "explanation": "Analysis pending",
+    "beta_parameters": {
+      "alpha": 1.0,
+      "beta": 1.0,
+      "probability": 0.5,
+      "variance": 0.083
+    },
+    "confidence_interval": {
+      "lower": 0.1,
+      "upper": 0.9,
+      "confidence_level": 0.95
+    },
+    "studies_used": [],
+    "interpretation": "Analysis pending",
+    "limitations": "Limited data available for analysis",
+    "confidence": "medium"
+  },
+  "risk_factors": {
+    "high_risk_groups": [],
+    "modifying_factors": [],
+    "preventive_measures": [],
+    "extra_notes": ""
+  },
+  "references": []
+}

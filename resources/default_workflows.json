@@ -101,7 +101,7 @@
       "title": "toxindex-sygma",
       "label": "sygma",
       "description": "Workflow that ranks chemicals based on user-specified endpoints",
-      "initial_prompt": "Upload a text file of of InChI's and an endpoint to be ranked by",
+      "initial_prompt": "Provide a SMILES string for your chemical of interest",
       "celery_task": "sygma",
       "task_name": "workflows.metabolite_sygma_task.metabolite_sygma_task", 
       "queue": "sygma",
