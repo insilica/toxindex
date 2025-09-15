@@ -1,0 +1,39 @@
+# Context catalog. The agent resolves user context (species/tissue) to the most specific entry:
+# (species,tissue) → (species,any) → (any,tissue) → any:any
+# Tags in allowed_tags enable rules bearing those tags; deny_tags can explicitly turn off certain tags.
+
+contexts:
+  - id: default
+    title: "Default (no specific constraints)"
+    species:
+    tissue:
+    allowed_tags: []
+    deny_tags: []
+
+  - id: human:any
+    title: "Human (all tissues)"
+    species: human
+    tissue:
+    allowed_tags: ["phaseI", "phaseII", "cyp", "ugt", "sult"]
+    deny_tags: []
+
+  - id: any:liver
+    title: "Liver (all species)"
+    species:
+    tissue: liver
+    allowed_tags: ["phaseI", "phaseII", "cyp", "ugt", "sult"]
+    deny_tags: []
+
+  - id: human:liver
+    title: "Human liver"
+    species: human
+    tissue: liver
+    allowed_tags: ["phaseI", "phaseII", "cyp", "cyp2d6", "cyp3a4", "ugt", "sult"]
+    deny_tags: []
+
+  - id: human:intestine
+    title: "Human intestine"
+    species: human
+    tissue: intestine
+    allowed_tags: ["phaseI", "phaseII", "cyp3a4", "ugt", "sult"]
+    deny_tags: ["cyp2d6"]  # e.g., downweight/not relevant in intestine

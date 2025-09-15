@@ -1,0 +1,33 @@
+# Minimal starter rule set for SMARTS-based applicability gating.
+# Need to further extend and curate. Rule IDs should be stable (used downstream for filtering/explanations).
+
+rules:
+  - id: R_AROM_OH
+    name: Aromatic hydroxylation (CYP)
+    reactant_smarts: "c1ccccc1"
+    tags: ["phaseI", "cyp", "cyp2d6", "cyp3a4"]
+    description: "Presence of an aromatic ring suggests potential for aromatic hydroxylation."
+
+  - id: R_AMIDE_HYD
+    name: Amide hydrolysis
+    reactant_smarts: "C(=O)N"
+    tags: ["phaseI", "hydrolase", "amidase"]
+    description: "Amide bond susceptible to hydrolysis by amidases/esterases."
+
+  - id: R_O_DEALK
+    name: O-dealkylation (CYP)
+    reactant_smarts: "[OX2;!$([O-])][CH3,CH2]"
+    tags: ["phaseI", "cyp", "cyp2d6", "cyp3a4"]
+    description: "Alkoxy group that can undergo O-dealkylation."
+
+  - id: R_GLUC
+    name: Glucuronidation (UGT)
+    reactant_smarts: "[OX2H]"
+    tags: ["phaseII", "ugt"]
+    description: "Free hydroxyl group enables O-glucuronidation."
+
+  - id: R_SULF
+    name: Sulfation (SULT)
+    reactant_smarts: "c[OH]"
+    tags: ["phaseII", "sult"]
+    description: "Phenolic OH commonly undergoes sulfation."
