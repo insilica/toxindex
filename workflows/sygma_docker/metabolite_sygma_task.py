@@ -38,6 +38,15 @@ from workflows.utils import download_gcs_file_to_temp, upload_local_file_to_gcs
 # Import the Sygma tool
 from sygma_predictor import SygmaMetabolitePredictor
 
+# # Import the reaction gating module
+# from workflows.sygma_docker.gating.runner import load_rule_config, gate_reactions
+# rules = load_rule_config("workflows/sygma_docker/resources/sygma_gating/rules.yml",
+#                          "workflows/sygma_docker/resources/sygma_gating/contexts.yml")
+# gating = gate_reactions(parent_smiles=smiles, context={"species":"human","tissue":"liver"})
+# # …pass gating.allowed_rule_ids (or similar) into your SyGMa call…
+# result["gating"] = gating.model_dump()
+
+
 # Set up the logger
 logging.getLogger().info("metabolite_sygma_task.py module loaded")
 logger = logging.getLogger(__name__)
