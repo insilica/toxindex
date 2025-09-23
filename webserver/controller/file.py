@@ -119,43 +119,69 @@ def download_file(file_id):
             from webserver.cache_manager import cache_manager
             import tempfile
             import hashlib
-            
+
             gcs_storage = GCSFileStorage()
-            
+
             # Get file metadata for ETag
             metadata = cache_manager.get_file_metadata(file.filepath)
             etag = metadata.get('md5_hash', '') if metadata else ''
-            
+
+
             # Create temporary file
             with tempfile.NamedTemporaryFile(delete=False) as temp_file:
                 temp_path = temp_file.name
-            
-            # Download from GCS
-            gcs_storage.download_file(file.filepath, temp_path)
-            
-            # Send file with caching headers
+
+            # Download from GCS BEFORE sending file
+            try:
+                gcs_storage.download_file(file.filepath, temp_path)
+            except Exception as download_exc:
+                logging.error(f"GCS download failed for {file.filepath}: {download_exc}")
+                return jsonify({'error': f'Failed to download file from GCS: {download_exc}', 'filepath': file.filepath}), 502
+
+            # Now send the file
             response = send_file(temp_path, as_attachment=True, download_name=file.filename)
-            
+
             # Add HTTP caching headers
             response.headers['Cache-Control'] = 'public, max-age=3600'  # 1 hour
             if etag:
                 response.headers['ETag'] = f'"{etag}"'
+            import datetime
             if metadata and metadata.get('created'):
-                response.headers['Last-Modified'] = metadata['created'].strftime('%a, %d %b %Y %H:%M:%S GMT')
-            
+                created = metadata['created']
+                dt = None
+                if isinstance(created, str):
+                    # Try parsing as ISO8601 or RFC3339
+                    try:
+                        # Remove Z and replace with +00:00 for UTC if present
+                        iso_str = created.replace('Z', '+00:00') if 'Z' in created else created
+                        dt = datetime.datetime.fromisoformat(iso_str)
+                    except Exception:
+                        try:
+                            # Try parsing RFC 1123/2822 (e.g., 'Mon, 23 Sep 2025 19:21:00 GMT')
+                            dt = datetime.datetime.strptime(created, '%a, %d %b %Y %H:%M:%S GMT')
+                        except Exception:
+                            dt = None
+                elif hasattr(created, 'strftime'):
+                    dt = created
+                if dt:
+                    response.headers['Last-Modified'] = dt.strftime('%a, %d %b %Y %H:%M:%S GMT')
+                else:
+                    # Fallback: use string as-is (may be non-standard)
+                    response.headers['Last-Modified'] = str(created)
+
             # Clean up temp file after response is sent
             @response.call_on_close
             def cleanup():
                 try:
                     os.unlink(temp_path)
-                except:
-                    pass
-            
+                except Exception as cleanup_exc:
+                    logging.warning(f"Failed to clean up temp file {temp_path}: {cleanup_exc}")
+
             return response
-            
+
         except Exception as e:
-            logging.error(f"Failed to download file from GCS: {e}")
-            return abort(404)
+            logging.error(f"Failed to download file from GCS (outer exception): {e}")
+            return jsonify({'error': f'Unexpected error during GCS file download: {e}', 'filepath': file.filepath}), 500
     
     # Handle local files
     elif os.path.exists(file.filepath):
