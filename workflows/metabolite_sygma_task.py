@@ -28,25 +28,43 @@ from webserver.cache_manager import cache_manager
 # Utility functions
 from workflows.utils import emit_status, get_redis_connection, publish_to_celery_updates, publish_to_socketio
 
-# Import the Sygma tool
+# Import the Sygma tool (installed from submodule in Dockerfile.sygma)
 from sygma_predictor import SygmaMetabolitePredictor
+
+# Import the reaction gating module
+from workflows.sygma_docker.gating.runner import load_rule_config, gate_reactions
 
 # Set up the logger
 logging.getLogger().info("metabolite_sygma_task.py module loaded")
 logger = logging.getLogger(__name__)
+
+
+# --- Gating config locations ---
+RULES_YAML = "workflows/sygma_docker/resources/sygma_gating/rules.yaml"
+CONTEXTS_YAML = "workflows/sygma_docker/resources/sygma_gating/contexts.yaml"
+
+# Default biological context if not supplied by client payload
+DEFAULT_GATING_CONTEXT = {"species": "human", "tissue": "liver"}
+
+
+# rules = load_rule_config(RULES_YAML, CONTEXTS_YAML)
+# gating = gate_reactions(parent_smiles=smiles, context=DEFAULT_GATING_CONTEXT)
+# # …pass gating.allowed_rule_ids (or similar) into your SyGMa call…
+# result["gating"] = gating.model_dump()
+
 
 # <----- Utility Functions ----->
 def emit_task_message(task_id, message_data):
     """Emit task message to both database and real-time channels"""
     # Publish to celery_updates for database processing
     publish_to_celery_updates("task_message", task_id, message_data)
-    
+
     # Publish to Socket.IO for real-time updates
     task = Task.get_task(task_id)
     if task and getattr(task, 'session_id', None):
         # Emit to chat session room
         publish_to_socketio("new_message", f"chat_session_{task.session_id}", message_data)
-    
+
     # Emit to task room
     publish_to_socketio("task_message", f"task_{task_id}", {
         "type": "task_message",
@@ -59,7 +77,7 @@ def emit_task_file(task_id, file_data):
     """Emit task file to both database and real-time channels"""
     # Publish to celery_updates for database processing
     publish_to_celery_updates("task_file", task_id, file_data)
-    
+
     # Publish to Socket.IO for real-time updates
     publish_to_socketio("task_file", f"task_{task_id}", file_data)
 
@@ -97,6 +115,7 @@ def get_chemical_from_query(user_query: str) -> List[str]:
     # Fallback: treat the whole thing as a single chemical name
     return [text]
 
+
 def _is_smiles(s: str) -> bool:
     """True if s parses as a valid SMILES with RDKit."""
     if not s or not isinstance(s, str):
@@ -106,9 +125,11 @@ def _is_smiles(s: str) -> bool:
     except Exception:
         return False
 
+
 def check_if_SMILES(chemical_string: str) -> bool:
-    """Alias kept for backward compatibility with your code."""
+    """Alias kept for backward compatibility."""
     return _is_smiles(chemical_string)
+
 
 def convert_chemical_name_to_smiles(chemical_name: str) -> Optional[str]:
     """
@@ -119,7 +140,7 @@ def convert_chemical_name_to_smiles(chemical_name: str) -> Optional[str]:
         import pubchempy as pcp
         hits = pcp.get_compounds(chemical_name, "name")
         if hits:
-            smi = hits[0].canonical_smiles
+            smi = hits[0].canonical_smiles  # take the first hit from the list
             logger.info(f"Resolved name '{chemical_name}' → SMILES '{smi}'")
             return smi
         logger.warning(f"No PubChem hit for '{chemical_name}'")
@@ -127,14 +148,17 @@ def convert_chemical_name_to_smiles(chemical_name: str) -> Optional[str]:
         logger.warning(f"PubChem lookup failed for '{chemical_name}': {e}")
     return None
 
+
 # Aliases for missing functions
 def _name_to_smiles(chemical_name: str) -> Optional[str]:
     """Alias for convert_chemical_name_to_smiles"""
     return convert_chemical_name_to_smiles(chemical_name)
 
+
 def _normalize_metabolites(raw_result: Any) -> List[Dict[str, Any]]:
     """Alias for _normalize_sygma_output"""
     return _normalize_sygma_output(raw_result)
+
 
 def _to_markdown_summary(query: str, smiles: str, rows: List[Dict[str, Any]]) -> str:
     """Generate a markdown summary of the metabolite analysis results"""
@@ -148,17 +172,63 @@ def _to_markdown_summary(query: str, smiles: str, rows: List[Dict[str, Any]]) ->
 Found {len(rows)} metabolites:
 
 """
-    for i, metabolite in enumerate(rows[:10], 1):  # Show first 10
+    for i, metabolite in enumerate(rows[:len(rows)], 1):  # Show first 10
         prob = metabolite.get('probability', 'N/A')
         markdown += f"{i}. **SMILES**: `{metabolite.get('smiles', 'N/A')}`\n"
-        if prob != 'N/A':
-            markdown += f"   - **Probability**: {prob:.3f}\n"
+        if prob != 'N/A' and prob is not None:
+            try:
+                markdown += f"   - **Probability**: {float(prob):.3f}\n"
+            except Exception:
+                markdown += f"   - **Probability**: {prob}\n"
         markdown += "\n"
-    
-    if len(rows) > 10:
-        markdown += f"... and {len(rows) - 10} more metabolites.\n"
-    
+
     return markdown
+
+# <----- Gating helpers ----->
+def _gating_context_from_payload(payload: Dict[str, Any]) -> Dict[str, str]:
+    """
+    Extract gating context from payload if present; fallback to defaults.
+    Accepts fields like payload['context'] = {'species': 'human', 'tissue': 'liver'}.
+    """
+    ctx = {}
+    try:
+        user_ctx = (payload.get("context") or {}) if isinstance(payload.get("context"), dict) else {}
+        ctx["species"] = (user_ctx.get("species") or DEFAULT_GATING_CONTEXT["species"]).strip().lower()
+        ctx["tissue"] = (user_ctx.get("tissue") or DEFAULT_GATING_CONTEXT["tissue"]).strip().lower()
+    except Exception:
+        ctx = dict(DEFAULT_GATING_CONTEXT)
+    return ctx
+
+
+def _gating_to_markdown(gating_report: Any) -> str:
+    """
+    Make a short, UI-friendly markdown block summarizing gating results.
+    """
+    try:
+        d = gating_report.model_dump() if hasattr(gating_report, "model_dump") else (
+            gating_report.to_dict() if hasattr(gating_report, "to_dict") else gating_report
+        )
+        ctx = d.get("context", {})
+        rows = d.get("decisions", []) or []
+        applicable = [r for r in rows if r.get("applicable")]
+        relevant = [r for r in rows if r.get("relevant")]
+        both = [r for r in rows if r.get("applicable") and r.get("relevant")]
+
+        lines = []
+        lines.append("## Pre-analysis Gating (SMARTS + Context)")
+        lines.append(f"- **Context resolved**: `{ctx.get('resolved_context_id', 'unknown')}`")
+        lines.append(f"- **Rules**: total {d.get('n_rules', len(rows))}, "
+                     f"applicable {len(applicable)}, relevant {len(relevant)}, "
+                     f"applicable ∧ relevant {len(both)}")
+        if both:
+            lines.append("\n**Likely-active rule hits:**")
+            for r in both[:8]:  # keep it brief in chat
+                rid = r.get("rule_id"); nm = r.get("rule_name"); tg = r.get("tags") or []
+                lines.append(f"- `{rid}` — {nm} (tags: {', '.join(tg) if tg else '—'})")
+        return "\n".join(lines) + "\n"
+    except Exception:
+        return "## Pre-analysis Gating\n- (Could not render gating summary)\n"
+
 
 # <----- Helper functions: Reaction rule stub (not used now, kept for future) ----->
 def define_reaction_rules(chemical: str) -> List[str]:
@@ -170,6 +240,7 @@ def define_reaction_rules(chemical: str) -> List[str]:
         raise ValueError("Chemical name or SMILES string cannot be empty.")
     logger.info(f"Defining reaction rules for chemical: {chemical}")
     return ["Oxidation", "Reduction", "Hydrolysis", "Hydroxylation", "Dealkylation", "Deamination"]
+
 
 # <----- SyGMa integration and normalization ----->
 def _normalize_sygma_output(result: Any) -> List[Dict[str, Any]]:
@@ -195,7 +266,7 @@ def _normalize_sygma_output(result: Any) -> List[Dict[str, Any]]:
 
         if isinstance(smi, str):
             try:
-                prob_f = float(prob) if prob is not None else None
+                prob_f = float(prob) if (prob is not None and prob != "") else None
             except Exception:
                 prob_f = None
             out.append({"smiles": smi, "probability": prob_f})
@@ -227,6 +298,7 @@ def sygma_get_metabolites(
         return pd.DataFrame(mets, columns=["smiles", "probability"])
     return mets
 
+
 # <----- Main Function ----->
 # Define the task for metabolite SYGMA analysis (main function)
 @celery.task(bind=True, queue="sygma")
@@ -242,7 +314,7 @@ def metabolite_sygma_task(self, payload: Dict[str, Any]):
     task_id = payload.get("task_id")
     user_id = payload.get("user_id")
     query = payload.get("user_query")  # either a chemical name or a SMILES
-
+    
     try:
         if not all([task_id, user_id, query]):
             raise ValueError(f"Missing required fields: task_id={task_id}, user_id={user_id}, payload={query}")
@@ -265,44 +337,103 @@ def metabolite_sygma_task(self, payload: Dict[str, Any]):
             smiles = _name_to_smiles(query)
             if not smiles:
                 raise ValueError(f"Could not resolve '{query}' to a SMILES string.")
+        
+        emit_status(task_id, "input resolved")
 
         # Cache keys (like probra_task)
         cache_key_base = f"sygma_cache:{hashlib.sha256(f'{query}|{smiles}'.encode()).hexdigest()}"
         json_cache_key = f"{cache_key_base}:json"
         csv_cache_key = f"{cache_key_base}:csv"
         md_cache_key = f"{cache_key_base}:markdown"
+        gating_cache_key = f"{cache_key_base}:gating_json"
+        gating_md_cache_key = f"{cache_key_base}:gating_md"
 
         emit_status(task_id, "checking cache")
         cached_json = r.get(json_cache_key)
         cached_csv = r.get(csv_cache_key)
         cached_md = r.get(md_cache_key)
+        cached_gating = r.get(gating_cache_key)
+        cached_gating_md = r.get(gating_md_cache_key)
+
+        # --- Always compute gating unless both JSON + MD are cached ---
+        emit_status(task_id, "gating")
+        try:
+            gating_cfg = load_rule_config(RULES_YAML, CONTEXTS_YAML)
+            gating_ctx = _gating_context_from_payload(payload)
+            if cached_gating and cached_gating_md:
+                logger.info("Using cached gating report")
+                gating_report_json = json.loads(cached_gating)
+                gating_md = cached_gating_md.decode("utf-8") if isinstance(cached_gating_md, (bytes, bytearray)) else cached_gating_md
+            else:
+                logger.info(f"Running gating on SMILES with context {gating_ctx}")
+                gating_report_obj = gate_reactions(
+                    parent_smiles=smiles, rules=gating_cfg, context=gating_ctx
+                )
+                # serialize
+                if hasattr(gating_report_obj, "model_dump"):
+                    gating_report_json = gating_report_obj.model_dump()
+                elif hasattr(gating_report_obj, "to_dict"):
+                    gating_report_json = gating_report_obj.to_dict()
+                else:
+                    gating_report_json = gating_report_obj  # already dict-like
+
+                gating_md = _gating_to_markdown(gating_report_obj)
+                # cache for 24h
+                r.set(gating_cache_key, json.dumps(gating_report_json, ensure_ascii=False), ex=60 * 60 * 24)
+                r.set(gating_md_cache_key, gating_md, ex=60 * 60 * 24)
+        except Exception as ge:
+            logger.warning(f"Gating step failed or unavailable: {ge}")
+            emit_status(task_id, "gating failed")
+            gating_report_json = None
+            gating_md = "## Pre-analysis Gating\n- (unavailable)\n"
 
         if cached_json and cached_md and cached_csv:
             logger.info("Using cached SyGMa results")
             metabolites = json.loads(cached_json)
             markdown = cached_md.decode("utf-8") if isinstance(cached_md, (bytes, bytearray)) else cached_md
             csv_data = cached_csv.decode("utf-8") if isinstance(cached_csv, (bytes, bytearray)) else cached_csv
-            emit_status(task_id, "using cache")
+            # augment the markdown with gating section if not present already
+            markdown = f"{gating_md}\n{markdown}"
         else:
             # Run SyGMa
             emit_status(task_id, "running sygma")
             logger.info("Instantiating SygmaMetabolitePredictor")
             predictor = SygmaMetabolitePredictor()
 
+            # If the predictor supports a rule filter, pass IDs of (applicable ∧ relevant) rules.
+            allowed_rule_ids = []
+            try:
+                if gating_report_json and isinstance(gating_report_json, dict):
+                    for d in gating_report_json.get("decisions", []):
+                        if d.get("applicable") and d.get("relevant"):
+                            rid = d.get("rule_id")
+                            if rid:
+                                allowed_rule_ids.append(rid)
+            except Exception:
+                allowed_rule_ids = []
+
             logger.info(f"Predicting metabolites for SMILES: {smiles}")
-            raw = predictor.get_metabolites(smiles, phase1_cycles=1, phase2_cycles=1)
+            try:
+                # optimistic path: submodule may accept a filter kwarg
+                raw = predictor.get_metabolites(
+                    smiles, phase1_cycles=1, phase2_cycles=1, allowed_rule_ids=allowed_rule_ids
+                )
+            except TypeError:
+                # fallback: older API with no filter support
+                raw = predictor.get_metabolites(smiles, phase1_cycles=1, phase2_cycles=1)
+
             metabolites = _normalize_metabolites(raw)
 
             emit_status(task_id, "formatting results")
             logger.info(f"Normalized {len(metabolites)} metabolites")
 
             # Make CSV
-            import pandas as pd
             df = pd.DataFrame(metabolites, columns=["smiles", "probability"])
             csv_data = df.to_csv(index=False)
 
-            # Markdown summary (like probra_task makes markdown output)
-            markdown = _to_markdown_summary(query=query, smiles=smiles, rows=metabolites)
+            # Markdown summary (prepend gating section)
+            results_md = _to_markdown_summary(query=query, smiles=smiles, rows=metabolites)
+            markdown = f"{gating_md}\n{results_md}"
 
             # Cache for 24h
             emit_status(task_id, "caching results")
@@ -321,15 +452,27 @@ def metabolite_sygma_task(self, payload: Dict[str, Any]):
 
         json_filename = f"sygma_result_{uuid.uuid4().hex}.json"
         csv_filename = f"sygma_result_{uuid.uuid4().hex}.csv"
-        md_filename = f"sygma_result_{uuid.uuid4().hex}.md"
+        md_filename  = f"sygma_result_{uuid.uuid4().hex}.md"
+        gating_filename = f"sygma_gating_{uuid.uuid4().hex}.json"   # NEW
 
         with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False, encoding="utf-8") as tj:
             json_path = tj.name
             tj.write(json.dumps({
                 "query": query,
                 "resolved_smiles": smiles,
+                "gating": gating_report_json,                    # embed gating in main JSON
                 "metabolites": metabolites
             }, indent=2, ensure_ascii=False))
+
+        # Gating JSON (separate downloadable artifact)
+        gating_path = None
+        try:
+            if gating_report_json is not None:
+                with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False, encoding="utf-8") as tg:
+                    gating_path = tg.name
+                    tg.write(json.dumps(gating_report_json, indent=2, ensure_ascii=False))
+        except Exception as e:
+            logger.warning(f"Failed to write gating JSON temp file: {e}")
 
         with tempfile.NamedTemporaryFile(mode="w", suffix=".csv", delete=False, encoding="utf-8") as tc:
             csv_path = tc.name
@@ -344,18 +487,24 @@ def metabolite_sygma_task(self, payload: Dict[str, Any]):
             base = f"tasks/{task_id}"
 
             json_gcs_path = f"{base}/{json_filename}"
-            csv_gcs_path = f"{base}/{csv_filename}"
-            md_gcs_path = f"{base}/{md_filename}"
+            csv_gcs_path  = f"{base}/{csv_filename}"
+            md_gcs_path   = f"{base}/{md_filename}"
+            gating_gcs_path = f"{base}/{gating_filename}" if gating_path else None
 
             gcs.upload_file(json_path, json_gcs_path, content_type="application/json")
-            gcs.upload_file(csv_path, csv_gcs_path, content_type="text/csv")
-            gcs.upload_file(md_path, md_gcs_path, content_type="text/markdown")
+            gcs.upload_file(csv_path,  csv_gcs_path,  content_type="text/csv")
+            gcs.upload_file(md_path,   md_gcs_path,   content_type="text/markdown")
+
+            if gating_path and gating_gcs_path:
+                gcs.upload_file(gating_path, gating_gcs_path, content_type="application/json")
 
             # optional: warm file cache for UI (like probra_task)
             if cache_manager:
                 cache_manager.cache_file_content(json_gcs_path, open(json_path, "r", encoding="utf-8").read())
-                cache_manager.cache_file_content(csv_gcs_path, open(csv_path, "r", encoding="utf-8").read())
-                cache_manager.cache_file_content(md_gcs_path, open(md_path, "r", encoding="utf-8").read())
+                cache_manager.cache_file_content(csv_gcs_path,  open(csv_path, "r", encoding="utf-8").read())
+                cache_manager.cache_file_content(md_gcs_path,   open(md_path, "r", encoding="utf-8").read())
+                if gating_path and gating_gcs_path:
+                    cache_manager.cache_file_content(gating_gcs_path, open(gating_path, "r", encoding="utf-8").read())
 
             emit_status(task_id, "files uploaded")
 
@@ -381,10 +530,18 @@ def metabolite_sygma_task(self, payload: Dict[str, Any]):
                 "file_type": "markdown",
                 "content_type": "text/markdown",
             })
+            if gating_path and gating_gcs_path:
+                emit_task_file(task_id, {
+                    "user_id": user_id,
+                    "filename": gating_filename,
+                    "filepath": gating_gcs_path,
+                    "file_type": "json",
+                    "content_type": "application/json",
+                })
 
         finally:
             # cleanup temps
-            for p in (locals().get("json_path"), locals().get("csv_path"), locals().get("md_path")):
+            for p in (locals().get("json_path"), locals().get("csv_path"), locals().get("md_path"), locals().get("gating_path")):
                 if p:
                     try:
                         os.unlink(p)
@@ -404,232 +561,3 @@ def metabolite_sygma_task(self, payload: Dict[str, Any]):
         except Exception:
             pass
         raise
-
-# import re
-# import redis
-# import json
-# import os
-# import uuid
-# import logging
-# import tempfile
-
-# # Libraries for chemical data handling
-# import pubchempy as pcp
-# from rdkit import Chem
-
-# from pathlib import Path
-
-# # For data manipulation
-# import pandas as pd
-
-# # Celery for task management
-# from workflows.celery_worker import celery
-
-# # Webserver models and storage
-# from webserver.model.message import MessageSchema
-# from webserver.model.task import Task
-# from webserver.model.file import File
-# from webserver.storage import GCSFileStorage
-
-# # Logging
-# logger = logging.getLogger(__name__)
-
-# # Utility functions
-# from workflows.utils import emit_status, download_gcs_file_to_temp, upload_local_file_to_gcs
-# ## if this does not work, add the functions directly
-
-# # Import the Sygma tool
-# from sygma_predictor import SygmaMetabolitePredictor, predict_metabolites_dataframe, predict_single, get_metabolites
-
-# # Define the task for metabolite SYGMA analysis (main function)
-# @celery.task(bind=True)
-# def metabolite_sygma_task(self, payload):
-#     """Task to perform metabolite SYGMA analysis.
-
-#     General Steps:
-#     1. Download input files from GCS. Format?? 
-#     Should be a chemical name or SMILES string for Sygma.
-#     2. If input is a chemical name, convert to SMILES. Try NIH tool or PubChemPy.
-#     3. Call the sygma_predictor tool with the SMILES string.
-#     4. Save the results to a temporary file.
-#     5. Upload the results file to GCS.
-#     6. Emit task status updates.
-#     7. Return the GCS path of the results file.
-
-#     Notes: 
-#     * test with hardcoded SMILES or chemical names first.
-#     * is workflow linear? ask Yifan/Zaki since they made it
-#         * how to interpret the query -> tool-calling
-#     * probra task has code snippet to get message payload
-#     * check cache for similar queries (if applicable)
-
-#     More notes:
-#     * SyGMa generates metabolites in isolation, but in practice, the context of metabolic pathways matters.
-#     This task should run in conjunction with the pathway analysis task to provide a more comprehensive view of the metabolites.
-#     Should customize the reaction rules based on the chemical and its context.
-
-#     Inputs: 
-#     - payload: Dictionary containing the task ID, user ID, query, and path to the input file.
-
-#     Outputs:
-
-#     """
-#     try:
-#         logger.info(f"[Metabolite SyGMa GCS] Running metabolite_sygma_task for task_id={payload.get('task_id')}, user_id={payload.get('user_id')}, payload={payload}")
-#         # set up the 
-#         r = redis.Redis(
-#             host=os.environ.get("REDIS_HOST", "localhost"),
-#             port=int(os.environ.get("REDIS_PORT", "6379"))
-#         )
-#         task_id = payload.get("task_id")
-#         user_id = payload.get("user_id")
-
-#         user_query = payload.get("payload", "Is Gentamicin nephrotoxic?")
-
-#         if not all([task_id, user_id, user_query]):
-#             raise ValueError(f"Missing required fields. task_id={task_id}, user_id={user_id}, user_query={user_query}")
-#         # Allow users to upload a file with chemical names or SMILES strings
-#         # file_id = payload.get("payload")
-
-#         chemicals = get_chemical_from_query(user_query)
-
-#         for chemical in chemicals:
-#             is_smiles = check_if_SMILES(chemical)
-#             if not is_smiles:
-#                 # If not a valid SMILES, convert chemical name to SMILES
-#                 chemical = convert_chemical_name_to_smiles(chemical)
-#                 logger.info(f"Converted chemical name to SMILES: {chemical}")
-#             else:
-#                 logger.info(f"Using provided SMILES: {chemical}")
-#             # Define reaction rules based on the chemical
-#             reaction_rules = define_reaction_rules(chemical)
-#             logger.info(f"Defined reaction rules for {chemical}: {reaction_rules}")
-#             # Get metabolites using the SygmaMetabolitePredictor
-#             metabolites_df = sygma_get_metabolites(chemical, reaction_rules=reaction_rules)
-#             logger.info(f"Retrieved metabolites for {chemical}: {metabolites_df.shape[0]} metabolites found.")
-#             # Save the metabolites DataFrame to a temporary file
-#             with tempfile.NamedTemporaryFile(delete=False, suffix=".csv") as temp_file:
-#                 metabolites_df.to_csv(temp_file.name, index=False)
-#                 temp_file_path = temp_file.name
-#                 logger.info(f"Saved metabolites to temporary file: {temp_file_path}")
-#             # Upload the temporary file to GCS
-#             gcs_path = f"metabolites/{user_id}/{task_id}/{uuid.uuid4()}.csv"
-#             upload_local_file_to_gcs(temp_file_path, gcs_path)
-#             logger.info(f"Uploaded metabolites file to GCS: {gcs_path}")
-#             # Emit task status update
-#             emit_status(
-#                 task_id=task_id,
-#                 user_id=user_id,
-#                 status="completed",
-#                 message=f"Metabolites for {chemical} saved to {gcs_path}",
-#                 gcs_path=gcs_path
-#             )
-
-#         logger.info(f"[Metabolite SyGMa GCS] Completed metabolite_sygma_task for task_id={task_id}, user_id={user_id}")
-#     except Exception as e:
-#         logger.error(f"[Metabolite SyGMa GCS] Error in metabolite_sygma_task: {e}")
-#         emit_status(
-#             task_id=task_id,
-#             user_id=user_id,
-#             status="failed",
-#             message=str(e)
-#         )
-    
-#         # Handle any exceptions that occur during the task
-#         # This could include logging the error, sending a notification, etc.
-#         # For now, we just log the error and emit a failure status
-#         logger.error(f"Error in metabolite_sygma_task: {e}")
-
-# # Define helper functions for the task (Add unit tests for each helper function)
-# def parse_user_query(user_query: str) -> dict:
-#     """Parse the user query to determine steps for metabolite prediction.
-#     This function can be extended to handle more complex queries in the future."""
-#     # This is a placeholder for more complex parsing logic
-#     # For now, we assume the user query is a single chemical name or SMILES string
-#     return {"chemical": user_query.strip()}
-
-# def get_chemical_from_query(user_query: str) -> str:
-#     """
-#         Extract chemical names and/or SMILES strings from the user query using a simple LLM agent approach.
-#         For now, use regex to find SMILES-like strings and fallback to extracting chemical names.
-#     """
-#     # Regex for SMILES (very basic, can be improved)
-#     smiles_pattern = r'([A-Za-z0-9@+\-\[\]\(\)\\\/%=#$]+)'
-#     # Try to find SMILES in the query
-#     smiles_matches = re.findall(smiles_pattern, user_query)
-#     # Filter out matches that are likely not chemical names (heuristic: length > 5)
-#     smiles_candidates = [s for s in smiles_matches if len(s) > 5]
-#     if smiles_candidates:
-#         return smiles_candidates[0]
-#     # Otherwise, fallback to extracting chemical name (assume the whole query is the name)
-#     return {"chemical": user_query.strip()}
-
-# def define_reaction_rules(chemical: str) -> List[str]:
-#     """Define reaction rules based on the chemical name or SMILES string.
-#     Use an LLM to generate reaction rules that are appropriate for the chemical."""
-#     # For now, we return a dummy set of rules.
-#     # In a real implementation, this would involve calling an LLM or a database of chemical reactions.
-#     # This is a placeholder for more complex logic.
-#     rules = []
-#     if not chemical:
-#         raise ValueError("Chemical name or SMILES string cannot be empty.")
-#     try:
-#         logger.info(f"Defining reaction rules for chemical: {chemical}")
-#     # Example of a simple rule definition
-#     # In practice, this would be more complex and based on chemical properties
-#         rules = ["Oxidation", "Reduction", "Hydrolysis", "Hydroxylation", "Dealkylation", "Deamination"]
-
-#     except Exception as e:
-#         logger.error(f"Error defining reaction rules for chemical {chemical}: {e}")
-#         raise ValueError(f"Failed to define reaction rules for chemical: {chemical}")
-#     return rules
-
-
-# def convert_chemical_name_to_smiles(chemical_name: str) -> str:
-#     """Convert a chemical name to SMILES using PubChemPy or NCI tool.
-#     Kyu suggested using an LLM agent."""
-#     import pubchempy as pcp
-#     compound = pcp.get_compounds(chemical_name, 'name')
-#     if compound:
-#         return compound[0].canonical_smiles
-#     else:
-#         # Add user input validation and error handling
-#         raise ValueError(f"Could not find SMILES for chemical name: {chemical_name}")
-#     ### Reminder: Add unit tests for this function
-
-# def check_if_SMILES(chemical_string: str) -> bool:
-#     """Check if a given string is a valid SMILES."""
-#     try:
-#         if Chem.MolFromSmiles(chemical_string):
-#             return True
-#     except Exception as e:
-#         logger.error(f"String is not a valid SMILES: {chemical_string}, error: {e}")
-#         return False
-
-# def sygma_get_metabolites(parent_smiles: str, phase1_cycles=1, phase2_cycles=1) -> pd.DataFrame:
-#     """Get metabolites using the SygmaMetabolitePredictor.
-    
-#     Notes: Add in `reaction_rules: List[str]` parameter to customize the reaction rules 
-#     based on the chemical and its context.
-#     """
-#     predictor = SygmaMetabolitePredictor()
-#     metabolites = predictor.get_metabolites(parent_smiles, phase1_cycles, phase2_cycles)
-
-#     if not metabolites:
-#         raise ValueError(f"No metabolites found for SMILES: {parent_smiles}")
-#         logger.error(f"No metabolites found for SMILES: {parent_smiles}")
-#     with open("metabolites.json", "w") as f:
-#         json.dump(metabolites, f, indent=4)
-#     logger.info(f"Found {len(metabolites)} metabolites for SMILES: {parent_smiles}")
-    
-#     return pd.DataFrame(metabolites)
-
-
-# # Just for testing purposes, remove later
-# if __name__ == "__main__":
-#     test_payload = {
-#         "task_id": "dev-test",
-#         "user_id": "local-user",
-#         "payload": "acetaminophen"
-#     }
-#     metabolite_sygma_task.apply(args=(test_payload,))

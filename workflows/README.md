@@ -1,1 +1,1 @@
-celery -A workflows.celery_worker worker --loglevel=info -Q celery,probra,openai,raptool,pathway
+celery -A workflows.celery_worker worker --loglevel=info -Q celery,probra,openai,raptool,pathway,sygma
