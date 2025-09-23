@@ -561,13 +561,3 @@ def metabolite_sygma_task(self, payload: Dict[str, Any]):
         except Exception:
             pass
         raise
-
-# if __name__ == "__main__":
-#     # For local testing only; in production, this runs via Celery worker
-#     test_payload = {
-#     "task_id": "1234",
-#     "user_id": "test_user",
-#     "user_query": "aspirin",
-#     "context": {"species": "human", "tissue": "liver"}
-#     }
-#     metabolite_sygma_task.apply_async(args=[test_payload])
