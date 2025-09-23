@@ -166,7 +166,7 @@ def _to_markdown_summary(query: str, smiles: str, rows: List[Dict[str, Any]]) ->
 Found {len(rows)} metabolites:
 
 """
-    for i, metabolite in enumerate(rows[:10], 1):  # Show first 10
+    for i, metabolite in enumerate(rows[:len(rows)], 1):  # Show first 10
         prob = metabolite.get('probability', 'N/A')
         markdown += f"{i}. **SMILES**: `{metabolite.get('smiles', 'N/A')}`\n"
         if prob != 'N/A' and prob is not None:
@@ -176,11 +176,7 @@ Found {len(rows)} metabolites:
                 markdown += f"   - **Probability**: {prob}\n"
         markdown += "\n"
 
-    if len(rows) > 10:
-        markdown += f"... and {len(rows) - 10} more metabolites.\n"
-
     return markdown
-
 
 # <----- Gating helpers ----->
 def _gating_context_from_payload(payload: Dict[str, Any]) -> Dict[str, str]:
