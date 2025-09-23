@@ -31,7 +31,7 @@ from workflows.utils import emit_status, get_redis_connection, publish_to_celery
 # Import the Sygma tool (installed from submodule in Dockerfile.sygma)
 from sygma_predictor import SygmaMetabolitePredictor
 
-# --- Gating imports ---
+# Import the reaction gating module
 from workflows.sygma_docker.gating.runner import load_rule_config, gate_reactions
 
 # Set up the logger
@@ -39,12 +39,18 @@ logging.getLogger().info("metabolite_sygma_task.py module loaded")
 logger = logging.getLogger(__name__)
 
 
-# --- Gating config locations (Option A paths) ---
+# --- Gating config locations ---
 RULES_YAML = "workflows/sygma_docker/resources/sygma_gating/rules.yaml"
 CONTEXTS_YAML = "workflows/sygma_docker/resources/sygma_gating/contexts.yaml"
 
 # Default biological context if not supplied by client payload
 DEFAULT_GATING_CONTEXT = {"species": "human", "tissue": "liver"}
+
+
+# rules = load_rule_config(RULES_YAML, CONTEXTS_YAML)
+# gating = gate_reactions(parent_smiles=smiles, context=DEFAULT_GATING_CONTEXT)
+# # …pass gating.allowed_rule_ids (or similar) into your SyGMa call…
+# result["gating"] = gating.model_dump()
 
 
 # <----- Utility Functions ----->
@@ -121,7 +127,7 @@ def _is_smiles(s: str) -> bool:
 
 
 def check_if_SMILES(chemical_string: str) -> bool:
-    """Alias kept for backward compatibility with your code."""
+    """Alias kept for backward compatibility."""
     return _is_smiles(chemical_string)
 
 
@@ -134,7 +140,7 @@ def convert_chemical_name_to_smiles(chemical_name: str) -> Optional[str]:
         import pubchempy as pcp
         hits = pcp.get_compounds(chemical_name, "name")
         if hits:
-            smi = hits[0].canonical_smiles
+            smi = hits[0].canonical_smiles  # take the first hit from the list
             logger.info(f"Resolved name '{chemical_name}' → SMILES '{smi}'")
             return smi
         logger.warning(f"No PubChem hit for '{chemical_name}'")
@@ -308,7 +314,7 @@ def metabolite_sygma_task(self, payload: Dict[str, Any]):
     task_id = payload.get("task_id")
     user_id = payload.get("user_id")
     query = payload.get("user_query")  # either a chemical name or a SMILES
-
+    
     try:
         if not all([task_id, user_id, query]):
             raise ValueError(f"Missing required fields: task_id={task_id}, user_id={user_id}, payload={query}")
@@ -331,6 +337,8 @@ def metabolite_sygma_task(self, payload: Dict[str, Any]):
             smiles = _name_to_smiles(query)
             if not smiles:
                 raise ValueError(f"Could not resolve '{query}' to a SMILES string.")
+        
+        emit_status(task_id, "input resolved")
 
         # Cache keys (like probra_task)
         cache_key_base = f"sygma_cache:{hashlib.sha256(f'{query}|{smiles}'.encode()).hexdigest()}"
@@ -375,6 +383,7 @@ def metabolite_sygma_task(self, payload: Dict[str, Any]):
                 r.set(gating_md_cache_key, gating_md, ex=60 * 60 * 24)
         except Exception as ge:
             logger.warning(f"Gating step failed or unavailable: {ge}")
+            emit_status(task_id, "gating failed")
             gating_report_json = None
             gating_md = "## Pre-analysis Gating\n- (unavailable)\n"
 
@@ -552,3 +561,13 @@ def metabolite_sygma_task(self, payload: Dict[str, Any]):
         except Exception:
             pass
         raise
+
+# if __name__ == "__main__":
+#     # For local testing only; in production, this runs via Celery worker
+#     test_payload = {
+#     "task_id": "1234",
+#     "user_id": "test_user",
+#     "user_query": "aspirin",
+#     "context": {"species": "human", "tissue": "liver"}
+#     }
+#     metabolite_sygma_task.apply_async(args=[test_payload])
