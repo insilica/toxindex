@@ -14,7 +14,7 @@ contexts:
     title: "Human (all tissues)"
     species: human
     tissue:
-    allowed_tags: ["phaseI", "phaseII", "cyp", "ugt", "sult"]
+    allowed_tags: ["phaseI", "phaseII", "cyp", "ugt", "sult", "fmo", "mao", "comt", "nat", "gst", "ces", "aox", "eh", "akr"]
     deny_tags: []
 
   - id: any:liver
@@ -28,12 +28,160 @@ contexts:
     title: "Human liver"
     species: human
     tissue: liver
-    allowed_tags: ["phaseI", "phaseII", "cyp", "cyp2d6", "cyp3a4", "ugt", "sult"]
+    # Dominant drug-metabolizing organ; major CYPs + conjugation pathways active
+    allowed_tags:
+      - phaseI
+      - phaseII
+      - cyp
+      - cyp3a4
+      - cyp2d6
+      - cyp2c9
+      - cyp2c19
+      - cyp1a2
+      - cyp2e1
+      - cyp2b6
+      - cyp2a6
+      - ugt
+      - sult
+      - fmo
+      - nat
+      - gst
+      - aox
+      - eh
+      - akr
+      - ces
     deny_tags: []
 
   - id: human:intestine
     title: "Human intestine"
     species: human
     tissue: intestine
-    allowed_tags: ["phaseI", "phaseII", "cyp3a4", "ugt", "sult"]
-    deny_tags: ["cyp2d6"]  # e.g., downweight/not relevant in intestine
+    # Enteric first-pass (esp. CYP3A4, UGT); less CYP2D6
+    allowed_tags: ["phaseI", "phaseII", "cyp", "cyp3a4", "cyp2c9", "cyp2c19", "ugt", "sult"]
+    deny_tags: ["cyp2d6"]
+
+  - id: human:small_intestine
+    title: "Human small intestine"
+    species: human
+    tissue: small_intestine
+    allowed_tags: ["phaseI", "phaseII", "cyp", "cyp3a4", "cyp2c9", "cyp2c19", "ugt", "sult"]
+    deny_tags: ["cyp2d6"]
+
+  - id: human:colon
+    title: "Human colon"
+    species: human
+    tissue: colon
+    # Phase II still relevant; microbiome reduction/hydrolysis may be modeled via separate "microbiome" tag if you add such rules
+    allowed_tags: ["phaseI", "phaseII", "ugt", "sult", "cyp1a1", "cyp1b1"]
+    deny_tags: ["cyp2d6", "cyp3a4"]  # far lower than small intestine
+
+  - id: human:kidney
+    title: "Human kidney"
+    species: human
+    tissue: kidney
+    # Conjugation + hydrolysis; transporter processes not modeled here
+    allowed_tags: ["phaseI", "phaseII", "ugt", "sult", "fmo", "nat", "gst", "ces", "akr", "eh"]
+    deny_tags: ["cyp2d6"]  # low; keep generic cyp off unless you add kidney-specific CYP rules
+
+  - id: human:lung
+    title: "Human lung"
+    species: human
+    tissue: lung
+    # Pulmonary CYP1 family, CYP2A13; some conjugation
+    allowed_tags: ["phaseI", "phaseII", "cyp1a1", "cyp1b1", "cyp2a13", "ugt", "sult", "fmo"]
+    deny_tags: ["cyp2d6", "cyp3a4"]  # relatively low vs liver/intestine
+
+  - id: human:brain
+    title: "Human brain (CNS)"
+    species: human
+    tissue: brain
+    # Low CYP; strong MAO/COMT for amines/catechols
+    allowed_tags: ["phaseI", "mao", "comt", "fmo", "ugt", "sult"]
+    deny_tags: ["cyp2d6", "cyp3a4", "cyp2c9", "cyp2c19", "cyp1a2", "cyp2e1", "cyp2b6"]
+
+  - id: human:heart
+    title: "Human heart (cardiac)"
+    species: human
+    tissue: heart
+    # Not a major metabolic site; MAO for amines; CYP2J2 locally
+    allowed_tags: ["phaseI", "mao", "comt", "cyp2j2", "ugt", "sult"]
+    deny_tags: ["cyp2d6", "cyp3a4", "cyp2c9", "cyp2c19"]
+
+  - id: human:skin
+    title: "Human skin"
+    species: human
+    tissue: skin
+    # Barrier tissue with CYP1s, some UGT/SULT, epoxide hydrolase
+    allowed_tags: ["phaseI", "phaseII", "cyp1a1", "cyp1b1", "ugt", "sult", "eh", "akr"]
+    deny_tags: ["cyp2d6", "cyp3a4"]
+
+  - id: human:plasma
+    title: "Human plasma/blood"
+    species: human
+    tissue: plasma
+    # Circulating hydrolases (CES), paraoxonase; little CYP
+    allowed_tags: ["phaseI", "ces"]
+    deny_tags: ["cyp", "ugt", "sult", "mao", "comt"]
+
+  - id: human:stomach
+    title: "Human stomach"
+    species: human
+    tissue: stomach
+    # Acid hydrolysis; minimal CYP; some UGT/SULT
+    allowed_tags: ["phaseI", "phaseII", "ugt", "sult", "eh"]
+    deny_tags: ["cyp2d6", "cyp3a4", "cyp2c9", "cyp2c19"]
+
+  - id: human:pancreas
+    title: "Human pancreas"
+    species: human
+    tissue: pancreas
+    # Limited xenobiotic metabolism; include conjugation if needed
+    allowed_tags: ["phaseII", "ugt", "sult"]
+    deny_tags: ["cyp"]
+
+  - id: human:spleen
+    title: "Human spleen"
+    species: human
+    tissue: spleen
+    allowed_tags: ["phaseII", "ugt", "sult"]
+    deny_tags: ["cyp"]
+
+  - id: human:bone_marrow
+    title: "Human bone marrow"
+    species: human
+    tissue: bone_marrow
+    allowed_tags: ["phaseII", "ugt", "sult"]
+    deny_tags: ["cyp"]
+
+  - id: human:adipose
+    title: "Human adipose (fat)"
+    species: human
+    tissue: adipose
+    # Storage > metabolism; some Phase II possible
+    allowed_tags: ["phaseII", "ugt", "sult"]
+    deny_tags: ["cyp"]
+
+  - id: human:muscle
+    title: "Human skeletal muscle"
+    species: human
+    tissue: muscle
+    # Low enzyme expression; MAO present in mitochondria
+    allowed_tags: ["phaseI", "mao"]
+    deny_tags: ["cyp", "ugt", "sult"]
+
+  - id: human:placenta
+    title: "Human placenta"
+    species: human
+    tissue: placenta
+    # Pregnancy context; some UGT/SULT, FMO reported
+    allowed_tags: ["phaseII", "ugt", "sult", "fmo"]
+    deny_tags: ["cyp"]
+
+  # Optional: a general gut-microbiome context if we add microbial rules in future
+  - id: human:microbiome_gut
+    title: "Human gut microbiome (adjunct)"
+    species: human
+    tissue: microbiome_gut
+    # Use only if you create microbe-specific reduction/hydrolysis rules and tag them "microbiome"
+    allowed_tags: ["microbiome"]
+    deny_tags: ["cyp", "ugt", "sult", "mao", "comt", "fmo", "nat", "gst", "ces", "aox", "eh", "akr"]
