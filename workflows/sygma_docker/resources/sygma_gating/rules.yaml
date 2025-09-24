@@ -1,33 +1,304 @@
-# Minimal starter rule set for SMARTS-based applicability gating.
+# SMARTS-based applicability gating for SyGMa-like reactions.
 # Need to further extend and curate. Rule IDs should be stable (used downstream for filtering/explanations).
+# NOTE: SMARTS here are minimal triggers; refine as needed (sterics, SOM, pKa, etc.).
 
 rules:
+  # -------------------------
+  # PHASE I — OXIDATIONS (CYP/FMO/AOX)
+  # -------------------------
   - id: R_AROM_OH
     name: Aromatic hydroxylation (CYP)
     reactant_smarts: "c1ccccc1"
-    tags: ["phaseI", "cyp", "cyp2d6", "cyp3a4"]
-    description: "Presence of an aromatic ring suggests potential for aromatic hydroxylation."
+    tags: ["phaseI", "cyp", "cyp2d6", "cyp3a4", "cyp1a2", "cyp2c9", "cyp2c19"]
+    description: "Arenes susceptible to ring hydroxylation."
 
-  - id: R_AMIDE_HYD
-    name: Amide hydrolysis
-    reactant_smarts: "C(=O)N"
-    tags: ["phaseI", "hydrolase", "amidase"]
-    description: "Amide bond susceptible to hydrolysis by amidases/esterases."
+  - id: R_BENZYLIC_OX
+    name: Benzylic oxidation (CYP)
+    reactant_smarts: "[CH2,CH;!$(C=O)]-[c]"
+    tags: ["phaseI", "cyp", "cyp3a4", "cyp2d6", "cyp2c9", "cyp2c19"]
+    description: "Benzylic C–H oxidation to alcohol/ketone."
+
+  - id: R_ALLYLIC_OX
+    name: Allylic oxidation (CYP)
+    reactant_smarts: "[CH2,CH]-C=C"
+    tags: ["phaseI", "cyp", "cyp3a4", "cyp2c9", "cyp2c19"]
+    description: "Allylic hydroxylation adjacent to C=C."
+
+  - id: R_ALIPHATIC_OH
+    name: Aliphatic hydroxylation (CYP)
+    reactant_smarts: "[CH3,CH2,CH]~[CH3,CH2,CH]"
+    tags: ["phaseI", "cyp", "cyp3a4", "cyp2c9", "cyp2c19", "cyp2b6"]
+    description: "Generic aliphatic C–H oxidation."
+
+  - id: R_N_DEALK_SEC_TERT
+    name: N-dealkylation of secondary/tertiary amines (CYP)
+    reactant_smarts: "[NX3;!$([N-]);!$(NC=O)][CH3,CH2]"
+    tags: ["phaseI", "cyp", "cyp3a4", "cyp2d6", "cyp2c19"]
+    description: "Oxidative N-dealkylation on dialkyl/tri-alkyl amines."
 
   - id: R_O_DEALK
     name: O-dealkylation (CYP)
     reactant_smarts: "[OX2;!$([O-])][CH3,CH2]"
-    tags: ["phaseI", "cyp", "cyp2d6", "cyp3a4"]
-    description: "Alkoxy group that can undergo O-dealkylation."
+    tags: ["phaseI", "cyp", "cyp2d6", "cyp3a4", "cyp2c19"]
+    description: "Alkoxy groups subject to O-dealkylation."
 
-  - id: R_GLUC
-    name: Glucuronidation (UGT)
+  - id: R_S_DEALK
+    name: S-dealkylation (CYP)
+    reactant_smarts: "S[CH3,CH2]"
+    tags: ["phaseI", "cyp", "cyp3a4", "cyp2c19"]
+    description: "Thioethers undergoing oxidative S-dealkylation."
+
+  - id: R_N_OXIDE
+    name: Tertiary amine N-oxide (FMO/CYP)
+    reactant_smarts: "[NX3;H0;!$([N-]);!$(NC=O)]"
+    tags: ["phaseI", "fmo", "cyp3a4"]
+    description: "N-oxidation of trialkylarylamines."
+
+  - id: R_ANILINE_N_OH
+    name: Aromatic amine N-hydroxylation (CYP)
+    reactant_smarts: "c[NH2,NH]"
+    tags: ["phaseI", "cyp", "cyp1a2", "cyp2e1"]
+    description: "Anilines to N-hydroxylamines."
+
+  - id: R_S_OX_SULFOX
+    name: Sulfoxidation (CYP/FMO)
+    reactant_smarts: "S([#6])[#6]"
+    tags: ["phaseI", "cyp", "fmo", "cyp3a4", "cyp2c9"]
+    description: "Thioether → sulfoxide."
+
+  - id: R_S_OX_SULFONE
+    name: Sulfone formation (CYP/FMO)
+    reactant_smarts: "S(=O)[#6]"
+    tags: ["phaseI", "cyp", "fmo"]
+    description: "Sulfoxide → sulfone (second oxidation)."
+
+  - id: R_SULFUR_DESULF
+    name: Oxidative desulfuration (CYP)
+    reactant_smarts: "C(=S)[N,O,S]"
+    tags: ["phaseI", "cyp", "cyp3a4"]
+    description: "Thiocarbonyl → carbonyl plus sulfur loss."
+
+  - id: R_ALKENE_EPOX
+    name: Alkene epoxidation (CYP)
+    reactant_smarts: "C=C"
+    tags: ["phaseI", "cyp", "cyp3a4", "cyp2c9"]
+    description: "Isolated C=C epoxidation."
+
+  - id: R_ARENE_EPOX
+    name: Arene oxide formation (CYP)
+    reactant_smarts: "c1ccccc1"
+    tags: ["phaseI", "cyp", "cyp1a2"]
+    description: "Arene → arene oxide (may rearrange/hydrolyze)."
+
+  - id: R_ALCOHOL_TO_KETONE
+    name: Secondary alcohol oxidation to ketone (CYP/ADH)
+    reactant_smarts: "[CH][OH]"
+    tags: ["phaseI", "cyp", "aox"]
+    description: "Alcohol → carbonyl."
+
+  - id: R_ALDEHYDE_TO_ACID
+    name: Aldehyde oxidation to carboxylic acid (ALDH/AOX)
+    reactant_smarts: "[CH;X3](=O)[#6]"
+    tags: ["phaseI", "aox"]
+    description: "Aldehyde → carboxylate."
+
+  - id: R_CARBONYL_RED
+    name: Carbonyl reduction (AKR)
+    reactant_smarts: "C(=O)[#6]"
+    tags: ["phaseI", "akr"]
+    description: "Ketone/aldehyde → alcohol."
+
+  - id: R_NITRO_RED
+    name: Nitro reduction (reductase/microbiome)
+    reactant_smarts: "[NX3](=O)=O"
+    tags: ["phaseI", "reduction", "microbiome"]
+    description: "Ar/alkyl nitro → hydroxylamine/amine."
+
+  - id: R_AZO_RED
+    name: Azo reduction (reductase/microbiome)
+    reactant_smarts: "N=N"
+    tags: ["phaseI", "reduction", "microbiome"]
+    description: "Azo bond cleavage to amines."
+
+  - id: R_DEHALO_AR
+    name: Aromatic dehalogenation (CYP/reduction)
+    reactant_smarts: "c[Cl,Br,I,F]"
+    tags: ["phaseI", "cyp", "reduction"]
+    description: "Aryl–X lability under metabolic conditions."
+
+  - id: R_DEHALO_ALKYL
+    name: Aliphatic dehalogenation (CYP/reduction)
+    reactant_smarts: "[CX4][Cl,Br,I]"
+    tags: ["phaseI", "cyp", "reduction"]
+    description: "Alkyl–X oxidative/reductive dehalogenation."
+
+  - id: R_OX_DEAMINATION
+    name: Oxidative deamination (MAO/CYP)
+    reactant_smarts: "[NX3;H2,H1][CH2,CH]-[c,C]"
+    tags: ["phaseI", "mao", "cyp"]
+    description: "Primary/secondary amines → imine → carbonyl + NH3."
+
+  # -------------------------
+  # PHASE I — HYDROLYSIS (CES/EH/PEPTIDASE)
+  # -------------------------
+  - id: R_ESTER_HYD
+    name: Ester hydrolysis (carboxylesterase)
+    reactant_smarts: "C(=O)O[CX4]"
+    tags: ["phaseI", "hydrolase", "ces"]
+    description: "Cleavage of simple esters."
+
+  - id: R_AMIDE_HYD
+    name: Amide hydrolysis (amidase)
+    reactant_smarts: "C(=O)N"
+    tags: ["phaseI", "hydrolase", "amidase"]
+    description: "Amide bond cleavage."
+
+  - id: R_CARBAMATE_HYD
+    name: Carbamate hydrolysis (esterase)
+    reactant_smarts: "OC(=O)N"
+    tags: ["phaseI", "hydrolase", "ces"]
+    description: "Carbamate → alcohol + amine + CO2."
+
+  - id: R_CARBONATE_HYD
+    name: Carbonate hydrolysis (esterase)
+    reactant_smarts: "OC(=O)O"
+    tags: ["phaseI", "hydrolase", "ces"]
+    description: "Carbonate → two alcohols + CO2."
+
+  - id: R_LACTONE_OPEN
+    name: Lactone ring opening (esterase)
+    reactant_smarts: "O=C1O[C,c,N]C1"
+    tags: ["phaseI", "hydrolase", "ces"]
+    description: "Cyclic ester hydrolysis."
+
+  - id: R_LACTAM_OPEN
+    name: Lactam ring opening (peptidase/amidase)
+    reactant_smarts: "O=C1N[C,c,O]C1"
+    tags: ["phaseI", "hydrolase", "amidase"]
+    description: "Cyclic amide hydrolysis."
+
+  - id: R_EPOXIDE_HYD
+    name: Epoxide hydrolysis (epoxide hydrolase)
+    reactant_smarts: "[OX2r3]"
+    tags: ["phaseI", "eh"]
+    description: "Epoxide ring opening to diols."
+
+  # -------------------------
+  # PHASE II — GLUCURONIDATION (UGT)
+  # -------------------------
+  - id: R_GLUC_OH
+    name: O-glucuronidation of alcohols/phenols (UGT)
     reactant_smarts: "[OX2H]"
     tags: ["phaseII", "ugt"]
-    description: "Free hydroxyl group enables O-glucuronidation."
+    description: "General O-glucuronidation on OH."
 
-  - id: R_SULF
-    name: Sulfation (SULT)
+  - id: R_GLUC_CARBOXYL
+    name: Acyl glucuronidation of carboxylic acids (UGT)
+    reactant_smarts: "C(=O)[O;H1,-1]"
+    tags: ["phaseII", "ugt"]
+    description: "Acyl glucuronides from COOH."
+
+  - id: R_GLUC_N3
+    name: N-glucuronidation of tertiary amines (UGT)
+    reactant_smarts: "[NX3;H0;!$([N-])]"
+    tags: ["phaseII", "ugt"]
+    description: "Quaternization-type N-glucuronides."
+
+  - id: R_GLUC_THIOL
+    name: S-glucuronidation of thiols (UGT)
+    reactant_smarts: "[SH]"
+    tags: ["phaseII", "ugt"]
+    description: "Thiol conjugation with glucuronic acid."
+
+  # -------------------------
+  # PHASE II — SULFATION (SULT)
+  # -------------------------
+  - id: R_SULF_PHENOL
+    name: Phenolic sulfation (SULT)
     reactant_smarts: "c[OH]"
     tags: ["phaseII", "sult"]
-    description: "Phenolic OH commonly undergoes sulfation."
+    description: "High-affinity sulfation of phenols."
+
+  - id: R_SULF_ALCOHOL
+    name: Aliphatic alcohol sulfation (SULT)
+    reactant_smarts: "[CH2,CH][OH]"
+    tags: ["phaseII", "sult"]
+    description: "Secondary to phenols; lower affinity."
+
+  # -------------------------
+  # PHASE II — METHYLATION (COMT/TPMT)
+  # -------------------------
+  - id: R_COMT_CATECHOL
+    name: Catechol O-methylation (COMT)
+    reactant_smarts: "c1ccc(c(c1)O)O"
+    tags: ["phaseII", "comt"]
+    description: "Vicinal di-phenols (catechols)."
+
+  - id: R_TPMT_THIOL
+    name: Thiol S-methylation (TPMT)
+    reactant_smarts: "[SH]"
+    tags: ["phaseII", "tpmt"]
+    description: "S-methyltransferase targets thiols."
+
+  # -------------------------
+  # PHASE II — ACETYLATION (NAT)
+  # -------------------------
+  - id: R_NAT_AROM_AMINE
+    name: N-acetylation of aryl amines (NAT)
+    reactant_smarts: "c[NH2]"
+    tags: ["phaseII", "nat"]
+    description: "Anilines → acetanilides."
+
+  - id: R_NAT_ALIPH_AMINE
+    name: N-acetylation of primary aliphatic amines (NAT)
+    reactant_smarts: "[NH2][CX4]"
+    tags: ["phaseII", "nat"]
+    description: "Primary aliphatic amines."
+
+  # -------------------------
+  # PHASE II — AMINO ACID/OTHER CONJUGATIONS
+  # -------------------------
+  - id: R_GLY_CONJ
+    name: Glycine conjugation (acyl-CoA:glycine N-acyltransferase)
+    reactant_smarts: "C(=O)[O;H1,-1]"
+    tags: ["phaseII", "amino_acid_conj"]
+    description: "Carboxylic acids to acyl-glycines."
+
+  - id: R_TAURINE_CONJ
+    name: Taurine conjugation (bile acid-like)
+    reactant_smarts: "C(=O)[O;H1,-1]"
+    tags: ["phaseII", "amino_acid_conj"]
+    description: "Acyl-CoA dependent taurine conjugation."
+
+  - id: R_GSH_MICHAEL
+    name: GSH conjugation to Michael acceptor (GST)
+    reactant_smarts: "C=CC(=O)[#6]"
+    tags: ["phaseII", "gst"]
+    description: "α,β-Unsaturated carbonyls (soft electrophiles)."
+
+  - id: R_GSH_EPOXIDE
+    name: GSH conjugation to epoxide (GST)
+    reactant_smarts: "[OX2r3]"
+    tags: ["phaseII", "gst"]
+    description: "Epoxides as electrophiles for GSH."
+
+  - id: R_GSH_HALIDE_SNAr
+    name: GSH SNAr on activated aryl halide (GST)
+    reactant_smarts: "c([F,Cl,Br,I])[N+](=O)[O-]"
+    tags: ["phaseII", "gst"]
+    description: "Activated Ar–X (e.g., nitro-activated) for SNAr."
+
+  # -------------------------
+  # PHASE II — OTHERS / SPECIAL
+  # -------------------------
+  - id: R_SULFAMATE_FORM
+    name: Sulfamate formation on amines (SULT-like)
+    reactant_smarts: "[NX3;H1,H2]"
+    tags: ["phaseII", "sult"]
+    description: "Less common; amine sulfation motif."
+
+  - id: R_PHOSPHO_EST
+    name: Phosphorylation of primary alcohols (rare xenobiotics)
+    reactant_smarts: "[CH2][OH]"
+    tags: ["phaseII", "other"]
+    description: "Occasional xenobiotic phosphorylation."
