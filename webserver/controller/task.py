@@ -27,10 +27,23 @@ def get_user_tasks():
             tasks = Task.get_tasks_by_user(user_id)
         active_tasks = [t for t in tasks if not t.archived]
         archived_tasks = [t for t in tasks if t.archived]
-        def sort_key(t):
+
+        # Prioritize running/incomplete tasks, then newest by last_accessed/created_at
+        def active_sort_key(t):
+            # running/incomplete first (status not in done/error)
+            status = (t.status or '').lower()
+            is_running = 0 if status not in ('done', 'error') else 1
+            ts = t.last_accessed or t.created_at or datetime.datetime.min
+            # lower is earlier in sort; we want running first (0) and newest first (-ts)
+            return (is_running, ts)
+
+        def archive_sort_key(t):
             return t.last_accessed or t.created_at or datetime.datetime.min
-        active_tasks = sorted(active_tasks, key=sort_key, reverse=True)
-        archived_tasks = sorted(archived_tasks, key=sort_key, reverse=True)
+
+        # Sort active: running first, newest first
+        active_tasks = sorted(active_tasks, key=active_sort_key, reverse=True)
+        # Sort archived: newest first
+        archived_tasks = sorted(archived_tasks, key=archive_sort_key, reverse=True)
         return jsonify({
             "active_tasks": [t.to_dict() for t in active_tasks],
             "archived_tasks": [t.to_dict() for t in archived_tasks],

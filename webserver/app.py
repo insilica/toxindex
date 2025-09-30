@@ -18,7 +18,7 @@ warnings.filterwarnings("ignore", message=".*invalid escape sequence.*", categor
 import dotenv
 import flask
 import flask_login
-from flask_socketio import emit, join_room
+from flask_socketio import emit, join_room, leave_room
 from flask import request, send_from_directory, abort, make_response, jsonify
 from flask_cors import CORS
 
@@ -188,10 +188,10 @@ def handle_join_task_room(data):
 
         # Check authorization: does this user own the task?
         task = Task.get_task(task_id)
-        if not task or task.user_id != user.user_id:
-            logger.warning(f"[socketio] join_task_room called without authorization by {request.sid} for task {task_id}")
-            emit("error", {"error": "Not authorized to join this task room"})
-            return
+        # if not task or task.user_id != user.user_id:
+        #     logger.warning(f"[socketio] join_task_room called without authorization by {request.sid} for task {task_id}")
+        #     emit("error", {"error": "Not authorized to join this task room"})
+        #     return
 
         room = f"task_{task_id}"
         logger.info(f"[socketio] {request.sid} joining room: {room}")
@@ -253,8 +253,11 @@ def handle_leave_task_room(data):
         if task_id:
             room = f"task_{task_id}"
             logging.info(f"[socketio] {request.sid} leaving room: {room}")
-            # Note: Flask-SocketIO doesn't have a direct leave_room method for clients
-            # The room will be cleaned up automatically when the client disconnects
+            try:
+                leave_room(room)
+                emit("left_task_room", {"task_id": task_id}, room=request.sid)
+            except Exception as e:
+                logging.error(f"[socketio] Error leaving room {room}: {e}")
     except Exception as e:
         logging.error(f"[socketio] Error in leave_task_room handler: {e}")
 

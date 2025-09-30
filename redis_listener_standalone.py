@@ -16,7 +16,6 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 # Import after setting up path
 from webserver.model import Task, Message, File
-import webserver.datastore as ds
 from webserver.logging_utils import setup_logging, log_service_startup, get_logger
 
 # Setup logging with shared utility
@@ -95,7 +94,7 @@ def redis_listener_standalone():
                     logger.warning(f"[redis_listener] ({listener_id}) Redis event missing required fields: event_type={event_type}, task_id={event_task_id}, data={event_data}")
                     continue
                     
-                if event_type not in ("task_message", "task_file", "task_status_update"):
+                if event_type not in ("task_message", "task_file"):
                     logger.debug(f"[redis_listener] ({listener_id}) Ignoring event_type={event_type}")
                     continue
                     
@@ -105,12 +104,10 @@ def redis_listener_standalone():
                     continue
                     
                 if event_type == "task_message":
-                    logger.info(f"[redis_listener] ({listener_id}) Processing task_message for task_id={event_task_id}")
-                    msg = Message.process_event(task, event_data)
+                    Message.process_event(task, event_data)
                     logger.info(f"[redis_listener] ({listener_id}) Processed message for task_id={event_task_id}")
                     
                 elif event_type == "task_file":
-                    logger.info(f"[redis_listener] ({listener_id}) Processing task_file for task_id={event_task_id}")
                     File.process_event(task, event_data)
                     logger.info(f"[redis_listener] ({listener_id}) Processed file event for task_id={event_task_id}")
                     

@@ -29,7 +29,7 @@ def plain_openai_task(self, payload):
         )
         task_id = payload.get("task_id")
         user_id = payload.get("user_id")
-        user_query = payload.get("payload", "Is Gentamicin nephrotoxic?")
+        user_query = payload.get("user_query", "Is Gentamicin nephrotoxic?")
         model = "gpt-4"
         emit_status(task_id, "checking cache")
         cache_key = f"openai_cache:{model}:{hashlib.sha256(user_query.encode()).hexdigest()}"

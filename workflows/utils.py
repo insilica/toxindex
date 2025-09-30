@@ -12,6 +12,7 @@ import pandas as pd
 
 # Webserver models and storage
 from webserver.model.message import MessageSchema
+from webserver.socketio import socketio
 from webserver.model.task import Task
 from webserver.model.file import File
 from webserver.storage import GCSFileStorage
@@ -39,16 +40,12 @@ def publish_to_celery_updates(event_type, task_id, data):
 
 
 def publish_to_socketio(event_name, room, data):
-    """Publish event to Socket.IO Redis channel for real-time updates"""
-    r = get_redis_connection()
-    socketio_event = {
-        "method": "emit",
-        "event": event_name,
-        "room": room,
-        "data": data
-    }
-    r.publish("socketio", json.dumps(socketio_event, default=str))
-    logging.info(f"Published {event_name} to Socket.IO for room {room}")
+    """Emit directly via Flask-SocketIO manager (uses Redis message_queue under the hood)."""
+    try:
+        socketio.emit(event_name, data, room=room)
+        logging.info(f"Emitted {event_name} to Socket.IO room {room}")
+    except Exception as e:
+        logging.error(f"Failed to emit {event_name} to room {room}: {e}")
 
 
 def emit_status(task_id, status):
