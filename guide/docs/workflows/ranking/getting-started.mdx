@@ -1,0 +1,98 @@
+---
+title: Getting Started with Ranking
+---
+
+# Getting Started with Ranking
+
+This guide will walk you through using the Ranking workflow to compare and rank chemicals based on their toxicity profiles.
+
+## Step 1: Access the Ranking Workflow
+
+1. Navigate to the **Workflows** section in your ToxIndex dashboard
+2. Click on **Ranking** to open the ranking interface
+3. You'll see the ranking setup page with options for chemical selection and endpoint configuration
+
+## Step 2: Select Chemicals for Ranking
+
+### Option A: Upload Chemical List
+1. Click **Upload Chemical List**
+2. Upload a CSV file with chemical identifiers (SMILES, CAS numbers, or names)
+3. Verify the chemicals are correctly parsed
+
+### Option B: Select from Environment
+1. Click **Select from Environment**
+2. Choose chemicals from your existing environments
+3. Select the specific chemicals you want to rank
+
+## Step 3: Configure Endpoints
+
+1. **Choose Endpoint Categories**:
+   - Acute toxicity endpoints
+   - Chronic toxicity endpoints
+   - Specific organ toxicity
+   - Environmental endpoints
+
+2. **Select Specific Endpoints**:
+   - Browse available endpoints for your selected categories
+   - Choose endpoints relevant to your ranking criteria
+
+3. **Set Ranking Parameters**:
+   - Define ranking criteria (higher/lower values are better)
+   - Set confidence levels for statistical analysis
+   - Choose ranking algorithm (Bradley-Terry, Thurstone, etc.)
+
+## Step 4: Run the Ranking Analysis
+
+1. Click **Start Ranking Analysis**
+2. Monitor the progress in the task queue
+3. The system will perform pairwise comparisons and generate rankings
+
+## Step 5: Review Results
+
+### Ranking Results
+- **Overall Rankings**: Numerical rankings with confidence intervals
+- **Pairwise Comparisons**: Detailed comparison matrices
+- **Statistical Significance**: P-values and confidence levels
+- **Endpoint Contributions**: How each endpoint contributes to the final ranking
+
+### Visualization Options
+- **Ranking Charts**: Bar charts showing relative rankings
+- **Comparison Networks**: Network diagrams of pairwise comparisons
+- **Endpoint Heatmaps**: Heatmaps showing endpoint-specific rankings
+- **Statistical Plots**: Confidence intervals and significance testing
+
+## Step 6: Export and Save Results
+
+1. **Download Rankings**: Export CSV files with ranking data
+2. **Save to Environment**: Store results in your environment for future reference
+3. **Generate Reports**: Create PDF reports with ranking summaries
+4. **Share Results**: Share ranking results with collaborators
+
+## Tips for Success
+
+- **Start Small**: Begin with 5-10 chemicals to understand the workflow
+- **Choose Relevant Endpoints**: Select endpoints that align with your ranking goals
+- **Review Statistical Output**: Pay attention to confidence intervals and significance levels
+- **Validate Results**: Cross-check rankings with known chemical properties
+
+## Next Steps
+
+- Learn about [Inputs and Status Updates](/docs/workflows/ranking/inputs-and-status)
+- Understand [Outputs and Artifacts](/docs/workflows/ranking/outputs-and-artifacts)
+- Explore [Frequently Asked Questions](/docs/workflows/ranking/faq)
+- Review the [Technical Architecture](/docs/workflows/ranking/architecture)
+
+## Troubleshooting
+
+If you encounter issues:
+
+1. **Check Chemical Identifiers**: Ensure all chemicals are properly identified
+2. **Verify Endpoint Selection**: Make sure you've selected at least one endpoint
+3. **Review Error Messages**: Check the task details for specific error information
+4. **Contact Support**: Reach out if you need assistance with the ranking workflow
+
+import useBaseUrl from '@docusaurus/useBaseUrl';
+
+<img src={useBaseUrl('/img/workflows/ranking-setup.png')} alt="Ranking Setup Interface" />
+
+<img src={useBaseUrl('/img/workflows/ranking-results.png')} alt="Ranking Results Display" />

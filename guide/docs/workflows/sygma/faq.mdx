@@ -1,0 +1,198 @@
+---
+title: SyGMA FAQ
+---
+
+# SyGMA Workflow FAQ
+
+## General Questions
+
+### What is the SyGMA workflow used for?
+
+The SyGMA workflow systematically generates potential metabolites of chemicals through various metabolic pathways. It's useful for understanding drug metabolism, toxicology assessment, and environmental fate prediction.
+
+### How many metabolites can be generated?
+
+The system can generate thousands of potential metabolites depending on the complexity of the input chemical and selected pathways. Generation is limited by computational resources and user-defined parameters.
+
+### What types of metabolic pathways are supported?
+
+Supported pathways include:
+- Phase I metabolism (oxidation, reduction, hydrolysis)
+- Phase II metabolism (conjugation reactions)
+- Environmental transformation pathways
+- Custom metabolic rules
+- Enzyme-specific transformations
+
+## Technical Questions
+
+### What algorithms are used for metabolite generation?
+
+The system uses multiple approaches:
+- **Rule-based generation**: Systematic application of metabolic rules
+- **Machine learning models**: AI-based metabolite prediction
+- **Expert systems**: Knowledge-based transformation rules
+- **Hybrid approaches**: Combination of multiple methods
+
+### How are metabolites prioritized?
+
+Metabolites are prioritized using:
+- **Chemical likelihood**: Based on reaction feasibility
+- **Biological relevance**: Tissue and species-specific metabolism
+- **Experimental evidence**: Literature-based validation
+- **Property-based ranking**: ADMET properties and activities
+
+### Can I customize metabolic rules?
+
+Yes, you can:
+- Define custom transformation rules
+- Modify existing metabolic pathways
+- Add enzyme-specific reactions
+- Create domain-specific metabolic models
+
+## Data Questions
+
+### What chemical formats are supported?
+
+Supported formats include:
+- SMILES strings
+- SDF files
+- MOL files
+- InChI strings
+- Chemical names (with structure resolution)
+
+### How do I handle complex chemical mixtures?
+
+The system provides several approaches:
+- **Individual analysis**: Analyze each chemical separately
+- **Mixture modeling**: Consider chemical interactions
+- **Batch processing**: Analyze multiple chemicals simultaneously
+- **Comparative analysis**: Compare metabolite profiles across chemicals
+
+### Can I use experimental data to validate metabolites?
+
+Yes, you can:
+- Upload experimental metabolite data
+- Compare predicted vs. observed metabolites
+- Validate metabolic pathways
+- Refine prediction models
+
+## Results Questions
+
+### How do I interpret metabolite results?
+
+- **Metabolite structures**: Generated chemical structures
+- **Transformation pathways**: Step-by-step metabolic routes
+- **Property predictions**: ADMET properties of metabolites
+- **Activity assessments**: Biological activities and toxicities
+
+### Can I export metabolite data?
+
+Yes, you can export:
+- SDF files with metabolite structures
+- CSV files with metabolite properties
+- Pathway diagrams and visualizations
+- Comprehensive analysis reports
+
+### How do I validate generated metabolites?
+
+Validation approaches include:
+- Chemical structure validation
+- Reaction feasibility assessment
+- Literature comparison
+- Expert review and curation
+
+## Troubleshooting
+
+### Why did my metabolite generation fail?
+
+Common causes include:
+- Invalid chemical structures
+- Unsupported chemical classes
+- Insufficient computational resources
+- Pathway configuration errors
+
+### How do I improve metabolite generation quality?
+
+- Use high-quality chemical structures
+- Select appropriate metabolic pathways
+- Apply relevant filtering criteria
+- Validate results with experimental data
+
+### Can I modify generation parameters after starting?
+
+No, generation parameters cannot be modified once the process starts. You'll need to start a new analysis with different parameters.
+
+## Advanced Usage
+
+### Can I create custom metabolic models?
+
+Yes, you can:
+- Define custom transformation rules
+- Create tissue-specific metabolic models
+- Develop species-specific pathways
+- Integrate experimental data
+
+### How do I handle stereochemistry in metabolites?
+
+The system provides several approaches:
+- **Stereospecific rules**: Enantiomer-specific transformations
+- **Stereochemical validation**: Check for stereochemical consistency
+- **Racemic mixtures**: Handle racemic metabolite generation
+- **Chiral analysis**: Analyze chiral metabolite distributions
+
+### Can I integrate with experimental data?
+
+Yes, the system supports:
+- Experimental metabolite data import
+- Comparative analysis with predictions
+- Model validation and refinement
+- Data-driven pathway optimization
+
+## Performance Considerations
+
+### How long does metabolite generation take?
+
+Processing time depends on:
+- Chemical complexity and size
+- Number of selected pathways
+- Generation depth and parameters
+- System computational resources
+
+### What are the computational requirements?
+
+- **Memory**: Scales with chemical complexity
+- **CPU**: Multi-core processing for parallel generation
+- **Storage**: Temporary storage for intermediate results
+- **Network**: Data transfer for large result sets
+
+### How do I optimize generation performance?
+
+- Use appropriate generation parameters
+- Select relevant pathways only
+- Apply filtering criteria early
+- Consider batch processing for multiple chemicals
+
+## Integration Options
+
+### Can I integrate with other workflows?
+
+Yes, SyGMA integrates with:
+- RAP workflow for metabolite-based predictions
+- Ranking workflow for metabolite prioritization
+- Custom analysis pipelines
+- External software and databases
+
+### How do I share results with collaborators?
+
+- Export results in standard formats
+- Generate comprehensive reports
+- Use collaborative features
+- Share via secure access links
+
+### Can I automate metabolite generation?
+
+Yes, you can:
+- Set up automated batch processing
+- Use API integration for programmatic access
+- Create custom workflows and pipelines
+- Schedule regular metabolite analyses

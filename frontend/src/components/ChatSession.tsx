@@ -25,6 +25,8 @@ const ChatSession = () => {
   const [fileId, setFileId] = useState<string | undefined>(undefined);
   const [fileName, setFileName] = useState<string | undefined>(undefined);
   const { socket, isConnected, connect } = useSocket();
+  const [chatTitle, setChatTitle] = useState<string>('Chat Session');
+  const [chatCreatedAt, setChatCreatedAt] = useState<string | null>(null);
 
   console.log("ChatSession mounted", sessionId);
 
@@ -76,6 +78,21 @@ const ChatSession = () => {
         console.error("Error loading messages:", err);
       })
       .finally(() => setLoading(false));
+  }, [sessionId]);
+
+  // Fetch chat session metadata (title and created_at)
+  useEffect(() => {
+    if (!sessionId) return;
+    fetch(`/api/chat_sessions/${sessionId}`, { credentials: 'include' })
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (!data) return;
+        if (data.title) setChatTitle(data.title);
+        if (data.created_at) setChatCreatedAt(data.created_at);
+      })
+      .catch(() => {
+        // Silently ignore; fallback values already set
+      });
   }, [sessionId]);
 
   const scrollToBottom = () => {
@@ -134,7 +151,16 @@ const ChatSession = () => {
 
   return (
     <div className="min-h-screen flex flex-col flex-1 relative" style={{ background: 'linear-gradient(135deg, #101614 0%, #1a2a1a 60%, #1a2320 100%)' }}>
-      <div className="flex-1 flex flex-col max-w-5xl mx-auto w-full px-4 pt-20 py-0">
+      {/* Header */}
+      <div className="flex items-center gap-4 px-4 py-4 border-b-2 border-gray-600" style={{ marginLeft: 'auto', marginRight: 'auto', width: '100%', maxWidth: '64rem' }}>
+        <HomeButton />
+        <span className="text-neutral-600 text-xl font-light mx-2">|</span>
+        <span className="text-lg font-semibold text-white truncate">{chatTitle}</span>
+        <span className="text-neutral-400 ml-4 text-sm whitespace-nowrap">
+          {chatCreatedAt ? new Date(chatCreatedAt).toLocaleString() : 'Unknown date'}
+        </span>
+      </div>
+      <div className="flex-1 flex flex-col max-w-5xl mx-auto w-full px-4 pt-6 py-0">
         {/* Chat history box */}
         <div
           className="flex-1 overflow-y-auto w-full max-w-5xl mx-auto px-20 py-0 bg-transparent rounded-lg shadow-inner"
@@ -226,23 +252,6 @@ const ChatSession = () => {
                 setFileId(id);
                 setFileName(name);
               }}
-            />
-          </div>
-          
-          {/* Home button positioned relative to page */}
-          <div 
-            className="absolute transition-all duration-300 z-50"
-            style={{
-              left: '2rem',
-              top: '1.5rem',
-              border: 'none',
-              padding: 0
-            }}
-          >
-            <HomeButton
-              color="#16a34a"
-              hoverColor="#2563eb"
-              aria-label="Go back"
             />
           </div>
         </div>

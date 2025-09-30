@@ -1,0 +1,140 @@
+---
+title: Ranking FAQ
+---
+
+# Ranking Workflow FAQ
+
+## General Questions
+
+### What is the Ranking workflow used for?
+
+The Ranking workflow enables pairwise comparison of chemicals to generate quantitative rankings based on toxicity endpoints. It's useful for regulatory prioritization, research planning, and risk assessment.
+
+### How many chemicals can I rank at once?
+
+The system supports ranking of 2-100 chemicals in a single analysis. For larger chemical sets, consider breaking them into smaller groups or using hierarchical ranking approaches.
+
+### What types of endpoints can I use for ranking?
+
+You can use various toxicity endpoints including:
+- Acute toxicity (LD50, LC50)
+- Chronic toxicity (NOAEL, LOAEL)
+- Organ-specific toxicity
+- Environmental endpoints
+- Custom endpoints from your data
+
+## Technical Questions
+
+### What ranking algorithms are available?
+
+The system supports multiple ranking algorithms:
+- **Bradley-Terry Model**: For pairwise comparison data
+- **Thurstone Model**: For continuous endpoint data
+- **Borda Count**: For multiple endpoint aggregation
+- **Custom Algorithms**: For specialized ranking needs
+
+### How are confidence intervals calculated?
+
+Confidence intervals are calculated using bootstrap resampling and Bayesian methods, providing uncertainty estimates for ranking positions.
+
+### Can I rank chemicals with missing endpoint data?
+
+Yes, the system handles missing data using:
+- Imputation methods for missing values
+- Weighted ranking based on data availability
+- Sensitivity analysis for missing data impact
+
+## Data Questions
+
+### What chemical identifiers are supported?
+
+Supported identifiers include:
+- SMILES strings
+- CAS numbers
+- Chemical names
+- InChI keys
+- PubChem IDs
+
+### How do I handle conflicting endpoint data?
+
+The system provides several approaches:
+- **Weighted Averaging**: Based on data quality and source reliability
+- **Consensus Methods**: Multiple data sources for the same endpoint
+- **Expert Weighting**: Manual assignment of endpoint importance
+- **Statistical Aggregation**: Robust statistical methods for data integration
+
+### Can I use my own endpoint data?
+
+Yes, you can upload custom endpoint data in CSV format. The system will integrate your data with existing ToxIndex endpoints.
+
+## Results Questions
+
+### How do I interpret ranking results?
+
+- **Ranking Position**: Lower numbers indicate higher priority/toxicity
+- **Confidence Intervals**: Wider intervals indicate more uncertainty
+- **Statistical Significance**: P-values indicate ranking reliability
+- **Endpoint Contributions**: Shows which endpoints drive the ranking
+
+### Can I export ranking results?
+
+Yes, you can export:
+- CSV files with ranking data
+- PDF reports with visualizations
+- Raw pairwise comparison data
+- Statistical analysis results
+
+### How do I validate ranking results?
+
+Validation approaches include:
+- Cross-validation with known chemical rankings
+- Sensitivity analysis with different endpoint weights
+- Comparison with literature-based rankings
+- Expert review of ranking positions
+
+## Troubleshooting
+
+### Why did my ranking analysis fail?
+
+Common causes include:
+- Invalid chemical identifiers
+- Insufficient endpoint data
+- Conflicting endpoint values
+- System resource limitations
+
+### How do I improve ranking quality?
+
+- Use high-quality, consistent endpoint data
+- Select relevant endpoints for your ranking goals
+- Consider endpoint weighting based on importance
+- Validate results with known chemical properties
+
+### Can I modify ranking parameters after starting?
+
+No, ranking parameters cannot be modified once the analysis starts. You'll need to start a new analysis with different parameters.
+
+## Advanced Usage
+
+### Can I create custom ranking criteria?
+
+Yes, you can define custom ranking criteria including:
+- Endpoint-specific weighting
+- Custom aggregation functions
+- Domain-specific ranking rules
+- Regulatory compliance criteria
+
+### How do I handle ties in rankings?
+
+The system provides several tie-breaking methods:
+- Secondary endpoint criteria
+- Data quality scores
+- Random assignment
+- Manual tie-breaking
+
+### Can I rank chemicals across different domains?
+
+Yes, the system supports cross-domain ranking using:
+- Normalized endpoint scores
+- Domain-specific weighting
+- Multi-criteria decision analysis
+- Hierarchical ranking approaches

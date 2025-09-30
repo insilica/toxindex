@@ -492,12 +492,24 @@ const Dashboard = () => {
                   <div
                     className="flex items-center min-w-0 gap-3 cursor-pointer"
                     style={{ flex: '1 1 0%', minWidth: 0 }}
-                    onClick={() => (task.status === 'done' || task.status === 'error') && navigate(`/task/${task.task_id}`)}
+                    onClick={() => {
+                      if (task.status === 'done' || task.status === 'error') {
+                        if (task.session_id) {
+                          navigate(`/chat/session/${task.session_id}?env=${task.environment_id}`);
+                        } else {
+                          navigate(`/task/${task.task_id}`);
+                        }
+                      }
+                    }}
                     tabIndex={0}
                     role="button"
                     onKeyDown={e => {
                       if ((task.status === 'done' || task.status === 'error') && (e.key === 'Enter' || e.key === ' ')) {
-                        navigate(`/task/${task.task_id}`);
+                        if (task.session_id) {
+                          navigate(`/chat/session/${task.session_id}?env=${task.environment_id}`);
+                        } else {
+                          navigate(`/task/${task.task_id}`);
+                        }
                       }
                     }}
                   >
@@ -619,11 +631,23 @@ const Dashboard = () => {
                   <div
                     className="flex items-center min-w-0 gap-3 cursor-pointer"
                     style={{ flex: '1 1 0%', minWidth: 0 }}
-                    onClick={() => navigate(`/task/${task.task_id}`)}
+                    onClick={() => {
+                      if (task.session_id) {
+                        navigate(`/chat/session/${task.session_id}?env=${task.environment_id}`);
+                      } else {
+                        navigate(`/task/${task.task_id}`);
+                      }
+                    }}
                     tabIndex={0}
                     role="button"
                     onKeyDown={e => {
-                      if (e.key === 'Enter' || e.key === ' ') navigate(`/task/${task.task_id}`);
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        if (task.session_id) {
+                          navigate(`/chat/session/${task.session_id}?env=${task.environment_id}`);
+                        } else {
+                          navigate(`/task/${task.task_id}`);
+                        }
+                      }
                     }}
                   >
                     <span className="text-gray-300 flex items-center gap-2 flex-nowrap min-w-0">

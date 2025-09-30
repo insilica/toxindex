@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 
 interface SocketContextType {
@@ -31,7 +31,7 @@ interface SocketProviderProps {
 
 export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   console.log('[SocketProvider] SocketProvider mounting');
-  const socketRef = useRef<Socket | null>(null);
+  const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
 
@@ -44,7 +44,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
 
   const connect = () => {
     // Don't connect if already connecting or connected
-    if (isConnecting || isConnected || socketRef.current) {
+    if (isConnecting || isConnected || socket) {
       console.log('[SocketIO] Connection already in progress or established');
       return;
     }
@@ -65,17 +65,17 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   };
 
   const establishConnection = () => {
-    if (socketRef.current) {
+    if (socket) {
       console.log('[SocketIO] Socket already exists, disconnecting first');
-      socketRef.current.disconnect();
-      socketRef.current = null;
+      socket.disconnect();
+      setSocket(null);
     }
 
     console.log('[SocketIO] Creating new socket connection...');
     setIsConnecting(true);
-    socketRef.current = io('/', {
+    const s = io('/', {
       withCredentials: true,
-      transports: ['polling'],
+      transports: ['websocket', 'polling'],
       transportOptions: {
         polling: {
           timeout: 30000 // 30 seconds
@@ -86,27 +86,28 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000
     });
+    setSocket(s);
 
     // Add connection event handlers
-    socketRef.current.on('connect', () => {
+    s.on('connect', () => {
       console.log('[SocketIO] Connected');
       setIsConnected(true);
       setIsConnecting(false);
     });
 
-    socketRef.current.on('connect_error', (error) => {
+    s.on('connect_error', (error) => {
       console.error('[SocketIO] Connection error:', error);
       setIsConnected(false);
       setIsConnecting(false);
     });
 
-    socketRef.current.on('disconnect', (reason) => {
+    s.on('disconnect', (reason) => {
       console.log('[SocketIO] Disconnected:', reason);
       setIsConnected(false);
       setIsConnecting(false);
     });
 
-    socketRef.current.on('error', (error) => {
+    s.on('error', (error) => {
       console.error('[SocketIO] Socket error:', error);
       setIsConnected(false);
       setIsConnecting(false);
@@ -114,10 +115,10 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   };
 
   const disconnect = () => {
-    if (socketRef.current) {
+    if (socket) {
       console.log('[SocketIO] Disconnecting socket...');
-      socketRef.current.disconnect();
-      socketRef.current = null;
+      socket.disconnect();
+      setSocket(null);
       setIsConnected(false);
       setIsConnecting(false);
     }
@@ -132,7 +133,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
 
   return (
     <SocketContext.Provider value={{ 
-      socket: socketRef.current, 
+      socket, 
       isConnected, 
       connect, 
       disconnect,

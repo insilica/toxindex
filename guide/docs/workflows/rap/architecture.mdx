@@ -1,0 +1,37 @@
+---
+sidebar_position: 5
+---
+
+# Under the Hood
+
+This section explains how RAP is implemented in the backend so you can understand performance and behavior.
+
+## Execution path
+
+- The task handler runs on Celery queue `rap` and logs the `task_id` and `user_id`.
+- It computes a cache key from `user_query` using SHA-256.
+- If both structured and markdown cache entries exist, it reuses them; otherwise, it runs the toxicity agent.
+- The agent returns a `ChemicalToxicityAssessment` or a dict/string; results are normalized to a dict.
+- The dict is converted to Markdown via the platform converter.
+
+## Real-time updates
+
+- Status events are emitted frequently (e.g., `starting`, `checking cache`, `running agent`, etc.).
+- Messages and files are broadcast to:
+  - `task_<task_id>` room for task detail view
+  - `chat_session_<session_id>` room if the task is linked to a chat
+
+## Storage
+
+- Two temporary files are created (JSON/MD) and uploaded to GCS under `tasks/<task_id>/`.
+- The content is cached in the application cache to reduce repetitive GCS reads.
+
+## Error handling
+
+- Missing required fields (e.g., `task_id`, `user_id`) cause immediate failure.
+- Any exception logs with stack trace, updates status to `error`, and re-raises so Celery marks the task failed.
+
+## Performance tips
+
+- Reusing the same query benefits from the cache path and returns faster.
+- Keep prompts focused to reduce agent runtime and output size.

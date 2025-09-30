@@ -1,0 +1,35 @@
+---
+sidebar_position: 3
+---
+
+# Inputs and Status Flow
+
+This page describes the inputs RAP expects and the lifecycle statuses you will see while a RAP task runs.
+
+## Required inputs
+
+RAP runs as a Celery task on the `rap` queue. The payload must include:
+
+- `task_id` (UUID string): The ToxIndex task identifier
+- `user_id` (string/UUID): The user initiating the task
+- `user_query` (string): The main prompt/query (defaults to “Is Gentamicin nephrotoxic?” if omitted)
+
+If any of `task_id` or `user_id` is missing, the task will fail early.
+
+## Status lifecycle
+
+You will see real-time status updates in the UI. Typical statuses are:
+
+- `starting`: task accepted and beginning
+- `checking cache`: looking up cached results for the query
+- `using cache` (optional): cache hit, reusing prior results
+- `running agent`: invoking the toxicity agent to generate a response
+- `converting to markdown`: preparing a readable report
+- `agent complete`: model work finished
+- `sending message`: streaming the result content to the UI
+- `uploading files to GCS`: preparing downloadable artifacts
+- `files uploaded`: artifacts available
+- `done`: task completed successfully
+- `error`: task failed (see Troubleshooting)
+
+These statuses are emitted via Socket.IO rooms for both the task and the related chat session (when present), so the dashboard updates live without refresh.

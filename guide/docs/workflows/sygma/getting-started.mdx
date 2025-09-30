@@ -1,0 +1,120 @@
+---
+title: Getting Started with SyGMA
+---
+
+# Getting Started with SyGMA
+
+This guide will walk you through using the SyGMA workflow to generate and analyze potential metabolites of chemicals.
+
+## Step 1: Access the SyGMA Workflow
+
+1. Navigate to the **Workflows** section in your ToxIndex dashboard
+2. Click on **SyGMA** to open the metabolite generation interface
+3. You'll see the SyGMA setup page with options for chemical input and pathway selection
+
+## Step 2: Input Chemical Structures
+
+### Option A: Upload Chemical Files
+1. Click **Upload Chemical Structures**
+2. Upload SDF, MOL, or SMILES files containing your chemicals
+3. Verify the structures are correctly parsed and displayed
+
+### Option B: Draw Chemical Structures
+1. Click **Draw Chemical Structure**
+2. Use the molecular editor to draw your chemical structure
+3. Save the structure for analysis
+
+### Option C: Enter SMILES Strings
+1. Click **Enter SMILES**
+2. Input SMILES strings for your chemicals
+3. Validate the structures before proceeding
+
+## Step 3: Configure Metabolic Pathways
+
+1. **Select Metabolic Pathways**:
+   - Phase I metabolism (oxidation, reduction, hydrolysis)
+   - Phase II metabolism (conjugation reactions)
+   - Environmental transformation pathways
+   - Custom metabolic rules
+
+2. **Set Generation Parameters**:
+   - Maximum number of transformation steps
+   - Metabolite generation depth
+   - Filtering criteria for metabolites
+   - Similarity thresholds for metabolite clustering
+
+3. **Choose Analysis Options**:
+   - Property prediction for metabolites
+   - Activity assessment
+   - Toxicity prediction
+   - Bioavailability estimation
+
+## Step 4: Run Metabolite Generation
+
+1. Click **Start Metabolite Generation**
+2. Monitor the progress in the task queue
+3. The system will systematically generate potential metabolites
+
+## Step 5: Review Generated Metabolites
+
+### Metabolite Results
+- **Generated Metabolites**: List of all potential metabolites
+- **Metabolic Pathways**: Step-by-step transformation pathways
+- **Metabolite Properties**: Predicted properties and activities
+- **Pathway Visualization**: Interactive metabolic pathway diagrams
+
+### Analysis Options
+- **Metabolite Prioritization**: Rank metabolites by importance
+- **Property Analysis**: Analyze metabolite properties
+- **Activity Prediction**: Predict biological activities
+- **Toxicity Assessment**: Assess potential toxicity
+
+## Step 6: Explore Metabolic Pathways
+
+### Pathway Visualization
+- **Interactive Diagrams**: Click to explore metabolic pathways
+- **Step-by-Step Transformations**: Detailed transformation mechanisms
+- **Enzyme Information**: Associated enzymes and cofactors
+- **Reaction Conditions**: Optimal conditions for transformations
+
+### Pathway Analysis
+- **Metabolic Flux**: Analysis of metabolic flow
+- **Rate-Limiting Steps**: Identification of bottlenecks
+- **Alternative Pathways**: Exploration of alternative routes
+- **Pathway Comparison**: Compare different metabolic routes
+
+## Step 7: Export and Save Results
+
+1. **Download Metabolites**: Export SDF files with metabolite structures
+2. **Save Pathways**: Export pathway diagrams and data
+3. **Generate Reports**: Create comprehensive analysis reports
+4. **Share Results**: Share findings with collaborators
+
+## Tips for Success
+
+- **Start with Simple Structures**: Begin with well-characterized chemicals
+- **Choose Relevant Pathways**: Select pathways appropriate for your system
+- **Review Generated Metabolites**: Validate chemically reasonable metabolites
+- **Use Filtering Options**: Apply filters to focus on relevant metabolites
+
+## Next Steps
+
+- Learn about [Inputs and Status Updates](/docs/workflows/sygma/inputs-and-status)
+- Understand [Outputs and Artifacts](/docs/workflows/sygma/outputs-and-artifacts)
+- Explore [Frequently Asked Questions](/docs/workflows/sygma/faq)
+- Review the [Technical Architecture](/docs/workflows/sygma/architecture)
+
+## Troubleshooting
+
+If you encounter issues:
+
+1. **Check Chemical Structures**: Ensure structures are valid and complete
+2. **Verify Pathway Selection**: Make sure you've selected at least one pathway
+3. **Review Error Messages**: Check the task details for specific error information
+4. **Contact Support**: Reach out if you need assistance with the SyGMA workflow
+
+import useBaseUrl from '@docusaurus/useBaseUrl';
+
+<img src={useBaseUrl('/img/workflows/sygma-setup.png')} alt="SyGMA Setup Interface" />
+
+<img src={useBaseUrl('/img/workflows/sygma-results.png')} alt="SyGMA Results Display" />

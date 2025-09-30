@@ -1,0 +1,30 @@
+---
+sidebar_position: 4
+---
+
+# Outputs and Artifacts
+
+RAP produces two kinds of outputs: inline messages to the UI and downloadable files stored in GCS.
+
+## Inline message
+
+After generation, RAP sends the Markdown report as a chat/task message:
+
+- The content is human-readable Markdown converted from the structured assessment
+- Emitted to both the task room and the chat session room (if any)
+
+## Downloadable artifacts (GCS)
+
+RAP writes two files per task under `tasks/<task_id>/` in your configured GCS bucket:
+
+- `probra_result_<uuid>.json`: structured JSON result
+- `probra_result_<uuid>.md`: Markdown report
+
+These are uploaded via the platform storage layer and announced back to the UI as `task_file` events with:
+
+- `filename`: the object name
+- `filepath`: the GCS path
+- `file_type`: `json` or `markdown`
+- `content_type`: `application/json` or `text/markdown`
+
+You can download these artifacts from the task details view.

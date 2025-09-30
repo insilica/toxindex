@@ -1,0 +1,217 @@
+---
+title: Inputs and Status Updates
+---
+
+# SyGMA Workflow: Inputs and Status Updates
+
+This page explains the data flow and status updates for the SyGMA workflow.
+
+## Input Requirements
+
+### Chemical Inputs
+
+**Required Fields:**
+- Chemical structures (SMILES, SDF, MOL, or InChI)
+- Valid and complete chemical structures
+- Proper stereochemistry information (if applicable)
+
+**Optional Fields:**
+- Chemical metadata (molecular weight, formula)
+- Experimental data for validation
+- Custom chemical properties
+- Biological context information
+
+### Metabolic Pathway Selection
+
+**Pathway Categories:**
+- Phase I metabolism (oxidation, reduction, hydrolysis)
+- Phase II metabolism (conjugation reactions)
+- Environmental transformation pathways
+- Custom metabolic rules
+
+**Pathway Requirements:**
+- At least one metabolic pathway must be selected
+- Pathways must be compatible with input chemicals
+- Custom pathways require rule definition
+
+### Generation Parameters
+
+**Depth Settings:**
+- Maximum transformation steps (default: 3)
+- Metabolite generation depth
+- Branching factor limits
+- Termination criteria
+
+**Filtering Options:**
+- Chemical similarity thresholds
+- Property-based filtering
+- Biological relevance criteria
+- Experimental validation requirements
+
+## Status Updates
+
+### Task Status Flow
+
+1. **Queued**: Task submitted to the metabolite generation queue
+2. **Preprocessing**: Chemical structures validated and normalized
+3. **Pathway Selection**: Metabolic pathways configured and validated
+4. **Generation**: Systematic metabolite generation process
+5. **Analysis**: Metabolite property prediction and analysis
+6. **Post-processing**: Result validation and visualization
+7. **Completed**: Results available for download and exploration
+
+### Real-time Updates
+
+**Progress Indicators:**
+- Overall task progress percentage
+- Current generation stage
+- Number of metabolites generated
+- Estimated time remaining
+
+**Status Messages:**
+- Chemical validation results
+- Pathway configuration status
+- Generation progress updates
+- Error notifications and warnings
+
+### Notification System
+
+**Email Notifications:**
+- Task completion alerts
+- Error notifications
+- Progress updates (optional)
+- Result availability notifications
+
+**Dashboard Updates:**
+- Real-time status in task queue
+- Progress bars and indicators
+- Interactive result previews
+- Error messages and suggestions
+
+## Data Processing Pipeline
+
+### Stage 1: Input Validation
+- Chemical structure validation
+- Stereochemistry verification
+- Pathway compatibility checking
+- Parameter validation
+
+### Stage 2: Pathway Configuration
+- Metabolic pathway selection
+- Rule validation and optimization
+- Pathway-specific parameter setting
+- Custom rule integration
+
+### Stage 3: Metabolite Generation
+- Systematic rule application
+- Metabolite structure generation
+- Duplicate detection and removal
+- Quality control and validation
+
+### Stage 4: Property Analysis
+- ADMET property prediction
+- Activity assessment
+- Toxicity prediction
+- Bioavailability estimation
+
+### Stage 5: Post-processing
+- Result validation and curation
+- Visualization generation
+- Report creation
+- Artifact preparation
+
+## Error Handling
+
+### Common Errors
+
+**Input Validation Errors:**
+- Invalid chemical structures
+- Unsupported chemical classes
+- Incomplete stereochemistry
+- Format compatibility issues
+
+**Generation Errors:**
+- Computational resource limitations
+- Pathway configuration errors
+- Rule application failures
+- Memory overflow issues
+
+**Recovery Actions:**
+- Automatic retry for transient errors
+- Alternative pathway selection
+- Parameter optimization
+- Manual intervention for complex issues
+
+### Error Reporting
+
+**Error Categories:**
+- Input validation errors
+- Pathway configuration errors
+- Generation process errors
+- System resource errors
+
+**Error Details:**
+- Specific error messages
+- Affected chemicals or pathways
+- Suggested corrective actions
+- Contact information for support
+
+## Performance Considerations
+
+### Processing Time
+- **Simple chemicals** (small molecules): 1-5 minutes
+- **Complex chemicals** (large molecules): 5-30 minutes
+- **Multiple chemicals**: 30-120 minutes
+- **Custom pathways**: Variable based on complexity
+
+### Resource Requirements
+- Memory usage scales with chemical complexity
+- CPU usage depends on pathway complexity
+- Storage requirements for intermediate results
+- Network bandwidth for data retrieval
+
+### Optimization Tips
+- Use appropriate generation parameters
+- Select relevant pathways only
+- Apply filtering criteria early
+- Consider batch processing for multiple chemicals
+
+## Monitoring and Debugging
+
+### Task Monitoring
+- Real-time progress tracking
+- Resource usage monitoring
+- Performance metrics
+- Error rate tracking
+
+### Debugging Tools
+- Detailed logging
+- Intermediate result inspection
+- Pathway analysis tools
+- Performance profiling
+
+### Support Resources
+- Documentation and tutorials
+- Community forums
+- Technical support
+- Expert consultation services
+
+## Quality Assurance
+
+### Result Validation
+- Chemical structure validation
+- Reaction feasibility assessment
+- Property prediction validation
+- Literature comparison
+
+### Quality Metrics
+- Metabolite generation success rate
+- Property prediction accuracy
+- Pathway completeness
+- Result reproducibility
+
+### Continuous Improvement
+- User feedback integration
+- Algorithm optimization
+- Performance monitoring
+- Quality metric tracking

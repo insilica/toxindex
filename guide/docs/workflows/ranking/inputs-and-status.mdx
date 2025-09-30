@@ -1,0 +1,193 @@
+---
+title: Inputs and Status Updates
+---
+
+# Ranking Workflow: Inputs and Status Updates
+
+This page explains the data flow and status updates for the Ranking workflow.
+
+## Input Requirements
+
+### Chemical Inputs
+
+**Required Fields:**
+- Chemical identifiers (SMILES, CAS, or names)
+- Minimum 2 chemicals for ranking
+- Maximum 100 chemicals per analysis
+
+**Optional Fields:**
+- Chemical metadata (molecular weight, formula)
+- Pre-existing toxicity data
+- Custom chemical properties
+
+### Endpoint Selection
+
+**Endpoint Categories:**
+- Acute toxicity endpoints
+- Chronic toxicity endpoints
+- Organ-specific toxicity
+- Environmental endpoints
+- Custom endpoints
+
+**Endpoint Requirements:**
+- At least one endpoint must be selected
+- Endpoints must have data for at least 2 chemicals
+- Missing data is handled automatically
+
+### Ranking Parameters
+
+**Algorithm Selection:**
+- Bradley-Terry Model (pairwise comparisons)
+- Thurstone Model (continuous data)
+- Borda Count (multiple endpoints)
+- Custom algorithms
+
+**Statistical Parameters:**
+- Confidence level (default: 95%)
+- Bootstrap iterations (default: 1000)
+- Significance threshold (default: 0.05)
+- Missing data handling method
+
+## Status Updates
+
+### Task Status Flow
+
+1. **Queued**: Task submitted to the ranking queue
+2. **Preprocessing**: Chemical identifiers validated and normalized
+3. **Data Retrieval**: Endpoint data collected from databases
+4. **Analysis**: Pairwise comparisons and ranking calculations
+5. **Post-processing**: Statistical analysis and confidence intervals
+6. **Completed**: Results available for download and visualization
+
+### Real-time Updates
+
+**Progress Indicators:**
+- Overall task progress percentage
+- Current processing stage
+- Estimated time remaining
+- Data quality metrics
+
+**Status Messages:**
+- Chemical validation results
+- Endpoint data availability
+- Analysis progress updates
+- Error notifications
+
+### Notification System
+
+**Email Notifications:**
+- Task completion alerts
+- Error notifications
+- Progress updates (optional)
+
+**Dashboard Updates:**
+- Real-time status in task queue
+- Progress bars and indicators
+- Error messages and suggestions
+
+## Data Processing Pipeline
+
+### Stage 1: Input Validation
+- Chemical identifier validation
+- Endpoint selection verification
+- Parameter validation
+- Data quality assessment
+
+### Stage 2: Data Collection
+- Endpoint data retrieval
+- Data source integration
+- Quality control checks
+- Missing data identification
+
+### Stage 3: Preprocessing
+- Chemical structure normalization
+- Endpoint data standardization
+- Outlier detection and handling
+- Data imputation (if needed)
+
+### Stage 4: Ranking Analysis
+- Pairwise comparison generation
+- Statistical ranking calculations
+- Confidence interval computation
+- Significance testing
+
+### Stage 5: Post-processing
+- Result validation
+- Visualization generation
+- Report creation
+- Artifact preparation
+
+## Error Handling
+
+### Common Errors
+
+**Input Validation Errors:**
+- Invalid chemical identifiers
+- Insufficient endpoint data
+- Conflicting parameter settings
+- Data format issues
+
+**Processing Errors:**
+- Computational failures
+- Memory limitations
+- Timeout errors
+- Data corruption
+
+**Recovery Actions:**
+- Automatic retry for transient errors
+- Data validation and correction
+- Alternative algorithm selection
+- Manual intervention for complex issues
+
+### Error Reporting
+
+**Error Categories:**
+- Input validation errors
+- Data processing errors
+- Computational errors
+- System errors
+
+**Error Details:**
+- Specific error messages
+- Affected chemicals or endpoints
+- Suggested corrective actions
+- Contact information for support
+
+## Performance Considerations
+
+### Processing Time
+- **Small datasets** (2-10 chemicals): 1-5 minutes
+- **Medium datasets** (10-50 chemicals): 5-30 minutes
+- **Large datasets** (50-100 chemicals): 30-120 minutes
+
+### Resource Requirements
+- Memory usage scales with chemical count
+- CPU usage depends on algorithm complexity
+- Storage requirements for intermediate results
+- Network bandwidth for data retrieval
+
+### Optimization Tips
+- Use relevant endpoints only
+- Consider chemical subset selection
+- Choose appropriate algorithms
+- Monitor system resources
+
+## Monitoring and Debugging
+
+### Task Monitoring
+- Real-time progress tracking
+- Resource usage monitoring
+- Performance metrics
+- Error rate tracking
+
+### Debugging Tools
+- Detailed logging
+- Intermediate result inspection
+- Parameter sensitivity analysis
+- Data quality reports
+
+### Support Resources
+- Documentation and tutorials
+- Community forums
+- Technical support
+- Expert consultation services
