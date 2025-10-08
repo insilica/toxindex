@@ -485,9 +485,9 @@ const UserGroupManager: React.FC = () => {
               Users
             </h2>
             
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto max-h-96 overflow-y-auto border border-gray-700 rounded-lg">
               <table className="w-full text-left">
-                <thead>
+                <thead className="sticky top-0 bg-gray-800 z-10">
                   <tr className="border-b border-gray-700">
                     <th className="py-3 px-4 text-gray-300 font-medium">Email</th>
                     <th className="py-3 px-4 text-gray-300 font-medium">Group</th>

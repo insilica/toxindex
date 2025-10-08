@@ -27,6 +27,36 @@ const ChatSession = () => {
   const { socket, isConnected, connect } = useSocket();
   const [chatTitle, setChatTitle] = useState<string>('Chat Session');
   const [chatCreatedAt, setChatCreatedAt] = useState<string | null>(null);
+  const getMessageKey = (m: any): string => {
+    if (!m) return 'null';
+    return m.message_id || `${m.role || 'unknown'}::${m.content || ''}`;
+  };
+
+  // Keep only first assistant message after each user message
+  const dedupeMessages = (messages: any[]): any[] => {
+    const result: any[] = [];
+    let lastUserIndex = -1;
+    
+    for (let i = 0; i < messages.length; i++) {
+      const msg = messages[i];
+      result.push(msg);
+      
+      if (msg.role === 'user') {
+        lastUserIndex = i;
+      } else if (msg.role === 'assistant' && lastUserIndex >= 0) {
+        // This is an assistant message after a user message
+        // Remove any subsequent assistant messages until next user message
+        let j = i + 1;
+        while (j < messages.length && messages[j].role === 'assistant') {
+          j++; // Skip duplicate assistant messages
+        }
+        i = j - 1; // Adjust loop index
+      }
+    }
+    
+    return result;
+  };
+  const isDev = (import.meta as any)?.env?.MODE !== 'production';
 
   console.log("ChatSession mounted", sessionId);
 
@@ -36,6 +66,15 @@ const ChatSession = () => {
     connect();
   }, []); // Empty dependency array - only run once
 
+  // Debug socket connection state
+  useEffect(() => {
+    console.log('[ChatSession] Socket state changed:', { 
+      hasSocket: !!socket, 
+      isConnected, 
+      sessionId 
+    });
+  }, [socket, isConnected, sessionId]);
+
   useEffect(() => {
     mountCount += 1;
     console.log("ChatSession useEffect mount count:", mountCount);
@@ -44,23 +83,50 @@ const ChatSession = () => {
   useEffect(() => {
     if (!socket || !sessionId) return;
 
-    // Only join room if socket is connected
+    // Join room if already connected
     if (isConnected) {
-      // Join the room
-      console.log('[SocketIO] Emitting join_chat_session', sessionId);
+      console.log('[SocketIO] Already connected, joining room immediately');
       socket.emit('join_chat_session', { session_id: sessionId });
     }
+
+    // Re-join room on every connect (handles reconnects)
+    const onConnect = () => {
+      console.log('[SocketIO] Connected, joining chat session room:', sessionId);
+      socket.emit('join_chat_session', { session_id: sessionId });
+    };
 
     // Handler for new_message
     const handler = (msg: any) => {
       console.log('[SocketIO] Received new_message:', msg);
-      setMessages(prev => [...prev, msg]);
+      console.log('[SocketIO] Message details:', { role: msg?.role, content: msg?.content?.substring(0, 50) + '...' });
+      // Append and dedupe to keep only first assistant message after each user message
+      setMessages(prev => {
+        const newMessages = [...prev, msg];
+        return dedupeMessages(newMessages);
+      });
     };
-    socket.on('new_message', handler);
 
-    // Cleanup handler only (not the socket)
+    // Listen for room join confirmation
+    const onJoinedRoom = (data: any) => {
+      console.log('[SocketIO] Successfully joined chat session:', data);
+    };
+
+    // Test: listen for ANY socket event to see if socket is working
+    const onAnyEvent = (...args: any[]) => {
+      console.log('[SocketIO] Received ANY event:', args);
+    };
+    socket.onAny(onAnyEvent);
+
+    socket.on('connect', onConnect);
+    socket.on('new_message', handler);
+    socket.on('joined_chat_session', onJoinedRoom);
+
+    // Cleanup handlers
     return () => {
+      socket.offAny(onAnyEvent);
+      socket.off('connect', onConnect);
       socket.off('new_message', handler);
+      socket.off('joined_chat_session', onJoinedRoom);
     };
   }, [sessionId, socket, isConnected]);
 
@@ -70,7 +136,10 @@ const ChatSession = () => {
     fetch(`/api/chat_sessions/${sessionId}/messages`, { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
-        setMessages(data.messages || []);
+        const list = Array.isArray(data.messages) ? data.messages : [];
+        // Keep only first assistant message after each user message
+        const deduped = dedupeMessages(list);
+        setMessages(deduped);
       })
       .catch(err => {
         setMessages([]);
@@ -83,14 +152,37 @@ const ChatSession = () => {
   // Fetch chat session metadata (title and created_at)
   useEffect(() => {
     if (!sessionId) return;
+    console.log('[ChatSession] Fetching session metadata for:', sessionId);
     fetch(`/api/chat_sessions/${sessionId}`, { credentials: 'include' })
-      .then(res => res.ok ? res.json() : null)
-      .then(data => {
-        if (!data) return;
-        if (data.title) setChatTitle(data.title);
-        if (data.created_at) setChatCreatedAt(data.created_at);
+      .then(res => {
+        console.log('[ChatSession] Session metadata response:', res.status, res.ok);
+        if (!res.ok) {
+          console.error('[ChatSession] API call failed:', res.status, res.statusText);
+          return null;
+        }
+        return res.json();
       })
-      .catch(() => {
+      .then(data => {
+        console.log('[ChatSession] Session metadata data:', data);
+        if (!data) {
+          console.log('[ChatSession] No data received, keeping defaults');
+          return;
+        }
+        if (data.title) {
+          console.log('[ChatSession] Setting title:', data.title);
+          setChatTitle(data.title);
+        } else {
+          console.log('[ChatSession] No title in data, keeping default');
+        }
+        if (data.created_at) {
+          console.log('[ChatSession] Setting created_at:', data.created_at);
+          setChatCreatedAt(data.created_at);
+        } else {
+          console.log('[ChatSession] No created_at in data, keeping null');
+        }
+      })
+      .catch((err) => {
+        console.error('[ChatSession] Failed to fetch session metadata:', err);
         // Silently ignore; fallback values already set
       });
   }, [sessionId]);
@@ -140,6 +232,22 @@ const ChatSession = () => {
         setInput('');
         setFileId(undefined);
         setFileName(undefined);
+        
+        // Fallback: poll for new messages after 3 seconds if no socket message arrives
+        // TODO: Remove this fallback once socket events are working reliably
+        // setTimeout(() => {
+        //   console.log('[ChatSession] Polling for new messages as fallback...');
+        //   fetch(`/api/chat_sessions/${sessionId}/messages`, { credentials: 'include' })
+        //     .then(res => res.json())
+        //     .then(data => {
+        //       const list = Array.isArray(data.messages) ? data.messages : [];
+        //       const deduped = dedupeMessages(list);
+        //       console.log('[ChatSession] Fallback poll completed, messages:', deduped.length);
+        //       console.log('[ChatSession] Last message:', deduped[deduped.length - 1]);
+        //       setMessages(deduped);
+        //     })
+        //     .catch(err => console.error('[ChatSession] Fallback poll failed:', err));
+        // }, 3000);
       }
     } catch (error) {
       setError('Error sending message.');
@@ -197,6 +305,11 @@ const ChatSession = () => {
                       }}
                     >
                       <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
+                      {isDev && (
+                        <div className="text-xs text-gray-200 mt-1 opacity-75 break-all" title="dedupe key">
+                          key: {getMessageKey(msg)}
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <div
@@ -217,6 +330,11 @@ const ChatSession = () => {
                       >
                         {msg.content}
                       </ReactMarkdown>
+                      {isDev && (
+                        <div className="text-xs text-gray-500 mt-1 opacity-75 break-all" title="dedupe key">
+                          key: {getMessageKey(msg)}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

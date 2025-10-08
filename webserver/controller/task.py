@@ -84,6 +84,11 @@ def create_task():
     if not sid:
         session = ChatSession.create_session(environment_id, user_id, title=title)
         sid = session.session_id if session else None
+    else:
+        # Update existing session title if it's still the default
+        existing_session = ChatSession.get_session(sid)
+        if existing_session and (not existing_session.title or existing_session.title == 'New chat' or existing_session.title == 'Chat Session'):
+            ChatSession.update_title(sid, title)
 
     logging.info(f"Controller: about to create task with created_at={created_at} (type: {type(created_at)})")
     task = Task.create_task(

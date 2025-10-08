@@ -12,7 +12,7 @@ from pathway_analysis_tool import save_pathway
 import pandas as pd
 from webserver.storage import GCSFileStorage
 from webserver.cache_manager import cache_manager
-from workflows.utils import emit_status, download_gcs_file_to_temp, upload_local_file_to_gcs
+from workflows.utils import emit_status, download_gcs_file_to_temp, upload_local_file_to_gcs, publish_to_socketio
 
 logger = logging.getLogger(__name__)
 
@@ -116,12 +116,27 @@ def pathway_analysis_task(self, payload):
         emit_status(task_id, "publishing results")
         # Publish message event
         message = MessageSchema(role="assistant", content=f"Pathway analysis completed for {pathway_id}")
+        
+        # Publish to Redis for database processing
         event = {
             "type": "task_message",
             "data": message.model_dump(),
             "task_id": task_id,
         }
         r.publish("celery_updates", json.dumps(event, default=str))
+        
+        # Emit to Socket.IO chat room
+        task = Task.get_task(task_id)
+        if task and getattr(task, 'session_id', None):
+            room = f"chat_session_{task.session_id}"
+            logger.info(f"[pathway_analysis_task] Emitting to chat room: {room}")
+            try:
+                publish_to_socketio("new_message", room, message.model_dump())
+                logger.info(f"[pathway_analysis_task] Successfully emitted to socket")
+            except Exception as e:
+                logger.error(f"[pathway_analysis_task] Failed to emit to socket: {e}")
+        else:
+            logger.warning(f"[pathway_analysis_task] No session_id found for task {task_id}")
 
         logger.info("pathway_analysis_task completed successfully")
         finished_at = Task.mark_finished(task_id)

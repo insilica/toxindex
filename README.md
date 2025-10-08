@@ -75,6 +75,7 @@ cd frontend && npm install
   celery -A workflows.celery_worker_raptool worker --loglevel=info -Q raptool
   celery -A workflows.celery_worker_ranking worker --loglevel=info -Q ranking
   celery -A workflows.celery_worker_plain worker --loglevel=info -Q openai
+  celery -A workflows.celery_worker_sparql worker --loglevel=info -Q sparql
   ```
 - Start frontend:
   ```sh

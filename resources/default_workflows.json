@@ -106,6 +106,18 @@
       "task_name": "workflows.metabolite_sygma_task.metabolite_sygma_task", 
       "queue": "sygma",
       "notes": "Add task_name/queue when task is implemented"
+    },
+    {
+      "workflow_id": 9,
+      "frontend_id": "SPARQL",
+      "title": "SPARQL",
+      "label": "SPARQL",
+      "description": "Workflow that fetches chemicals from SPARQL endpoint",
+      "initial_prompt": "Fetch 200 chemicals from SPARQL endpoint",
+      "celery_task": "SPARQL",
+      "task_name": "workflows.celery_task_sparql.sparql_task", 
+      "queue": "SPARQL",
+      "notes": "Add task_name/queue when task is implemented"
     }
   ]
 }

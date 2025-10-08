@@ -1,4 +1,3 @@
-import redis
 import json
 import os
 import uuid
@@ -15,41 +14,15 @@ from webserver.cache_manager import cache_manager
 from webserver.tools.deeptox_agent import deeptox_agent
 from webserver.tools.toxicity_models_simple import ChemicalToxicityAssessment
 from webserver.ai_service import convert_pydantic_to_markdown
-from workflows.utils import emit_status, publish_to_celery_updates, publish_to_socketio, get_redis_connection
+from workflows.utils import (
+    emit_status,
+    get_redis_connection,
+    emit_task_message,
+    emit_task_file,
+)
 
 logging.getLogger().info("rap.py module loaded")
 logger = logging.getLogger(__name__)
-
-
-
-
-def emit_task_message(task_id, message_data):
-    """Emit task message to both database and real-time channels"""
-    # Publish to celery_updates for database processing
-    publish_to_celery_updates("task_message", task_id, message_data)
-    
-    # Publish to Socket.IO for real-time updates
-    task = Task.get_task(task_id)
-    if task and getattr(task, 'session_id', None):
-        # Emit to chat session room
-        publish_to_socketio("new_message", f"chat_session_{task.session_id}", message_data)
-    
-    # Emit to task room
-    publish_to_socketio("task_message", f"task_{task_id}", {
-        "type": "task_message",
-        "data": message_data,
-        "task_id": str(task_id),  # Convert UUID to string for JSON serialization
-    })
-
-
-def emit_task_file(task_id, file_data):
-    """Emit task file to both database and real-time channels"""
-    # Publish to celery_updates for database processing
-    publish_to_celery_updates("task_file", task_id, file_data)
-    
-    # Publish to Socket.IO for real-time updates
-    publish_to_socketio("task_file", f"task_{task_id}", file_data)
-
 
 @celery.task(bind=True, queue='rap')
 def rap_task(self, payload):

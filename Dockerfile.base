@@ -32,6 +32,7 @@ COPY webserver/ai_service.py /app/webserver/
 COPY webserver/logging_utils.py /app/webserver/
 COPY webserver/data_paths.py /app/webserver/
 COPY webserver/datastore.py /app/webserver/
+COPY webserver/socketio.py /app/webserver/
 
 # Copy config files
 COPY config/ /app/config/

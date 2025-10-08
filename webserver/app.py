@@ -46,6 +46,10 @@ dotenv.load_dotenv()
 setup_logging("webserver", log_level=logging.DEBUG)
 logger = get_logger("webserver")
 
+# Reduce noise from frequent health checks/access logs
+logging.getLogger('geventwebsocket.handler').setLevel(logging.WARNING)
+logging.getLogger('werkzeug').setLevel(logging.WARNING)
+
 # FLASK APP ===================================================================
 static_folder_path = os.path.join(os.path.dirname(__file__), "webserver", "static")
 app = flask.Flask(__name__, static_folder=static_folder_path)
