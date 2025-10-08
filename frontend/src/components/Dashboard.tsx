@@ -214,11 +214,15 @@ const Dashboard = () => {
 
   useEffect(() => {
     console.log("selectedEnv", selectedEnv);
-    setTasksLoading(true);
-    let url = "/api/tasks";
-    if (selectedEnv && selectedEnv !== "__add__" && selectedEnv !== "__manage__") {
-      url += `?environment_id=${selectedEnv}`;
+    // If no valid environment is selected, avoid fetching all tasks and clear state
+    if (!selectedEnv || selectedEnv === "__add__" || selectedEnv === "__manage__") {
+      setActiveTasks([]);
+      setArchivedTasks([]);
+      return;
     }
+
+    setTasksLoading(true);
+    const url = `/api/tasks?environment_id=${selectedEnv}`;
     fetch(url, { credentials: "include", cache: "no-store" })
       .then(res => res.json())
       .then(data => {
@@ -310,32 +314,44 @@ const Dashboard = () => {
     };
   }, [socket, isConnected]); // Removed activeTasks dependency
 
-  // Separate effect for room management to avoid feedback loops
+  // Reset room subscriptions when environment changes
+  useEffect(() => {
+    if (!socket || !isConnected) return;
+    // Leave all previously joined rooms on env change
+    prevTaskIdsRef.current.forEach(id => {
+      socket.emit('leave_task_room', { task_id: id });
+    });
+    prevTaskIdsRef.current = [];
+  }, [selectedEnv, socket, isConnected]);
+
+  // Separate effect for room management to avoid feedback loops, scoped and capped
   useEffect(() => {
     if (!socket || !isConnected) return;
 
-    const currentTaskIds = activeTasks.map(t => t.task_id);
+    // Cap the number of rooms to join to reduce load (e.g., first 20 active tasks)
+    const MAX_ROOMS = 20;
+    const limitedTaskIds = activeTasks.slice(0, MAX_ROOMS).map(t => t.task_id);
     const prevTaskIds = prevTaskIdsRef.current;
 
-    console.log('[Dashboard] Managing rooms - prevTaskIds:', prevTaskIds, 'currentTaskIds:', currentTaskIds);
+    console.log('[Dashboard] Managing rooms - prevTaskIds:', prevTaskIds, 'currentTaskIds:', limitedTaskIds);
 
     // Leave old rooms
     prevTaskIds.forEach(id => {
-      if (!currentTaskIds.includes(id)) {
+      if (!limitedTaskIds.includes(id)) {
         console.log('[SocketIO] Leaving task room', id);
         socket.emit('leave_task_room', { task_id: id });
       }
     });
 
     // Join new rooms
-    currentTaskIds.forEach(id => {
+    limitedTaskIds.forEach(id => {
       if (!prevTaskIds.includes(id)) {
         console.log('[SocketIO] Joining task room', id);
         socket.emit('join_task_room', { task_id: id });
       }
     });
 
-    prevTaskIdsRef.current = currentTaskIds;
+    prevTaskIdsRef.current = limitedTaskIds;
   }, [activeTasks, socket, isConnected]);
 
 

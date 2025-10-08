@@ -17,8 +17,8 @@ let isLoading = false;
 let loadPromise: Promise<Workflow[]> | null = null;
 
 // Load workflows from JSON file
-export async function loadWorkflows(): Promise<Workflow[]> {
-  if (workflowsCache) {
+export async function loadWorkflows(forceRefresh = false): Promise<Workflow[]> {
+  if (workflowsCache && !forceRefresh) {
     return workflowsCache;
   }
 
@@ -63,6 +63,13 @@ export function getWorkflows(): Workflow[] {
   return workflowsCache || [];
 }
 
+// Clear workflows cache to force reload
+export function clearWorkflowsCache(): void {
+  workflowsCache = null;
+  isLoading = false;
+  loadPromise = null;
+}
+
 // Initialize workflows on module load
 export async function initializeWorkflows(): Promise<void> {
   await loadWorkflows();
@@ -94,4 +101,4 @@ export function getWorkflowByFrontendId(frontend_id: string): Workflow | undefin
 }
 
 // Initialize workflows when this module is imported
-initializeWorkflows().catch(console.error); 
+// Removed automatic initialization to prevent stale cache 

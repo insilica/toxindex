@@ -1,0 +1,9 @@
+FROM toxindex-base:latest
+
+# Core workflow files
+COPY workflows/celery_worker_plain.py /app/workflows/celery_worker_plain.py
+COPY workflows/plain_openai_tasks.py /app/workflows/plain_openai_tasks.py
+
+# Entrypoint: Celery worker for rap tasks only
+CMD ["python", "-m", "celery", "-A", "workflows.celery_worker_plain", "worker", "--loglevel=info", "-Q", "openai"]
+

@@ -1,0 +1,9 @@
+FROM toxindex-base:latest
+
+# Core workflow files
+COPY workflows/celery_worker_sparql.py /app/workflows/celery_worker_sparql.py
+COPY workflows/celery_task_sparql.py /app/workflows/celery_task_sparql.py
+
+# Entrypoint: Celery worker for rap tasks only
+CMD ["python", "-m", "celery", "-A", "workflows.celery_worker_sparql", "worker", "--loglevel=info", "-Q", "SPARQL"]
+

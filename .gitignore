@@ -74,3 +74,6 @@ k8s/backend-secrets.yaml
 
 # Python build directory
 build/
+docs/_build/
+# Docs build artifacts
+docs/_build/

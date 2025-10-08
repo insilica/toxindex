@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import FilePreviewModal from './shared/FilePreviewModal';
-import { FaComments, FaPlus, FaListAlt, FaFileCsv, FaFileAlt, FaFileCode, FaDatabase, FaFileImage, FaFile, FaEllipsisH, FaUsers, FaCog, FaServer, FaShieldAlt, FaUser, FaSignOutAlt } from 'react-icons/fa';
+import { FaComments, FaPlus, FaListAlt, FaFileCsv, FaFileAlt, FaFileCode, FaDatabase, FaFileImage, FaFile, FaEllipsisH, FaUsers, FaCog, FaServer, FaShieldAlt, FaUser, FaSignOutAlt, FaBookOpen } from 'react-icons/fa';
 import { createPortal } from "react-dom";
 import { useEnvironment } from "../context/EnvironmentContext";
 import { useChatSession } from "../context/ChatSessionContext";
@@ -276,7 +276,10 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title: null })
+      body: JSON.stringify({ 
+        title: null,
+        environment_id: selectedEnv 
+      })
     });
     if (res.ok) {
       const session = await res.json();
@@ -599,6 +602,15 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       {/* Header controls at top right */}
       {auth && (
         <div style={{ position: 'absolute', top: '2rem', right: '2.5rem', zIndex: 40, display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          {/* Guide button (left of Session Status) */}
+          <button
+            onClick={() => window.open('https://toxindex.com/guide', '_blank', 'noopener,noreferrer')}
+            className="w-9 h-9 flex items-center justify-center rounded-full !bg-gray-900 !bg-opacity-10 text-white hover:!bg-gray-800 focus:outline-none shadow"
+            style={{ padding: 0 }}
+            title="Open Guide"
+          >
+            <FaBookOpen className="text-gray-300" />
+          </button>
           {/* Session Status */}
           <CompactSessionStatus />
           

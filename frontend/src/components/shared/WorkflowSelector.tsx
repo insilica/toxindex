@@ -36,8 +36,8 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({ className = '' }) =
   }, []);
 
   useEffect(() => {
-    // Load workflows on component mount
-    loadWorkflows().then(loadedWorkflows => {
+    // Force refresh workflows on component mount
+    loadWorkflows(true).then(loadedWorkflows => {
       setWorkflows(loadedWorkflows);
     });
   }, []);

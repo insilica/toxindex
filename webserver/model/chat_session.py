@@ -2,6 +2,8 @@ import webserver.datastore as ds
 import logging
 import uuid
 
+logger = logging.getLogger(__name__)
+
 class ChatSession:
     def __init__(self, session_id, environment_id, user_id, title=None, created_at=None):
         self.session_id = session_id
@@ -35,12 +37,23 @@ class ChatSession:
             title = 'New chat'
         session_id = str(uuid.uuid4())
         params = (session_id, environment_id, user_id, title)
-        ds.execute(
-            "INSERT INTO chat_sessions (session_id, environment_id, user_id, title) VALUES (%s, %s, %s, %s)",
-            params
-        )
-        row = ds.find("SELECT * FROM chat_sessions WHERE session_id = %s", (session_id,))
-        return ChatSession.from_row(row) if row else None
+        logging.info(f"[ChatSession.create_session] Creating session: {session_id}, environment_id={environment_id}, user_id={user_id}, title='{title}'")
+        try:
+            ds.execute(
+                "INSERT INTO chat_sessions (session_id, environment_id, user_id, title) VALUES (%s, %s, %s, %s)",
+                params
+            )
+            logging.info(f"[ChatSession.create_session] Session inserted successfully")
+            row = ds.find("SELECT * FROM chat_sessions WHERE session_id = %s", (session_id,))
+            if row:
+                logging.info(f"[ChatSession.create_session] Session found in database: {row}")
+                return ChatSession.from_row(row)
+            else:
+                logging.error(f"[ChatSession.create_session] Session not found after insert: {session_id}")
+                return None
+        except Exception as e:
+            logging.error(f"[ChatSession.create_session] Error creating session: {e}")
+            return None
 
     @staticmethod
     def update_title(session_id, title):
@@ -62,8 +75,14 @@ class ChatSession:
 
     @staticmethod
     def get_session(session_id):
+        logging.info(f"[ChatSession.get_session] Looking for session: {session_id}")
         row = ds.find("SELECT * FROM chat_sessions WHERE session_id = %s", (session_id,))
-        return ChatSession.from_row(row) if row else None
+        if row:
+            logging.info(f"[ChatSession.get_session] Session found: {row}")
+            return ChatSession.from_row(row)
+        else:
+            logging.warning(f"[ChatSession.get_session] Session not found: {session_id}")
+            return None
 
     @staticmethod
     def delete_session(session_id, user_id=None):

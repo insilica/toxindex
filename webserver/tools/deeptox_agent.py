@@ -67,7 +67,7 @@ from langchain_google_community import GoogleSearchAPIWrapper
 from langchain_core.runnables import RunnableLambda
 from langgraph.graph import StateGraph
 from agno.tools import tool
-from agno.agent import Agent, RunResponse
+from agno.agent import Agent
 from textwrap import dedent
 from webserver.tools.chemprop import get_chemprop
 
@@ -530,7 +530,6 @@ deeptox_agent = Agent(
     name="Deep Toxicology Agent",
     model=agent_model,
     tools=[get_chemprop, invoke_deepsearch],
-    response_model=ChemicalToxicityAssessment,
     description=dedent("""
         You are a specialized toxicology research assistant with expertise in:
         - Chemical toxicity analysis and risk assessment
@@ -564,15 +563,16 @@ deeptox_agent = Agent(
         
         Output structured data only. Convert to markdown only if explicitly requested.
     """),
-    show_tool_calls=True,
-    add_datetime_to_instructions=True,
-    stream_intermediate_steps=False,
-    stream=False,
-    debug_mode=True,
+    output_schema=ChemicalToxicityAssessment,
+    # show_tool_calls=True,
+    # add_datetime_to_instructions=True,
+    # stream_intermediate_steps=False,
+    # stream=False,
+    # debug_mode=True,
 )
 
 if __name__ == "__main__":
-    response: RunResponse = deeptox_agent.run(
+    response = deeptox_agent.run(
         "Is Methotrexate closely linked to hepatotoxicity in the presence of alcohol consumption or obesity-related metabolic conditions?") 
     response_data = response.content
     timestamp = datetime.now().isoformat().replace(':', '-')

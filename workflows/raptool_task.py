@@ -17,10 +17,38 @@ from RAPtool.predict_chemicals import predict_chemicals
 from RAPtool.select_feature import select_feature
 from RAPtool.build_heatmap import build_heatmap
 from RAPtool.build_stripchart import build_stripchart
-from workflows.utils import emit_status, download_gcs_file_to_temp, upload_local_file_to_gcs
+from workflows.utils import emit_status, download_gcs_file_to_temp, upload_local_file_to_gcs, publish_to_socketio
 
 logger = logging.getLogger(__name__)
 
+
+def emit_task_message(task_id, message_data):
+    """Emit task message to both database and real-time channels"""
+    r = redis.Redis(
+        host=os.environ.get("REDIS_HOST", "localhost"),
+        port=int(os.environ.get("REDIS_PORT", "6379"))
+    )
+    
+    # Publish to Redis for database processing
+    event = {
+        "type": "task_message",
+        "data": message_data,
+        "task_id": task_id,
+    }
+    r.publish("celery_updates", json.dumps(event, default=str))
+    
+    # Emit to Socket.IO chat room
+    task = Task.get_task(task_id)
+    if task and getattr(task, 'session_id', None):
+        room = f"chat_session_{task.session_id}"
+        logger.info(f"[raptool_task] Emitting to chat room: {room}")
+        try:
+            publish_to_socketio("new_message", room, message_data)
+            logger.info(f"[raptool_task] Successfully emitted to socket")
+        except Exception as e:
+            logger.error(f"[raptool_task] Failed to emit to socket: {e}")
+    else:
+        logger.warning(f"[raptool_task] No session_id found for task {task_id}")
 
 
 @celery.task(bind=True, queue='raptool')
@@ -78,12 +106,7 @@ def raptool_task(self, payload):
             emit_status(task_id, "publishing parse result")
             # Publish message event
             message = MessageSchema(role="assistant", content=f"Chemicals parsed")
-            event = {
-                "type": "task_message",
-                "data": message.model_dump(),
-                "task_id": task_id,
-            }
-            r.publish("celery_updates", json.dumps(event, default=str))
+            emit_task_message(task_id, message.model_dump())
 
             # Publish file event (for download)
             file_event = {
@@ -109,12 +132,7 @@ def raptool_task(self, payload):
             emit_status(task_id, "publishing categorize result")
             # Publish message event
             message = MessageSchema(role="assistant", content=f"Chemicals categorized")
-            event = {
-                "type": "task_message",
-                "data": message.model_dump(),
-                "task_id": task_id,
-            }
-            r.publish("celery_updates", json.dumps(event, default=str))
+            emit_task_message(task_id, message.model_dump())
 
             # Publish categorized file event (for download)
             categorized_file_event = {
@@ -139,12 +157,7 @@ def raptool_task(self, payload):
             
             # Publish message event
             message = MessageSchema(role="assistant", content=f"ToxTransformer predictions generated")
-            event = {
-                "type": "task_message",
-                "data": message.model_dump(),
-                "task_id": task_id,
-            }
-            r.publish("celery_updates", json.dumps(event, default=str))
+            emit_task_message(task_id, message.model_dump())
 
             # Publish predictions file event (for download)
             predictions_file_event = {
@@ -205,12 +218,7 @@ def raptool_task(self, payload):
                 role="assistant",
                 content=f"features selected (methods used: lasso, random_forest, mutual_info, rfe)."
             )
-            event = {
-                "type": "task_message",
-                "data": message.model_dump(),
-                "task_id": task_id,
-            }
-            r.publish("celery_updates", json.dumps(event, default=str))
+            emit_task_message(task_id, message.model_dump())
 
             # Run build_heatmap with mutual_info-selected features
             emit_status(task_id, "building heatmap")
@@ -224,12 +232,7 @@ def raptool_task(self, payload):
             
             # Publish message event for build_heatmap
             message = MessageSchema(role="assistant", content=f"heatmap generated")
-            event = {
-                "type": "task_message",
-                "data": message.model_dump(),
-                "task_id": task_id,
-            }
-            r.publish("celery_updates", json.dumps(event, default=str))
+            emit_task_message(task_id, message.model_dump())
             
             # Publish file event for heatmap image
             heatmap_file_event = {
@@ -255,12 +258,7 @@ def raptool_task(self, payload):
             
             # Publish message event for build_stripchart
             message = MessageSchema(role="assistant", content=f"stripchart generated")
-            event = {
-                "type": "task_message",
-                "data": message.model_dump(),
-                "task_id": task_id,
-            }
-            r.publish("celery_updates", json.dumps(event, default=str))
+            emit_task_message(task_id, message.model_dump())
             
             # Publish file event for stripchart image
             stripchart_file_event = {

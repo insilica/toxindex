@@ -15,7 +15,7 @@ export default {
       {
         type: 'link',
         label: 'Chat with us on Discord',
-        href: 'https://discord.gg/aKmFkEKgbm',
+        href: 'https://discord.gg/hvC8AjMB',
       },
     ],
   };

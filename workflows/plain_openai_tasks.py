@@ -13,7 +13,7 @@ from webserver.tools.toxicity_schema import TOXICITY_SCHEMA
 from webserver.model.task import Task
 from webserver.storage import GCSFileStorage
 from webserver.cache_manager import cache_manager
-from workflows.utils import emit_status
+from workflows.utils import emit_status, publish_to_socketio
 
 logger = logging.getLogger(__name__)
 
@@ -29,8 +29,8 @@ def plain_openai_task(self, payload):
         )
         task_id = payload.get("task_id")
         user_id = payload.get("user_id")
-        user_query = payload.get("payload", "Is Gentamicin nephrotoxic?")
-        model = "gpt-4"
+        user_query = payload.get("user_query", "Is Gentamicin nephrotoxic?")
+        model = "gpt-4o"
         emit_status(task_id, "checking cache")
         cache_key = f"openai_cache:{model}:{hashlib.sha256(user_query.encode()).hexdigest()}"
         cached = r.get(cache_key)
@@ -54,13 +54,33 @@ def plain_openai_task(self, payload):
         emit_status(task_id, "publishing message")
         # display raw markdown content directly to user
         message = MessageSchema(role="assistant", content=content)
+        message_data = message.model_dump()
+        
+        # Publish to Redis for database processing
         event = {
             "type": "task_message",
-            "data": message.model_dump(),
+            "data": message_data,
             "task_id": task_id,
         }
         logger.info(f"[plain_openai_task] Publishing message event: {event}")
         r.publish("celery_updates", json.dumps(event, default=str))
+        
+        # Emit to Socket.IO chat room
+        logger.info(f"[plain_openai_task] Attempting to emit to Socket.IO for task_id={task_id}")
+        task = Task.get_task(task_id)
+        logger.info(f"[plain_openai_task] Retrieved task: {task}")
+        logger.info(f"[plain_openai_task] Task session_id: {getattr(task, 'session_id', None) if task else 'No task'}")
+        
+        if task and getattr(task, 'session_id', None):
+            room = f"chat_session_{task.session_id}"
+            logger.info(f"[plain_openai_task] Emitting to chat room: {room}")
+            try:
+                publish_to_socketio("new_message", room, message_data)
+                logger.info(f"[plain_openai_task] Successfully emitted to socket")
+            except Exception as e:
+                logger.error(f"[plain_openai_task] Failed to emit to socket: {e}")
+        else:
+            logger.warning(f"[plain_openai_task] No session_id found for task {task_id}")
 
         emit_status(task_id, "uploading file to GCS")
         # Create temporary file and upload to GCS
@@ -163,13 +183,29 @@ def openai_json_schema_task(self, payload):
 
         emit_status(task_id, "publishing message")
         message = MessageSchema(role="assistant", content=content)
+        message_data = message.model_dump()
+        
+        # Publish to Redis for database processing
         event = {
             "type": "task_message",
-            "data": message.model_dump(),
+            "data": message_data,
             "task_id": task_id,
         }
         logger.info(f"[openai_json_schema_task] Publishing message event: {event}")
         r.publish("celery_updates", json.dumps(event, default=str))
+        
+        # Emit to Socket.IO chat room
+        task = Task.get_task(task_id)
+        if task and getattr(task, 'session_id', None):
+            room = f"chat_session_{task.session_id}"
+            logger.info(f"[openai_json_schema_task] Emitting to chat room: {room}")
+            try:
+                publish_to_socketio("new_message", room, message_data)
+                logger.info(f"[openai_json_schema_task] Successfully emitted to socket")
+            except Exception as e:
+                logger.error(f"[openai_json_schema_task] Failed to emit to socket: {e}")
+        else:
+            logger.warning(f"[openai_json_schema_task] No session_id found for task {task_id}")
 
         emit_status(task_id, "uploading file to GCS")
         # Create temporary file and upload to GCS

@@ -39,7 +39,7 @@ langchain-google-community
 google-genai
 langchain-google-genai
 langgraph
-agno
+agno==2.1.0
 bs4
 aiohttp
 tenacity

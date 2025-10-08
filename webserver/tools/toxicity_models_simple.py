@@ -1,9 +1,7 @@
 from __future__ import annotations
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 from pydantic import BaseModel, Field, validator
-import re
 from urllib.parse import urlparse
-from datetime import datetime
 import requests
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
