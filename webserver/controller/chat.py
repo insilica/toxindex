@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 import flask_login
 from webserver.model import Message
+from webserver.model.file import File
 from webserver.csrf import csrf
 from webserver.util import is_valid_uuid
 from webserver.model.chat_session import ChatSession 
@@ -16,6 +17,17 @@ def get_chat_session_messages(session_id):
         return jsonify({'error': 'Invalid session ID'}), 400
     messages = Message.get_messages_by_session(session_id)
     return jsonify({'messages': [m.to_dict() for m in messages]})
+
+@csrf.exempt
+@chat_bp.route('/<session_id>/files', methods=['GET'])
+@flask_login.login_required
+def get_chat_session_files(session_id):
+    if not is_valid_uuid(session_id):
+        return jsonify({'error': 'Invalid session ID'}), 400
+    logging.info(f"[get_chat_session_files] Fetching files for session: {session_id}")
+    files = File.get_files_by_session(session_id)
+    logging.info(f"[get_chat_session_files] Found {len(files)} files for session {session_id}")
+    return jsonify({'files': [f.to_dict() for f in files]})
 
 @csrf.exempt
 @chat_bp.route('/<session_id>', methods=['GET'])

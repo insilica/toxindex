@@ -254,6 +254,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const isSettings = location.pathname.startsWith("/settings");
   const isAdminPage = location.pathname.startsWith("/admin");
   const isGeneralSettings = location.pathname === "/settings/general";
+  const isChatSession = location.pathname.startsWith("/chat/session/");
   let settingsSection: 'general' | 'environments' | 'data-controls' | 'admin' = 'general';
   if (location.pathname === "/settings/environments") settingsSection = 'environments';
   else if (location.pathname === "/settings/data-controls") settingsSection = 'data-controls';
@@ -362,11 +363,12 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     <div className="flex w-screen min-h-screen overflow-x-hidden" style={{ fontFamily: 'Inter, Arial, sans-serif', position: 'relative' }}>
 
       {/* Sidebar */}
-      <div style={{ position: 'relative' }}>
-        <aside
-          className={`bg-black shadow-sm flex flex-col justify-between min-h-screen relative transition-all duration-500 ease-in-out ${(sidebarOpen || sidebarClosing) ? 'w-64 opacity-100' : 'w-0 opacity-0 pointer-events-none'}`}
-          style={{ overflow: 'hidden', position: 'relative', zIndex: 40, padding: 0, margin: 0, borderRight: 'none' }}
-        >
+      {!isChatSession && (
+        <div style={{ position: 'relative' }}>
+          <aside
+            className={`bg-black shadow-sm flex flex-col justify-between min-h-screen relative transition-all duration-500 ease-in-out ${(sidebarOpen || sidebarClosing) ? 'w-64 opacity-100' : 'w-0 opacity-0 pointer-events-none'}`}
+            style={{ overflow: 'hidden', position: 'relative', zIndex: 40, padding: 0, margin: 0, borderRight: 'none' }}
+          >
           {/* Close button */}
           {(sidebarOpen || sidebarClosing) && (
             <button
@@ -578,7 +580,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           )}
         </aside>
         {/* Open sidebar button */}
-        {!sidebarOpen && !sidebarClosing && (
+        {!sidebarOpen && !sidebarClosing && !isChatSession && (
           <button
             className="fixed z-50 w-9 h-9 flex items-center justify-center rounded-full text-gray-300 hover:text-green-400 shadow transition group"
             style={{ top: '1.95rem', left: '1.45rem', minWidth: '32px', minHeight: '32px', position: 'fixed', background: 'none', padding: 0 }}
@@ -598,10 +600,11 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             </span>
           </button>
         )}
-      </div>
+        </div>
+      )}
       {/* Header controls at top right */}
       {auth && (
-        <div style={{ position: 'absolute', top: '2rem', right: '2.5rem', zIndex: 40, display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <div style={{ position: 'absolute', top: '0.8rem', right: '2.5rem', zIndex: 40, display: 'flex', alignItems: 'center', gap: '1rem' }}>
           {/* Guide button (left of Session Status) */}
           <button
             onClick={() => window.open('https://toxindex.com/guide', '_blank', 'noopener,noreferrer')}

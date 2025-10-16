@@ -151,5 +151,17 @@ class File:
         )
         return [File.from_row(row) for row in rows]
 
+    @staticmethod
+    def get_files_by_session(session_id):
+        """Get all files associated with a chat session through tasks"""
+        rows = ds.find_all(
+            """SELECT f.* FROM files f 
+               JOIN tasks t ON f.task_id = t.task_id 
+               WHERE t.session_id = %s 
+               ORDER BY f.created_at DESC""",
+            (session_id,)
+        )
+        return [File.from_row(row) for row in rows]
+
 
 

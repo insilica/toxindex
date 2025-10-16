@@ -128,10 +128,10 @@
             fi
             
             # Install other local packages if they exist
-            if [ -d "pathway_analysis_tool" ]; then
-              echo "Installing pathway_analysis_tool..."
-              pip install -e pathway_analysis_tool/
-            fi
+            #if [ -d "pathway_analysis_tool" ]; then
+            #  echo "Installing pathway_analysis_tool..."
+            #  pip install -e pathway_analysis_tool/
+            #fi
             
 
             # Source your fullstack environment setup (Postgres, Redis, AWS, etc.)

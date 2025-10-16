@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -27,6 +27,12 @@ const ChatSession = () => {
   const { socket, isConnected, connect } = useSocket();
   const [chatTitle, setChatTitle] = useState<string>('Chat Session');
   const [chatCreatedAt, setChatCreatedAt] = useState<string | null>(null);
+  const [leftPanelWidth, setLeftPanelWidth] = useState<number>(60); // percentage
+  const [isResizing, setIsResizing] = useState<boolean>(false);
+  const [sessionFiles, setSessionFiles] = useState<any[]>([]);
+  const [expandedFiles, setExpandedFiles] = useState<Set<string>>(new Set());
+  const [fileContents, setFileContents] = useState<Record<string, string>>({});
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const getMessageKey = (m: any): string => {
     if (!m) return 'null';
     return m.message_id || `${m.role || 'unknown'}::${m.content || ''}`;
@@ -187,9 +193,143 @@ const ChatSession = () => {
       });
   }, [sessionId]);
 
+  // Fetch files associated with this chat session
+  useEffect(() => {
+    if (!sessionId) return;
+    console.log('[ChatSession] Fetching session files for:', sessionId);
+    fetch(`/api/chat_sessions/${sessionId}/files`, { credentials: 'include' })
+      .then(res => {
+        console.log('[ChatSession] Session files response:', res.status, res.ok);
+        if (!res.ok) {
+          console.error('[ChatSession] API call failed:', res.status, res.statusText);
+          return null;
+        }
+        return res.json();
+      })
+      .then(data => {
+        console.log('[ChatSession] Session files data:', data);
+        if (data && data.files) {
+          setSessionFiles(data.files);
+        } else {
+          setSessionFiles([]);
+        }
+      })
+      .catch((err) => {
+        console.error('[ChatSession] Failed to fetch session files:', err);
+        setSessionFiles([]);
+      });
+  }, [sessionId]);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
+
+  // Resize handler functions
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizing(true);
+  }, []);
+
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (!isResizing) return;
+    
+    const container = document.querySelector('.chat-container');
+    if (!container) return;
+    
+    const containerRect = container.getBoundingClientRect();
+    const newLeftWidth = ((e.clientX - containerRect.left) / containerRect.width) * 100;
+    
+    // Constrain between 20% and 80%
+    const constrainedWidth = Math.min(Math.max(newLeftWidth, 20), 80);
+    setLeftPanelWidth(constrainedWidth);
+  }, [isResizing]);
+
+  const handleMouseUp = useCallback(() => {
+    setIsResizing(false);
+  }, []);
+
+  // File handling functions
+  const toggleFileExpansion = (fileId: string) => {
+    setExpandedFiles(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(fileId)) {
+        newSet.delete(fileId);
+      } else {
+        newSet.add(fileId);
+        // Fetch file content if not already loaded
+        if (!fileContents[fileId]) {
+          fetchFileContent(fileId);
+        }
+      }
+      return newSet;
+    });
+  };
+
+  const fetchFileContent = async (fileId: string) => {
+    try {
+      console.log('[ChatSession] Fetching content for file:', fileId);
+      const res = await fetch(`/api/files/${fileId}/inspect`, { credentials: 'include' });
+      if (res.ok) {
+        const data = await res.json();
+        console.log('[ChatSession] File content response:', data);
+        // The inspect endpoint returns structured data, we want the raw content
+        const content = data.content || data.text || JSON.stringify(data, null, 2);
+        console.log('[ChatSession] Extracted content:', content);
+        setFileContents(prev => ({ ...prev, [fileId]: content }));
+      } else {
+        console.error('[ChatSession] Failed to fetch file content:', res.status, res.statusText);
+        setFileContents(prev => ({ ...prev, [fileId]: `Error loading file content (${res.status})` }));
+      }
+    } catch (error) {
+      console.error('[ChatSession] Error fetching file content:', error);
+      setFileContents(prev => ({ ...prev, [fileId]: `Error loading file content: ${error instanceof Error ? error.message : String(error)}` }));
+    }
+  };
+
+  // Group files by filename to consolidate duplicates
+  const groupFilesByFilename = (files: any[]) => {
+    const groups: Record<string, any[]> = {};
+    files.forEach(file => {
+      const filename = file.filename;
+      if (!groups[filename]) {
+        groups[filename] = [];
+      }
+      groups[filename].push(file);
+    });
+    return groups;
+  };
+
+  const toggleGroupExpansion = (filename: string) => {
+    setExpandedGroups(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(filename)) {
+        newSet.delete(filename);
+      } else {
+        newSet.add(filename);
+      }
+      return newSet;
+    });
+  };
+
+  // Add global mouse event listeners for resizing
+  useEffect(() => {
+    if (isResizing) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+    } else {
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+  }, [isResizing, handleMouseMove, handleMouseUp]);
 
   useEffect(() => {
     scrollToBottom();
@@ -232,22 +372,6 @@ const ChatSession = () => {
         setInput('');
         setFileId(undefined);
         setFileName(undefined);
-        
-        // Fallback: poll for new messages after 3 seconds if no socket message arrives
-        // TODO: Remove this fallback once socket events are working reliably
-        // setTimeout(() => {
-        //   console.log('[ChatSession] Polling for new messages as fallback...');
-        //   fetch(`/api/chat_sessions/${sessionId}/messages`, { credentials: 'include' })
-        //     .then(res => res.json())
-        //     .then(data => {
-        //       const list = Array.isArray(data.messages) ? data.messages : [];
-        //       const deduped = dedupeMessages(list);
-        //       console.log('[ChatSession] Fallback poll completed, messages:', deduped.length);
-        //       console.log('[ChatSession] Last message:', deduped[deduped.length - 1]);
-        //       setMessages(deduped);
-        //     })
-        //     .catch(err => console.error('[ChatSession] Fallback poll failed:', err));
-        // }, 3000);
       }
     } catch (error) {
       setError('Error sending message.');
@@ -260,7 +384,7 @@ const ChatSession = () => {
   return (
     <div className="min-h-screen flex flex-col flex-1 relative" style={{ background: 'linear-gradient(135deg, #101614 0%, #1a2a1a 60%, #1a2320 100%)' }}>
       {/* Header */}
-      <div className="flex items-center gap-4 px-4 py-4 border-b-2 border-gray-600" style={{ marginLeft: 'auto', marginRight: 'auto', width: '100%', maxWidth: '64rem' }}>
+      <div className="flex items-center gap-4 px-4 py-4 border-b-2 border-gray-600 w-full">
         <HomeButton />
         <span className="text-neutral-600 text-xl font-light mx-2">|</span>
         <span className="text-lg font-semibold text-white truncate">{chatTitle}</span>
@@ -268,7 +392,19 @@ const ChatSession = () => {
           {chatCreatedAt ? new Date(chatCreatedAt).toLocaleString() : 'Unknown date'}
         </span>
       </div>
-      <div className="flex-1 flex flex-col max-w-5xl mx-auto w-full px-4 pt-6 py-0">
+      
+      {/* Split Panel Container */}
+      <div className="flex-1 flex chat-container" style={{ minHeight: 0 }}>
+        {/* Left Panel - Chat */}
+        <div 
+          className="flex flex-col"
+          style={{ 
+            width: `${leftPanelWidth}%`,
+            minWidth: '300px',
+            maxWidth: '80%'
+          }}
+        >
+          <div className="flex-1 flex flex-col max-w-5xl mx-auto w-full px-4 pt-6 py-0">
         {/* Chat history box */}
         <div
           className="flex-1 overflow-y-auto w-full max-w-5xl mx-auto px-20 py-0 bg-transparent rounded-lg shadow-inner"
@@ -371,6 +507,131 @@ const ChatSession = () => {
                 setFileName(name);
               }}
             />
+          </div>
+        </div>
+        </div>
+        </div>
+        
+        {/* Draggable Divider */}
+        <div
+          className="w-1 bg-gray-600 hover:bg-gray-500 cursor-col-resize flex-shrink-0 relative group"
+          onMouseDown={handleMouseDown}
+          style={{
+            cursor: isResizing ? 'col-resize' : 'col-resize'
+          }}
+        >
+          {/* Visual indicator for the divider */}
+          <div className="absolute inset-y-0 -left-1 -right-1 bg-transparent hover:bg-gray-400/20 transition-colors duration-200"></div>
+          {/* Resize handle indicator */}
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-1 h-8 bg-gray-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+        </div>
+        
+        {/* Right Panel - File Listing */}
+        <div 
+          className="flex flex-col bg-gray-900/20"
+          style={{ 
+            width: `${100 - leftPanelWidth}%`,
+            minWidth: '200px'
+          }}
+        >
+          <div className="p-4 border-b border-gray-700">
+            <h3 className="text-lg font-semibold text-white">Session Files</h3>
+            <p className="text-sm text-gray-400">{sessionFiles.length} file(s) associated</p>
+          </div>
+          
+          <div className="flex-1 overflow-y-auto p-4">
+            {sessionFiles.length === 0 ? (
+              <div className="text-center text-gray-400 py-8">
+                <div className="text-2xl mb-2">📁</div>
+                <div className="text-sm">No files associated with this session</div>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {Object.entries(groupFilesByFilename(sessionFiles)).map(([filename, files]) => (
+                  <div key={filename} className="border border-gray-700 rounded-lg overflow-hidden">
+                    <button
+                      onClick={() => toggleGroupExpansion(filename)}
+                      className="w-full text-left p-3 !bg-gray-800 hover:!bg-gray-700 transition-colors duration-200 flex items-center justify-between"
+                    >
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <span className="text-sm">📄</span>
+                        <span className="text-sm text-white truncate" title={filename}>
+                          {filename}
+                        </span>
+                        {files.length > 1 && (
+                          <span className="text-xs bg-blue-600 text-white px-2 py-1 rounded-full">
+                            {files.length} versions
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-400">
+                          {files.length === 1 && files[0].size ? `${(files[0].size / 1024).toFixed(1)}KB` : ''}
+                        </span>
+                        <svg
+                          className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${
+                            expandedGroups.has(filename) ? 'rotate-180' : ''
+                          }`}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
+                    </button>
+                    
+                    {expandedGroups.has(filename) && (
+                      <div className="border-t border-gray-700 bg-gray-900/50">
+                        <div className="pl-10 py-2 pr-2">
+                          {files.map((file, index) => (
+                            <div key={file.file_id} className="border border-gray-600 rounded p-1 pl-4 bg-gray-800/50">
+                              <div className="flex items-center justify-between">
+                                <span className="text-sm text-gray-100">
+                                  Version {index + 1}
+                                  {file.created_at && (
+                                    <span className="ml-2 text-gray-300">
+                                      ({new Date(file.created_at).toLocaleDateString()})
+                                    </span>
+                                  )}
+                                </span>
+                                <button
+                                  onClick={() => toggleFileExpansion(file.file_id)}
+                                  className="!bg-transparent text-blue-500 hover:text-blue-400 transition-colors duration-200"
+                                  title={expandedFiles.has(file.file_id) ? 'Hide Content' : 'Show Content'}
+                                >
+                                  <svg
+                                    className={`w-4 h-4 transition-transform duration-200 ${
+                                      expandedFiles.has(file.file_id) ? 'rotate-180' : ''
+                                    }`}
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                  </svg>
+                                </button>
+                              </div>
+                              
+                              {expandedFiles.has(file.file_id) && (
+                                <div className="mt-2">
+                                  <div className="text-xs text-gray-400 mb-2">File Content:</div>
+                                  <div className="bg-black rounded p-3 max-h-48 overflow-y-auto">
+                                    <pre className="text-xs text-gray-300 whitespace-pre-wrap font-mono">
+                                      {fileContents[file.file_id] ? fileContents[file.file_id] : 'Loading...'}
+                                    </pre>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
